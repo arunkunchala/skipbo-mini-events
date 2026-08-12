@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Collector's Showcase — Skip-Bo Summer Postcards</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+  .cs-hud { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .cs-ring-wrap { position:relative; width:58px; height:58px; flex:0 0 auto; }
+  .cs-ring-wrap svg { transform: rotate(-90deg); }
+  .cs-ring-pct { position:absolute; inset:0; display:grid; place-items:center; color:#fff; font-weight:900; font-size:13px; text-shadow:0 1px 0 rgba(0,0,0,.3); }
+  .cs-hud-txt { flex:1; min-width:0; }
+  .cs-hud-title { color:#fff; font-weight:900; font-size:15px; text-shadow:0 1px 0 rgba(0,0,0,.3); }
+  .cs-hud-sub { color:var(--sb-sky-light); font-size:11px; font-weight:700; margin-top:2px; }
+  .cs-info-btn { width:30px; height:30px; border-radius:50%; border:1.5px solid rgba(255,255,255,.4); background:rgba(255,255,255,.15); color:#fff; font-weight:900; font-size:15px; cursor:pointer; flex:0 0 auto; }
+  .cs-lastchance { background:linear-gradient(90deg,var(--sb-red),#ff7043); color:#fff; font-weight:800; font-size:12px; border-radius:12px; padding:8px 12px; text-align:center; margin-bottom:10px; box-shadow:var(--sb-shadow); animation:sbPulse 1.2s infinite; }
+
+  /* tabs */
+  .cs-tabs { display:flex; gap:8px; margin-bottom:10px; }
+  .cs-tab { flex:1; border:none; border-radius:12px; padding:9px 6px; font-family:var(--sb-font); font-weight:800; font-size:13px; cursor:pointer; background:rgba(255,255,255,.14); color:var(--sb-sky-light); border:2px solid transparent; }
+  .cs-tab.active { background:var(--sb-cream); color:var(--sb-ink); border-color:var(--sb-yellow); box-shadow:var(--sb-shadow); }
+  .cs-tab .cnt { display:block; font-size:11px; font-weight:700; opacity:.8; }
+  .cs-tab.done .cnt { color:var(--sb-green); }
+
+  /* album grid */
+  .cs-album { background:var(--sb-cream); border-radius:var(--sb-radius); box-shadow:var(--sb-shadow); padding:12px; margin-bottom:12px; }
+  .cs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .cs-slot { aspect-ratio:3/4; border-radius:10px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:4px; text-align:center; transition:box-shadow .3s; }
+  .cs-slot.empty { border:2px dashed rgba(27,42,74,.3); background:rgba(27,42,74,.05); }
+  .cs-slot.empty .art { font-size:26px; filter:grayscale(1); opacity:.28; }
+  .cs-slot.owned { border:2px solid rgba(27,42,74,.15); background:#fff; box-shadow:0 2px 6px rgba(27,42,74,.18); }
+  .cs-slot.owned .art { font-size:28px; }
+  .cs-slot.epicown { background:linear-gradient(160deg,#fff8e1,#ffe9a8); border-color:var(--sb-yellow-dark); }
+  .cs-slot .nm { font-size:8.5px; font-weight:800; color:var(--sb-ink); line-height:1.05; }
+  .cs-slot.empty .nm { opacity:.5; }
+  .cs-slot .rar { font-size:8px; letter-spacing:-1px; }
+  .cs-slot.glow { box-shadow:0 0 0 3px var(--sb-yellow), 0 0 18px rgba(255,199,44,.9); }
+  .cs-slot.stamp .inner-stamp { animation:csStamp .45s cubic-bezier(.34,1.7,.64,1); }
+  @keyframes csStamp { 0%{transform:scale(2.1) rotate(-9deg);opacity:0;} 60%{transform:scale(.92) rotate(2deg);opacity:1;} 100%{transform:scale(1) rotate(0);} }
+
+  /* wildcard meter */
+  .cs-meter-wrap { background:rgba(20,57,111,.55); border:1.5px solid rgba(255,199,44,.45); border-radius:14px; padding:10px 12px; margin-bottom:12px; }
+  .cs-meter-row { display:flex; align-items:center; gap:8px; }
+  .cs-meter-ico { font-size:22px; flex:0 0 auto; position:relative; }
+  .cs-meter-ico .st { position:absolute; right:-4px; top:-4px; font-size:11px; }
+  .cs-meter-bar { flex:1; height:16px; border-radius:999px; background:rgba(0,0,0,.4); overflow:hidden; border:1px solid rgba(255,255,255,.2); }
+  .cs-meter-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--sb-yellow),#ffe082); border-radius:999px; transition:width .5s cubic-bezier(.22,1,.36,1); box-shadow:0 0 8px rgba(255,199,44,.8); }
+  .cs-meter-num { color:var(--sb-yellow); font-weight:900; font-size:13px; flex:0 0 auto; }
+  .cs-meter-cap { color:var(--sb-sky-light); font-size:10.5px; font-weight:700; margin-top:6px; text-align:center; }
+
+  /* pack zone */
+  .cs-packzone { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .cs-pack-row { display:flex; gap:8px; }
+  .cs-pack-row .sb-btn { flex:1; }
+  .cs-freetimer { text-align:center; color:var(--sb-sky-light); font-size:11px; font-weight:700; }
+  .cs-badge { position:absolute; top:-8px; right:-6px; background:var(--sb-red); color:#fff; font-size:11px; font-weight:900; min-width:20px; height:20px; border-radius:999px; display:grid; place-items:center; padding:0 5px; border:2px solid #fff; }
+
+  /* floating almost-there pill */
+  .cs-pill { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom,0px) + 52px); z-index:150; background:linear-gradient(90deg,#7b2ff7,#b465da); color:#fff; font-weight:800; font-size:13px; border:none; border-radius:999px; padding:10px 18px; box-shadow:0 6px 20px rgba(0,0,0,.45); cursor:pointer; animation:csPillIn .4s cubic-bezier(.34,1.56,.64,1), sbPulse 2s 1s infinite; }
+  @keyframes csPillIn { from{transform:translateX(-50%) translateY(60px);opacity:0;} to{transform:translateX(-50%) translateY(0);opacity:1;} }
+
+  /* pack opening overlay */
+  .cs-overlay { position:fixed; inset:0; z-index:260; background:rgba(8,16,36,.92); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:20px; }
+  .cs-ov-title { color:#fff; font-weight:900; font-size:18px; text-shadow:0 2px 0 rgba(0,0,0,.4); }
+  .cs-ov-cards { display:flex; gap:12px; }
+  .cs-flip { width:96px; height:132px; perspective:700px; cursor:pointer; }
+  .cs-flip-inner { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.34,1.3,.5,1); }
+  .cs-flip.epic .cs-flip-inner { transition-duration:1.15s; }
+  .cs-flip.flipped .cs-flip-inner { transform:rotateY(180deg); }
+  .cs-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .cs-face.back { background:linear-gradient(160deg,var(--sb-blue) 0%,var(--sb-sky) 100%); border:3px solid var(--sb-yellow); color:var(--sb-yellow); font-weight:900; }
+  .cs-face.back .logo { font-size:30px; }
+  .cs-face.back .txt { font-size:10px; letter-spacing:1px; }
+  .cs-flip.ready .cs-face.back { animation:csWiggle 1.1s infinite; }
+  @keyframes csWiggle { 0%,100%{transform:rotate(0);} 25%{transform:rotate(-3deg) scale(1.04);} 75%{transform:rotate(3deg) scale(1.04);} }
+  .cs-face.front { background:#fff; border:3px solid rgba(27,42,74,.25); transform:rotateY(180deg); padding:6px; text-align:center; }
+  .cs-face.front .art { font-size:40px; }
+  .cs-face.front .nm { font-size:11px; font-weight:900; color:var(--sb-ink); line-height:1.1; }
+  .cs-face.front .rar { font-size:10px; }
+  .cs-face.front .tag { font-size:9px; font-weight:900; border-radius:999px; padding:2px 8px; margin-top:2px; }
+  .tag.new { background:var(--sb-green); color:#fff; }
+  .tag.dupe { background:var(--sb-yellow); color:var(--sb-ink); }
+  .cs-flip.epic .cs-face.front { background:linear-gradient(160deg,#fff8e1,#ffe082); border-color:var(--sb-yellow-dark); box-shadow:0 0 24px 6px rgba(255,199,44,.85); }
+  .cs-flip.epic .cs-face.front::after { content:""; position:absolute; inset:0; border-radius:9px; background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.85) 48%,transparent 62%); background-size:250% 100%; animation:csShimmer 1.6s infinite; pointer-events:none; }
+  @keyframes csShimmer { from{background-position:180% 0;} to{background-position:-80% 0;} }
+  .cs-ov-hint { color:var(--sb-sky-light); font-size:12px; font-weight:700; }
+  .cs-stardust { position:fixed; z-index:410; font-size:16px; pointer-events:none; transition:all .8s cubic-bezier(.4,-.1,.5,1); }
+
+  /* picker + panorama */
+  .cs-pick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0; }
+  .cs-pick { border:2px solid rgba(27,42,74,.2); border-radius:10px; background:#fff; padding:8px 4px; cursor:pointer; font-family:var(--sb-font); }
+  .cs-pick .art { font-size:26px; } .cs-pick .nm { font-size:9px; font-weight:800; color:var(--sb-ink); } .cs-pick .rar { font-size:8px; }
+  .cs-pick:active { transform:scale(.94); }
+  .cs-pano { display:flex; justify-content:center; margin:10px 0; background:linear-gradient(180deg,#3E8EDE,#9cc8f5); border-radius:12px; padding:12px 4px; overflow:hidden; }
+  .cs-pano span { font-size:22px; animation:csMerge .8s cubic-bezier(.34,1.4,.64,1) backwards; }
+  @keyframes csMerge { from{transform:translateY(40px) scale(2.2); opacity:0;} to{transform:none; opacity:1;} }
+  .cs-shop-grid { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .cs-shop-item { display:flex; align-items:center; gap:10px; background:#fff; border:2px solid rgba(27,42,74,.12); border-radius:12px; padding:10px; cursor:pointer; text-align:left; font-family:var(--sb-font); position:relative; }
+  .cs-shop-item .big { font-size:26px; }
+  .cs-shop-item .t { font-weight:900; font-size:13px; color:var(--sb-ink); }
+  .cs-shop-item .d { font-size:10.5px; color:#5a6b8c; font-weight:700; }
+  .cs-shop-item .p { margin-left:auto; background:var(--sb-green); color:#fff; font-weight:900; font-size:13px; border-radius:999px; padding:6px 10px; flex:0 0 auto; }
+  .cs-shop-item .gbadge { position:absolute; top:-7px; left:8px; background:var(--sb-blue); color:#fff; font-size:8.5px; font-weight:900; border-radius:999px; padding:2px 7px; }
+  .cs-timerbar { display:flex; justify-content:center; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<div class="sb-app">
+<div class="sb-main">
+
+  <div class="cs-timerbar"><span class="sb-timer-chip">⏳ Season ends in <span id="cs-cd"></span></span></div>
+  <div id="cs-lastchance" class="cs-lastchance" style="display:none">🔥 Last chance — album resets at season end!</div>
+
+  <div class="cs-hud">
+    <div class="cs-ring-wrap">
+      <svg width="58" height="58" viewBox="0 0 58 58">
+        <circle cx="29" cy="29" r="24" fill="rgba(0,0,0,.3)" stroke="rgba(255,255,255,.2)" stroke-width="6"/>
+        <circle id="cs-ring" cx="29" cy="29" r="24" fill="none" stroke="#FFC72C" stroke-width="6" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="150.8" style="transition:stroke-dashoffset .6s"/>
+      </svg>
+      <div class="cs-ring-pct" id="cs-pct">0%</div>
+    </div>
+    <div class="cs-hud-txt">
+      <div class="cs-hud-title">📮 Skip-Bo Summer Postcards</div>
+      <div class="cs-hud-sub">Collect all 18 postcards for the grand prize!</div>
+    </div>
+    <button class="cs-info-btn" id="cs-info">ⓘ</button>
+  </div>
+
+  <div class="cs-tabs">
+    <button class="cs-tab" data-page="beach">🏖️ Beach Days<span class="cnt" id="cs-cnt-beach">0/9</span></button>
+    <button class="cs-tab" data-page="carnival">🎡 Carnival Nights<span class="cnt" id="cs-cnt-carnival">0/9</span></button>
+  </div>
+
+  <div class="cs-album"><div class="cs-grid" id="cs-grid"></div></div>
+
+  <div class="cs-meter-wrap">
+    <div class="cs-meter-row">
+      <span class="cs-meter-ico">🃏<span class="st">★</span></span>
+      <div class="cs-meter-bar"><div class="cs-meter-fill" id="cs-meter-fill"></div></div>
+      <span class="cs-meter-num" id="cs-meter-num">0/8</span>
+    </div>
+    <div class="cs-meter-cap">Duplicates are never wasted — every dupe adds +1 to the Wildcard Meter. Fill it to pick ANY missing postcard!</div>
+  </div>
+
+  <div class="cs-packzone">
+    <button class="sb-btn sb-btn-yellow sb-btn-block" id="cs-open" style="position:relative">🎴 Open Pack<span class="cs-badge" id="cs-packbadge">2</span></button>
+    <div class="cs-freetimer" id="cs-freetimer"></div>
+    <div class="cs-pack-row">
+      <button class="sb-btn sb-btn-green sb-btn-sm" id="cs-play">▶️ Play a level (+1 pack)</button>
+      <button class="sb-btn sb-btn-blue sb-btn-sm" id="cs-shop">🛍️ Postcard Shop</button>
+    </div>
+  </div>
+
+</div>
+</div>
+<script src="../shared/core.js"></script>
+<script>
+(function(){
+"use strict";
+SB.init({ title:"Collector's Showcase", subtitle:"Summer Postcards Album · Season 1", resetKey:"collectors-showcase" });
+
+// ---------- catalog ----------
+var CARDS=[
+ {id:"b1",p:"beach",n:"Sunny Shore",e:"🏖️",r:1},{id:"b2",p:"beach",n:"Ice Cream",e:"🍦",r:1},
+ {id:"b3",p:"beach",n:"Beach Ball",e:"🏐",r:1},{id:"b4",p:"beach",n:"Flip Flops",e:"🩴",r:1},
+ {id:"b5",p:"beach",n:"Seashell",e:"🐚",r:1},{id:"b6",p:"beach",n:"Surf's Up",e:"🏄",r:2},
+ {id:"b7",p:"beach",n:"Tiki Sunset",e:"🍹",r:2},{id:"b8",p:"beach",n:"Sandcastle",e:"🏰",r:2},
+ {id:"b9",p:"beach",n:"Golden Sunset",e:"🌅",r:3},
+ {id:"c1",p:"carnival",n:"Cotton Candy",e:"🍭",r:1},{id:"c2",p:"carnival",n:"Balloon Pop",e:"🎈",r:1},
+ {id:"c3",p:"carnival",n:"Popcorn Cart",e:"🍿",r:1},{id:"c4",p:"carnival",n:"Carousel",e:"🎠",r:1},
+ {id:"c5",p:"carnival",n:"Ring Toss",e:"🎯",r:1},{id:"c6",p:"carnival",n:"Ferris Wheel",e:"🎡",r:2},
+ {id:"c7",p:"carnival",n:"Circus Tent",e:"🎪",r:2},{id:"c8",p:"carnival",n:"Fireworks",e:"🎆",r:2},
+ {id:"c9",p:"carnival",n:"Neon Midway",e:"🌃",r:3}
+];
+var byId={}; CARDS.forEach(function(c){byId[c.id]=c;});
+var PAGES={beach:{label:"Beach Days",reward:[{type:"coins",amount:1500},{type:"wild",amount:2}],rtxt:"1500 coins + 2 Wilds"},
+           carnival:{label:"Carnival Nights",reward:[{type:"coins",amount:2500},{type:"gem",amount:5}],rtxt:"2500 coins + 5 gems + exclusive Card Back"}};
+var METER_MAX=8, FREE_MS=90000, FREE_CAP=2;
+
+// ---------- state ----------
+var st=SB.store("collectors-showcase",{end:0,owned:{},meter:0,packs:2,nextFree:0,pageDone:{},albumDone:false,cardBack:false,trophy:false});
+var s=st.data;
+if(!s.end){ s.end=Date.now()+72*3600000; s.nextFree=Date.now()+FREE_MS; st.save(); }
+var curPage="beach", busy=false, pillEl=null;
+
+// ---------- countdown ----------
+SB.countdown(document.getElementById("cs-cd"), s.end, function(){ SB.toast("Season ended! Reset demo to replay."); });
+setInterval(function(){ document.getElementById("cs-lastchance").style.display = (s.end-Date.now()<3600000 && s.end>Date.now())?"":"none"; },1000);
+
+// ---------- helpers ----------
+function ownedCount(p){ return CARDS.filter(function(c){return c.p===p && s.owned[c.id];}).length; }
+function missing(p){ return CARDS.filter(function(c){return (!p||c.p===p) && !s.owned[c.id];}); }
+function stars(r){ return "⭐".repeat(r); }
+function totalOwned(){ return Object.keys(s.owned).length; }
+
+// ---------- render ----------
+function render(){
+  var g=document.getElementById("cs-grid"); g.innerHTML="";
+  CARDS.filter(function(c){return c.p===curPage;}).forEach(function(c){
+    var d=document.createElement("div");
+    var own=!!s.owned[c.id];
+    d.className="cs-slot "+(own?"owned":"empty")+(own&&c.r===3?" epicown":"");
+    d.id="slot-"+c.id;
+    d.innerHTML='<div class="inner-stamp"><div class="art">'+c.e+'</div><div class="nm">'+c.n+'</div><div class="rar">'+stars(c.r)+'</div></div>';
+    g.appendChild(d);
+  });
+  ["beach","carnival"].forEach(function(p){
+    var el=document.getElementById("cs-cnt-"+p);
+    el.textContent=ownedCount(p)+"/9"+(ownedCount(p)===9?" ✓":"");
+    el.parentElement.classList.toggle("done",ownedCount(p)===9);
+    el.parentElement.classList.toggle("active",p===curPage);
+  });
+  var pct=Math.round(totalOwned()/18*100);
+  document.getElementById("cs-pct").textContent=pct+"%";
+  document.getElementById("cs-ring").style.strokeDashoffset=150.8*(1-pct/100);
+  document.getElementById("cs-meter-fill").style.width=Math.min(100,s.meter/METER_MAX*100)+"%";
+  document.getElementById("cs-meter-num").textContent=s.meter+"/"+METER_MAX;
+  document.getElementById("cs-packbadge").textContent=s.packs;
+  document.getElementById("cs-open").disabled=busy||s.packs<=0;
+  updatePill();
+}
+document.querySelectorAll(".cs-tab").forEach(function(t){
+  t.addEventListener("click",function(){ curPage=t.dataset.page; SB.haptic(); render(); });
+});
+
+// ---------- free pack timer ----------
+setInterval(function(){
+  var ft=document.getElementById("cs-freetimer");
+  if(s.packs>=FREE_CAP){ ft.textContent="Free pack timer paused (max "+FREE_CAP+" free packs held)"; s.nextFree=Date.now()+FREE_MS; st.save(); return; }
+  var left=s.nextFree-Date.now();
+  if(left<=0){ s.packs++; s.nextFree=Date.now()+FREE_MS; st.save(); render(); SB.toast("🎴 Free pack arrived!"); SB.haptic(); }
+  else ft.textContent="Next free pack in "+Math.ceil(left/1000)+"s";
+},500);
+
+// ---------- pack opening ----------
+function pullCard(forceNew){
+  var pool;
+  if(forceNew && missing().length){ pool=missing(); }
+  else{
+    var roll=Math.random(), r=roll<0.70?1:(roll<0.95?2:3);
+    pool=CARDS.filter(function(c){return c.r===r;});
+  }
+  return pool[(Math.random()*pool.length)|0];
+}
+function openPack(opts){
+  opts=opts||{};
+  if(busy) return;
+  if(!opts.free){
+    if(s.packs<=0){ var b=document.getElementById("cs-open"); b.classList.remove("sb-shake"); void b.offsetWidth; b.classList.add("sb-shake"); SB.toast("No packs! Play a level or visit the shop."); return; }
+    s.packs--; st.save();
+  }
+  busy=true; render();
+  var pulls=[pullCard(false),pullCard(false),pullCard(false)];
+  if(opts.guaranteeNew && missing().length && !pulls.some(function(c){return !s.owned[c.id];})) pulls[(Math.random()*3)|0]=pullCard(true);
+  var ownedSnapshot={}; for(var k in s.owned) ownedSnapshot[k]=true;
+  var ov=document.createElement("div"); ov.className="cs-overlay";
+  ov.innerHTML='<div class="cs-ov-title">'+(opts.title||"📬 Postcard Pack")+'</div><div class="cs-ov-cards" id="cs-ovc"></div><div class="cs-ov-hint" id="cs-ovh">Tap the glowing card to reveal!</div>';
+  document.body.appendChild(ov);
+  var wrap=ov.querySelector("#cs-ovc"), flipped=0, seen={};
+  pulls.forEach(function(c,i){
+    var dupe=!!ownedSnapshot[c.id]||!!seen[c.id]; seen[c.id]=true;
+    var f=document.createElement("div");
+    f.className="cs-flip"+(c.r===3?" epic":"")+(i===0?" ready":"");
+    f.innerHTML='<div class="cs-flip-inner"><div class="cs-face back"><div class="logo">📮</div><div class="txt">SKIP-BO</div></div>'+
+      '<div class="cs-face front"><div class="art">'+c.e+'</div><div class="nm">'+c.n+'</div><div class="rar">'+stars(c.r)+'</div>'+
+      '<div class="tag '+(dupe?"dupe":"new")+'">'+(dupe?"DUPE → 🃏★ +1":"NEW!")+'</div></div></div>';
+    f.addEventListener("click",function(){
+      if(!f.classList.contains("ready")||f.classList.contains("flipped")) return;
+      f.classList.add("flipped"); f.classList.remove("ready"); SB.haptic(c.r===3?45:15);
+      if(c.r===3) setTimeout(function(){var r=f.getBoundingClientRect(); SB.confetti(r.left+r.width/2,r.top,50);},600);
+      flipped++;
+      if(flipped<3) wrap.children[flipped].classList.add("ready");
+      else setTimeout(function(){
+        ov.querySelector("#cs-ovh").innerHTML='<button class="sb-btn sb-btn-green" id="cs-collect">Collect ✓</button>';
+        ov.querySelector("#cs-collect").addEventListener("click",function(){ collect(ov,pulls,opts); });
+      }, c.r===3?900:400);
+    });
+    wrap.appendChild(f);
+  });
+}
+function collect(ov,pulls,opts){
+  var flips=ov.querySelectorAll(".cs-flip"), delay=0, gotNew=false;
+  pulls.forEach(function(c,i){
+    var rect=flips[i].getBoundingClientRect(), cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    var dupe=!!s.owned[c.id];
+    if(!dupe){ s.owned[c.id]=true; gotNew=true; }
+    setTimeout(function(){
+      if(dupe){ stardustToMeter(cx,cy); s.meter++; st.save(); render(); }
+      else{
+        if(c.p!==curPage){ curPage=c.p; render(); }
+        var slot=document.getElementById("slot-"+c.id);
+        var fly=document.createElement("div"); fly.className="sb-fly"; fly.textContent=c.e;
+        fly.style.left=cx+"px"; fly.style.top=cy+"px"; document.body.appendChild(fly);
+        var sr=slot.getBoundingClientRect();
+        requestAnimationFrame(function(){requestAnimationFrame(function(){ fly.style.left=(sr.left+sr.width/2)+"px"; fly.style.top=(sr.top+sr.height/2)+"px"; fly.style.transform="scale(1.6)"; });});
+        setTimeout(function(){ fly.remove(); st.save(); render();
+          var sl=document.getElementById("slot-"+c.id);
+          if(sl){ sl.classList.add("glow","stamp"); SB.haptic(20); setTimeout(function(){sl.classList.remove("glow","stamp");},900); }
+        },720);
+      }
+    },delay); delay+=dupe?350:850;
+  });
+  ov.remove();
+  setTimeout(function(){
+    busy=false; render();
+    checkMeter(function(){ checkPages(function(){ if(opts.after) opts.after(); }); });
+  },delay+900);
+  if(gotNew) SB.confetti();
+}
+function stardustToMeter(x,y){
+  var m=document.querySelector(".cs-meter-ico").getBoundingClientRect();
+  for(var j=0;j<6;j++)(function(j){
+    var d=document.createElement("div"); d.className="cs-stardust"; d.textContent="✨";
+    d.style.left=(x+Math.random()*50-25)+"px"; d.style.top=(y+Math.random()*40-20)+"px";
+    document.body.appendChild(d);
+    setTimeout(function(){ d.style.left=(m.left+8)+"px"; d.style.top=(m.top+8)+"px"; d.style.opacity="0.2"; d.style.transform="scale(.5)"; },30+j*60);
+    setTimeout(function(){ d.remove(); },950+j*60);
+  })(j);
+  SB.toast("Duplicate → +1 Wildcard Meter 🃏★");
+}
+
+// ---------- wildcard meter ----------
+function checkMeter(done){
+  if(s.meter<METER_MAX){ if(done)done(); return; }
+  s.meter-=METER_MAX; st.save(); render();
+  var miss=missing();
+  if(!miss.length){ SB.grantRewards([{type:"coins",amount:800}]); SB.toast("Album full — meter converted to 800 coins!"); if(done)done(); return; }
+  SB.confetti(); SB.haptic(40);
+  var html='<h3 style="margin:0">🃏★ Wildcard Ready!</h3><div class="sb-muted" style="font-size:13px;font-weight:700">Choose ANY missing postcard — it\'s yours.</div><div class="cs-pick-grid">'+
+    miss.map(function(c){return '<button class="cs-pick" data-id="'+c.id+'"><div class="art">'+c.e+'</div><div class="nm">'+c.n+'</div><div class="rar">'+stars(c.r)+'</div></button>';}).join("")+'</div>';
+  var m=SB.modal(html);
+  m.el.querySelectorAll(".cs-pick").forEach(function(b){
+    b.addEventListener("click",function(){
+      var c=byId[b.dataset.id]; s.owned[c.id]=true; st.save(); m.close();
+      curPage=c.p; render();
+      var sl=document.getElementById("slot-"+c.id);
+      if(sl){ sl.classList.add("glow","stamp"); setTimeout(function(){sl.classList.remove("glow","stamp");},900); }
+      SB.confetti(); SB.toast("🃏★ "+c.n+" stamped into the album!");
+      setTimeout(function(){ checkMeter(function(){ checkPages(done); }); },700);
+    });
+  });
+}
+
+// ---------- page & album completion ----------
+function panorama(p){ return '<div class="cs-pano">'+CARDS.filter(function(c){return c.p===p;}).map(function(c,i){return '<span style="animation-delay:'+(i*0.09)+'s">'+c.e+'</span>';}).join("")+'</div>'; }
+function checkPages(done){
+  var next=["beach","carnival"].find(function(p){ return ownedCount(p)===9 && !s.pageDone[p]; });
+  if(!next){ checkAlbum(done); return; }
+  s.pageDone[next]=true; if(next==="carnival") s.cardBack=true; st.save(); render();
+  SB.confetti(); SB.haptic(50);
+  var pg=PAGES[next];
+  var m=SB.modal('<h3 style="margin:0">🎉 '+pg.label+' Complete!</h3><div class="sb-muted" style="font-size:12px;font-weight:700">Your 9 postcards assemble into a scene…</div>'+panorama(next)+
+    '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+pg.reward.map(SB.rewardChip).join("")+(next==="carnival"?'<span class="sb-reward"><span class="ico">🎴</span>Exclusive Card Back</span>':"")+'</div>'+
+    '<button class="sb-btn sb-btn-yellow sb-btn-block" id="cs-claim" style="margin-top:12px">Claim!</button>');
+  m.el.querySelector("#cs-claim").addEventListener("click",function(){
+    SB.grantRewards(pg.reward,m.el.querySelector("#cs-claim")); m.close(); SB.confetti();
+    setTimeout(function(){ checkPages(done); },600);
+  });
+}
+function checkAlbum(done){
+  if(totalOwned()<18||s.albumDone){ if(done)done(); return; }
+  s.albumDone=true; s.trophy=true; st.save(); render();
+  SB.confetti(); setTimeout(SB.confetti,400); setTimeout(SB.confetti,800); SB.haptic(80);
+  var m=SB.modal('<h3 style="margin:0">🏆 ALBUM COMPLETE!</h3><div style="font-size:44px;margin:6px 0">🏆</div>'+
+    '<div class="sb-muted" style="font-size:13px;font-weight:700">Season 1 Collector — all 18 Summer Postcards!</div>'+panorama("beach")+panorama("carnival")+
+    '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+[{type:"coins",amount:5000},{type:"gem",amount:10}].map(SB.rewardChip).join("")+'<span class="sb-reward"><span class="ico">🏆</span>Collector Trophy</span></div>'+
+    '<button class="sb-btn sb-btn-yellow sb-btn-block" id="cs-grand" style="margin-top:12px">Claim Grand Prize!</button>');
+  m.el.querySelector("#cs-grand").addEventListener("click",function(){
+    SB.grantRewards([{type:"coins",amount:5000},{type:"gem",amount:10}],m.el.querySelector("#cs-grand"));
+    m.close(); SB.confetti(); if(done)done();
+  });
+}
+
+// ---------- earn / open buttons ----------
+document.getElementById("cs-open").addEventListener("click",function(){ openPack({}); });
+document.getElementById("cs-play").addEventListener("click",function(){
+  if(busy) return; var btn=this; btn.disabled=true; btn.textContent="Playing…";
+  setTimeout(function(){
+    btn.disabled=false; btn.innerHTML="▶️ Play a level (+1 pack)";
+    s.packs++; st.save(); render(); SB.confetti(); SB.haptic(30);
+    SB.toast("Level complete! +1 Postcard Pack 🎴");
+  },1200);
+});
+
+// ---------- shop ----------
+function urgent(){ return s.end-Date.now()<3600000; }
+function shopHtml(){
+  return '<h3 style="margin:0">🛍️ Postcard Shop</h3>'+
+  (urgent()?'<div style="background:var(--sb-red);color:#fff;font-size:11px;font-weight:800;border-radius:8px;padding:5px;margin-top:6px">🔥 FINAL HOUR — last chance before the album resets!</div>':'<div class="sb-muted" style="font-size:12px;font-weight:700">Every duplicate feeds the Wildcard Meter.</div>')+
+  '<div class="cs-shop-grid">'+
+  '<button class="cs-shop-item" data-buy="pack3"><span class="big">📬</span><span><span class="t">Postcard Pack ×3</span><br><span class="d">9 cards · dupes fill your meter</span></span><span class="p">$1.99</span></button>'+
+  '<button class="cs-shop-item" data-buy="gnew"><span class="gbadge">✔ GUARANTEED NEW</span><span class="big">🌟</span><span><span class="t">Guaranteed-New Pack</span><br><span class="d">3 cards — at least 1 you\'re missing</span></span><span class="p">$4.99</span></button>'+
+  '<button class="cs-shop-item" data-buy="wcb"><span class="big">🃏</span><span><span class="t">Wildcard Bundle</span><br><span class="d">+4 meter progress + 1 pack</span></span><span class="p">$2.99</span></button>'+
+  '</div>';
+}
+function openShop(){
+  var m=SB.modal(shopHtml());
+  m.el.querySelectorAll("[data-buy]").forEach(function(b){
+    b.addEventListener("click",function(){ m.close(); buy(b.dataset.buy); });
+  });
+}
+document.getElementById("cs-shop").addEventListener("click",openShop);
+function buy(which){
+  if(which==="pack3") SB.buyIAP({label:"Postcard Pack ×3",price:"$1.99",sub:"9 postcards · duplicates always fill the Wildcard Meter",grant:false,
+    contents:[{type:"chest",amount:3}],onSuccess:function(){ s.packs+=2; st.save(); render(); SB.toast("+3 packs! Opening one now…");
+      setTimeout(function(){ openPack({free:true,title:"📬 Purchased Pack 1 of 3"}); },500); }});
+  if(which==="gnew") SB.buyIAP({label:"Guaranteed-New Pack",price:"$4.99",sub:"3 cards · at least 1 postcard you don't own yet",grant:false,
+    contents:[{type:"star",amount:1},{type:"chest",amount:1}],onSuccess:function(){
+      setTimeout(function(){ openPack({free:true,guaranteeNew:true,title:"🌟 Guaranteed-New Pack"}); },500); }});
+  if(which==="wcb") SB.buyIAP({label:"Wildcard Bundle",price:"$2.99",sub:"+4 Wildcard Meter progress + 1 Postcard Pack",grant:false,
+    contents:[{type:"star",amount:4},{type:"chest",amount:1}],onSuccess:function(){
+      stardustToMeter(window.innerWidth/2,window.innerHeight/2);
+      s.meter+=4; s.packs++; st.save(); render(); SB.toast("+4 Wildcard Meter · +1 pack!");
+      setTimeout(function(){ checkMeter(function(){ setTimeout(function(){ openPack({free:true,title:"🃏 Bundle Pack"}); },400); }); },900); }});
+}
+
+// ---------- almost-there pill / complete-page offer ----------
+function updatePill(){
+  var target=["beach","carnival"].find(function(p){ var n=ownedCount(p); return (n===7||n===8)&&!s.pageDone[p]; });
+  if(!target){ if(pillEl){pillEl.remove();pillEl=null;} return; }
+  var n=ownedCount(target);
+  if(!pillEl){ pillEl=document.createElement("button"); pillEl.className="cs-pill"; document.body.appendChild(pillEl);
+    pillEl.addEventListener("click",function(){ offerCompletePage(pillEl.dataset.p); }); }
+  pillEl.dataset.p=target;
+  pillEl.textContent=(urgent()?"🔥 ":"")+"Almost there! "+n+"/9 "+PAGES[target].label+" →";
+}
+function offerCompletePage(p){
+  var miss=missing(p);
+  SB.buyIAP({label:"Complete "+PAGES[p].label+" Page",price:"$9.99",
+    sub:(urgent()?"🔥 FINAL HOUR! ":"")+"Instantly grants your "+miss.length+" missing postcard"+(miss.length>1?"s":"")+" + page reward ("+PAGES[p].rtxt+")",
+    grant:false,contents:miss.map(function(c){return {type:"star",amount:c.r};}),
+    onSuccess:function(){
+      curPage=p; miss.forEach(function(c){ s.owned[c.id]=true; }); st.save(); render();
+      miss.forEach(function(c,i){ setTimeout(function(){ var sl=document.getElementById("slot-"+c.id);
+        if(sl){ sl.classList.add("glow","stamp"); SB.haptic(15); setTimeout(function(){sl.classList.remove("glow","stamp");},800); } },i*280); });
+      setTimeout(function(){ checkPages(); },miss.length*280+600);
+    }});
+}
+
+// ---------- info ----------
+document.getElementById("cs-info").addEventListener("click",function(){
+  SB.modal('<h3 style="margin:0">ⓘ Collector\'s Showcase</h3><div style="text-align:left;font-size:13px;line-height:1.5;color:var(--sb-ink);margin-top:8px;font-weight:600">'+
+  '<p>A sticker-album event: open packs of Summer Postcards and stamp them into two 9-slot pages, with rarity odds of 70/25/5. Duplicates are never dead pulls — each one adds +1 to the Wildcard Meter, and a full meter lets you claim ANY missing postcard.</p>'+
+  '<p>Monetization leans on album-completion compulsion: empty slots with visible silhouettes generate want, and the "Almost there! 8/9" offer appears exactly when one missing card blocks a page reward. As the 72-hour deadline nears, wildcard and complete-the-page upsells intensify because the album resets at season end.</p>'+
+  '<p>Every purchase is followed by a pack-opening or stamping celebration, so spending always pays off with a moment of delight.</p></div>');
+});
+
+render();
+})();
+</script>
+</body>
+</html>

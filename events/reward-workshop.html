@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Reward Workshop</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+  .sb-main { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
+  .ws-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .ws-info { width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:#fff;font-weight:900;font-size:15px;cursor:pointer; }
+  .ws-head .spacer { flex:1; }
+
+  /* target panel */
+  .tgt { margin-bottom:12px; }
+  .tgt h4 { margin:0 0 6px; font-size:14px; }
+  .tgt-big { font-size:34px; float:right; margin:-4px 0 0 8px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+  .chk { list-style:none; margin:0; padding:0; }
+  .chk li { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding:3px 0; }
+  .chk .mk { width:18px; text-align:center; font-weight:900; }
+  .chk .ok .mk, .chk li.ok { color:var(--sb-green); }
+  .chk li.no .mk { color:var(--sb-red); }
+  .chk .cnt { margin-left:auto; font-size:12px; color:#5a6b8c; }
+  .chk li.ok .cnt { color:var(--sb-green); }
+
+  /* workbench */
+  .bench-zone { position:relative; border-radius:18px; padding:12px 12px 14px; margin-bottom:12px;
+    background: repeating-linear-gradient(0deg,#6b4423 0 14px,#7a4f2a 14px 28px), #6b4423;
+    border:3px solid #4a2e14; box-shadow: inset 0 2px 8px rgba(0,0,0,0.45), var(--sb-shadow); overflow:hidden; }
+  .bench-zone.gold-trim { border-color: var(--sb-yellow); box-shadow: 0 0 14px rgba(255,199,44,0.55), inset 0 2px 8px rgba(0,0,0,0.45); }
+  .bench-zone::before { content:""; position:absolute; top:-40px; left:50%; transform:translateX(-50%);
+    width:220px; height:130px; background:radial-gradient(ellipse at center, rgba(255,220,120,0.35), transparent 70%); pointer-events:none; }
+  .lamp { position:absolute; top:2px; left:50%; transform:translateX(-50%); font-size:20px; }
+  .rack { display:flex; justify-content:center; gap:14px; font-size:18px; margin-bottom:6px;
+    text-shadow:0 2px 2px rgba(0,0,0,0.4); }
+  .rack span { display:inline-block; }
+  .dance .rack span { animation: dance 0.5s infinite alternate; }
+  .dance .rack span:nth-child(2n){ animation-delay:0.12s; }
+  @keyframes dance { from{transform:rotate(-18deg) translateY(0);} to{transform:rotate(18deg) translateY(-5px);} }
+
+  .bench { margin-top:6px; }
+  .bench + .bench { margin-top:12px; border-top:2px dashed rgba(255,255,255,0.2); padding-top:12px; }
+  .bench-row { display:flex; align-items:center; justify-content:center; gap:6px; }
+  .slot { width:52px; height:52px; border-radius:12px; border:2px dashed rgba(255,255,255,0.45);
+    background:rgba(0,0,0,0.25); display:grid; place-items:center; font-size:26px; cursor:pointer;
+    transition:transform 0.1s; position:relative; }
+  .slot:active { transform:scale(0.93); }
+  .slot.filled { border-style:solid; border-color:var(--sb-yellow); background:rgba(255,199,44,0.15); }
+  .slot.result { border-color:rgba(255,255,255,0.7); background:rgba(255,255,255,0.12); cursor:default; }
+  .arrow { color:#fff; font-size:20px; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
+  .bench-foot { display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .bench-foot .sb-btn { flex:1; }
+  .pop { animation: popIn 0.6s cubic-bezier(0.34,1.8,0.64,1); filter:drop-shadow(0 0 8px rgba(255,220,120,0.95)); }
+  @keyframes popIn { 0%{transform:scale(0);} 60%{transform:scale(1.5);} 100%{transform:scale(1);} }
+
+  .craftfx { position:absolute; inset:0; display:none; place-items:center; z-index:5; pointer-events:none; }
+  .bench.crafting .craftfx { display:grid; }
+  .craftfx .ham { font-size:42px; animation: swing 0.3s infinite alternate; transform-origin:80% 90%; }
+  @keyframes swing { from{transform:rotate(-45deg);} to{transform:rotate(20deg);} }
+  .craftfx .spk { position:absolute; font-size:20px; animation: spark 0.5s infinite; }
+  .craftfx .spk:nth-child(2){ left:32%; top:38%; animation-delay:0.15s; }
+  .craftfx .spk:nth-child(3){ right:30%; top:52%; animation-delay:0.3s; }
+  .craftfx .spk:nth-child(4){ left:44%; bottom:18%; animation-delay:0.45s; }
+  @keyframes spark { 0%{opacity:0; transform:scale(0.4);} 50%{opacity:1; transform:scale(1.3);} 100%{opacity:0; transform:scale(0.4);} }
+  .bench.crafting .bench-row { filter:brightness(0.55); }
+
+  .fin-pill { display:block; margin:10px auto 0; border:none; cursor:pointer; border-radius:999px;
+    padding:8px 16px; font-weight:800; font-size:13px; color:var(--sb-ink);
+    background: linear-gradient(180deg,#ffe08a,var(--sb-yellow)); box-shadow:0 3px 0 var(--sb-yellow-dark), var(--sb-shadow);
+    animation: sbPulse 1.4s infinite; }
+
+  /* inventory */
+  .inv-title { color:#fff; font-weight:800; font-size:13px; margin:0 0 6px; text-shadow:0 1px 0 rgba(0,0,0,0.3); }
+  .inv { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin-bottom:12px; }
+  .inv button { position:relative; border:none; border-radius:12px; background:rgba(253,246,227,0.95);
+    padding:8px 2px 6px; font-size:24px; cursor:pointer; box-shadow:var(--sb-shadow); transition:transform 0.1s; }
+  .inv button:active { transform:scale(0.9); }
+  .inv button.zero { opacity:0.4; filter:grayscale(0.7); }
+  .inv .ct { position:absolute; top:-6px; right:-4px; background:var(--sb-red); color:#fff; font-size:11px;
+    font-weight:900; border-radius:999px; min-width:19px; padding:2px 4px; box-shadow:0 1px 3px rgba(0,0,0,0.4); }
+  .inv .lbl { display:block; font-size:9px; font-weight:800; color:var(--sb-ink); margin-top:1px; }
+
+  /* recipes */
+  .recipes { margin-bottom:12px; }
+  .recipes h4 { margin:0 0 8px; font-size:14px; }
+  .rec { display:flex; align-items:center; gap:6px; font-size:15px; padding:5px 6px; border-radius:10px; }
+  .rec.hot { background:rgba(255,199,44,0.3); outline:2px solid var(--sb-yellow); }
+  .rec .nm { margin-left:auto; font-size:11px; font-weight:800; color:#5a6b8c; text-align:right; }
+  .tier { font-size:10px; font-weight:900; color:#8a6d1f; margin:6px 0 2px; letter-spacing:0.5px; }
+
+  .earn { margin-bottom:12px; }
+
+  /* card flip overlay */
+  .flipwrap { display:flex; justify-content:center; gap:18px; margin:14px 0 6px; perspective:600px; }
+  .fcard { width:74px; height:102px; position:relative; transform-style:preserve-3d; transition:transform 0.55s cubic-bezier(0.34,1.3,0.64,1); }
+  .fcard.flipped { transform:rotateY(180deg); }
+  .fcard .face { position:absolute; inset:0; border-radius:10px; backface-visibility:hidden;
+    display:grid; place-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.35); }
+  .fcard .back { background:repeating-linear-gradient(45deg,var(--sb-blue) 0 8px,var(--sb-blue-dark) 8px 16px);
+    border:3px solid #fff; color:var(--sb-yellow); font-size:26px; font-weight:900; }
+  .fcard .front { background:#fff; border:3px solid var(--sb-yellow); transform:rotateY(180deg); font-size:38px; }
+  .fcard .front small { position:absolute; bottom:6px; font-size:10px; font-weight:800; color:var(--sb-ink); }
+
+  /* shop drawer */
+  .shop-tab { position:fixed; left:50%; transform:translateX(-50%);
+    bottom:calc(env(safe-area-inset-bottom,0px) + 10px); z-index:120;
+    border:none; cursor:pointer; border-radius:999px; padding:11px 26px; font-weight:900; font-size:15px;
+    color:var(--sb-ink); background:linear-gradient(180deg,#ffd95e,var(--sb-yellow));
+    box-shadow:0 4px 0 var(--sb-yellow-dark), 0 6px 18px rgba(0,0,0,0.4); }
+  .drawer-bd { position:fixed; inset:0; z-index:150; background:rgba(10,20,40,0.6); display:none;
+    align-items:flex-end; justify-content:center; }
+  .drawer-bd.open { display:flex; }
+  .drawer { width:100%; max-width:480px; background:var(--sb-cream); border-radius:22px 22px 0 0;
+    padding:16px 16px calc(env(safe-area-inset-bottom,0px)+18px); max-height:70dvh; overflow-y:auto;
+    animation: up 0.3s cubic-bezier(0.22,1,0.36,1); }
+  @keyframes up { from{transform:translateY(100%);} to{transform:translateY(0);} }
+  .offer { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid rgba(27,42,74,0.1); }
+  .offer .ic { font-size:28px; }
+  .offer .tx { flex:1; min-width:0; }
+  .offer .tx b { font-size:14px; display:block; }
+  .offer .tx span { font-size:11px; color:#5a6b8c; }
+  .offer .sb-btn-sm { min-width:74px; }
+  .owned { font-size:12px; font-weight:900; color:var(--sb-green); min-width:74px; text-align:center; }
+
+  /* target chooser */
+  .choose-opt { display:flex; align-items:center; gap:12px; width:100%; margin-top:10px; border:2px solid rgba(27,42,74,0.15);
+    border-radius:14px; background:#fff; padding:12px; cursor:pointer; text-align:left; font-family:var(--sb-font); }
+  .choose-opt:active { transform:scale(0.97); }
+  .choose-opt .em { font-size:30px; }
+  .choose-opt b { display:block; font-size:15px; color:var(--sb-ink); }
+  .choose-opt span { font-size:11px; color:#5a6b8c; }
+</style>
+</head>
+<body>
+<div class="sb-app">
+  <div class="sb-main">
+    <div class="ws-head">
+      <span class="sb-timer-chip">⏳ <span id="timer"></span></span>
+      <span class="spacer"></span>
+      <button class="ws-info" id="infoBtn">ⓘ</button>
+    </div>
+
+    <div class="sb-panel tgt" id="tgtPanel"></div>
+
+    <div class="bench-zone" id="benchZone">
+      <span class="lamp">💡</span>
+      <div class="rack"><span>🔨</span><span>🪚</span><span>🔧</span><span>✂️</span><span>📏</span></div>
+      <div id="benches"></div>
+      <div id="pillWrap"></div>
+    </div>
+
+    <p class="inv-title">🧰 Your materials — tap to place on bench</p>
+    <div class="inv" id="inv"></div>
+
+    <button class="sb-btn sb-btn-green sb-btn-block earn" id="playBtn">🎴 Play a level · earn 2 chips</button>
+
+    <div class="sb-panel recipes" id="recipes"></div>
+  </div>
+</div>
+<button class="shop-tab" id="shopTab">🛒 Workshop Shop</button>
+<div class="drawer-bd" id="drawerBd"><div class="drawer" id="drawer"></div></div>
+
+<script src="../shared/core.js"></script>
+<script>
+(function(){
+"use strict";
+SB.init({ title:"Reward Workshop", subtitle:"Craft your own masterpiece", resetKey:"reward-workshop" });
+
+var st = SB.store("reward-workshop", {
+  endTs:0, target:null, done:false, celebrated:false,
+  inv:{ blue:2, green:1, red:0, gold:0, rocket:0, shield:0, hammer:0, wildcard:0 },
+  crafts:{ rocket:0, shield:0, hammer:0, wildcard:0, chest:0 },
+  bench2:false, instant:false, dbl:false, levels:0, chipsEarned:0
+});
+var S = st.data, inv = S.inv, C = S.crafts;
+if(!S.endTs){ S.endTs = Date.now() + 72*3600*1000; st.save(); }
+
+var ITEMS = {
+  blue:{e:"🔵",n:"Blue Chip"}, green:{e:"🟢",n:"Green Chip"}, red:{e:"🔴",n:"Red Chip"}, gold:{e:"🟡",n:"Gold Chip"},
+  rocket:{e:"🚀",n:"Rocket"}, shield:{e:"🛡️",n:"Shield"}, hammer:{e:"🔨",n:"Hammer"}, wildcard:{e:"🃏",n:"Wild Card"}
+};
+var BOOSTERS = ["rocket","shield","hammer"];
+var RECIPES = {
+  rocket:{ need:{blue:3}, out:"rocket", grant:[{type:"draw",amount:1}], n:"Rocket booster" },
+  shield:{ need:{green:3}, out:"shield", grant:[{type:"undo",amount:1}], n:"Shield booster" },
+  hammer:{ need:{red:3}, out:"hammer", grant:[{type:"reverse",amount:1}], n:"Hammer booster" },
+  wildcard:{ need:{booster:2, gold:1}, out:"wildcard", grant:[{type:"wild",amount:1}], n:"Wild Card" },
+  chest:{ need:{wildcard:2}, out:null, grant:[{type:"coins",amount:3000},{type:"wild",amount:3},{type:"gem",amount:10}], n:"PREMIUM CHEST" }
+};
+var PRICE = { blue:"$0.99", green:"$0.99", red:"$0.99", gold:"$1.99", rocket:"$1.49", shield:"$1.49", hammer:"$1.49", wildcard:"$2.99" };
+var TGT = {
+  wild3:{ e:"🃏", n:"Wild Collector", d:"Craft 3 Wild Cards" },
+  chest:{ e:"🎁", n:"Premium Chest", d:"The grand masterpiece — 3000 🪙 + 3 🃏 + 10 💎" },
+  boosters:{ e:"🚀", n:"Booster Bundle", d:"Craft one of each booster" }
+};
+
+var benches = [ {slots:[],busy:false,result:null} ];
+if(S.bench2) benches.push({slots:[],busy:false,result:null});
+
+// ---------- helpers ----------
+function el(id){ return document.getElementById(id); }
+function boosterCount(){ return inv.rocket + inv.shield + inv.hammer; }
+function have(k){ return k==="booster" ? boosterCount() : (inv[k]||0); }
+function targetDone(){
+  if(S.target==="boosters") return C.rocket>=1 && C.shield>=1 && C.hammer>=1;
+  if(S.target==="wild3") return C.wildcard>=3;
+  if(S.target==="chest") return C.chest>=1;
+  return false;
+}
+function pathRecipes(){
+  if(!S.target) return [];
+  if(S.target==="boosters") return ["hammer","shield","rocket"].filter(function(r){ return !C[r]; });
+  if(S.target==="wild3") return C.wildcard>=3 ? [] : ["wildcard","hammer","shield","rocket"];
+  return C.chest ? [] : ["chest","wildcard","hammer","shield","rocket"];
+}
+function missingFor(rid){
+  var need = RECIPES[rid].need, miss = [];
+  for(var k in need) for(var i=have(k); i<need[k]; i++) miss.push(k);
+  return miss;
+}
+function matchRecipe(slots){
+  outer: for(var id in RECIPES){
+    var need = RECIPES[id].need, pool = slots.slice();
+    for(var k in need){
+      for(var i=0;i<need[k];i++){
+        var idx = -1;
+        for(var j=0;j<pool.length;j++){
+          if(k==="booster" ? BOOSTERS.indexOf(pool[j])>=0 : pool[j]===k){ idx=j; break; }
+        }
+        if(idx<0) continue outer;
+        pool.splice(idx,1);
+      }
+    }
+    if(pool.length===0) return id;
+  }
+  return null;
+}
+
+// ---------- rendering ----------
+function renderTarget(){
+  var p = el("tgtPanel");
+  if(!S.target){
+    p.innerHTML = '<h4>🎯 Choose your masterpiece</h4><div class="sb-muted" style="font-size:12px">Pick the reward you want to build toward.</div>' +
+      '<button class="sb-btn sb-btn-blue sb-btn-block sb-btn-sm" style="margin-top:8px" id="pickBtn">Choose target</button>';
+    el("pickBtn").addEventListener("click", showChooser);
+    return;
+  }
+  var t = TGT[S.target], rows = [], bc = boosterCount();
+  function row(e,l,h,n){ rows.push({e:e,l:l,h:h,n:n}); }
+  if(S.target==="boosters"){
+    row("🚀","Rocket crafted",Math.min(1,C.rocket),1);
+    row("🛡️","Shield crafted",Math.min(1,C.shield),1);
+    row("🔨","Hammer crafted",Math.min(1,C.hammer),1);
+    if(!C.rocket) row("🔵","Blue Chips",inv.blue,3);
+    else if(!C.shield) row("🟢","Green Chips",inv.green,3);
+    else if(!C.hammer) row("🔴","Red Chips",inv.red,3);
+  } else if(S.target==="wild3"){
+    row("🃏","Wild Cards crafted",C.wildcard,3);
+    if(C.wildcard<3){ row("⚙️","Boosters ready",bc,2); row("🟡","Gold Chip",inv.gold,1); }
+  } else {
+    row("🎁","Premium Chest",C.chest,1);
+    if(!C.chest){
+      row("🃏","Wild Cards ready",inv.wildcard,2);
+      if(inv.wildcard<2){ row("⚙️","Boosters ready",bc,2); row("🟡","Gold Chip",inv.gold,1); }
+    }
+  }
+  p.innerHTML = '<span class="tgt-big">'+t.e+'</span><h4>🎯 '+t.n+'</h4><ul class="chk">' +
+    rows.map(function(r){
+      var ok = r.h>=r.n;
+      return '<li class="'+(ok?"ok":"no")+'"><span class="mk">'+(ok?"✓":"✗")+'</span><span>'+r.e+' '+r.l+
+        '</span><span class="cnt">'+Math.min(r.h,r.n)+'/'+r.n+'</span></li>';
+    }).join("") + "</ul>" +
+    (targetDone() ? '<div style="font-weight:900;color:var(--sb-green);font-size:13px">🏆 Masterpiece complete!</div>' : "");
+}
+
+function renderBenches(){
+  el("benches").innerHTML = benches.map(function(b,bi){
+    var rid = matchRecipe(b.slots);
+    var slots = "";
+    for(var i=0;i<3;i++){
+      var it = b.slots[i];
+      slots += '<div class="slot'+(it?" filled":"")+'" data-b="'+bi+'" data-i="'+i+'">'+(it?ITEMS[it].e:"")+"</div>";
+    }
+    var res = b.result ? '<span class="pop">'+b.result+"</span>" : (rid ? '<span style="opacity:0.35">'+(RECIPES[rid].out?ITEMS[RECIPES[rid].out].e:"🎁")+"</span>" : "");
+    return '<div class="bench'+(b.busy?" crafting":"")+'" data-bench="'+bi+'">' +
+      '<div class="craftfx"><span class="ham">🔨</span><span class="spk">✨</span><span class="spk">✨</span><span class="spk">💥</span></div>' +
+      '<div class="bench-row">'+slots+'<span class="arrow">→</span><div class="slot result">'+res+"</div></div>" +
+      '<div class="bench-foot"><button class="sb-btn sb-btn-yellow sb-btn-sm" data-craft="'+bi+'"'+((rid&&!b.busy)?"":" disabled")+">⚒️ CRAFT"+
+      (S.dbl?" ×2":"")+"</button></div></div>";
+  }).join("");
+  el("benches").querySelectorAll(".slot[data-b]").forEach(function(s){
+    s.addEventListener("click", function(){ unplace(+s.dataset.b, +s.dataset.i); });
+  });
+  el("benches").querySelectorAll("[data-craft]").forEach(function(btn){
+    btn.addEventListener("click", function(){ startCraft(benches[+btn.dataset.craft]); });
+  });
+  el("benchZone").classList.toggle("gold-trim", S.dbl);
+  renderPill();
+}
+
+function renderPill(){
+  var w = el("pillWrap"); w.innerHTML = "";
+  var list = pathRecipes();
+  for(var i=0;i<list.length;i++){
+    var rid = list[i], miss = missingFor(rid);
+    if(miss.length===1){
+      var m = miss[0]==="booster" ? "rocket" : miss[0];
+      var b = document.createElement("button");
+      b.className = "fin-pill";
+      b.innerHTML = "✨ Finish "+RECIPES[rid].n+" — get 1 "+ITEMS[m].n+" "+ITEMS[m].e+" · "+PRICE[m];
+      (function(rid,m){ b.addEventListener("click", function(){ sellMissing(rid,m); }); })(rid,m);
+      w.appendChild(b);
+      return;
+    }
+  }
+}
+
+function renderInv(){
+  var keys = ["blue","green","red","gold","rocket","shield","hammer","wildcard"];
+  el("inv").innerHTML = keys.map(function(k){
+    return '<button data-it="'+k+'" class="'+(inv[k]?"":"zero")+'">'+ITEMS[k].e+
+      '<span class="lbl">'+ITEMS[k].n.split(" ")[0]+'</span><span class="ct">'+inv[k]+"</span></button>";
+  }).join("");
+  el("inv").querySelectorAll("[data-it]").forEach(function(b){
+    b.addEventListener("click", function(){ place(b.dataset.it, b); });
+  });
+}
+
+function renderRecipes(){
+  var path = pathRecipes();
+  function line(id, ing){
+    return '<div class="rec'+(path.indexOf(id)>=0?" hot":"")+'">'+ing+' <span class="arrow" style="color:var(--sb-ink)">→</span> '+
+      (RECIPES[id].out?ITEMS[RECIPES[id].out].e:"🎁")+'<span class="nm">'+RECIPES[id].n+"<br>+"+
+      RECIPES[id].grant.map(function(g){ return g.amount+" "+SB.icon(g.type); }).join(" ")+"</span></div>";
+  }
+  el("recipes").innerHTML = "<h4>📜 Recipe tree</h4>" +
+    '<div class="tier">TIER 1 · BOOSTERS</div>' +
+    line("rocket","🔵🔵🔵") + line("shield","🟢🟢🟢") + line("hammer","🔴🔴🔴") +
+    '<div class="tier">TIER 2</div>' + line("wildcard","⚙️⚙️ + 🟡") +
+    '<div class="tier">TIER 3 · GRAND GOAL</div>' + line("chest","🃏🃏") +
+    '<div class="sb-muted" style="font-size:11px;margin-top:6px">⚙️ = any crafted booster. Crafted items also pay out real boosters instantly.</div>';
+}
+
+function renderAll(){ renderTarget(); renderBenches(); renderInv(); renderRecipes(); st.save(); }
+
+// ---------- bench interaction ----------
+function place(item, srcEl){
+  if(!inv[item]){ srcEl.classList.remove("sb-shake"); void srcEl.offsetWidth; srcEl.classList.add("sb-shake"); return; }
+  for(var i=0;i<benches.length;i++){
+    var b = benches[i];
+    if(!b.busy && b.slots.length<3){
+      inv[item]--; b.slots.push(item); b.result=null;
+      SB.haptic(10); renderAll(); return;
+    }
+  }
+  SB.toast(benches.length>1 ? "Both benches are full!" : "Bench is full — craft or remove items");
+  el("benchZone").classList.remove("sb-shake"); void el("benchZone").offsetWidth; el("benchZone").classList.add("sb-shake");
+}
+function unplace(bi, si){
+  var b = benches[bi];
+  if(b.busy || !b.slots[si]) return;
+  inv[b.slots[si]]++; b.slots.splice(si,1);
+  SB.haptic(8); renderAll();
+}
+
+function startCraft(b){
+  var rid = matchRecipe(b.slots);
+  if(!rid || b.busy) return;
+  b.busy = true; b.result = null;
+  SB.haptic(15); renderAll();
+  setTimeout(function(){ finishCraft(b, rid); }, S.instant ? 180 : 1200);
+}
+function finishCraft(b, rid){
+  var R = RECIPES[rid], mult = S.dbl ? 2 : 1;
+  b.slots = []; b.busy = false;
+  b.result = R.out ? ITEMS[R.out].e : "🎁";
+  C[rid] += mult;
+  if(R.out) inv[R.out] += mult;
+  var zone = el("benchZone"), r = zone.getBoundingClientRect();
+  SB.grantRewards(R.grant.map(function(g){ return {type:g.type, amount:g.amount*mult}; }), zone);
+  SB.confetti(r.left + r.width/2, r.top + r.height/2, 45);
+  SB.toast("⚒️ Crafted "+(mult>1?"2× ":"")+R.n+"!");
+  renderAll();
+  setTimeout(function(){ b.result=null; renderBenches(); }, 2200);
+  if(rid==="chest") setTimeout(grandCelebration, 600);
+  else if(targetDone() && !S.celebrated){ S.celebrated = true; st.save(); setTimeout(targetCelebration, 700); }
+}
+
+// ---------- contextual monetization ----------
+function sellMissing(rid, item){
+  SB.buyIAP({
+    label:"1 "+ITEMS[item].n+" "+ITEMS[item].e,
+    price:PRICE[item],
+    sub:"The exact piece missing from your "+RECIPES[rid].n+" — crafts it instantly!",
+    grant:false,
+    onSuccess:function(){
+      inv[item]++;
+      SB.toast("+1 "+ITEMS[item].n+" "+ITEMS[item].e);
+      autoCraft(rid);
+    }
+  });
+}
+function autoCraft(rid){
+  var free = null;
+  for(var i=0;i<benches.length;i++) if(!benches[i].busy){ free = benches[i]; break; }
+  var miss = missingFor(rid);
+  if(!free || miss.length){ renderAll(); return; }
+  // return any staged items on that bench, then pull the recipe from inventory
+  free.slots.forEach(function(it){ inv[it]++; });
+  free.slots = [];
+  var need = RECIPES[rid].need;
+  for(var k in need){
+    for(var j=0;j<need[k];j++){
+      if(k==="booster"){
+        for(var x=0;x<BOOSTERS.length;x++) if(inv[BOOSTERS[x]]>0){ inv[BOOSTERS[x]]--; free.slots.push(BOOSTERS[x]); break; }
+      } else { inv[k]--; free.slots.push(k); }
+    }
+  }
+  renderAll();
+  setTimeout(function(){ startCraft(free); }, 500);
+}
+
+// ---------- shop drawer ----------
+function offerRow(ic, name, sub, price, key, fn){
+  var owned = key && S[key];
+  return '<div class="offer"><span class="ic">'+ic+'</span><div class="tx"><b>'+name+"</b><span>"+sub+"</span></div>"+
+    (owned ? '<span class="owned">✓ Owned</span>' : '<button class="sb-btn sb-btn-green sb-btn-sm" data-of="'+fn+'">'+price+"</button>")+"</div>";
+}
+function renderDrawer(){
+  el("drawer").innerHTML = '<h3 style="margin:0 0 2px">🛒 Workshop Shop</h3>'+
+    '<div class="sb-muted" style="font-size:12px;margin-bottom:6px">Stock the bench, upgrade the workshop</div>'+
+    offerRow("🎨","Chip Variety Pack","2× Blue 🔵, Green 🟢 & Red 🔴 chips","$1.99",null,"pack")+
+    offerRow("🟡","Gold Chip","The rare one — needed for Wild Cards","$1.99",null,"gold")+
+    offerRow("🪑","Second Bench","Craft two recipes in parallel","$2.99","bench2","bench")+
+    offerRow("⚡","Instant Craft","Skip crafting time on every bench","$0.99","instant","instant")+
+    offerRow("✨","Double Output Pass","Every craft outputs ×2 for the whole event","$4.99","dbl","dbl")+
+    '<button class="sb-sheet-cancel" id="drawerClose">Close</button>';
+  el("drawer").querySelectorAll("[data-of]").forEach(function(b){
+    b.addEventListener("click", function(){ buyOffer(b.dataset.of); });
+  });
+  el("drawerClose").addEventListener("click", function(){ el("drawerBd").classList.remove("open"); });
+}
+function buyOffer(id){
+  el("drawerBd").classList.remove("open");
+  var o = {
+    pack:{ label:"Chip Variety Pack 🎨", price:"$1.99", sub:"2× 🔵 + 2× 🟢 + 2× 🔴 straight to your bench",
+      fn:function(){ inv.blue+=2; inv.green+=2; inv.red+=2; SB.toast("+2 🔵 +2 🟢 +2 🔴"); } },
+    gold:{ label:"Gold Chip 🟡", price:"$1.99", sub:"The rare chip that unlocks Wild Cards",
+      fn:function(){ inv.gold++; SB.toast("+1 Gold Chip 🟡"); } },
+    bench:{ label:"Second Bench 🪑", price:"$2.99", sub:"One-time upgrade · craft two recipes at once",
+      fn:function(){ S.bench2=true; benches.push({slots:[],busy:false,result:null}); SB.toast("🪑 Second bench installed!"); } },
+    instant:{ label:"Instant Craft ⚡", price:"$0.99", sub:"One-time upgrade · no more waiting at the bench",
+      fn:function(){ S.instant=true; SB.toast("⚡ Instant Craft enabled!"); } },
+    dbl:{ label:"Double Output Pass ✨", price:"$4.99", sub:"Event-long · every craft outputs ×2 (gold-trim bench!)",
+      fn:function(){ S.dbl=true; SB.toast("✨ Double Output active!"); } }
+  }[id];
+  SB.buyIAP({ label:o.label, price:o.price, sub:o.sub, grant:false,
+    onSuccess:function(){ o.fn(); renderAll(); renderDrawer(); },
+    onCancel:function(){ el("drawerBd").classList.add("open"); } });
+}
+el("shopTab").addEventListener("click", function(){ renderDrawer(); el("drawerBd").classList.add("open"); });
+el("drawerBd").addEventListener("click", function(e){ if(e.target===el("drawerBd")) el("drawerBd").classList.remove("open"); });
+
+// ---------- play a level (faucet) ----------
+function rollChip(){
+  var r = Math.random();
+  return r<0.40 ? "blue" : r<0.70 ? "green" : r<0.95 ? "red" : "gold";
+}
+el("playBtn").addEventListener("click", function(){
+  var a = rollChip(), b = rollChip();
+  S.levels++; S.chipsEarned += 2;
+  var m = SB.modal(
+    '<h3 style="margin:0">Level complete! 🎉</h3><div class="sb-muted" style="font-size:12px">Your material haul…</div>'+
+    '<div class="flipwrap">'+
+    '<div class="fcard" id="fc0"><div class="face back">SB</div><div class="face front">'+ITEMS[a].e+"<small>"+ITEMS[a].n+"</small></div></div>"+
+    '<div class="fcard" id="fc1"><div class="face back">SB</div><div class="face front">'+ITEMS[b].e+"<small>"+ITEMS[b].n+"</small></div></div>"+
+    "</div>"+'<button class="sb-btn sb-btn-blue sb-btn-block" id="fcOk" disabled>Collect</button>');
+  setTimeout(function(){ el("fc0").classList.add("flipped"); SB.haptic(10); }, 350);
+  setTimeout(function(){ el("fc1").classList.add("flipped"); SB.haptic(10);
+    if(a==="gold"||b==="gold") SB.confetti(); el("fcOk").disabled = false; }, 800);
+  el("fcOk").addEventListener("click", function(){
+    inv[a]++; inv[b]++; m.close();
+    SB.toast("+1 "+ITEMS[a].e+"  ·  +1 "+ITEMS[b].e);
+    SB.haptic(20); renderAll();
+  });
+});
+
+// ---------- celebrations ----------
+function targetCelebration(){
+  SB.confetti();
+  var t = TGT[S.target];
+  var m = SB.modal('<div style="font-size:52px">'+t.e+'</div><h3 style="margin:6px 0">Masterpiece complete!</h3>'+
+    '<p class="sb-muted" style="font-size:13px">You finished the <b>'+t.n+'</b> path. The workshop stays open — pick a new goal!</p>'+
+    '<button class="sb-btn sb-btn-yellow sb-btn-block" id="newTgt">🎯 New masterpiece?</button>'+
+    '<button class="sb-sheet-cancel" id="keepGo">Keep crafting</button>');
+  m.el.querySelector("#newTgt").addEventListener("click", function(){ m.close(); newMasterpiece(); });
+  m.el.querySelector("#keepGo").addEventListener("click", m.close);
+}
+function grandCelebration(){
+  S.done = true; st.save();
+  el("benchZone").classList.add("dance");
+  SB.confetti();
+  setTimeout(function(){ SB.confetti(window.innerWidth*0.25, window.innerHeight*0.4, 70); }, 350);
+  setTimeout(function(){ SB.confetti(window.innerWidth*0.75, window.innerHeight*0.4, 70); }, 700);
+  setTimeout(function(){
+    var m = SB.modal('<div style="font-size:56px" class="sb-bounce">🎁</div><h3 style="margin:6px 0">PREMIUM CHEST CRAFTED!</h3>'+
+      '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0">'+
+      SB.rewardChip({type:"coins",amount:3000*(S.dbl?2:1)})+SB.rewardChip({type:"wild",amount:3*(S.dbl?2:1)})+SB.rewardChip({type:"gem",amount:10*(S.dbl?2:1)})+"</div>"+
+      '<p class="sb-muted" style="font-size:12px">'+S.levels+" levels played · "+(C.rocket+C.shield+C.hammer)+" boosters, "+C.wildcard+" wilds & "+C.chest+" chest crafted · "+S.chipsEarned+" chips earned</p>"+
+      '<button class="sb-btn sb-btn-yellow sb-btn-block" id="restart">🎯 New masterpiece?</button>'+
+      '<button class="sb-sheet-cancel" id="stay">Bask in glory</button>');
+    m.el.querySelector("#restart").addEventListener("click", function(){ m.close(); el("benchZone").classList.remove("dance"); newMasterpiece(); });
+    m.el.querySelector("#stay").addEventListener("click", function(){ m.close(); el("benchZone").classList.remove("dance"); });
+  }, 1100);
+}
+function newMasterpiece(){
+  S.target = null; S.celebrated = false; S.done = false;
+  C.rocket=0; C.shield=0; C.hammer=0; C.wildcard=0; C.chest=0;
+  st.save(); renderAll(); showChooser();
+}
+
+// ---------- target chooser ----------
+function showChooser(){
+  var m = SB.modal('<h3 style="margin:0 0 2px">🎯 Choose your masterpiece</h3>'+
+    '<p class="sb-muted" style="font-size:12px;margin:4px 0 6px">Everything you craft pays out real rewards along the way.</p>'+
+    ["boosters","wild3","chest"].map(function(k){
+      var t = TGT[k];
+      return '<button class="choose-opt" data-t="'+k+'"><span class="em">'+t.e+'</span><span><b>'+t.n+
+        (k==="chest"?" 👑":"")+"</b><span>"+t.d+"</span></span></button>";
+    }).join(""));
+  m.el.querySelectorAll("[data-t]").forEach(function(b){
+    b.addEventListener("click", function(){
+      S.target = b.dataset.t; S.celebrated = targetDone(); st.save();
+      m.close(); SB.haptic(15); SB.toast("🎯 Target set: "+TGT[S.target].n);
+      renderAll();
+    });
+  });
+}
+
+// ---------- info ----------
+el("infoBtn").addEventListener("click", function(){
+  var m = SB.modal('<h3 style="margin:0 0 8px">🛠️ Reward Workshop</h3>'+
+    '<p style="font-size:13px;text-align:left;line-height:1.5;margin:0">Players pick a masterpiece to build, then combine chips earned from levels into boosters, Wild Cards and finally the Premium Chest. '+
+    'The target checklist constantly shows exactly which ingredient is missing, turning vague desire into a specific, nameable want. '+
+    'Monetization sells precisely that missing piece — "1 Gold Chip · $1.99" converts far better than abstract bundles because the purchase visibly completes a craft the player already started. '+
+    'Upgrades (second bench, instant craft, double output) monetize engaged players on convenience instead of content.</p>'+
+    '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" id="infoOk">Got it</button>');
+  m.el.querySelector("#infoOk").addEventListener("click", m.close);
+});
+
+// ---------- countdown ----------
+SB.countdown(el("timer"), S.endTs, function(){ SB.toast("⏳ Event ended — demo stays open"); });
+
+// ---------- boot ----------
+renderAll();
+if(!S.target) showChooser();
+})();
+</script>
+</body>
+</html>

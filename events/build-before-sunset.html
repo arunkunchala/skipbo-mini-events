@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Build Before Sunset · Skip-Bo Event</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+  /* ---------- header row ---------- */
+  .bbs-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .bbs-info {
+    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,0.18); color:#fff; font-size:17px; font-weight:900;
+  }
+  .bbs-info:active { transform:scale(0.9); }
+
+  /* ---------- scene ---------- */
+  .scene {
+    position:relative; height:300px; border-radius:var(--sb-radius);
+    overflow:hidden; box-shadow:var(--sb-shadow); border:2px solid rgba(255,255,255,0.25);
+  }
+  .sky { position:absolute; inset:0; background:linear-gradient(180deg,#3E8EDE 0%,#7db8ee 38%,#ffd28a 62%,#ff9e5e 78%,#f2784b 100%); }
+  .dusk { position:absolute; inset:0; background:linear-gradient(180deg,#141c3a 0%,#3a2b52 60%,#7a3d55 100%); opacity:0; transition:opacity 1s linear; }
+  .sun {
+    position:absolute; left:68%; top:12%; width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #fff3c4, #FFC72C 55%, #ff9e3d);
+    box-shadow:0 0 34px 14px rgba(255,199,44,0.55);
+    transition:top 1s linear;
+  }
+  .sun.flicker { animation:sunFlick 0.5s 2; }
+  @keyframes sunFlick { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.8) saturate(1.4); transform:scale(1.12);} }
+  .sea {
+    position:absolute; left:0; right:0; bottom:17%; height:22%;
+    background:linear-gradient(180deg,#2e7ec9,#1D4FA1);
+    box-shadow:inset 0 4px 8px rgba(255,255,255,0.35);
+  }
+  .sea::after { content:"🌊 🌊 🌊"; position:absolute; top:-9px; left:0; right:0; text-align:center; font-size:13px; opacity:0.7; letter-spacing:34px; }
+  .sand { position:absolute; left:0; right:0; bottom:0; height:18%; background:linear-gradient(180deg,#f4d58d,#dcb264); }
+
+  /* build layers */
+  .layer { position:absolute; opacity:0; transform:translateY(24px) scale(0.7); transition:all 0.7s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; }
+  .layer.on { opacity:1; transform:translateY(0) scale(1); }
+  .posts { left:10%; bottom:14%; font-size:26px; letter-spacing:8px; }
+  .posts::before { content:"🏗️"; position:absolute; top:-34px; left:56px; font-size:32px; }
+  .hut { left:14%; bottom:15%; font-size:58px; }
+  .hut::after { content:"🍹"; position:absolute; right:-18px; bottom:6px; font-size:20px; }
+  .lights { left:6%; right:6%; top:26%; height:36px; border-bottom:2px dashed rgba(255,235,170,0.85); border-radius:0 0 50% 50%; }
+  .lights span { position:absolute; bottom:-9px; font-size:13px; animation:twinkle 1.6s infinite; }
+  @keyframes twinkle { 0%,100%{opacity:1; filter:brightness(1.3);} 50%{opacity:0.45;} }
+  .djbooth { right:8%; bottom:15%; font-size:40px; }
+  .djbooth::after { content:"🎧"; position:absolute; left:12px; bottom:-4px; font-size:22px; }
+  .party { inset:0; }
+  .bunting { position:absolute; top:0; left:0; right:0; height:16px;
+    background:linear-gradient(45deg,transparent 33%,var(--sb-red) 33% 66%,transparent 66%) 0 0/24px 16px,
+               linear-gradient(-45deg,transparent 33%,var(--sb-yellow) 33% 66%,transparent 66%) 12px 0/24px 16px; }
+  .dancers { position:absolute; bottom:2%; left:0; right:0; text-align:center; font-size:26px; }
+  .dancers span { display:inline-block; animation:dance 0.6s infinite alternate; }
+  .dancers span:nth-child(2n){ animation-delay:0.3s; }
+  @keyframes dance { from{transform:translateY(0) rotate(-8deg);} to{transform:translateY(-8px) rotate(8deg);} }
+  .fireworks { position:absolute; top:6%; left:0; right:0; text-align:center; font-size:30px; letter-spacing:40px; }
+  .fireworks span { display:inline-block; animation:fw 1.4s infinite; }
+  .fireworks span:nth-child(2){ animation-delay:0.5s; } .fireworks span:nth-child(3){ animation-delay:0.9s; }
+  @keyframes fw { 0%{transform:scale(0.2); opacity:0;} 35%{transform:scale(1.3); opacity:1;} 100%{transform:scale(1.6); opacity:0;} }
+
+  .worker { position:absolute; bottom:16%; left:44%; font-size:30px; animation:bob 0.9s infinite alternate; transition:opacity 0.4s; }
+  .worker.two { left:60%; bottom:15%; }
+  .worker .tool { position:absolute; top:-14px; right:-13px; font-size:17px; animation:hammer 0.45s infinite alternate; }
+  @keyframes bob { from{transform:translateY(0);} to{transform:translateY(-6px);} }
+  @keyframes hammer { from{transform:rotate(-30deg);} to{transform:rotate(25deg);} }
+  .guests { position:absolute; bottom:1%; left:6px; right:6px; height:26px; font-size:19px; overflow:hidden; white-space:nowrap; }
+  .guests span { display:inline-block; animation:arrive 0.8s cubic-bezier(0.34,1.56,0.64,1) both; margin-right:2px; }
+  @keyframes arrive { from{transform:translateX(90px); opacity:0;} to{transform:translateX(0); opacity:1;} }
+  .scene.dim .sky,.scene.dim .sea,.scene.dim .sand,.scene.dim .layer { filter:grayscale(0.6) brightness(0.55); }
+
+  /* ---------- stage card ---------- */
+  .stagecard { margin-top:12px; }
+  .stage-dots { display:flex; gap:6px; justify-content:center; margin-bottom:10px; }
+  .stage-dots i {
+    width:26px; height:26px; border-radius:50%; font-style:normal; font-size:13px; font-weight:900;
+    display:grid; place-items:center; background:rgba(27,42,74,0.12); color:#8b97ad;
+  }
+  .stage-dots i.done { background:var(--sb-green); color:#fff; }
+  .stage-dots i.now { background:var(--sb-yellow); color:var(--sb-ink); box-shadow:0 0 0 3px rgba(255,199,44,0.35); }
+  .stage-name { font-size:17px; font-weight:900; text-align:center; }
+  .bar-wrap { margin:10px 0 4px; }
+  .bar-label { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#5a6b8c; margin-bottom:3px; }
+  .bar { height:16px; border-radius:999px; background:rgba(27,42,74,0.12); overflow:hidden; }
+  .bar .fill {
+    height:100%; border-radius:999px; width:0%;
+    background:linear-gradient(90deg,var(--sb-yellow),#ff9e3d); transition:width 0.5s linear;
+    background-size:200% 100%;
+  }
+  .bar .fill.whoosh { animation:whoosh 0.6s; }
+  @keyframes whoosh { 0%{filter:brightness(1);} 50%{filter:brightness(1.9); background-position:100% 0;} 100%{filter:brightness(1);} }
+  .bar.second .fill { background:linear-gradient(90deg,#5ba0e8,var(--sb-sky)); }
+  .stage-rewards { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:8px 0; }
+  .tapbtn { margin-top:6px; }
+  .tapbtn.glow { animation:glowPulse 0.9s infinite; }
+  @keyframes glowPulse {
+    0%,100%{ box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 0 0 rgba(255,199,44,0.7); }
+    50%{ box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 0 12px rgba(255,199,44,0); }
+  }
+
+  /* ---------- offers ---------- */
+  .offers { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+  .offer {
+    background:var(--sb-cream); border-radius:14px; box-shadow:var(--sb-shadow);
+    padding:10px; text-align:center; cursor:pointer; border:2px solid transparent;
+    transition:transform 0.08s;
+  }
+  .offer:active { transform:scale(0.96); }
+  .offer .oi { font-size:26px; }
+  .offer .ot { font-weight:900; font-size:13px; margin:2px 0; }
+  .offer .op { font-weight:800; font-size:12px; color:var(--sb-blue); }
+  .offer.hot { border-color:var(--sb-yellow); background:linear-gradient(180deg,#fff7dd,var(--sb-cream)); }
+  .offer.grand {
+    grid-column:1 / -1; border-color:var(--sb-red);
+    background:linear-gradient(135deg,#2a1a4a,#5b2a6e 60%,#a13d6d); color:#fff;
+    animation:grandIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .offer.grand .op { color:var(--sb-yellow); font-size:14px; }
+  .offer.grand .osub { font-size:11px; opacity:0.85; }
+  @keyframes grandIn { from{transform:scale(0.7); opacity:0;} to{transform:scale(1); opacity:1;} }
+  .offer.used { filter:grayscale(0.8); opacity:0.55; pointer-events:none; }
+
+  .earnrow { margin-top:12px; }
+  .endpanel { margin-top:12px; text-align:center; }
+  .endpanel h2 { margin:4px 0 8px; }
+</style>
+</head>
+<body>
+<div class="sb-app">
+  <div class="sb-main">
+
+    <div class="bbs-head">
+      <span class="sb-timer-chip">🌅 Sunset in <span id="sunset-t">--</span></span>
+      <button class="bbs-info" id="info-btn" aria-label="Info">ⓘ</button>
+    </div>
+
+    <div class="scene" id="scene">
+      <div class="sky"></div>
+      <div class="dusk" id="dusk"></div>
+      <div class="sun" id="sun"></div>
+      <div class="layer lights" id="L2"><span style="left:8%">✨</span><span style="left:26%">✨</span><span style="left:46%">✨</span><span style="left:66%">✨</span><span style="left:86%">✨</span></div>
+      <div class="sea"></div>
+      <div class="sand"></div>
+      <div class="layer posts" id="L0">𝍩 𝍩 𝍩 𝍩</div>
+      <div class="layer hut" id="L1">🛖</div>
+      <div class="layer djbooth" id="L3">🎪</div>
+      <div class="layer party" id="L4">
+        <div class="bunting"></div>
+        <div class="fireworks"><span>🎆</span><span>🎇</span><span>🎆</span></div>
+        <div class="dancers"><span>🕺</span><span>💃</span><span>🕺</span><span>💃</span></div>
+      </div>
+      <div class="worker" id="worker1">👷<span class="tool">🛠️</span></div>
+      <div class="worker two" id="worker2" style="display:none">👷‍♀️<span class="tool">🔨</span></div>
+      <div class="guests" id="guests"></div>
+    </div>
+
+    <div class="sb-panel stagecard" id="stagecard">
+      <div class="stage-dots" id="dots"></div>
+      <div class="stage-name" id="stage-name"></div>
+      <div class="bar-wrap" id="bar-main">
+        <div class="bar-label"><span id="bar1-lbl">Building…</span><span id="bar1-time">--:--</span></div>
+        <div class="bar"><div class="fill" id="fill1"></div></div>
+      </div>
+      <div class="bar-wrap" id="bar-second" style="display:none">
+        <div class="bar-label"><span>👷‍♀️ Second worker: <span id="bar2-name"></span></span><span id="bar2-time">--:--</span></div>
+        <div class="bar second"><div class="fill" id="fill2"></div></div>
+      </div>
+      <div class="stage-rewards" id="stage-rewards"></div>
+      <button class="sb-btn sb-btn-yellow sb-btn-block tapbtn" id="tap-btn">Building…</button>
+    </div>
+
+    <div class="offers" id="offers">
+      <div class="offer" id="of-speed"><div class="oi">⏩</div><div class="ot">Speed up 30s</div><div class="op">🪙 100</div></div>
+      <div class="offer hot" id="of-foreman"><div class="oi">👷‍♂️📋</div><div class="ot">Foreman Pack</div><div class="op">$1.99</div></div>
+      <div class="offer" id="of-worker"><div class="oi">👷‍♀️</div><div class="ot">Second Worker</div><div class="op">$2.99</div></div>
+      <div class="offer grand" id="of-grand" style="display:none">
+        <div class="oi">🎉🏖️🎆</div><div class="ot">GRAND OPENING PACK</div>
+        <div class="osub">Finish the whole venue now · DOUBLES the grand chest</div>
+        <div class="op">$4.99</div>
+      </div>
+    </div>
+
+    <div class="earnrow">
+      <button class="sb-btn sb-btn-blue sb-btn-block" id="earn-btn">▶️ Play a level (+150 coins)</button>
+    </div>
+
+    <div class="sb-panel-blue endpanel" id="endpanel" style="display:none"></div>
+  </div>
+</div>
+<script src="../shared/core.js"></script>
+<script>
+(function(){
+  "use strict";
+  SB.init({ title:"Build Before Sunset", subtitle:"Sunset Beach Club · Skip-Bo Beach Party", resetKey:"build-before-sunset" });
+
+  var EVENT_MS = 30*60*1000; // demo: 30 min to sunset
+  var STAGES = [
+    { name:"Foundations",     emoji:"🏗️", dur: 60*1000, rewards:[{type:"coins",amount:300}] },
+    { name:"Deck & Bar",      emoji:"🛖", dur: 90*1000, rewards:[{type:"wild",amount:1}] },
+    { name:"Lights & Decor",  emoji:"✨", dur:120*1000, rewards:[{type:"coins",amount:600},{type:"energy",amount:2}] },
+    { name:"Stage & DJ Booth",emoji:"🎪", dur:180*1000, rewards:[{type:"undo",amount:1},{type:"draw",amount:1}] },
+    { name:"GRAND OPENING",   emoji:"🎉", dur:240*1000, rewards:[{type:"chest",amount:1},{type:"coins",amount:2500},{type:"wild",amount:2},{type:"gem",amount:5}] }
+  ];
+  var GUEST_POOL = ["🧑‍🎤","👩‍🍳","🧔","👩‍🦰","🕶️🧑","👵","🧑‍🦱","👨‍🎨","💁‍♀️","🧜‍♀️","🏄","🧑‍✈️","👯","🦩","🐬"];
+
+  var st = SB.store("build-before-sunset", {
+    startTs:null, sunsetEnd:null,
+    timers:[null,null,null,null,null],   // absolute end timestamps — survive reload
+    done:[false,false,false,false,false],
+    bonus:[0,0,0,0,0],                    // foreman bonus coins per stage
+    secondWorker:false, grandPack:false, outcome:null, consoled:false
+  });
+  var S = st.data;
+  if(!S.startTs){ S.startTs = Date.now(); S.sunsetEnd = S.startTs + EVENT_MS; st.save(); }
+
+  // ---------- helpers ----------
+  var $ = function(id){ return document.getElementById(id); };
+  function activeStage(){ for(var i=0;i<5;i++) if(!S.done[i]) return i; return -1; }
+  function ensureTimers(){
+    var a = activeStage(); if(a<0) return;
+    var now = Date.now();
+    if(S.timers[a]==null) S.timers[a] = now + STAGES[a].dur;
+    if(S.secondWorker && a+1<5 && S.timers[a+1]==null) S.timers[a+1] = now + STAGES[a+1].dur;
+    st.save();
+  }
+  function mmss(ms){ ms=Math.max(0,ms); var m=Math.floor(ms/60000), s=Math.floor(ms%60000/1000);
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"); }
+  function stageReady(i){ return S.timers[i]!=null && Date.now()>=S.timers[i]; }
+
+  // ---------- scene ----------
+  function renderScene(){
+    for(var i=0;i<5;i++) $("L"+i).classList.toggle("on", S.done[i]);
+    var doneCount = S.done.filter(Boolean).length;
+    var g = $("guests"), want = Math.min(doneCount*3, GUEST_POOL.length);
+    while(g.children.length < want){
+      var sp=document.createElement("span"); sp.textContent=GUEST_POOL[g.children.length]; g.appendChild(sp);
+    }
+    $("worker1").style.display = (S.outcome || activeStage()<0) ? "none" : "";
+    $("worker2").style.display = (S.secondWorker && !S.outcome && activeStage()>=0 && activeStage()<4) ? "" : "none";
+    $("scene").classList.toggle("dim", S.outcome==="fail");
+  }
+  function renderSun(){
+    var p = Math.min(1, Math.max(0,(Date.now()-S.startTs)/(S.sunsetEnd-S.startTs)));
+    $("sun").style.top = (10 + p*66) + "%";
+    $("dusk").style.opacity = (p*0.55).toFixed(2);
+    if(S.outcome==="fail") $("dusk").style.opacity = 0.75;
+  }
+
+  // ---------- stage card ----------
+  function renderDots(){
+    var a = activeStage(), h="";
+    for(var i=0;i<5;i++) h += '<i class="'+(S.done[i]?"done":(i===a?"now":""))+'">'+(S.done[i]?"✓":i+1)+"</i>";
+    $("dots").innerHTML = h;
+  }
+  function renderStage(){
+    renderDots();
+    var a = activeStage();
+    if(a<0 || S.outcome){ $("stagecard").style.display = S.outcome ? "none" : ""; return; }
+    var sg = STAGES[a];
+    $("stage-name").textContent = "Stage "+(a+1)+": "+sg.emoji+" "+sg.name;
+    var chips = sg.rewards.map(SB.rewardChip).join("");
+    if(a===4 && S.grandPack) chips = sg.rewards.map(function(r){ return SB.rewardChip({type:r.type,amount:r.amount*2}); }).join("") + '<span class="sb-reward">✖️2 DOUBLED!</span>';
+    if(S.bonus[a]) chips += SB.rewardChip({type:"coins",amount:S.bonus[a]}) ;
+    $("stage-rewards").innerHTML = chips;
+
+    var now = Date.now(), left = S.timers[a]==null ? sg.dur : S.timers[a]-now;
+    var pct = Math.min(100, Math.max(0, 100*(1 - left/sg.dur)));
+    $("fill1").style.width = pct+"%";
+    $("bar1-time").textContent = mmss(left);
+    $("bar1-lbl").textContent = stageReady(a) ? "✅ Ready!" : "🛠️ Building…";
+
+    var second = S.secondWorker && a+1<5 && S.timers[a+1]!=null;
+    $("bar-second").style.display = second ? "" : "none";
+    if(second){
+      var l2 = S.timers[a+1]-now, p2 = Math.min(100,Math.max(0,100*(1-l2/STAGES[a+1].dur)));
+      $("bar2-name").textContent = STAGES[a+1].name;
+      $("fill2").style.width = p2+"%";
+      $("bar2-time").textContent = l2<=0 ? "Done — waiting" : mmss(l2);
+    }
+
+    var btn = $("tap-btn");
+    if(stageReady(a)){ btn.disabled=false; btn.classList.add("glow"); btn.textContent = "✨ TAP TO COMPLETE ✨"; }
+    else { btn.disabled=true; btn.classList.remove("glow"); btn.textContent = "Building… "+mmss(left); }
+  }
+
+  // ---------- offers ----------
+  function renderOffers(){
+    var a = activeStage();
+    $("offers").style.display = S.outcome ? "none" : "";
+    $("of-worker").classList.toggle("used", S.secondWorker);
+    if(S.secondWorker) $("of-worker").querySelector(".op").textContent = "✓ Hired";
+    var halfLeft = (S.sunsetEnd - Date.now()) <= EVENT_MS/2;
+    $("of-grand").style.display = (!S.grandPack && a>=0 && (a===4 || halfLeft)) ? "" : "none";
+  }
+
+  // ---------- stage completion ----------
+  function completeStage(i, silent){
+    if(S.done[i] || S.outcome) return;
+    S.done[i] = true;
+    var rw = STAGES[i].rewards.map(function(r){
+      return { type:r.type, amount: (i===4 && S.grandPack) ? r.amount*2 : r.amount };
+    });
+    if(S.bonus[i]) rw.push({type:"coins", amount:S.bonus[i]});
+    SB.grantRewards(rw, $("tap-btn"));
+    SB.confetti(window.innerWidth/2, 260, silent?40:90);
+    ensureTimers(); st.save();
+    renderAll();
+    if(activeStage()<0){ win(); }
+    else if(!silent) SB.toast("Stage "+(i+1)+" complete! Guests are arriving… 🏖️");
+  }
+
+  $("tap-btn").addEventListener("click", function(){
+    var a = activeStage();
+    if(a<0 || !stageReady(a)) return;
+    SB.haptic(30);
+    completeStage(a,false);
+  });
+
+  // ---------- win / fail ----------
+  function win(){
+    if(S.outcome) return;
+    S.outcome = "win"; st.save();
+    renderAll();
+    SB.confetti(); setTimeout(SB.confetti, 500); setTimeout(SB.confetti, 1000);
+    var all=[]; STAGES.forEach(function(sg,i){ sg.rewards.forEach(function(r){
+      all.push(SB.rewardChip({type:r.type, amount:(i===4&&S.grandPack)?r.amount*2:r.amount})); }); });
+    SB.modal(
+      '<div style="font-size:44px">🎉🏖️🎆</div><h2 style="margin:6px 0">GRAND OPENING!</h2>'+
+      '<p class="sb-muted" style="font-size:14px">The Sunset Beach Club opened before sundown — the whole party showed up! Everything you earned:</p>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0">'+all.join("")+"</div>"+
+      '<button class="sb-btn sb-btn-green sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Let\'s party! 🕺</button>'
+    );
+    $("endpanel").style.display="";
+    $("endpanel").innerHTML = '<div style="font-size:34px">🎆🏖️🎆</div><h2>The party is ON!</h2><p style="opacity:0.85;font-size:14px">You built the whole venue before sunset. See you at the next beach weekend!</p>';
+  }
+  function fail(){
+    if(S.outcome==="win") return;
+    S.outcome = "fail"; st.save();
+    renderAll();
+    if(!S.consoled){
+      S.consoled = true; st.save();
+      SB.grantRewards([{type:"coins",amount:400},{type:"energy",amount:1}]);
+    }
+    $("endpanel").style.display="";
+    $("endpanel").innerHTML =
+      '<div style="font-size:34px">🌙😅</div><h2>The party started without the full venue…</h2>'+
+      '<p style="opacity:0.85;font-size:14px">The sun set with the club unfinished. The guests still danced on the sand — here\'s a consolation gift: 🪙 400 + ⚡ 1.</p>'+
+      '<button class="sb-btn sb-btn-yellow sb-btn-block" id="rebuild-btn">🔨 Rebuild next weekend</button>';
+    $("rebuild-btn").addEventListener("click", function(){ st.clear(); location.reload(); });
+  }
+
+  // ---------- acceleration options ----------
+  $("of-speed").addEventListener("click", function(){
+    var a = activeStage(); if(a<0 || stageReady(a)) return;
+    if(!SB.spend("coins",100)){
+      this.classList.remove("sb-shake"); void this.offsetWidth; this.classList.add("sb-shake");
+      SB.toast("Not enough coins — play a level below! 🪙"); return;
+    }
+    S.timers[a] = Math.max(Date.now(), S.timers[a]-30000); st.save();
+    var f=$("fill1"); f.classList.remove("whoosh"); void f.offsetWidth; f.classList.add("whoosh");
+    var sun=$("sun"); sun.classList.remove("flicker"); void sun.offsetWidth; sun.classList.add("flicker");
+    SB.haptic(20); SB.toast("⏩ Whoosh! 30 seconds faster");
+    renderStage();
+  });
+
+  $("of-foreman").addEventListener("click", function(){
+    var a = activeStage(); if(a<0) return;
+    if(stageReady(a)){ SB.toast("This stage is ready — tap to complete it!"); return; }
+    SB.buyIAP({
+      label:"Foreman Pack 👷‍♂️📋", price:"$1.99",
+      sub:"The foreman finishes “"+STAGES[a].name+"” instantly, plus a coin bonus",
+      contents:[{type:"coins",amount:200}], grant:false,
+      onSuccess:function(){
+        S.bonus[a] += 200;
+        S.timers[a] = Date.now(); st.save();
+        renderAll();
+        SB.toast("👷‍♂️ Foreman on site — stage finished! Tap to complete ✨");
+      }
+    });
+  });
+
+  $("of-worker").addEventListener("click", function(){
+    if(S.secondWorker) return;
+    SB.buyIAP({
+      label:"Second Worker 👷‍♀️", price:"$2.99",
+      sub:"One-time: the next stage builds in parallel for the rest of the event",
+      contents:[], grant:false,
+      onSuccess:function(){
+        S.secondWorker = true; ensureTimers(); st.save();
+        renderAll();
+        SB.toast("👷‍♀️ Second worker hired — building two stages at once!");
+      }
+    });
+  });
+
+  $("of-grand").addEventListener("click", function(){
+    if(S.grandPack) return;
+    SB.buyIAP({
+      label:"Grand Opening Pack 🎉🏖️", price:"$4.99",
+      sub:"Finish the entire venue right now — and the grand chest pays DOUBLE",
+      contents:STAGES[4].rewards.map(function(r){ return {type:r.type,amount:r.amount*2}; }),
+      grant:false,
+      onSuccess:function(){
+        S.grandPack = true;
+        // cascade-finish everything up to the finale, then leave the big tap
+        var pending=[]; for(var i=0;i<4;i++) if(!S.done[i]) pending.push(i);
+        pending.forEach(function(i,idx){ setTimeout(function(){ completeStage(i,true); }, 350+idx*550); });
+        setTimeout(function(){
+          if(!S.done[4]){ S.timers[4]=Date.now(); st.save(); renderAll();
+            SB.toast("🎉 Everything's built — tap to open the club!"); }
+        }, 400+pending.length*550);
+      }
+    });
+  });
+
+  // ---------- earn ----------
+  $("earn-btn").addEventListener("click", function(){
+    var b=this; b.disabled=true; b.textContent="🃏 Playing a Skip-Bo level…";
+    setTimeout(function(){
+      SB.grantRewards([{type:"coins",amount:150}], b);
+      b.disabled=false; b.innerHTML="▶️ Play a level (+150 coins)";
+    },1100);
+  });
+
+  // ---------- info ----------
+  $("info-btn").addEventListener("click", function(){
+    SB.modal(
+      '<div style="font-size:34px">🌅🏗️</div><h3 style="margin:6px 0">Build Before Sunset</h3>'+
+      '<p style="font-size:14px;text-align:left;line-height:1.5" class="sb-muted">Timed build events let players keep playing Skip-Bo while the venue constructs itself in the background — the timer creates anticipation, not punishment. Each finished stage visibly transforms the scene and pays an escalating reward, so every return visit has a payoff. Monetization comes from finish-now moments: a soft-currency speed-up sinks coins, the Foreman and Second Worker packs sell time, and the Grand Opening pack captures deadline urgency by doubling the finale chest. The sunset deadline caps the loop with gentle loss aversion while the consolation reward keeps a miss feeling fair.</p>'+
+      '<button class="sb-btn sb-btn-blue sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it</button>'
+    );
+  });
+
+  // ---------- main loop ----------
+  function renderAll(){ renderScene(); renderStage(); renderOffers(); renderSun(); }
+  ensureTimers();
+  renderAll();
+
+  var sunsetChip = $("sunset-t");
+  SB.countdown(sunsetChip, S.sunsetEnd, function(){
+    if(!S.outcome && activeStage()>=0) fail();
+  });
+  if(S.outcome==="fail") fail();     // re-render fail panel after reload
+  if(S.outcome==="win"){ $("endpanel").style.display=""; $("endpanel").innerHTML='<div style="font-size:34px">🎆🏖️🎆</div><h2>The party is ON!</h2><p style="opacity:0.85;font-size:14px">You built the whole venue before sunset!</p>'; }
+
+  setInterval(function(){
+    if(S.outcome) { renderSun(); return; }
+    if(Date.now() >= S.sunsetEnd && activeStage()>=0){ fail(); return; }
+    renderStage(); renderSun(); renderOffers();
+  }, 500);
+})();
+</script>
+</body>
+</html>

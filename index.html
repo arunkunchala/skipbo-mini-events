@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14396f">
+<title>Skip-Bo Mini-Event Prototypes</title>
+<link rel="stylesheet" href="shared/core.css">
+<style>
+  .hub-hero {
+    text-align: center;
+    padding: 18px 10px 6px;
+    color: #fff;
+  }
+  .hub-hero .logo {
+    display: inline-block;
+    background: linear-gradient(180deg, #2a5cb0, #1D4FA1);
+    border: 3px solid var(--sb-yellow);
+    border-radius: 18px;
+    padding: 10px 26px;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: var(--sb-yellow);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.35);
+    box-shadow: var(--sb-shadow);
+    transform: rotate(-2deg);
+  }
+  .hub-hero p { margin: 10px 4px 0; font-size: 13px; color: var(--sb-sky-light); font-weight: 600; }
+  .hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .evt-card {
+    display: block;
+    text-decoration: none;
+    background: var(--sb-cream);
+    border-radius: 16px;
+    box-shadow: var(--sb-shadow);
+    overflow: hidden;
+    color: var(--sb-ink);
+    transition: transform 0.1s ease;
+    border: 2px solid rgba(255,255,255,0.5);
+  }
+  .evt-card:active { transform: scale(0.96); }
+  .evt-art {
+    height: 86px;
+    display: grid; place-items: center;
+    font-size: 42px;
+    position: relative;
+  }
+  .evt-art .badge {
+    position: absolute; top: 6px; left: 6px;
+    font-size: 9px; font-weight: 900; letter-spacing: 0.5px;
+    color: #fff; background: var(--sb-red);
+    padding: 3px 7px; border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .evt-body { padding: 9px 10px 11px; }
+  .evt-body h3 { margin: 0 0 3px; font-size: 14px; line-height: 1.15; }
+  .evt-body p { margin: 0; font-size: 10.5px; line-height: 1.35; color: #5a6b8c; font-weight: 600; }
+  .foot-note { text-align: center; color: rgba(255,255,255,0.65); font-size: 11px; margin-top: 20px; font-weight: 600; padding: 0 20px; line-height: 1.5;}
+</style>
+</head>
+<body>
+<div class="sb-app">
+  <div class="sb-main">
+    <div class="hub-hero">
+      <div class="logo">SKIP-BO</div>
+      <p>Monetization Mini-Event Prototypes · 10 playable concepts<br>Liquidnitro Games · Internal demo</p>
+    </div>
+    <div class="hub-grid">
+      <a class="evt-card" href="events/treasure-elevator.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#FFC72C,#e0a400)"><span class="badge">Offer chain</span>🏨</div>
+        <div class="evt-body"><h3>Treasure Elevator</h3><p>Endless-Treasure evolution — ride floors of free rewards gated by escalating IAPs</p></div>
+      </a>
+      <a class="evt-card" href="events/prize-drop.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#3E8EDE,#1D4FA1)"><span class="badge">Plinko</span>🎡</div>
+        <div class="evt-body"><h3>Prize Drop</h3><p>Physics peg-board with jackpot pocket, multipliers & extra-ball IAPs</p></div>
+      </a>
+      <a class="evt-card" href="events/prize-box.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#2E9E4F,#1f7038)"><span class="badge">BYOB</span>📦</div>
+        <div class="evt-body"><h3>Pack Your Prize Box</h3><p>Drag rewards into your own box — build the exact bundle you want to buy</p></div>
+      </a>
+      <a class="evt-card" href="events/treasure-dig.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#a9703f,#6e4423)"><span class="badge">Excavation</span>⛏️</div>
+        <div class="evt-body"><h3>Treasure Dig</h3><p>Uncover buried chests tile by tile — scanners, dynamite & shovel packs</p></div>
+      </a>
+      <a class="evt-card" href="events/build-before-sunset.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#ef7d4f,#c74b1e)"><span class="badge">Timer build</span>🏗️</div>
+        <div class="evt-body"><h3>Build Before Sunset</h3><p>Finish the venue before the party — speed-ups, second worker & finish packs</p></div>
+      </a>
+      <a class="evt-card" href="events/rescue-run.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#8e6ee0,#5b3fb0)"><span class="badge">Pin-pull</span>🪢</div>
+        <div class="evt-body"><h3>Rescue Run</h3><p>The viral pin-pull ad as a real event — free Fluffy & the reward crates</p></div>
+      </a>
+      <a class="evt-card" href="events/sorting-warehouse.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#4fb8c9,#2a7f8f)"><span class="badge">Sort</span>🏭</div>
+        <div class="evt-body"><h3>Sorting Warehouse</h3><p>Sort parcels off the conveyor into colored crates — capacity & undo IAPs</p></div>
+      </a>
+      <a class="evt-card" href="events/lucky-grabber.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#e05c8a,#a82e5c)"><span class="badge">Claw</span>🕹️</div>
+        <div class="evt-body"><h3>Lucky Grabber</h3><p>Claw machine with visible prize pool & a grip-power pity meter</p></div>
+      </a>
+      <a class="evt-card" href="events/reward-workshop.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#7a8ca8,#4a5c78)"><span class="badge">Craft</span>⚗️</div>
+        <div class="evt-body"><h3>Reward Workshop</h3><p>Combine chips into the reward you choose — buy only the missing piece</p></div>
+      </a>
+      <a class="evt-card" href="events/collectors-showcase.html">
+        <div class="evt-art" style="background:linear-gradient(160deg,#d9a441,#9c6f1d)"><span class="badge">Album</span>🖼️</div>
+        <div class="evt-body"><h3>Collector's Showcase</h3><p>Complete the postcard album — duplicates feed a wildcard meter</p></div>
+      </a>
+    </div>
+    <p class="foot-note">All purchases are simulated — no real transactions. Wallet, prices and rewards mirror Skip-Bo Mobile's live economy ($0.99–$19.99 tiers, coins, energy & boosters).</p>
+  </div>
+</div>
+<script src="shared/core.js"></script>
+<script>
+  SB.init({ hub: true, title: "Mini-Event Hub", subtitle: "Tap an event to play", resetKey: "hub" });
+</script>
+</body>
+</html>

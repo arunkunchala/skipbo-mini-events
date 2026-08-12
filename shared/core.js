@@ -1,0 +1,324 @@
+/* ============================================================
+   Skip-Bo Mini-Events — shared core (wallet, fake IAP, FX)
+   Global: window.SB
+   ============================================================ */
+(function () {
+  "use strict";
+
+  // ---------- safe storage (falls back to memory) ----------
+  var mem = {};
+  function sGet(k) {
+    try { var v = localStorage.getItem(k); return v == null ? (k in mem ? mem[k] : null) : v; }
+    catch (e) { return k in mem ? mem[k] : null; }
+  }
+  function sSet(k, v) {
+    mem[k] = v;
+    try { localStorage.setItem(k, v); } catch (e) {}
+  }
+  function sDel(k) {
+    delete mem[k];
+    try { localStorage.removeItem(k); } catch (e) {}
+  }
+
+  // ---------- reward catalog ----------
+  var ICONS = {
+    coins: "🪙", energy: "⚡", wild: "🃏", undo: "↩️", draw: "🎴",
+    reverse: "🔄", chest: "🎁", gem: "💎", token: "🎟️", star: "⭐", shovel: "⛏️",
+    ball: "🔮", grab: "🕹️", tool: "🔧", key: "🗝️"
+  };
+  var LABELS = {
+    coins: "Coins", energy: "Energy", wild: "Wild Card", undo: "Undo",
+    draw: "Draw+", reverse: "Reverse", chest: "Chest", gem: "Gems",
+    token: "Event Tokens", star: "Stars", shovel: "Shovels", ball: "Drop Balls",
+    grab: "Grabs", tool: "Tools", key: "Keys"
+  };
+
+  // ---------- wallet ----------
+  var WKEY = "sb_wallet_v1";
+  function loadWallet() {
+    var d = sGet(WKEY);
+    if (d) { try { return JSON.parse(d); } catch (e) {} }
+    return { coins: 2450, energy: 5, wild: 2, undo: 3, draw: 1, gem: 10 };
+  }
+  var wallet = loadWallet();
+  function saveWallet() { sSet(WKEY, JSON.stringify(wallet)); renderWallet(); }
+
+  function renderWallet() {
+    var el = document.getElementById("sb-wallet-amt");
+    if (el) el.textContent = fmt(wallet.coins);
+  }
+  function fmt(n) {
+    n = Math.floor(n);
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+    if (n >= 10000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+    return String(n);
+  }
+
+  // ---------- top bar ----------
+  function init(opts) {
+    opts = opts || {};
+    var app = document.querySelector(".sb-app");
+    if (!app) { app = document.createElement("div"); app.className = "sb-app"; while (document.body.firstChild) app.appendChild(document.body.firstChild); document.body.appendChild(app); }
+    var bar = document.createElement("div");
+    bar.className = "sb-topbar";
+    var isHub = !!opts.hub;
+    bar.innerHTML =
+      (isHub ? "" : '<button class="sb-back" id="sb-back" aria-label="Back">‹</button>') +
+      '<div class="sb-title-wrap"><div class="sb-title">' + (opts.title || "Skip-Bo Event") + "</div>" +
+      (opts.subtitle ? '<div class="sb-subtitle">' + opts.subtitle + "</div>" : "") +
+      "</div>" +
+      '<div class="sb-wallet"><span class="sb-coin-ico">🪙</span><span id="sb-wallet-amt">0</span></div>';
+    app.insertBefore(bar, app.firstChild);
+    if (!isHub) {
+      bar.querySelector("#sb-back").addEventListener("click", function () {
+        location.href = location.pathname.indexOf("/events/") !== -1 ? "../index.html" : "index.html";
+      });
+    }
+    if (opts.resetKey) {
+      var r = document.createElement("button");
+      r.className = "sb-demo-reset";
+      r.textContent = "⟲ Reset demo";
+      r.addEventListener("click", function () {
+        sDel("sb_evt_" + opts.resetKey);
+        sDel(WKEY);
+        location.reload();
+      });
+      document.body.appendChild(r);
+    }
+    ensureFxLayers();
+    renderWallet();
+    return bar;
+  }
+
+  // ---------- event-local persistent store ----------
+  function store(key, defaults) {
+    var K = "sb_evt_" + key;
+    var cur = null;
+    var raw = sGet(K);
+    if (raw) { try { cur = JSON.parse(raw); } catch (e) {} }
+    if (!cur) cur = JSON.parse(JSON.stringify(defaults || {}));
+    return {
+      data: cur,
+      save: function () { sSet(K, JSON.stringify(cur)); },
+      clear: function () { sDel(K); }
+    };
+  }
+
+  // ---------- toast ----------
+  var toastEl, toastTimer;
+  function toast(msg, ms) {
+    if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "sb-toast"; document.body.appendChild(toastEl); }
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, ms || 1800);
+  }
+
+  // ---------- haptic ----------
+  var userInteracted = false;
+  window.addEventListener("pointerdown", function () { userInteracted = true; }, { once: true, capture: true });
+  function haptic(ms) { try { if (userInteracted && navigator.vibrate) navigator.vibrate(ms || 15); } catch (e) {} }
+
+  // ---------- flying rewards + grant ----------
+  function ensureFxLayers() {
+    if (!document.getElementById("sb-confetti")) {
+      var c = document.createElement("canvas");
+      c.id = "sb-confetti";
+      document.body.appendChild(c);
+    }
+  }
+
+  function flyIcon(icon, fromX, fromY) {
+    var target = document.getElementById("sb-wallet-amt");
+    var tx = window.innerWidth - 50, ty = 30;
+    if (target) { var r = target.getBoundingClientRect(); tx = r.left + r.width / 2; ty = r.top + r.height / 2; }
+    var el = document.createElement("div");
+    el.className = "sb-fly";
+    el.textContent = icon;
+    el.style.left = fromX + "px";
+    el.style.top = fromY + "px";
+    document.body.appendChild(el);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        el.style.left = tx + "px";
+        el.style.top = ty + "px";
+        el.style.transform = "scale(0.4)";
+        el.style.opacity = "0.3";
+      });
+    });
+    setTimeout(function () { el.remove(); }, 800);
+  }
+
+  // rewards: [{type:'coins', amount:500}, ...]  originEl optional
+  function grantRewards(rewards, originEl) {
+    var ox = window.innerWidth / 2, oy = window.innerHeight / 2;
+    if (originEl && originEl.getBoundingClientRect) {
+      var r = originEl.getBoundingClientRect();
+      ox = r.left + r.width / 2; oy = r.top + r.height / 2;
+    }
+    var names = [];
+    (rewards || []).forEach(function (rw, i) {
+      wallet[rw.type] = (wallet[rw.type] || 0) + rw.amount;
+      names.push("+" + fmt(rw.amount) + " " + (LABELS[rw.type] || rw.type));
+      var n = Math.min(rw.type === "coins" ? 6 : 2, 6);
+      for (var j = 0; j < n; j++) {
+        (function (d) {
+          setTimeout(function () { flyIcon(ICONS[rw.type] || "🎁", ox + (Math.random() * 60 - 30), oy + (Math.random() * 40 - 20)); }, d);
+        })(i * 120 + j * 70);
+      }
+    });
+    saveWallet();
+    haptic(20);
+    if (names.length) toast(names.join("  ·  "));
+    var w = document.querySelector(".sb-wallet");
+    if (w) { w.classList.remove("sb-bounce"); void w.offsetWidth; w.classList.add("sb-bounce"); }
+  }
+
+  function spend(type, amount) {
+    if ((wallet[type] || 0) < amount) return false;
+    wallet[type] -= amount;
+    saveWallet();
+    return true;
+  }
+  function bal(type) { return wallet[type] || 0; }
+
+  // ---------- reward chip HTML ----------
+  function rewardChip(rw) {
+    return '<span class="sb-reward"><span class="ico">' + (ICONS[rw.type] || "🎁") + "</span>" +
+      fmt(rw.amount) + " " + (LABELS[rw.type] || rw.type) + "</span>";
+  }
+  function icon(type) { return ICONS[type] || "🎁"; }
+
+  // ---------- fake IAP bottom sheet ----------
+  var sheetEl = null;
+  function buyIAP(opts) {
+    // opts: {label, price, sub, contents:[rewards], onSuccess, grant:true|false}
+    closeSheet();
+    var bd = document.createElement("div");
+    bd.className = "sb-sheet-backdrop";
+    var chips = (opts.contents || []).map(rewardChip).join("");
+    bd.innerHTML =
+      '<div class="sb-sheet">' +
+      "<h3>" + (opts.label || "Special Offer") + "</h3>" +
+      '<div class="sb-sheet-sub">' + (opts.sub || "One-time offer · Skip-Bo Mini Event") + "</div>" +
+      (chips ? '<div class="sb-sheet-contents">' + chips + "</div>" : "") +
+      '<button class="sb-btn sb-btn-green sb-btn-block" id="sb-sheet-buy"><span>Buy now</span><span class="sb-price-tag">' + opts.price + "</span></button>" +
+      '<button class="sb-sheet-cancel" id="sb-sheet-cancel">No thanks</button>' +
+      "</div>";
+    document.body.appendChild(bd);
+    sheetEl = bd;
+    requestAnimationFrame(function () { requestAnimationFrame(function () { bd.classList.add("open"); }); });
+    bd.addEventListener("click", function (e) { if (e.target === bd) dismiss(); });
+    bd.querySelector("#sb-sheet-cancel").addEventListener("click", dismiss);
+    bd.querySelector("#sb-sheet-buy").addEventListener("click", function () {
+      var btn = bd.querySelector("#sb-sheet-buy");
+      btn.disabled = true;
+      btn.innerHTML = "<span>Processing…</span>";
+      haptic(10);
+      setTimeout(function () {
+        btn.innerHTML = "<span>✓ Purchased!</span>";
+        haptic(35);
+        setTimeout(function () {
+          closeSheet();
+          if (opts.grant !== false && opts.contents) grantRewards(opts.contents);
+          confetti();
+          if (opts.onSuccess) opts.onSuccess();
+        }, 450);
+      }, 700);
+    });
+    function dismiss() { closeSheet(); if (opts.onCancel) opts.onCancel(); }
+  }
+  function closeSheet() {
+    if (sheetEl) {
+      var s = sheetEl; sheetEl = null;
+      s.classList.remove("open");
+      setTimeout(function () { s.remove(); }, 300);
+    }
+  }
+
+  // ---------- centered modal ----------
+  function modal(html) {
+    var bd = document.createElement("div");
+    bd.className = "sb-modal-backdrop open";
+    bd.innerHTML = '<div class="sb-modal">' + html + "</div>";
+    document.body.appendChild(bd);
+    bd.addEventListener("click", function (e) { if (e.target === bd) bd.remove(); });
+    return {
+      el: bd,
+      close: function () { bd.remove(); }
+    };
+  }
+
+  // ---------- confetti ----------
+  var confettiRunning = false;
+  function confetti(x, y, count) {
+    ensureFxLayers();
+    var canvas = document.getElementById("sb-confetti");
+    var ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    var cx = x == null ? canvas.width / 2 : x;
+    var cy = y == null ? canvas.height / 3 : y;
+    var colors = ["#FFC72C", "#D7263D", "#2E9E4F", "#3E8EDE", "#ffffff", "#FDF6E3"];
+    var parts = [];
+    for (var i = 0; i < (count || 80); i++) {
+      parts.push({
+        x: cx, y: cy,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -Math.random() * 12 - 3,
+        s: Math.random() * 7 + 4,
+        c: colors[(Math.random() * colors.length) | 0],
+        r: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.3,
+        life: 90 + Math.random() * 40
+      });
+    }
+    if (confettiRunning) { confettiParts = confettiParts.concat(parts); return; }
+    confettiParts = parts;
+    confettiRunning = true;
+    (function frame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var alive = false;
+      confettiParts.forEach(function (p) {
+        if (p.life <= 0) return;
+        alive = true;
+        p.life--;
+        p.vy += 0.35;
+        p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.r);
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 40));
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+        ctx.restore();
+      });
+      if (alive) requestAnimationFrame(frame);
+      else { confettiRunning = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    })();
+  }
+  var confettiParts = [];
+
+  // ---------- countdown helper ----------
+  function countdown(el, endTs, onEnd) {
+    function tick() {
+      var left = Math.max(0, endTs - Date.now());
+      var h = Math.floor(left / 3600000);
+      var m = Math.floor((left % 3600000) / 60000);
+      var s = Math.floor((left % 60000) / 1000);
+      el.textContent = (h > 0 ? h + "h " : "") + String(m).padStart(2, "0") + "m " + String(s).padStart(2, "0") + "s";
+      if (left < 3600000 && el.parentElement) el.parentElement.classList.add("urgent");
+      if (left <= 0) { clearInterval(iv); if (onEnd) onEnd(); }
+    }
+    var iv = setInterval(tick, 1000);
+    tick();
+    return iv;
+  }
+
+  window.SB = {
+    init: init, store: store, toast: toast, haptic: haptic,
+    grantRewards: grantRewards, spend: spend, bal: bal, fmt: fmt,
+    rewardChip: rewardChip, icon: icon, buyIAP: buyIAP, modal: modal,
+    confetti: confetti, countdown: countdown, wallet: wallet
+  };
+})();

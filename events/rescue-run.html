@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Rescue Run — Skip-Bo Mini Event</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+/* ---------- HUD ---------- */
+.hud{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.hud-row{display:flex;align-items:center;gap:8px}
+.scene-chip{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-weight:800;font-size:12px;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.tools-chip{background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-weight:800;font-size:13px;border-radius:999px;padding:4px 11px;white-space:nowrap}
+.info-btn{margin-left:auto;width:34px;height:34px;flex:0 0 auto;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
+.info-btn:active{transform:scale(.92)}
+/* ---------- Stage ---------- */
+.stage-wrap{padding:10px}
+.stage{position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#0e2a52 0%,#123a75 70%,#16457f 100%)}
+.hintline{color:#c9ddf5;font-size:11.5px;text-align:center;margin-top:9px;font-weight:600}
+/* ---------- Chambers ---------- */
+.chamber{position:absolute;z-index:1;border-left:6px solid #0b2247;border-right:6px solid #0b2247;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015))}
+.chamber.toprow{border-top:6px solid #0b2247;border-radius:12px 12px 0 0}
+.chamber.safe{background:linear-gradient(180deg,rgba(46,158,79,.12),rgba(46,158,79,.45));border-bottom:8px solid #1f7038;border-radius:0 0 12px 12px}
+.chamber.soaked{background:linear-gradient(180deg,rgba(62,142,222,.28),rgba(62,142,222,.6))}
+.chamber.soaked::after{content:'💧 💧';position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:13px;opacity:.9}
+.chamber.plugged{background:linear-gradient(180deg,rgba(125,125,138,.3),rgba(125,125,138,.55))}
+.safelab{position:absolute;z-index:2;font-size:9px;letter-spacing:2px;color:#9ff0b4;font-weight:900}
+/* ---------- Pins ---------- */
+.pin{position:absolute;height:34px;z-index:6;background:none;border:none;padding:0;cursor:pointer;transition:transform .5s cubic-bezier(.3,1.4,.45,1),opacity .45s}
+.pin .bar{position:absolute;left:0;top:11px;height:12px;width:calc(100% - 24px);border-radius:6px;background:linear-gradient(180deg,#ffe08a,#FFC72C 55%,#c98f00);box-shadow:0 2px 3px rgba(0,0,0,.45)}
+.pin .knob{position:absolute;right:0;top:4px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffeeb0,#FFC72C 55%,#c98f00);border:2px solid #9c7000;box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.pin.pulled{transform:translateX(135%) rotate(8deg);opacity:0;pointer-events:none}
+.pin.hint,.rope.hint,.fixbtn.hint{animation:hintGlow .7s infinite}
+@keyframes hintGlow{0%,100%{filter:none}50%{filter:brightness(1.5) drop-shadow(0 0 10px #57ff8e)}}
+/* ---------- Ropes ---------- */
+.rope{position:absolute;width:42px;z-index:6;background:none;border:none;padding:0;cursor:pointer;transition:transform .5s ease,opacity .45s}
+.rope .line{position:absolute;left:50%;top:0;bottom:26px;width:5px;margin-left:-2.5px;border-radius:3px;background:repeating-linear-gradient(180deg,#cfa76a 0 6px,#8a6a3c 6px 11px)}
+.rope .scis{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:22px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.rope.cut{opacity:0;transform:translateY(34px) rotate(28deg);pointer-events:none}
+/* ---------- Items ---------- */
+.item{position:absolute;width:58px;height:58px;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:left .32s ease-in,top .32s cubic-bezier(.55,0,.7,1),opacity .35s}
+.item .em{font-size:29px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4));line-height:1.1}
+.item .amt{font-size:10px;font-weight:900;color:#fff;background:rgba(0,0,0,.5);border-radius:8px;padding:1px 6px;margin-top:-1px}
+.item.rw{background:linear-gradient(180deg,#c08447 0%,#8a5426 100%);border:2px solid #5f3a17;border-radius:10px;box-shadow:inset 0 2px 0 rgba(255,255,255,.25),0 3px 5px rgba(0,0,0,.4)}
+.item.hzitem .em{font-size:36px}
+.item.land{animation:landA .35s}
+@keyframes landA{0%{transform:scale(1,.72)}55%{transform:scale(.92,1.14)}100%{transform:scale(1)}}
+.item.pop{animation:popA .46s forwards}
+@keyframes popA{to{transform:scale(1.9) rotate(20deg);opacity:0}}
+.item.collectfx{animation:collectA .52s forwards}
+@keyframes collectA{to{transform:scale(.25) translateY(-34px);opacity:0}}
+.splash{position:absolute;z-index:8;font-size:30px;animation:splashA .72s forwards;pointer-events:none}
+@keyframes splashA{0%{transform:scale(.5);opacity:1}100%{transform:scale(1.9) translateY(-14px);opacity:0}}
+.chute{position:absolute;z-index:2;color:#9cc8f5;font-size:20px;font-weight:900;opacity:.85;pointer-events:none}
+.netbar{position:absolute;height:8px;z-index:2;border-radius:4px;background:repeating-linear-gradient(90deg,#ffe08a 0 8px,#e0a400 8px 13px);box-shadow:0 0 10px rgba(255,199,44,.85);animation:netSh 1.2s infinite;pointer-events:none}
+@keyframes netSh{0%,100%{opacity:.85}50%{opacity:1;box-shadow:0 0 18px rgba(255,199,44,1)}}
+/* ---------- Fix buttons (mop / break) ---------- */
+.fixbtn{position:absolute;z-index:7;width:96px;border:none;border-radius:11px;font-family:var(--sb-font);font-weight:800;font-size:11.5px;padding:8px 4px;background:linear-gradient(180deg,#ef5468,#D7263D);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.3);cursor:pointer;animation:sbPulse 1.4s infinite}
+/* ---------- Fluffy ---------- */
+.fluffy{position:absolute;z-index:4;font-size:36px;transform-origin:50% 100%;animation:fIdle 2.8s ease-in-out infinite;pointer-events:none}
+@keyframes fIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.03,.97)}88%{transform:scale(1)}93%{transform:scale(1.06,.82)}97%{transform:scale(1)}}
+.fluffy.worried{animation:fWorry .5s ease-in-out infinite}
+@keyframes fWorry{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.fluffy.cheer{animation:fCheer .45s ease infinite}
+@keyframes fCheer{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px) rotate(-6deg)}}
+.fluffy .hat{position:absolute;top:-14px;left:8px;font-size:19px;display:none}
+.fluffy.hashat .hat{display:block}
+.fluffy .cheerfx{position:absolute;top:-20px;right:-16px;font-size:19px;display:none}
+.fluffy.cheer .cheerfx{display:block}
+/* ---------- Shop offers ---------- */
+.offer{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid rgba(27,42,74,.12);border-radius:14px;padding:9px 10px;margin-bottom:8px;text-align:left}
+.offer .oi{font-size:26px;flex:0 0 auto}
+.offer .ot{flex:1 1 auto;min-width:0}
+.offer .ot b{display:block;font-size:13.5px}
+.offer .ot span{font-size:10.5px;color:#5a6b8c;line-height:1.25;display:block}
+.offer .sb-btn{padding:9px 11px;font-size:13px;flex:0 0 auto;white-space:nowrap}
+/* ---------- Victory ---------- */
+.victory{text-align:center;padding:28px 10px;color:#fff}
+.victory .vtro{font-size:64px;animation:fIdle 2s ease-in-out infinite}
+.victory h2{margin:6px 0;color:var(--sb-yellow);text-shadow:0 2px 0 rgba(0,0,0,.35);letter-spacing:1px}
+.victory .vf{font-size:14px;font-weight:700;margin-bottom:4px}
+.vchips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 20px}
+</style>
+</head>
+<body>
+<div class="sb-app"><div class="sb-main">
+  <div class="hud">
+    <div class="hud-row">
+      <span class="sb-timer-chip">⏳ <span id="cd">--</span></span>
+      <span class="scene-chip" id="sceneChip">Scene 1/3</span>
+      <span class="tools-chip" id="toolsChip">🔧 0</span>
+      <button class="info-btn" id="infoBtn" aria-label="About this event">ⓘ</button>
+    </div>
+    <div class="hud-row">
+      <button class="sb-btn sb-btn-green sb-btn-sm" id="earnBtn" style="flex:1 1 auto">▶ Play a level&nbsp;<b>+2 🔧</b></button>
+      <button class="sb-btn sb-btn-yellow sb-btn-sm" id="shopBtn">🧰 Shop</button>
+    </div>
+  </div>
+  <div class="sb-panel-blue stage-wrap">
+    <div class="stage" id="stage"></div>
+    <div class="hintline">Tap a gold pin (1 🔧) · crates go to Fluffy 🐹 — hazards stay out!</div>
+  </div>
+</div></div>
+<script src="../shared/core.js"></script>
+<script>
+(function(){
+"use strict";
+SB.init({title:"Rescue Run", subtitle:"Pull the pins · Save the treasure", resetKey:"rescue-run"});
+var S = SB.store("rescue-run", {endTs:0, scene:1, seeded:false, log:[], collected:{}, haul:{}, net:{}, pass:false, done:false});
+var D = S.data;
+
+/* ---------- hand-authored scenes (fixed sequence graphs) ---------- */
+var SCENES = {
+ 1:{name:"Free the Coins!", cols:1, rows:4,
+    cells:{C0:{c:0,r:0,floor:"A"},C1:{c:0,r:1,floor:"B"},C2:{c:0,r:2,floor:"C"},C3:{c:0,r:3,safe:1}},
+    down:{C0:"C1",C1:"C2",C2:"C3"},
+    items:[{id:"a",icon:"🪙",cell:"C0",rw:{type:"coins",amount:200}},
+           {id:"b",icon:"💰",cell:"C2",rw:{type:"coins",amount:300}}],
+    ropes:[], order:["p:C","p:B","p:A"]},
+ 2:{name:"Dodge the Waterfall!", cols:2, rows:4,
+    cells:{L0:{c:0,r:0,floor:"A",divert:{rope:"X",to:"PIT",dir:"l"}},L1:{c:0,r:1,floor:"B"},L2:{c:0,r:2,floor:"C"},L3:{c:0,r:3,safe:1},
+           R0:{c:1,r:0,floor:"D"},R1:{c:1,r:1,floor:"E"}},
+    down:{L0:"L1",L1:"L2",L2:"L3",R0:"R1",R1:"L2"},
+    items:[{id:"w",icon:"💧",cell:"L0",hz:"water"},
+           {id:"a",icon:"🪙",cell:"L1",rw:{type:"coins",amount:400}},
+           {id:"b",icon:"💰",cell:"R0",rw:{type:"coins",amount:500}},
+           {id:"c",icon:"⚡",cell:"R1",rw:{type:"energy",amount:3}}],
+    ropes:[{id:"X",cell:"L0",side:"l"}],
+    order:["x:X","p:A","p:B","p:D","p:E","p:C"]},
+ 3:{name:"Save the Wild Card!", cols:2, rows:5,
+    cells:{L0:{c:0,r:0,floor:"A",divert:{rope:"X",to:"TRAP",dir:"l"}},L1:{c:0,r:1,floor:"B"},L2:{c:0,r:2,floor:"C"},L3:{c:0,r:3,floor:"D"},L4:{c:0,r:4,safe:1},
+           R0:{c:1,r:0,floor:"E",divert:{rope:"Y",to:"PIT",dir:"r"}},R1:{c:1,r:1,floor:"F"},R2:{c:1,r:2,floor:"G"}},
+    down:{L0:"L1",L1:"L2",L2:"L3",L3:"L4",R0:"R1",R1:"R2",R2:"L3"},
+    items:[{id:"bo",icon:"🪨",cell:"L0",hz:"boulder"},
+           {id:"a",icon:"🪙",cell:"L1",rw:{type:"coins",amount:700}},
+           {id:"wc",icon:"🃏",cell:"L2",rw:{type:"wild",amount:1}},
+           {id:"g",icon:"💎",cell:"L3",rw:{type:"gem",amount:5}},
+           {id:"w",icon:"💧",cell:"R0",hz:"water"},
+           {id:"b",icon:"💰",cell:"R1",rw:{type:"coins",amount:800}}],
+    ropes:[{id:"X",cell:"L0",side:"l"},{id:"Y",cell:"R0",side:"r"}],
+    order:["x:X","p:A","x:Y","p:E","p:F","p:G","p:B","p:C","p:D"]}
+};
+var INTRO = {
+ 1:["🪙","Pull the gold pins to drop the treasure crates down to Fluffy. Every pin costs 1 Tool 🔧 and pulls are permanent — so think before you pull!"],
+ 2:["💧","A waterfall looms above the coins! Cut the rope ✂️ FIRST to open the side chute and divert the water — then funnel everything home."],
+ 3:["🃏","The big one: a boulder AND water guard the Wild Card. Divert both hazards with the ropes, then chain the pins for the grand cascade!"]};
+
+/* ---------- runtime state ---------- */
+var stageEl = document.getElementById("stage");
+var SC, cells, items, pulled, cut, pinEls, ropeEls, chamberEls, fixEls, fluffyEl;
+var busy=false, doneShown=false, colW=150, PADX=10, CH=80, introSeen={}, worryT, rzT;
+
+function cellXY(k){ var cd=cells[k]; return {x:PADX+cd.c*(colW+16), y:6+cd.r*CH}; }
+function el(cls){ var d=document.createElement("div"); d.className=cls; stageEl.appendChild(d); return d; }
+function netActive(){ return D.pass || !!D.net[D.scene]; }
+function updateHUD(){ var t=document.getElementById("toolsChip"); if(t) t.textContent="🔧 "+SB.bal("tool"); }
+
+/* ---------- build / render ---------- */
+function buildScene(){
+  SC = SCENES[D.scene];
+  cells = JSON.parse(JSON.stringify(SC.cells));
+  pulled={}; cut={}; pinEls={}; ropeEls={}; chamberEls={}; fixEls={};
+  busy=false; doneShown=false; fluffyEl=null;
+  stageEl.innerHTML="";
+  stageEl.style.height=(SC.rows*CH+12)+"px";
+  var W = stageEl.clientWidth || 330;
+  colW = Math.min((W-16*(SC.cols-1)-20)/SC.cols, SC.cols===1?216:180);
+  PADX = (W-(colW*SC.cols+16*(SC.cols-1)))/2;
+  Object.keys(cells).forEach(function(k){
+    var cd=cells[k], p=cellXY(k);
+    var c=el("chamber"+(cd.safe?" safe":""));
+    if(cd.r===0) c.classList.add("toprow");
+    c.style.left=p.x+"px"; c.style.top=p.y+"px"; c.style.width=colW+"px"; c.style.height=CH+"px";
+    chamberEls[k]=c;
+    if(cd.safe){
+      var lab=el("safelab"); lab.textContent="SAFE ZONE";
+      lab.style.left=(p.x+colW/2-36)+"px"; lab.style.top=(p.y+6)+"px";
+      fluffyEl=el("fluffy");
+      fluffyEl.innerHTML='🐹<span class="hat">⛑️</span><span class="cheerfx">🎉</span>';
+      fluffyEl.style.left=(p.x+colW/2-19)+"px"; fluffyEl.style.top=(p.y+CH-48)+"px";
+      if(D.pass) fluffyEl.classList.add("hashat");
+    }
+    if(cd.floor){
+      var pin=document.createElement("button"); pin.className="pin";
+      pin.innerHTML='<span class="bar"></span><span class="knob"></span>';
+      pin.style.left=(p.x+4)+"px"; pin.style.top=(p.y+CH-17)+"px"; pin.style.width=(colW-8)+"px";
+      pin.onclick=function(){ doPull(cd.floor,false); };
+      stageEl.appendChild(pin); pinEls[cd.floor]=pin;
+    }
+    var dn=SC.down[k];
+    if(dn && cells[dn] && cells[dn].c!==cd.c){
+      var a=el("chute"); a.textContent = cells[dn].c<cd.c ? "↙" : "↘";
+      a.style.left=(cells[dn].c<cd.c ? p.x+6 : p.x+colW-26)+"px"; a.style.top=(p.y+CH-32)+"px";
+    }
+  });
+  (SC.ropes||[]).forEach(function(r){
+    var p=cellXY(r.cell);
+    var b=document.createElement("button"); b.className="rope";
+    b.innerHTML='<span class="line"></span><span class="scis">✂️</span>';
+    b.style.left=(r.side==="l" ? p.x+6 : p.x+colW-48)+"px";
+    b.style.top=(p.y+3)+"px"; b.style.height=(CH-26)+"px";
+    b.onclick=function(){ doCut(r.id,false); };
+    stageEl.appendChild(b); ropeEls[r.id]=b;
+  });
+  items = SC.items.filter(function(it){ return !D.collected[it.id]; })
+                  .map(function(it){ return JSON.parse(JSON.stringify(it)); });
+  items.forEach(function(it){
+    var d=document.createElement("div");
+    d.className="item"+(it.rw?" rw":" hzitem");
+    d.innerHTML='<span class="em">'+it.icon+'</span>'+(it.rw&&it.rw.amount>1?'<span class="amt">×'+it.rw.amount+'</span>':'');
+    stageEl.appendChild(d); it.el=d;
+  });
+  updateItemPositions(false);
+  document.getElementById("sceneChip").textContent="Scene "+D.scene+"/3";
+  D.log.forEach(function(ev){ var t=ev.split(":");
+    if(t[0]==="p") doPull(t[1],true);
+    else if(t[0]==="x") doCut(t[1],true);
+    else doFix(t[0],t[1],true);
+  });
+  renderNets(); updateFluffy(); updateHUD();
+  if(!D.log.length && !introSeen[D.scene]){ introSeen[D.scene]=1; setTimeout(introModal,350); }
+}
+
+function updateItemPositions(anim){
+  var byCell={};
+  items.forEach(function(it){ if(it.done && !it.plugStay) return; (byCell[it.cell]=byCell[it.cell]||[]).push(it); });
+  Object.keys(byCell).forEach(function(k){
+    var arr=byCell[k], p=cellXY(k);
+    arr.forEach(function(it,i){
+      var off=(i-(arr.length-1)/2)*36;
+      it.el.style.left=(p.x+colW/2-29+off)+"px";
+      it.el.style.top=(p.y+CH-62)+"px";
+      if(anim){ it.el.classList.remove("land"); void it.el.offsetWidth; setTimeout(function(){ it.el.classList.add("land"); },300); }
+    });
+  });
+}
+
+function renderNets(){
+  var old=stageEl.querySelectorAll(".netbar"), i;
+  for(i=0;i<old.length;i++) old[i].remove();
+  if(!netActive()) return;
+  items.forEach(function(it){
+    if(!it.rw || it.done) return;
+    var p=cellXY(it.cell), n=el("netbar");
+    n.style.left=(p.x+8)+"px"; n.style.top=(p.y+CH-15)+"px"; n.style.width=(colW-16)+"px";
+  });
+}
+
+/* ---------- Fluffy moods ---------- */
+function updateFluffy(){ if(fluffyEl) fluffyEl.classList.toggle("worried", Object.keys(fixEls).length>0); }
+function worry(){ if(!fluffyEl) return; fluffyEl.classList.add("worried"); clearTimeout(worryT); worryT=setTimeout(updateFluffy,2200); }
+function cheer(){ if(!fluffyEl) return; fluffyEl.classList.remove("worried"); fluffyEl.classList.add("cheer");
+  setTimeout(function(){ if(fluffyEl){ fluffyEl.classList.remove("cheer"); updateFluffy(); } },1300); }
+
+/* ---------- economy ---------- */
+function payTool(elm){
+  if(!SB.spend("tool",1)){
+    if(elm){ elm.classList.add("sb-shake"); setTimeout(function(){ elm.classList.remove("sb-shake"); },450); }
+    SB.haptic(40);
+    openShop(true);
+    return false;
+  }
+  updateHUD(); return true;
+}
+
+/* ---------- actions ---------- */
+function doPull(id,silent){
+  if(pulled[id]) return;
+  if(!silent){ if(busy) return; if(!payTool(pinEls[id])) return; D.log.push("p:"+id); S.save(); SB.haptic(); }
+  pulled[id]=1; pinEls[id].classList.add("pulled");
+  settle(silent);
+}
+function doCut(id,silent){
+  if(cut[id]) return;
+  if(!silent){ if(busy) return; if(!payTool(ropeEls[id])) return; D.log.push("x:"+id); S.save(); SB.haptic(); SB.toast("✂️ Rope cut — side chute open!"); }
+  cut[id]=1; ropeEls[id].classList.add("cut");
+  var rp=(SC.ropes||[]).filter(function(r){ return r.id===id; })[0];
+  if(rp){ var p=cellXY(rp.cell), a=el("chute");
+    a.textContent = rp.side==="l" ? "↙" : "↘"; a.style.color="#7CFC9A";
+    a.style.left=(rp.side==="l" ? p.x+10 : p.x+colW-30)+"px"; a.style.top=(p.y+CH-36)+"px"; }
+  settle(silent);
+}
+function addFixBtn(cellK,kind,label){
+  if(fixEls[cellK]) return;
+  var p=cellXY(cellK);
+  var b=document.createElement("button"); b.className="fixbtn"; b.textContent=label;
+  b.style.left=(p.x+colW/2-48)+"px"; b.style.top=(p.y+CH/2-16)+"px";
+  b.onclick=function(){
+    if(busy) return;
+    if(!payTool(b)) return;
+    D.log.push(kind+":"+cellK); S.save();
+    doFix(kind,cellK,false);
+  };
+  stageEl.appendChild(b); fixEls[cellK]=b;
+}
+function doFix(kind,cellK,silent){
+  var cd=cells[cellK], ch=chamberEls[cellK];
+  if(kind==="m"){ cd.soaked=false; ch.classList.remove("soaked"); }
+  else{
+    cd.plugged=false; ch.classList.remove("plugged");
+    var hz=null; items.forEach(function(it){ if(it.plugStay && it.cell===cellK) hz=it; });
+    if(hz){ hz.plugStay=false;
+      if(silent) hz.el.remove();
+      else{ hz.el.classList.add("pop"); (function(e){ setTimeout(function(){ e.remove(); },480); })(hz.el); }
+    }
+  }
+  if(fixEls[cellK]){ fixEls[cellK].remove(); delete fixEls[cellK]; }
+  if(!silent){ SB.toast(kind==="m" ? "🧽 Drained! Path reopened" : "⛏️ Boulder shattered!"); SB.haptic(25); }
+  settle(silent);
+}
+
+/* ---------- gravity simulation (slot-based) ---------- */
+function stepOnce(silent){
+  var moves=[], acted=false;
+  items.slice().sort(function(a,b){ return cells[b.cell].r-cells[a.cell].r; }).forEach(function(it){
+    if(it.done) return;
+    var cd=cells[it.cell];
+    if(cd.safe || cd.soaked || cd.plugged) return;
+    if(cd.floor && !pulled[cd.floor]){
+      if(it.hz && it.moved){ activateHazard(it,silent); acted=true; }
+      return;
+    }
+    var tgt, netSave=false;
+    if(cd.divert && (cut[cd.divert.rope] || (it.hz && netActive()))){
+      tgt=cd.divert.to;
+      if(it.hz && !cut[cd.divert.rope]) netSave=true;
+    } else tgt=SC.down[it.cell];
+    if(!tgt) return;
+    if(tgt==="PIT" || tgt==="TRAP"){
+      if(netSave && !silent){ SB.toast("🥅 Safety Net! Hazard auto-deflected"); it.el.classList.add("sb-bounce"); }
+      pitOut(it,silent); acted=true; return;
+    }
+    var td=cells[tgt];
+    if(td.soaked || td.plugged){ if(it.hz && it.moved){ activateHazard(it,silent); acted=true; } return; }
+    if(it.hz && td.safe){ activateHazard(it,silent); acted=true; return; }
+    moves.push({it:it,tgt:tgt});
+  });
+  var arrivals=[];
+  moves.forEach(function(m){
+    m.it.cell=m.tgt; m.it.moved=true;
+    if(m.it.hz && !silent) worry();
+    if(cells[m.tgt].safe) arrivals.push(m.it);
+  });
+  if(moves.length) updateItemPositions(!silent);
+  arrivals.forEach(function(it){ collect(it,silent); });
+  return moves.length>0 || acted;
+}
+function settle(silent){
+  if(silent){ var g=0; while(stepOnce(true) && g++<60){} finishSettle(true); return; }
+  busy=true;
+  (function loop(){
+    if(stepOnce(false)) setTimeout(loop,350);
+    else { busy=false; finishSettle(false); }
+  })();
+}
+function finishSettle(silent){ renderNets(); updateFluffy(); checkComplete(silent); }
+
+/* ---------- hazards: wrong pulls add steps, never destroy rewards ---------- */
+function activateHazard(it,silent){
+  it.done=true;
+  var cd=cells[it.cell], ch=chamberEls[it.cell];
+  if(it.hz==="water"){
+    cd.soaked=true; ch.classList.add("soaked");
+    it.el.remove();
+    addFixBtn(it.cell,"m","🧽 Mop up · 1🔧");
+    if(!silent) SB.toast("😅 Phew! Chamber soaked — mop it to reopen the path");
+  } else {
+    cd.plugged=true; ch.classList.add("plugged");
+    it.plugStay=true;
+    addFixBtn(it.cell,"b","⛏️ Break rock · 1🔧");
+    if(!silent) SB.toast("😅 Phew! The boulder plugged the chamber — break it open");
+  }
+  if(!silent){ SB.haptic(35); worry(); }
+}
+function pitOut(it,silent){
+  it.done=true;
+  var dirL = cells[it.cell].divert.dir==="l";
+  if(silent){ it.el.remove(); return; }
+  var x=parseFloat(it.el.style.left)||0, y=parseFloat(it.el.style.top)||0;
+  it.el.style.left=(x+(dirL?-120:120))+"px";
+  it.el.style.top=(y+54)+"px";
+  it.el.style.opacity="0";
+  var s=el("splash"); s.textContent = it.hz==="water" ? "💦" : "💨";
+  s.style.left=(x+(dirL?-34:64))+"px"; s.style.top=(y+28)+"px";
+  setTimeout(function(){ s.remove(); it.el.remove(); },760);
+  SB.toast(it.hz==="water" ? "💦 Splash! Water diverted safely" : "💨 Boulder rolled away safely");
+  SB.haptic(20);
+}
+
+/* ---------- rewards ---------- */
+function collect(it,silent){
+  it.done=true; D.collected[it.id]=1;
+  D.haul[it.rw.type]=(D.haul[it.rw.type]||0)+it.rw.amount; S.save();
+  if(silent){ SB.grantRewards([it.rw]); it.el.remove(); return; }
+  setTimeout(function(){
+    SB.grantRewards([it.rw], it.el);
+    it.el.classList.add("collectfx");
+    if(fluffyEl){ var f=fluffyEl.getBoundingClientRect(); SB.confetti(f.left+f.width/2, f.top, 36); }
+    cheer();
+    setTimeout(function(){ it.el.remove(); },520);
+  },340);
+}
+function checkComplete(silent){
+  if(doneShown) return;
+  var rem = items.filter(function(it){ return it.rw && !it.done; });
+  if(rem.length) return;
+  doneShown=true;
+  setTimeout(function(){ if(D.scene<3) completeModal(); else victory(false); }, silent?150:850);
+}
+function nextScene(){
+  D.scene++; D.log=[]; D.collected={}; S.save();
+  buildScene();
+}
+function completeModal(){
+  var sc=SCENES[D.scene];
+  var chips=sc.items.filter(function(i){ return i.rw; }).map(function(i){ return SB.rewardChip(i.rw); }).join("");
+  SB.confetti();
+  var adv=false; function go(){ if(adv) return; adv=true; nextScene(); }
+  var m=SB.modal('<div style="font-size:46px">🎉</div><h3 style="margin:4px 0">Scene '+D.scene+' rescued!</h3>'+
+    '<p style="font-size:13px;color:#3c4c6e;margin:4px 0 10px">Fluffy got every crate. On to the next contraption!</p>'+
+    '<div class="sb-sheet-contents" style="justify-content:center">'+chips+'</div>'+
+    '<button class="sb-btn sb-btn-green sb-btn-block" id="nx">Next scene ▶</button>');
+  m.el.querySelector("#nx").onclick=function(){ m.close(); go(); };
+  m.el.addEventListener("click",function(e){ if(e.target===m.el) go(); });
+}
+function victory(initial){
+  D.done=true; S.save();
+  var chips=Object.keys(D.haul).map(function(k){ return SB.rewardChip({type:k,amount:D.haul[k]}); }).join(" ");
+  stageEl.style.height="auto";
+  stageEl.innerHTML='<div class="victory"><div class="vtro">🏆</div><h2>RESCUE COMPLETE!</h2>'+
+    '<div class="vf">🐹'+(D.pass?'⛑️':'')+' Fluffy &amp; the treasure are safe!</div>'+
+    '<div class="sb-muted" style="color:#c9ddf5;font-size:12px">Your total haul from all 3 scenes:</div>'+
+    '<div class="vchips">'+(chips||'—')+'</div>'+
+    '<button class="sb-btn sb-btn-yellow" id="again">↻ Play again</button></div>';
+  document.getElementById("again").onclick=function(){
+    D.scene=1; D.log=[]; D.collected={}; D.haul={}; D.done=false; D.net={}; S.save();
+    introSeen={}; buildScene();
+  };
+  if(!initial){
+    [0,450,950].forEach(function(t){ setTimeout(function(){ SB.confetti(Math.random()*window.innerWidth, window.innerHeight*0.3); },t); });
+    SB.toast("🏆 Event complete — legendary rescue!");
+  }
+}
+
+/* ---------- intro / info ---------- */
+function introModal(){
+  var sc=SCENES[D.scene], iv=INTRO[D.scene];
+  var chips=sc.items.filter(function(i){ return i.rw; }).map(function(i){ return SB.rewardChip(i.rw); }).join("");
+  var m=SB.modal('<div style="font-size:42px">'+iv[0]+'</div>'+
+    '<h3 style="margin:6px 0 4px">Scene '+D.scene+'/3 — '+sc.name+'</h3>'+
+    '<p style="font-size:13.5px;line-height:1.45;color:#3c4c6e;margin:6px 0 10px">'+iv[1]+'</p>'+
+    '<div class="sb-sheet-contents" style="justify-content:center">'+chips+'</div>'+
+    '<button class="sb-btn sb-btn-green sb-btn-block" id="go">🚀 Start rescue</button>');
+  m.el.querySelector("#go").onclick=function(){ m.close(); SB.haptic(); };
+}
+document.getElementById("infoBtn").onclick=function(){
+  var m=SB.modal('<h3 style="margin:0 0 8px">ⓘ Rescue Run</h3>'+
+    '<p style="text-align:left;font-size:13.5px;line-height:1.5;color:#3c4c6e;margin:0 0 12px">'+
+    'Rescue Run is the viral &ldquo;pull-the-pin&rdquo; ad made <b>honest</b> — an actually playable rescue puzzle inside Skip-Bo, not a bait mechanic. '+
+    'Every pin or rope costs 1 Tool 🔧, which players earn free by playing levels or top up with small contextual purchases exactly when they run dry mid-rescue. '+
+    'Wrong pulls never destroy rewards — hazards only add recoverable steps — so spending feels safe and IAPs sell confidence (hints, safety nets, chapter pass) rather than damage repair. '+
+    'Three escalating scenes and a 48-hour timer drive urgency and repeat sessions.</p>'+
+    '<button class="sb-btn sb-btn-blue sb-btn-block" id="ok">Got it</button>');
+  m.el.querySelector("#ok").onclick=function(){ m.close(); };
+};
+
+/* ---------- hint ---------- */
+function showHint(){
+  var target=null, fk=Object.keys(fixEls);
+  if(fk.length) target=fixEls[fk[0]];
+  else for(var i=0;i<SC.order.length;i++){
+    var t=SC.order[i].split(":");
+    if(t[0]==="p" && !pulled[t[1]]){ target=pinEls[t[1]]; break; }
+    if(t[0]==="x" && !cut[t[1]]){ target=ropeEls[t[1]]; break; }
+  }
+  if(!target){ SB.toast("💡 You're already on track!"); return; }
+  target.classList.add("hint");
+  SB.toast("💡 Follow the green glow!");
+  setTimeout(function(){ target.classList.remove("hint"); },5000);
+}
+
+/* ---------- contextual shop / fake IAPs ---------- */
+function openShop(ctx){
+  function row(id,ic,t,s,pr,owned){
+    return '<div class="offer"><span class="oi">'+ic+'</span><span class="ot"><b>'+t+'</b><span>'+s+'</span></span>'+
+      '<button class="sb-btn sb-btn-'+(owned?'blue':'green')+'" data-buy="'+id+'"'+(owned?' disabled':'')+'>'+(owned?'✓ Owned':pr)+'</button></div>';
+  }
+  var m=SB.modal('<h3 style="margin:0">'+(ctx?'😱 Out of tools mid-rescue!':'🧰 Rescue Shop')+'</h3>'+
+    '<div class="sb-muted" style="font-size:12px;margin:4px 0 12px">'+(ctx?'Fluffy is counting on you — restock and finish the job!':'Stock up for the rescue.')+'</div>'+
+    row("kit","🔧","Rescue Toolkit","6 tools — enough to finish the job","$0.99",false)+
+    row("hint","💡","Smart Hint + 4 Tools","Next correct move glows green for 5s","$1.99",false)+
+    row("net","🥅","Safety Net","This scene: golden net guards every crate — wrong pulls auto-deflect","$2.99",netActive())+
+    row("pass","⛑️","Chapter Pass","12 🔧 + Safety Net on ALL scenes + Fluffy hard-hat","$4.99",D.pass)+
+    '<button class="sb-sheet-cancel" id="shop-x">Maybe later</button>');
+  m.el.querySelector("#shop-x").onclick=function(){ m.close(); };
+  var btns=m.el.querySelectorAll("[data-buy]");
+  for(var i=0;i<btns.length;i++)(function(b){
+    b.onclick=function(){ m.close(); buy(b.getAttribute("data-buy")); };
+  })(btns[i]);
+}
+function buy(id){
+  if(id==="kit") SB.buyIAP({label:"Rescue Toolkit", price:"$0.99", sub:"Enough tools to finish the rescue",
+    contents:[{type:"tool",amount:6}],
+    onSuccess:function(){ updateHUD(); SB.toast("🔧 Toolkit acquired — back to the rescue!"); }});
+  if(id==="hint") SB.buyIAP({label:"Smart Hint + 4 Tools", price:"$1.99", sub:"The next correct move glows green for 5 seconds",
+    contents:[{type:"tool",amount:4}],
+    onSuccess:function(){ updateHUD(); showHint(); }});
+  if(id==="net") SB.buyIAP({label:"Safety Net", price:"$2.99", sub:"A golden net guards every reward crate this scene — hazards auto-deflect on wrong pulls",
+    contents:[], grant:false,
+    onSuccess:function(){ D.net[D.scene]=1; S.save(); renderNets(); SB.toast("🥅 Safety Net deployed under the crates!"); }});
+  if(id==="pass") SB.buyIAP({label:"Chapter Pass", price:"$4.99", sub:"12 tools + Safety Net on all remaining scenes + exclusive hard-hat for Fluffy",
+    contents:[{type:"tool",amount:12}],
+    onSuccess:function(){ D.pass=true; S.save(); renderNets(); updateHUD();
+      if(fluffyEl) fluffyEl.classList.add("hashat");
+      SB.toast("⛑️ Chapter Pass active — Fluffy feels SAFE!"); }});
+}
+document.getElementById("shopBtn").onclick=function(){ openShop(false); };
+
+/* ---------- earn loop ---------- */
+var earnBtn=document.getElementById("earnBtn");
+earnBtn.onclick=function(){
+  if(earnBtn.disabled) return;
+  earnBtn.disabled=true;
+  var old=earnBtn.innerHTML;
+  earnBtn.innerHTML="🃏 Playing level…";
+  setTimeout(function(){
+    SB.grantRewards([{type:"tool",amount:2}], earnBtn);
+    earnBtn.innerHTML=old; earnBtn.disabled=false; updateHUD();
+  },1300);
+};
+
+/* ---------- boot ---------- */
+if(!D.endTs){ D.endTs = Date.now()+48*3600*1000; S.save(); }
+SB.countdown(document.getElementById("cd"), D.endTs, function(){ SB.toast("⏳ Event ended — demo keeps running!"); });
+if(!D.seeded){
+  D.seeded=true; S.save();
+  setTimeout(function(){ SB.grantRewards([{type:"tool",amount:6}]); updateHUD(); },700);
+}
+if(D.done) victory(true); else buildScene();
+setInterval(updateHUD,1000);
+window.addEventListener("resize",function(){
+  clearTimeout(rzT);
+  rzT=setTimeout(function(){ if(!D.done) buildScene(); },250);
+});
+})();
+</script>
+</body>
+</html>

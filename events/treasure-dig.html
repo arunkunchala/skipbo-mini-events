@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Treasure Dig — Skip-Bo Mini Event</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+  /* ---------- header ---------- */
+  .td-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .td-site {
+    flex:1 1 auto; color:#fff; font-weight:900; font-size:15px;
+    text-shadow:0 2px 0 rgba(0,0,0,.3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .td-site small { display:block; font-size:10px; font-weight:700; color:var(--sb-sky-light); }
+  .td-info {
+    width:30px; height:30px; border-radius:50%; border:1.5px solid rgba(255,255,255,.5);
+    background:rgba(255,255,255,.12); color:#fff; font-weight:900; font-size:15px; cursor:pointer;
+    flex:0 0 auto;
+  }
+  /* ---------- progress ---------- */
+  .td-prog-wrap { margin-bottom:10px; }
+  .td-prog-label { display:flex; justify-content:space-between; color:#fff; font-size:12px; font-weight:800; margin-bottom:4px; text-shadow:0 1px 0 rgba(0,0,0,.3); }
+  .td-prog { height:14px; border-radius:999px; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.25); overflow:hidden; }
+  .td-prog-fill {
+    height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(180deg,#ffe28a,var(--sb-yellow) 55%,var(--sb-yellow-dark));
+    box-shadow:0 0 8px rgba(255,199,44,.8); transition:width .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  /* ---------- finds tray ---------- */
+  .td-tray { display:flex; gap:6px; justify-content:center; margin-bottom:10px; }
+  .td-slot {
+    width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-size:22px;
+    background:rgba(0,0,0,.3); border:2px dashed rgba(255,255,255,.3);
+    filter:grayscale(1); opacity:.45; transition:all .3s;
+  }
+  .td-slot.got {
+    filter:none; opacity:1; border:2px solid var(--sb-yellow);
+    background:radial-gradient(circle at 35% 30%, #6b4b12, #3d2a08);
+    box-shadow:0 0 10px rgba(255,199,44,.6); animation:sbBounce .5s;
+  }
+  /* ---------- grid ---------- */
+  .td-wrap { position:relative; margin:0 auto 12px; max-width:392px; }
+  .td-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .td-tile {
+    position:relative; aspect-ratio:1; border-radius:9px; overflow:hidden; cursor:pointer;
+    background:radial-gradient(circle at 65% 20%, #2a1c0c, #1c1206);
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.8);
+  }
+  .td-dirt {
+    position:absolute; inset:0; border-radius:9px; transition:opacity .18s, transform .18s;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(0,0,0,.28) 0 8%, transparent 9%),
+      radial-gradient(circle at 70% 60%, rgba(0,0,0,.22) 0 7%, transparent 8%),
+      radial-gradient(circle at 45% 80%, rgba(255,255,255,.10) 0 6%, transparent 7%),
+      radial-gradient(circle at 80% 22%, rgba(255,255,255,.12) 0 5%, transparent 6%),
+      linear-gradient(160deg, #a9743a 0%, #8a5a28 45%, #6e451d 100%);
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.30), inset 0 2px 0 rgba(255,255,255,.22);
+  }
+  .td-tile.revealed .td-dirt { opacity:0; transform:scale(1.25); pointer-events:none; }
+  .td-tile.cracking .td-dirt { animation:tdCrack .25s ease-in forwards; }
+  @keyframes tdCrack {
+    0% { transform:scale(1); filter:brightness(1); }
+    30% { transform:scale(.94) rotate(-2deg); filter:brightness(1.25); }
+    60% { transform:scale(1.02) rotate(2deg); filter:brightness(.85); }
+    100% { transform:scale(1.2); opacity:0; }
+  }
+  /* cracked rock (after first hit) */
+  .td-tile.rockcracked .td-dirt {
+    background:
+      linear-gradient(115deg, transparent 44%, rgba(0,0,0,.55) 46%, transparent 49%),
+      linear-gradient(35deg, transparent 58%, rgba(0,0,0,.5) 60%, transparent 63%),
+      radial-gradient(circle at 50% 45%, #9a9a9a 0%, #6f6f6f 60%, #4c4c4c 100%);
+  }
+  .td-tile.rockcracked .td-dirt::after {
+    content:"🪨"; position:absolute; inset:0; display:grid; place-items:center; font-size:20px; opacity:.9;
+  }
+  .td-content {
+    position:absolute; inset:0; display:grid; place-items:center; font-size:24px;
+    opacity:0; transform:scale(.3);
+  }
+  .td-tile.revealed .td-content { opacity:1; transform:scale(1); transition:all .3s cubic-bezier(.34,1.56,.64,1) .1s; }
+  .td-tile.revealed.gold { background:radial-gradient(circle at 40% 30%, #ffdf7e, #d8a017 65%, #9c6b06); box-shadow:inset 0 2px 6px rgba(255,255,255,.5), 0 0 10px rgba(255,199,44,.55); }
+  .td-tile.revealed.rubble { background:radial-gradient(circle at 60% 30%, #3a3a3a, #222); }
+  .td-tile.revealed.rubble .td-content { font-size:15px; opacity:.55; }
+  .td-tile.collected { background:radial-gradient(circle at 40% 30%, #4d3a10, #2b1f06); box-shadow:inset 0 3px 8px rgba(0,0,0,.8); }
+  .td-tile.collected .td-content { opacity:.28; filter:grayscale(.6); }
+  /* glint telegraph */
+  .td-glint {
+    position:absolute; inset:0; display:none; place-items:center; pointer-events:none;
+    font-size:17px; z-index:3; text-shadow:0 0 6px #ffd95e;
+  }
+  .td-tile.glinting .td-glint { display:grid; animation:tdGlint 1.3s infinite; }
+  .td-tile.glinting .td-dirt { box-shadow:inset 0 0 0 2px rgba(255,220,110,.75), inset 0 -3px 0 rgba(0,0,0,.3); }
+  @keyframes tdGlint {
+    0%,100% { opacity:.25; transform:scale(.8) rotate(-8deg); }
+    50% { opacity:1; transform:scale(1.15) rotate(8deg); }
+  }
+  /* scanner overlay */
+  .td-scan {
+    position:absolute; inset:0; display:none; place-items:center; pointer-events:none;
+    font-size:20px; z-index:4; opacity:.55; filter:drop-shadow(0 0 4px #7fd4ff);
+  }
+  .td-tile.scanned .td-scan { display:grid; animation:tdScanIn .3s; }
+  .td-tile.scanned .td-dirt { box-shadow:inset 0 0 0 2px rgba(127,212,255,.8), inset 0 -3px 0 rgba(0,0,0,.3); }
+  @keyframes tdScanIn { from { opacity:0; transform:scale(.5); } to { opacity:.55; transform:scale(1); } }
+  /* dust puff */
+  .td-puff {
+    position:absolute; z-index:5; width:26px; height:26px; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, rgba(214,186,140,.95), rgba(214,186,140,0) 70%);
+    animation:tdPuff .5s ease-out forwards;
+  }
+  @keyframes tdPuff { from { transform:scale(.4); opacity:1; } to { transform:scale(2.4) translateY(-8px); opacity:0; } }
+  /* dynamite row markers + blast */
+  .td-rowmark {
+    position:absolute; left:-8px; width:34px; height:34px; z-index:10; display:none;
+    border:none; border-radius:50%; background:var(--sb-red); color:#fff; font-size:17px; cursor:pointer;
+    box-shadow:0 3px 0 var(--sb-red-dark), var(--sb-shadow); transform:translateY(-50%);
+    animation:sbPulse 1s infinite;
+  }
+  .td-wrap.dynmode .td-rowmark { display:block; }
+  .td-wrap.dynmode .td-grid { outline:3px dashed rgba(215,38,61,.7); outline-offset:4px; border-radius:8px; }
+  .td-tile.blast { animation:tdBlast .45s ease-out; }
+  @keyframes tdBlast {
+    0% { filter:brightness(3); transform:scale(1.15); }
+    40% { filter:brightness(1.6) saturate(2); transform:scale(.92); }
+    100% { filter:none; transform:scale(1); }
+  }
+  /* ---------- toolbar ---------- */
+  .td-tools { display:flex; gap:8px; margin-bottom:10px; }
+  .td-chip {
+    flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
+    background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.3); border-radius:14px;
+    color:#fff; font-weight:900; font-size:15px; padding:9px 4px; cursor:pointer;
+  }
+  .td-chip .big { font-size:19px; }
+  .td-chip.shovels { border-color:rgba(255,199,44,.75); color:var(--sb-yellow); flex:1.3; }
+  .td-chip.armed { background:rgba(62,142,222,.5); border-color:#7fd4ff; box-shadow:0 0 10px rgba(127,212,255,.7); }
+  .td-chip.armed-dyn { background:rgba(215,38,61,.5); border-color:#ff8a99; box-shadow:0 0 10px rgba(215,38,61,.8); }
+  .td-chip:disabled { opacity:.45; }
+  .td-chip.zero { opacity:.5; }
+  /* ---------- shop sheet offers ---------- */
+  .td-offer {
+    display:flex; align-items:center; gap:10px; width:100%;
+    background:#fff; border:2px solid rgba(27,42,74,.12); border-radius:14px;
+    padding:10px 12px; margin-bottom:8px; cursor:pointer; text-align:left; font-family:var(--sb-font);
+  }
+  .td-offer:active { transform:scale(.98); }
+  .td-offer .ico { font-size:28px; flex:0 0 auto; }
+  .td-offer .txt { flex:1 1 auto; min-width:0; }
+  .td-offer .txt b { display:block; font-size:15px; color:var(--sb-ink); }
+  .td-offer .txt span { font-size:11.5px; color:#5a6b8c; font-weight:600; }
+  .td-offer .price {
+    flex:0 0 auto; background:linear-gradient(180deg,#3fc167,var(--sb-green) 55%,var(--sb-green-dark));
+    color:#fff; font-weight:900; font-size:14px; padding:8px 12px; border-radius:10px;
+    box-shadow:0 2px 0 rgba(0,0,0,.25); text-shadow:0 1px 0 rgba(0,0,0,.2);
+  }
+  .td-offer.hero {
+    background:linear-gradient(160deg,#fff6d8,#ffe9a8); border:2.5px solid var(--sb-yellow);
+    box-shadow:0 0 14px rgba(255,199,44,.6); position:relative; overflow:hidden;
+  }
+  .td-offer.hero .ico { font-size:38px; animation:sbPulse 1.2s infinite; }
+  .td-offer.hero::before {
+    content:"BEST VALUE"; position:absolute; top:6px; right:-26px; transform:rotate(35deg);
+    background:var(--sb-red); color:#fff; font-size:8.5px; font-weight:900; padding:2px 28px; letter-spacing:.5px;
+  }
+  .td-collect-fly { position:fixed; z-index:400; font-size:30px; pointer-events:none; transition:all .8s cubic-bezier(.5,-.2,.4,1.1); filter:drop-shadow(0 0 8px #ffd95e); }
+</style>
+</head>
+<body>
+<div class="sb-app">
+  <div class="sb-main">
+    <div class="td-head">
+      <div class="td-site" id="siteLabel">⛺ Site 1<small>Sandy Flats</small></div>
+      <span class="sb-timer-chip">⏳ <span id="cd">--</span></span>
+      <button class="td-info" id="infoBtn" aria-label="Info">ⓘ</button>
+    </div>
+
+    <div class="td-prog-wrap">
+      <div class="td-prog-label"><span>Treasures found</span><span id="progTxt">0/6</span></div>
+      <div class="td-prog"><div class="td-prog-fill" id="progFill"></div></div>
+    </div>
+
+    <div class="td-tray" id="tray"></div>
+
+    <div class="td-wrap" id="wrap">
+      <div class="td-grid" id="grid"></div>
+    </div>
+
+    <div class="td-tools">
+      <button class="td-chip shovels" id="shovelChip"><span class="big">⛏️</span><span id="shovelCt">0</span></button>
+      <button class="td-chip" id="scanBtn"><span class="big">🔮</span><span id="scanCt">0</span></button>
+      <button class="td-chip" id="dynBtn"><span class="big">🧨</span><span id="dynCt">0</span></button>
+      <button class="td-chip" id="shopBtn" style="border-color:rgba(63,193,103,.8);color:#8af0a8;"><span class="big">＋</span>Shop</button>
+    </div>
+
+    <button class="sb-btn sb-btn-green sb-btn-block" id="earnBtn">🎴 Play a level <span style="font-weight:900;">(+3 ⛏️)</span></button>
+  </div>
+</div>
+<script src="../shared/core.js"></script>
+<script>
+(function(){
+"use strict";
+var COLS=7, ROWS=9, N=COLS*ROWS;
+var EMO={crown:"👑",chest:"🎁",wild:"🃏",trail:"🪙",gem:"💎"};
+var SITE_NAMES=["Sandy Flats","Amber Gorge","Gilded Ruins","Crown Caverns","Lost Temple","Sunken Vault"];
+
+SB.init({title:"Treasure Dig", subtitle:"Excavation Event · Limited Time", resetKey:"treasure-dig"});
+
+var st=SB.store("treasure-dig",{level:1,endTs:0,seeded:false,scanners:0,dyn:0,grid:null,arts:null});
+var S=st.data;
+
+if(!S.endTs){ S.endTs=Date.now()+48*3600*1000; st.save(); }
+if(!S.seeded){ S.seeded=true; st.save(); SB.grantRewards([{type:"shovel",amount:10}]); SB.toast("Welcome to the dig site! +10 Shovels"); }
+
+// ---------- level generation ----------
+function mult(){ return Math.pow(1.5,S.level-1); }
+function coinsAmt(base){ return Math.round(base*mult()/10)*10; }
+
+function genLevel(){
+  var cells=[],i;
+  for(i=0;i<N;i++) cells.push({k:"e",a:-1,hits:0,rev:false});
+  var arts=[];
+  function tryPlace(w,h){
+    for(var t=0;t<400;t++){
+      var ww=w,hh=h;
+      if(w!==h && Math.random()<0.5){ ww=h; hh=w; }
+      var c0=(Math.random()*(COLS-ww+1))|0, r0=(Math.random()*(ROWS-hh+1))|0;
+      var idxs=[],ok=true;
+      for(var r=r0;r<r0+hh;r++)for(var c=c0;c<c0+ww;c++){
+        var ix=r*COLS+c;
+        if(cells[ix].k!=="e"){ok=false;break;}
+        idxs.push(ix);
+      }
+      if(ok) return idxs;
+    }
+    return null;
+  }
+  function addArt(kind,w,h){
+    var idxs=tryPlace(w,h);
+    if(!idxs) return;
+    var ai=arts.length;
+    arts.push({kind:kind,cells:idxs,got:false});
+    idxs.forEach(function(ix){ cells[ix].k="a"; cells[ix].a=ai; });
+  }
+  addArt("crown",3,2);
+  addArt("chest",2,2);
+  addArt("wild",1,2);
+  addArt("trail",1,4);
+  addArt("gem",1,1);
+  addArt("gem",1,1);
+  var rocks=Math.min(4+((Math.random()*3)|0)+(S.level-1),12), placed=0, guard=0;
+  while(placed<rocks && guard++<600){
+    var ix=(Math.random()*N)|0;
+    if(cells[ix].k==="e"){ cells[ix].k="r"; placed++; }
+  }
+  S.grid=cells; S.arts=arts; st.save();
+}
+if(!S.grid||!S.arts) genLevel();
+
+// ---------- DOM refs ----------
+var gridEl=document.getElementById("grid"), wrapEl=document.getElementById("wrap");
+var trayEl=document.getElementById("tray"), progTxt=document.getElementById("progTxt"), progFill=document.getElementById("progFill");
+var shovelCt=document.getElementById("shovelCt"), scanCt=document.getElementById("scanCt"), dynCt=document.getElementById("dynCt");
+var scanBtn=document.getElementById("scanBtn"), dynBtn=document.getElementById("dynBtn"), shovelChip=document.getElementById("shovelChip");
+var tiles=[], scanMode=false, dynMode=false, busy=false;
+
+SB.countdown(document.getElementById("cd"), S.endTs, function(){ SB.toast("Event ended — thanks for digging!"); });
+
+// ---------- render ----------
+function buildGrid(){
+  gridEl.innerHTML=""; tiles=[];
+  wrapEl.querySelectorAll(".td-rowmark").forEach(function(m){m.remove();});
+  for(var i=0;i<N;i++){
+    var t=document.createElement("div");
+    t.className="td-tile";
+    t.dataset.i=i;
+    t.innerHTML='<div class="td-dirt"></div><div class="td-content"></div><div class="td-glint">✨</div><div class="td-scan"></div>';
+    t.addEventListener("click", onTileTap);
+    gridEl.appendChild(t); tiles.push(t);
+    syncTile(i);
+  }
+  for(var r=0;r<ROWS;r++){
+    (function(row){
+      var m=document.createElement("button");
+      m.className="td-rowmark"; m.textContent="🧨";
+      m.style.top=(row*100/ROWS + 100/ROWS/2)+"%";
+      m.addEventListener("click", function(e){ e.stopPropagation(); blastRow(row); });
+      wrapEl.appendChild(m);
+    })(r);
+  }
+  refreshGlints(); refreshTray(); refreshProgress(); refreshTools(); refreshSite();
+}
+function contentFor(cell){
+  if(cell.k==="a") return EMO[S.arts[cell.a].kind];
+  if(cell.k==="r") return "🪨";
+  return "·";
+}
+function syncTile(i){
+  var cell=S.grid[i], t=tiles[i];
+  t.classList.toggle("revealed",cell.rev);
+  t.classList.toggle("rockcracked",cell.k==="r"&&cell.hits===1&&!cell.rev);
+  var gold=cell.rev&&cell.k==="a";
+  t.classList.toggle("gold",gold&&!S.arts[cell.a].got);
+  t.classList.toggle("collected",gold&&S.arts[cell.a].got);
+  t.classList.toggle("rubble",cell.rev&&cell.k!=="a");
+  t.querySelector(".td-content").textContent = cell.rev ? (cell.k==="a"?EMO[S.arts[cell.a].kind]:(cell.k==="r"?"🪨":"·")) : "";
+}
+function refreshGlints(){
+  tiles.forEach(function(t){t.classList.remove("glinting");});
+  S.arts.forEach(function(a){
+    if(a.got) return;
+    var anyRev=a.cells.some(function(ix){return S.grid[ix].rev;});
+    if(!anyRev) return;
+    a.cells.forEach(function(ix){
+      if(S.grid[ix].rev) return;
+      var r=(ix/COLS)|0, c=ix%COLS;
+      var adj=[[r-1,c],[r+1,c],[r,c-1],[r,c+1]];
+      var near=adj.some(function(p){
+        if(p[0]<0||p[0]>=ROWS||p[1]<0||p[1]>=COLS) return false;
+        var j=p[0]*COLS+p[1];
+        return S.grid[j].a===S.grid[ix].a && S.grid[j].rev;
+      });
+      if(near) tiles[ix].classList.add("glinting");
+    });
+  });
+}
+function refreshTray(){
+  trayEl.innerHTML="";
+  S.arts.forEach(function(a){
+    var d=document.createElement("div");
+    d.className="td-slot"+(a.got?" got":"");
+    d.textContent=EMO[a.kind];
+    trayEl.appendChild(d);
+  });
+}
+function refreshProgress(){
+  var got=S.arts.filter(function(a){return a.got;}).length;
+  progTxt.textContent=got+"/"+S.arts.length;
+  progFill.style.width=(got/S.arts.length*100)+"%";
+}
+function refreshTools(){
+  shovelCt.textContent=SB.bal("shovel");
+  scanCt.textContent=S.scanners; dynCt.textContent=S.dyn;
+  shovelChip.classList.toggle("zero",SB.bal("shovel")===0);
+  scanBtn.classList.toggle("zero",S.scanners===0);
+  dynBtn.classList.toggle("zero",S.dyn===0);
+  scanBtn.classList.toggle("armed",scanMode);
+  dynBtn.classList.toggle("armed-dyn",dynMode);
+  wrapEl.classList.toggle("dynmode",dynMode);
+}
+function refreshSite(){
+  document.getElementById("siteLabel").innerHTML="⛺ Site "+S.level+"<small>"+SITE_NAMES[(S.level-1)%SITE_NAMES.length]+"</small>";
+}
+
+// ---------- FX ----------
+function puffAt(t){
+  var p=document.createElement("div"); p.className="td-puff";
+  p.style.left="calc(50% - 13px)"; p.style.top="calc(50% - 13px)";
+  t.appendChild(p); setTimeout(function(){p.remove();},520);
+}
+function goldBurst(t){
+  var r=t.getBoundingClientRect();
+  SB.confetti(r.left+r.width/2, r.top+r.height/2, 24);
+}
+
+// ---------- dig ----------
+function onTileTap(e){
+  if(busy) return;
+  var t=e.currentTarget, i=+t.dataset.i, cell=S.grid[i];
+  if(dynMode){ SB.toast("Tap a 🧨 row marker to blast a row"); return; }
+  if(scanMode){ doScan(i); return; }
+  if(cell.rev){ return; }
+  if(SB.bal("shovel")<=0){
+    t.classList.remove("sb-shake"); void t.offsetWidth; t.classList.add("sb-shake");
+    shovelChip.classList.remove("sb-shake"); void shovelChip.offsetWidth; shovelChip.classList.add("sb-shake");
+    SB.haptic(30); openShop(true); return;
+  }
+  SB.spend("shovel",1); refreshTools(); SB.haptic();
+  busy=true;
+  t.classList.add("cracking");
+  setTimeout(function(){
+    t.classList.remove("cracking");
+    busy=false;
+    if(cell.k==="r"&&cell.hits===0){
+      cell.hits=1; st.save(); syncTile(i); puffAt(t);
+      SB.toast("Solid rock! One more hit…");
+      afterDig(); return;
+    }
+    revealCell(i,t);
+    afterDig();
+  },250);
+}
+function revealCell(i,t){
+  var cell=S.grid[i];
+  if(cell.rev) return;
+  cell.rev=true; cell.hits=2;
+  syncTile(i);
+  if(cell.k==="a"){
+    goldBurst(t); SB.haptic(25);
+    var art=S.arts[cell.a];
+    if(art.kind==="trail") SB.grantRewards([{type:"coins",amount:coinsAmt(150)}],t);
+    refreshGlints();
+    if(art.cells.every(function(ix){return S.grid[ix].rev;})) collectArt(cell.a,t);
+  } else {
+    puffAt(t);
+  }
+  st.save();
+}
+function collectArt(ai,originTile){
+  var art=S.arts[ai];
+  art.got=true; st.save();
+  art.cells.forEach(syncTile);
+  refreshGlints();
+  // fly to tray
+  var slot=trayEl.children[ai], sr=slot.getBoundingClientRect(), or_=originTile.getBoundingClientRect();
+  var fly=document.createElement("div");
+  fly.className="td-collect-fly"; fly.textContent=EMO[art.kind];
+  fly.style.left=(or_.left+or_.width/2-15)+"px"; fly.style.top=(or_.top+or_.height/2-15)+"px";
+  document.body.appendChild(fly);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    fly.style.left=(sr.left+sr.width/2-15)+"px"; fly.style.top=(sr.top+sr.height/2-15)+"px";
+    fly.style.transform="scale(.6)";
+  });});
+  setTimeout(function(){
+    fly.remove(); refreshTray(); refreshProgress();
+    var rw=null;
+    if(art.kind==="crown"){ rw=[{type:"coins",amount:coinsAmt(3000)},{type:"wild",amount:2},{type:"gem",amount:5}]; SB.confetti(); SB.toast("👑 GOLDEN CROWN excavated!"); }
+    else if(art.kind==="chest"){ rw=[{type:"coins",amount:coinsAmt(800)},{type:"draw",amount:1}]; }
+    else if(art.kind==="wild"){ rw=[{type:"wild",amount:1}]; }
+    else if(art.kind==="gem"){ rw=[{type:"gem",amount:Math.round(mult())}]; }
+    else if(art.kind==="trail"){ SB.toast("🪙 Coin Trail complete!"); }
+    if(rw) SB.grantRewards(rw,originTile);
+    checkLevelDone();
+  },820);
+}
+function afterDig(){
+  refreshTools();
+  if(SB.bal("shovel")===0 && !S.arts.every(function(a){return a.got;})){
+    setTimeout(function(){ if(SB.bal("shovel")===0) openShop(true); },700);
+  }
+}
+
+// ---------- scanner ----------
+scanBtn.addEventListener("click",function(){
+  dynMode=false;
+  if(S.scanners<=0){ scanBtn.classList.add("sb-shake"); setTimeout(function(){scanBtn.classList.remove("sb-shake");},450); openShop(false); return; }
+  scanMode=!scanMode; refreshTools();
+  SB.toast(scanMode?"🔮 Scanner armed — tap any tile to scan 3×3":"Scanner disarmed");
+});
+function doScan(i){
+  scanMode=false; S.scanners--; st.save(); refreshTools(); SB.haptic(20);
+  var r0=(i/COLS)|0, c0=i%COLS, marked=[];
+  for(var r=r0-1;r<=r0+1;r++)for(var c=c0-1;c<=c0+1;c++){
+    if(r<0||r>=ROWS||c<0||c>=COLS) continue;
+    var ix=r*COLS+c, cell=S.grid[ix];
+    if(cell.rev) continue;
+    tiles[ix].querySelector(".td-scan").textContent=contentFor(cell);
+    tiles[ix].classList.add("scanned"); marked.push(ix);
+  }
+  SB.toast("🔮 Scan active for 10s");
+  setTimeout(function(){ marked.forEach(function(ix){ tiles[ix].classList.remove("scanned"); }); },10000);
+}
+
+// ---------- dynamite ----------
+dynBtn.addEventListener("click",function(){
+  scanMode=false;
+  if(S.dyn<=0){ dynBtn.classList.add("sb-shake"); setTimeout(function(){dynBtn.classList.remove("sb-shake");},450); openShop(false); return; }
+  dynMode=!dynMode; refreshTools();
+  SB.toast(dynMode?"🧨 Pick a row to blast!":"Dynamite stowed");
+});
+function blastRow(row){
+  if(S.dyn<=0||busy) return;
+  S.dyn--; dynMode=false; busy=true; st.save(); refreshTools(); SB.haptic(40);
+  var idxs=[];
+  for(var c=0;c<COLS;c++) idxs.push(row*COLS+c);
+  idxs.forEach(function(ix,k){
+    setTimeout(function(){ tiles[ix].classList.add("blast"); },k*35);
+  });
+  var mid=tiles[idxs[3]].getBoundingClientRect();
+  SB.confetti(mid.left+mid.width/2, mid.top+mid.height/2, 50);
+  setTimeout(function(){
+    idxs.forEach(function(ix){
+      tiles[ix].classList.remove("blast");
+      revealCell(ix,tiles[ix]);
+    });
+    busy=false; refreshTools();
+  },480);
+}
+
+// ---------- shop (contextual out-of-shovels sheet) ----------
+var shopEl=null;
+function crownState(){
+  var crown=S.arts[0];
+  if(!crown||crown.kind!=="crown"||crown.got) return {eligible:false};
+  var rev=crown.cells.filter(function(ix){return S.grid[ix].rev;}).length;
+  return {eligible:(rev/crown.cells.length)>=0.6, rev:rev, total:crown.cells.length};
+}
+function closeShop(){
+  if(!shopEl) return;
+  var s=shopEl; shopEl=null;
+  s.classList.remove("open"); setTimeout(function(){s.remove();},300);
+}
+function openShop(auto){
+  if(shopEl) return;
+  var cs=crownState();
+  var html='<div class="sb-sheet">'
+    +'<h3>'+(auto?"Out of shovels!":"Dig Site Shop")+'</h3>'
+    +'<div class="sb-sheet-sub">'+(auto?"Your treasures are still down there…":"Stock up and keep digging")+'</div>';
+  if(cs.eligible){
+    html+='<button class="td-offer hero" data-buy="crown"><span class="ico">👑</span>'
+      +'<span class="txt"><b>Finish the Crown!</b><span>'+cs.rev+'/'+cs.total+' uncovered — 6 ⛏️ + 1 🔮 Scanner</span></span>'
+      +'<span class="price">$2.99</span></button>';
+  }
+  html+='<button class="td-offer" data-buy="shovels"><span class="ico">⛏️</span>'
+    +'<span class="txt"><b>12 Shovels</b><span>Keep the dig going</span></span><span class="price">$1.99</span></button>'
+    +'<button class="td-offer" data-buy="scanner"><span class="ico">🔮</span>'
+    +'<span class="txt"><b>Scanner</b><span>Tap a tile → see a 3×3 area for 10s</span></span><span class="price">$0.99</span></button>'
+    +'<button class="td-offer" data-buy="dyn"><span class="ico">🧨</span>'
+    +'<span class="txt"><b>Dynamite Pack</b><span>3 dynamite (clear full rows!) + 12 ⛏️</span></span><span class="price">$4.99</span></button>'
+    +'<button class="sb-sheet-cancel" id="td-shop-cancel">No thanks</button></div>';
+  var bd=document.createElement("div");
+  bd.className="sb-sheet-backdrop"; bd.innerHTML=html;
+  document.body.appendChild(bd); shopEl=bd;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){bd.classList.add("open");});});
+  bd.addEventListener("click",function(e){ if(e.target===bd) closeShop(); });
+  bd.querySelector("#td-shop-cancel").addEventListener("click",closeShop);
+  bd.querySelectorAll(".td-offer").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var what=btn.dataset.buy;
+      closeShop();
+      setTimeout(function(){ launchIAP(what); },250);
+    });
+  });
+}
+function launchIAP(what){
+  if(what==="crown"){
+    SB.buyIAP({label:"👑 Finish the Crown!",price:"$2.99",sub:"The Golden Crown is almost yours — don't stop now!",
+      contents:[{type:"shovel",amount:6}],
+      onSuccess:function(){ S.scanners++; st.save(); refreshTools(); SB.toast("🔮 +1 Scanner — the crown awaits!"); }});
+  } else if(what==="shovels"){
+    SB.buyIAP({label:"⛏️ 12 Shovels",price:"$1.99",sub:"Straight back to the dig",
+      contents:[{type:"shovel",amount:12}],
+      onSuccess:function(){ refreshTools(); }});
+  } else if(what==="scanner"){
+    SB.buyIAP({label:"🔮 Scanner",price:"$0.99",sub:"Reveal a 3×3 area's secrets for 10 seconds",
+      contents:[],
+      onSuccess:function(){ S.scanners++; st.save(); scanMode=true; refreshTools(); SB.toast("🔮 Scanner armed — tap any tile!"); }});
+  } else if(what==="dyn"){
+    SB.buyIAP({label:"🧨 Dynamite Pack",price:"$4.99",sub:"3 dynamite + 12 shovels — clear whole rows",
+      contents:[{type:"shovel",amount:12}],
+      onSuccess:function(){ S.dyn+=3; st.save(); refreshTools(); SB.toast("🧨 +3 Dynamite!"); }});
+  }
+}
+document.getElementById("shopBtn").addEventListener("click",function(){ openShop(false); });
+shovelChip.addEventListener("click",function(){ if(SB.bal("shovel")===0) openShop(true); });
+
+// ---------- level complete ----------
+function checkLevelDone(){
+  if(!S.arts.every(function(a){return a.got;})) return;
+  SB.confetti(); SB.haptic(40);
+  setTimeout(function(){
+    var m=SB.modal(
+      '<div style="font-size:44px;">🏆</div>'
+      +'<h3 style="margin:6px 0 4px;">Site '+S.level+' Cleared!</h3>'
+      +'<p class="sb-muted" style="margin:0 0 10px;font-size:13px;">All 6 treasures excavated at '+SITE_NAMES[(S.level-1)%SITE_NAMES.length]+'.</p>'
+      +'<div style="font-size:26px;letter-spacing:6px;margin-bottom:12px;">👑🎁🃏🪙💎💎</div>'
+      +'<p style="font-size:12.5px;color:#5a6b8c;margin:0 0 12px;">Site '+(S.level+1)+' is richer: rewards ×1.5, but rockier ground…</p>'
+      +'<button class="sb-btn sb-btn-yellow sb-btn-block" id="digDeeper">⛏️ Dig Deeper → Site '+(S.level+1)+'</button>'
+    );
+    m.el.querySelector("#digDeeper").addEventListener("click",function(){
+      m.close();
+      S.level++; genLevel(); buildGrid();
+      SB.grantRewards([{type:"shovel",amount:5}]);
+      SB.toast("⛺ Site "+S.level+" — bonus +5 shovels!");
+    });
+  },900);
+}
+
+// ---------- earn button ----------
+var earnBtn=document.getElementById("earnBtn");
+earnBtn.addEventListener("click",function(){
+  if(earnBtn.disabled) return;
+  earnBtn.disabled=true;
+  var orig=earnBtn.innerHTML;
+  earnBtn.innerHTML="🎴 Dealing cards…";
+  setTimeout(function(){
+    earnBtn.innerHTML="✓ Level won!";
+    earnBtn.classList.add("sb-bounce");
+    SB.grantRewards([{type:"shovel",amount:3}],earnBtn);
+    SB.confetti(window.innerWidth/2, window.innerHeight-120, 30);
+    refreshTools();
+    setTimeout(function(){ earnBtn.innerHTML=orig; earnBtn.disabled=false; earnBtn.classList.remove("sb-bounce"); },900);
+  },550);
+});
+
+// ---------- info ----------
+document.getElementById("infoBtn").addEventListener("click",function(){
+  SB.modal(
+    '<div style="font-size:38px;">⛏️👑</div><h3 style="margin:6px 0 8px;">Treasure Dig</h3>'
+    +'<p style="font-size:13.5px;line-height:1.5;text-align:left;color:var(--sb-ink);margin:0 0 12px;">'
+    +'Each tap spends a shovel to break dirt and reveal what\'s buried — artifacts, coins, gems, or stubborn rocks that take two hits. '
+    +'When part of an artifact is uncovered, its neighboring buried tiles sparkle, telegraphing exactly where to dig next and creating a near-miss pull right as shovels run low. '
+    +'That is the monetization beat: contextual offers (shovels, scanner, dynamite — and a premium "Finish the Crown" bundle when the grand prize is mostly exposed) appear precisely at the moment of highest investment. '
+    +'Shovels are also earned by playing regular Skip-Bo levels, looping event excitement back into core-game sessions.</p>'
+    +'<button class="sb-btn sb-btn-blue sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it</button>'
+  );
+});
+
+buildGrid();
+})();
+</script>
+</body>
+</html>

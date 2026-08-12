@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Lucky Grabber — Skip-Bo Mini Event</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+  .hdr-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .info-btn { margin-left:auto; width:30px; height:30px; border-radius:50%; border:none;
+    background:rgba(255,255,255,0.2); color:#fff; font-weight:900; font-size:15px; cursor:pointer; }
+  .strong-badge { display:inline-flex; align-items:center; gap:4px; background:linear-gradient(180deg,#ff6a3d,#D7263D);
+    color:#fff; font-weight:800; font-size:12px; border-radius:999px; padding:3px 10px;
+    box-shadow:0 0 12px rgba(255,80,40,0.8); animation:sbPulse 1.2s infinite; }
+
+  /* ---------- cabinet ---------- */
+  #cabinet { border-radius:22px; padding:10px 10px 12px; position:relative;
+    background:linear-gradient(180deg,#e8404f 0%,#D7263D 30%,#a31527 100%);
+    border:3px solid #7c0e1c; box-shadow:var(--sb-shadow), inset 0 2px 0 rgba(255,255,255,0.3); }
+  body.premium #cabinet { background:linear-gradient(180deg,#3a3a3a 0%,#1c1c1c 60%,#000 100%);
+    border-color:#FFC72C; box-shadow:0 0 22px rgba(255,199,44,0.45), var(--sb-shadow); }
+  #marquee { text-align:center; font-weight:900; font-size:22px; letter-spacing:3px; padding:2px 0 8px;
+    color:#fff; text-shadow:0 0 8px #FFC72C,0 0 18px #FFC72C,0 2px 0 rgba(0,0,0,0.4);
+    animation:neon 3s linear infinite; }
+  @keyframes neon {
+    0%   { text-shadow:0 0 8px #FFC72C,0 0 20px #FFC72C,0 2px 0 rgba(0,0,0,.4); color:#fffbe8; }
+    33%  { text-shadow:0 0 8px #3E8EDE,0 0 20px #3E8EDE,0 2px 0 rgba(0,0,0,.4); color:#eaf4ff; }
+    66%  { text-shadow:0 0 8px #2E9E4F,0 0 20px #2E9E4F,0 2px 0 rgba(0,0,0,.4); color:#eaffee; }
+    100% { text-shadow:0 0 8px #FFC72C,0 0 20px #FFC72C,0 2px 0 rgba(0,0,0,.4); color:#fffbe8; }
+  }
+  #glass { position:relative; height:300px; overflow:hidden; border-radius:12px;
+    background:linear-gradient(180deg,#cfe6ff 0%,#eaf4ff 30%,#dceeff 100%);
+    border:3px solid rgba(255,255,255,0.75); box-shadow:inset 0 0 24px rgba(29,79,161,0.25); }
+  #glass::after { content:""; position:absolute; top:0; left:8%; width:18%; height:100%; pointer-events:none;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,0.5),transparent); }
+  #rail { position:absolute; top:4px; left:0; right:0; height:8px;
+    background:linear-gradient(180deg,#5a6b8c,#33425f); border-radius:4px; }
+  #pitFloor { position:absolute; bottom:0; left:0; right:0; height:26px;
+    background:linear-gradient(180deg,#9cc8f5,#6ba3dd); border-top:2px solid rgba(255,255,255,0.6); }
+  #chute { position:absolute; left:6px; bottom:0; width:58px; height:44px; border-radius:10px 10px 0 0;
+    background:linear-gradient(180deg,#14213c,#000); border:2px solid #33425f; border-bottom:none;
+    color:#9cc8f5; font-size:9px; font-weight:800; text-align:center; padding-top:4px; z-index:2; }
+
+  /* ---------- claw ---------- */
+  #claw { position:absolute; top:8px; width:0; display:flex; flex-direction:column; align-items:center;
+    transition:left 0.12s linear; z-index:6; }
+  #cable { width:3px; height:14px; background:linear-gradient(180deg,#7a89a8,#33425f);
+    transition:height 0.5s ease-in-out; }
+  #gripper { position:relative; width:44px; height:28px; margin-top:-2px;
+    transition:transform 0.2s, filter 0.3s; }
+  #gripper .hub { position:absolute; left:50%; top:0; width:16px; height:12px; margin-left:-8px;
+    background:linear-gradient(180deg,#aab6cc,#5a6b8c); border-radius:4px; }
+  #gripper .prong { position:absolute; top:8px; width:7px; height:22px; border-radius:5px 5px 8px 8px;
+    background:linear-gradient(180deg,#aab6cc,#5a6b8c); transition:transform 0.22s ease; }
+  #gripper .pl { left:6px; transform:rotate(24deg); transform-origin:top center; }
+  #gripper .pr { right:6px; transform:rotate(-24deg); transform-origin:top center; }
+  #claw.closed .pl { transform:rotate(-6deg); }
+  #claw.closed .pr { transform:rotate(6deg); }
+  #claw.mega #cable, #claw.mega .hub, #claw.mega .prong {
+    background:linear-gradient(180deg,#ffe58a,#e0a400); }
+  #claw.mega #gripper { filter:drop-shadow(0 0 8px #FFC72C); animation:sparkle 0.7s infinite; }
+  #claw.strong #gripper { filter:drop-shadow(0 0 8px #ff4530); }
+  #claw.strong .prong, #claw.strong .hub { background:linear-gradient(180deg,#ff8a75,#c22); }
+  @keyframes sparkle { 0%,100%{ filter:drop-shadow(0 0 6px #FFC72C);} 50%{ filter:drop-shadow(0 0 16px #fff);} }
+
+  /* ---------- capsules ---------- */
+  .cap { position:absolute; width:40px; height:40px; border-radius:50%;
+    display:grid; place-items:center; font-size:19px; z-index:3;
+    border:2px solid rgba(0,0,0,0.2); box-shadow:0 3px 5px rgba(0,0,0,0.25), inset 0 6px 6px rgba(255,255,255,0.65); }
+  .cap.coin { background:linear-gradient(180deg,#ffe58a 45%,#FFC72C 50%,#e0a400); }
+  .cap.boost { background:linear-gradient(180deg,#bcd9f8 45%,#3E8EDE 50%,#1D4FA1); }
+  .cap.gem { background:linear-gradient(180deg,#f0c9f5 45%,#b452c9 50%,#7b2e8f); }
+  .cap.jack { background:linear-gradient(180deg,#fff3c4 45%,#FFC72C 50%,#c78900);
+    border-color:#8a5c00; animation:jackGlow 1.4s infinite; }
+  .cap.gold { background:linear-gradient(180deg,#ffe58a 45%,#c78900 50%,#1c1c1c); border-color:#FFC72C; }
+  @keyframes jackGlow { 0%,100%{ box-shadow:0 0 6px 2px rgba(255,199,44,0.7), inset 0 6px 6px rgba(255,255,255,0.6);}
+    50%{ box-shadow:0 0 16px 5px rgba(255,199,44,0.95), inset 0 6px 6px rgba(255,255,255,0.6);} }
+  .cap.targeted { outline:3px solid rgba(215,38,61,0.85); outline-offset:2px; }
+  .cap .lock { position:absolute; top:-8px; right:-6px; font-size:13px; }
+  .cap.wobble { animation:wob 0.28s ease-in-out 2; }
+  @keyframes wob { 0%,100%{transform:rotate(0);} 25%{transform:rotate(-12deg);} 75%{transform:rotate(12deg);} }
+  .cap.tumble { animation:tum 0.8s ease-in-out; }
+  @keyframes tum { 0%{transform:translateY(-70px) rotate(0);} 60%{transform:translateY(6px) rotate(300deg);}
+    100%{transform:translateY(0) rotate(360deg);} }
+  #oddsTag { position:absolute; z-index:7; background:rgba(27,42,74,0.92); color:#fff; font-size:11px;
+    font-weight:800; padding:2px 8px; border-radius:999px; pointer-events:none; transition:left .12s linear;
+    white-space:nowrap; }
+  #oddsTag.mega { background:linear-gradient(180deg,#FFC72C,#e0a400); color:#1B2A4A; }
+  .pop-txt { position:absolute; z-index:8; font-weight:900; font-size:15px; color:#D7263D;
+    text-shadow:0 1px 0 #fff; pointer-events:none; animation:popUp 0.9s ease-out forwards; }
+  @keyframes popUp { 0%{ transform:translateY(0) scale(0.6); opacity:0;} 20%{ opacity:1; transform:scale(1.15);}
+    100%{ transform:translateY(-38px) scale(1); opacity:0;} }
+  #clearBanner { position:absolute; inset:0; z-index:10; display:none; flex-direction:column; gap:8px;
+    align-items:center; justify-content:center; background:rgba(20,57,111,0.82); text-align:center; }
+  #clearBanner.show { display:flex; }
+  #clearBanner h2 { color:#FFC72C; font-size:26px; margin:0; text-shadow:0 0 14px #FFC72C; animation:sbPulse 1s infinite; }
+
+  /* ---------- coin slot / grip meter ---------- */
+  #slotRow { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  #coinSlot { flex:0 0 auto; background:linear-gradient(180deg,#33425f,#14213c); color:#FFC72C;
+    border:2px solid #5a6b8c; border-radius:10px; padding:6px 12px; font-weight:900; font-size:15px;
+    display:flex; align-items:center; gap:6px; }
+  #coinSlot .slit { width:4px; height:18px; background:#000; border-radius:2px; box-shadow:inset 0 0 4px #FFC72C; }
+  #meterWrap { flex:1 1 auto; }
+  #meter { height:18px; border-radius:999px; background:rgba(0,0,0,0.4); border:2px solid rgba(255,255,255,0.5);
+    overflow:hidden; position:relative; }
+  #meterFill { height:100%; width:0%; border-radius:999px; transition:width 0.6s cubic-bezier(0.22,1,0.36,1);
+    background:linear-gradient(90deg,#3E8EDE,#2E9E4F,#FFC72C); }
+  #meter.full #meterFill { animation:sparkle 0.7s infinite; background:linear-gradient(90deg,#FFC72C,#fff3c4,#FFC72C); }
+  #meterTxt { position:absolute; inset:0; display:grid; place-items:center; font-size:10px; font-weight:900;
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.6); }
+  .meter-note { font-size:10px; font-weight:700; color:#fff; opacity:0.9; margin-top:3px; text-align:center; }
+
+  /* ---------- controls ---------- */
+  .controls { display:flex; gap:10px; margin-top:12px; align-items:stretch; }
+  .move-btn { flex:0 0 76px; border:none; border-radius:14px; font-size:26px; color:#fff; cursor:pointer;
+    background:linear-gradient(180deg,#5ba0e8,#1D4FA1); box-shadow:0 4px 0 rgba(0,0,0,0.25); touch-action:none; }
+  .move-btn:active { transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,0.25); }
+  .grab-big { flex:1 1 auto; font-size:20px; }
+  .earn-row { display:flex; gap:8px; margin-top:10px; }
+  .earn-row .sb-btn { flex:1 1 0; }
+
+  /* ---------- prize pool panel ---------- */
+  .pool { margin-top:14px; padding:12px; }
+  .pool-title { font-weight:900; font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+  .pool-note { font-size:10px; font-weight:700; color:#2E9E4F; }
+  .pool-row { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed rgba(27,42,74,0.15);
+    font-size:12px; font-weight:700; }
+  .pool-row:last-child { border-bottom:none; }
+  .pool-row .pico { font-size:17px; }
+  .pool-row .pname { flex:1 1 auto; }
+  .pool-row .pods { color:#1D4FA1; }
+  .pool-row .pleft { background:#1B2A4A; color:#FFC72C; border-radius:999px; padding:1px 9px; font-weight:900; }
+  .pool-row.gone { opacity:0.35; text-decoration:line-through; }
+
+  /* ---------- shop modal ---------- */
+  .shop-opt { display:flex; align-items:center; gap:10px; width:100%; margin-top:8px; border:none; cursor:pointer;
+    background:#fff; border:2px solid rgba(27,42,74,0.15); border-radius:14px; padding:10px 12px; text-align:left;
+    font-family:var(--sb-font); }
+  .shop-opt:active { transform:scale(0.98); }
+  .shop-opt .so-ico { font-size:24px; }
+  .shop-opt .so-txt { flex:1 1 auto; }
+  .shop-opt .so-name { font-weight:900; font-size:14px; color:var(--sb-ink); }
+  .shop-opt .so-sub { font-size:11px; color:#5a6b8c; font-weight:700; }
+  .shop-opt .so-price { font-weight:900; color:#fff; background:linear-gradient(180deg,#3fc167,#2E9E4F);
+    border-radius:10px; padding:6px 10px; font-size:13px; }
+  .shop-opt .so-price.free { background:linear-gradient(180deg,#5ba0e8,#1D4FA1); }
+  .shop-opt:disabled { opacity:0.5; pointer-events:none; }
+  .shop-opt.best { border-color:#FFC72C; box-shadow:0 0 0 2px rgba(255,199,44,0.5); position:relative; }
+
+  /* ---------- capsule open modal ---------- */
+  .cap-big { font-size:64px; display:inline-block; animation:capCrack 0.9s ease; }
+  @keyframes capCrack { 0%{ transform:scale(0.4) rotate(0);} 30%{ transform:scale(1.2) rotate(-14deg);}
+    50%{ transform:scale(1) rotate(12deg);} 70%{ transform:scale(1.25) rotate(-6deg);} 100%{ transform:scale(1) rotate(0);} }
+  .open-chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0 14px; }
+</style>
+</head>
+<body>
+<div class="sb-app">
+  <div class="sb-main">
+    <div class="hdr-row">
+      <span class="sb-timer-chip">⏳ <span id="cd">--</span></span>
+      <span class="strong-badge" id="strongBadge" style="display:none">💪 <span id="strongT">5:00</span></span>
+      <button class="info-btn" id="infoBtn" aria-label="Info">ⓘ</button>
+    </div>
+
+    <div id="cabinet">
+      <div id="marquee">✦ LUCKY GRABBER ✦</div>
+      <div id="glass">
+        <div id="rail"></div>
+        <div id="chute">PRIZE<br>⬇</div>
+        <div id="pitFloor"></div>
+        <div id="claw"><div id="cable"></div>
+          <div id="gripper"><div class="hub"></div><div class="prong pl"></div><div class="prong pr"></div></div>
+        </div>
+        <div id="oddsTag" style="display:none"></div>
+        <div id="clearBanner">
+          <h2>🏆 MACHINE CLEARED!</h2>
+          <div style="color:#fff;font-weight:800;font-size:13px">Bonus +1000 coins collected!</div>
+          <button class="sb-btn sb-btn-yellow sb-btn-sm" id="premiumBtn">👑 Premium Machine · $9.99</button>
+          <button class="sb-btn sb-btn-blue sb-btn-sm" id="restartBtn">🔁 New standard machine (free)</button>
+        </div>
+      </div>
+      <div id="slotRow">
+        <div id="coinSlot"><span class="slit"></span>🕹️ <span id="grabCount">3</span></div>
+        <div id="meterWrap">
+          <div id="meter"><div id="meterFill"></div><div id="meterTxt">GRIP POWER 0%</div></div>
+          <div class="meter-note">Every miss = <b>+34% grip</b> · Full bar = <b>MEGA GRAB</b> (guaranteed, any capsule)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="move-btn" id="btnL">◀</button>
+      <button class="sb-btn sb-btn-red grab-big" id="grabBtn">🕹️ GRAB!</button>
+      <button class="move-btn" id="btnR">▶</button>
+    </div>
+    <div class="earn-row">
+      <button class="sb-btn sb-btn-blue sb-btn-sm" id="earnBtn">🃏 Play a level (+1 grab)</button>
+      <button class="sb-btn sb-btn-yellow sb-btn-sm" id="shopBtn">🛒 Get Grabs</button>
+    </div>
+
+    <div class="sb-panel pool">
+      <div class="pool-title">PRIZE POOL <span class="pool-note">Finite pool — every capsule stays until won!</span></div>
+      <div id="poolList"></div>
+    </div>
+  </div>
+</div>
+<script src="../shared/core.js"></script>
+<script>
+(function () {
+  "use strict";
+  SB.init({ title: "Lucky Grabber", subtitle: "Clear the machine — win every prize!", resetKey: "lucky-grabber" });
+
+  // ---------- tiers ----------
+  var TIERS = {
+    coin:  { ico: "🪙", name: "Coin Capsule",    odds: 0.85 },
+    boost: { ico: "🎴", name: "Booster Capsule", odds: 0.65 },
+    gem:   { ico: "💎", name: "Gem Capsule",     odds: 0.55 },
+    jack:  { ico: "⭐", name: "GOLD JACKPOT",    odds: 0.30 },
+    gold:  { ico: "🔒", name: "Guaranteed Gold", odds: 1.00 }
+  };
+  function poolDef(premium) {
+    var caps = [];
+    var i;
+    for (i = 0; i < 8; i++) caps.push({ t: "coin", won: false });
+    for (i = 0; i < (premium ? 4 : 3); i++) caps.push({ t: "boost", won: false });
+    for (i = 0; i < (premium ? 3 : 2); i++) caps.push({ t: "gem", won: false });
+    for (i = 0; i < (premium ? 2 : 1); i++) caps.push({ t: "jack", won: false });
+    // shuffle order so pile placement varies
+    for (i = caps.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0; var tmp = caps[i]; caps[i] = caps[j]; caps[j] = tmp; }
+    return caps;
+  }
+
+  // ---------- state ----------
+  var st = SB.store("lucky-grabber", {
+    endTs: 0, grabs: 3, pity: 0, premium: false, cleared: false,
+    strongUntil: 0, shuffleDay: "", caps: null
+  });
+  var S = st.data;
+  if (!S.endTs) { S.endTs = Date.now() + 48 * 3600 * 1000; }
+  if (!S.caps) { S.caps = poolDef(false); }
+  st.save();
+  if (S.premium) document.body.classList.add("premium");
+
+  // ---------- dom ----------
+  var glass = document.getElementById("glass"), claw = document.getElementById("claw"),
+      cable = document.getElementById("cable"), oddsTag = document.getElementById("oddsTag"),
+      grabBtn = document.getElementById("grabBtn"), grabCount = document.getElementById("grabCount"),
+      meter = document.getElementById("meter"), meterFill = document.getElementById("meterFill"),
+      meterTxt = document.getElementById("meterTxt"), poolList = document.getElementById("poolList"),
+      clearBanner = document.getElementById("clearBanner"), strongBadge = document.getElementById("strongBadge"),
+      coinSlot = document.getElementById("coinSlot");
+
+  SB.countdown(document.getElementById("cd"), S.endTs, function () { SB.toast("Event ended! (demo keeps running)"); });
+
+  // ---------- capsule layout ----------
+  var capEls = [];
+  var CW = 40, ROW_H = 30;
+  function layoutCapsules() {
+    capEls.forEach(function (e) { if (e) e.remove(); });
+    capEls = [];
+    var W = glass.clientWidth, H = glass.clientHeight;
+    var n = S.caps.length, sizes = [], rem = n, size = 7;
+    while (rem > 0) { sizes.push(Math.min(size, rem)); rem -= size; size = Math.max(2, size - 1); }
+    var idx = 0;
+    S.caps.forEach(function (c, ci) {
+      var row = 0, acc = 0;
+      for (var r = 0; r < sizes.length; r++) { if (idx < acc + sizes[r]) { row = r; break; } acc += sizes[r]; }
+      var posInRow = idx - acc, k = sizes[row];
+      var usable = W - 78; // keep clear of chute on the left
+      var x = 70 + (posInRow + 0.5) * usable / k - CW / 2 + (((ci * 37) % 13) - 6);
+      var top = H - 30 - CW - row * ROW_H;
+      idx++;
+      if (c.won) { capEls.push(null); return; }
+      var el = document.createElement("div");
+      el.className = "cap " + c.t;
+      el.textContent = c.t === "gold" ? "⭐" : TIERS[c.t].ico;
+      if (c.t === "gold") el.innerHTML = "⭐<span class='lock'>🎯</span>";
+      el.style.left = Math.max(66, Math.min(W - CW - 4, x)) + "px";
+      el.style.top = top + "px";
+      glass.appendChild(el);
+      capEls.push(el);
+    });
+  }
+
+  // ---------- claw movement ----------
+  var clawX = 200, busy = false, moveIv = null;
+  function clampX(x) { return Math.max(70, Math.min(glass.clientWidth - 26, x)); }
+  function setClaw(x, slow) {
+    clawX = clampX(x);
+    claw.style.transition = slow ? "left 0.25s ease" : "left 0.12s linear";
+    claw.style.left = clawX + "px";
+    updateTarget();
+  }
+  function nearestCap() {
+    var best = -1, bd = 1e9;
+    S.caps.forEach(function (c, i) {
+      if (c.won || !capEls[i]) return;
+      var cx = capEls[i].offsetLeft + CW / 2, d = Math.abs(cx - clawX);
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best;
+  }
+  function effOdds(t) {
+    if (S.pity >= 100) return 1;
+    var o = TIERS[t].odds;
+    if (t !== "gold" && Date.now() < S.strongUntil) o = Math.min(1, o + 0.25);
+    return o;
+  }
+  var targetIdx = -1;
+  function updateTarget() {
+    var ni = nearestCap();
+    if (targetIdx >= 0 && capEls[targetIdx]) capEls[targetIdx].classList.remove("targeted");
+    targetIdx = ni;
+    if (ni < 0) { oddsTag.style.display = "none"; return; }
+    var el = capEls[ni]; el.classList.add("targeted");
+    var mega = S.pity >= 100;
+    oddsTag.style.display = "block";
+    oddsTag.className = mega ? "mega" : ""; oddsTag.id = "oddsTag";
+    oddsTag.textContent = mega ? "MEGA 100%" : Math.round(effOdds(S.caps[ni].t) * 100) + "%";
+    oddsTag.style.left = (el.offsetLeft - 4) + "px";
+    oddsTag.style.top = (el.offsetTop - 22) + "px";
+  }
+  function holdMove(btn, dir) {
+    function start(e) { e.preventDefault(); if (busy) return; stop();
+      moveIv = setInterval(function () { setClaw(clawX + dir * 4); }, 16); }
+    function stop() { clearInterval(moveIv); moveIv = null; }
+    btn.addEventListener("pointerdown", start);
+    ["pointerup", "pointerleave", "pointercancel"].forEach(function (ev) { btn.addEventListener(ev, stop); });
+  }
+  holdMove(document.getElementById("btnL"), -1);
+  holdMove(document.getElementById("btnR"), 1);
+  var dragging = false;
+  glass.addEventListener("pointerdown", function (e) { if (busy) return; dragging = true;
+    setClaw(e.clientX - glass.getBoundingClientRect().left); });
+  glass.addEventListener("pointermove", function (e) { if (dragging && !busy)
+    setClaw(e.clientX - glass.getBoundingClientRect().left); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(function (ev) {
+    glass.addEventListener(ev, function () { dragging = false; }); });
+
+  // ---------- renders ----------
+  function renderGrabs() {
+    grabCount.textContent = S.grabs;
+    grabBtn.textContent = S.pity >= 100 ? "⚡ MEGA GRAB!" : "🕹️ GRAB!";
+  }
+  function renderMeter() {
+    var p = Math.min(100, S.pity);
+    meterFill.style.width = p + "%";
+    meterTxt.textContent = p >= 100 ? "MEGA GRAB READY!" : "GRIP POWER " + p + "%";
+    meter.classList.toggle("full", p >= 100);
+    claw.classList.toggle("mega", p >= 100);
+    updateTarget();
+  }
+  function contentsLabel(t) {
+    if (S.premium) {
+      if (t === "coin") return "300 coins"; if (t === "jack") return "3000 coins + 3 Wild + Avatar Frame";
+    }
+    return { coin: "200 coins", boost: "random Wild / Undo / Draw+", gem: S.premium ? "8 gems" : "5 gems",
+      jack: "2000 coins + 2 Wild + Avatar Frame", gold: "800 coins + 3 gems (guaranteed!)" }[t];
+  }
+  function renderPool() {
+    var order = ["coin", "boost", "gem", "jack", "gold"], html = "";
+    order.forEach(function (t) {
+      var tot = 0, left = 0;
+      S.caps.forEach(function (c) { if (c.t === t) { tot++; if (!c.won) left++; } });
+      if (!tot) return;
+      html += '<div class="pool-row' + (left ? "" : " gone") + '"><span class="pico">' + (t === "gold" ? "⭐🎯" : TIERS[t].ico) +
+        '</span><span class="pname">' + TIERS[t].name + " <span class='sb-muted'>· " + contentsLabel(t) +
+        '</span></span><span class="pods">' + Math.round(TIERS[t].odds * 100) + '%</span><span class="pleft">×' + left + "</span></div>";
+    });
+    poolList.innerHTML = html;
+  }
+  function renderStrong() {
+    var left = S.strongUntil - Date.now();
+    var on = left > 0;
+    strongBadge.style.display = on ? "" : "none";
+    claw.classList.toggle("strong", on && S.pity < 100);
+    if (on) {
+      var m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+      document.getElementById("strongT").textContent = m + ":" + String(s).padStart(2, "0");
+    }
+  }
+  setInterval(renderStrong, 1000);
+
+  // ---------- grab sequence ----------
+  function wait(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+  function pop(x, y, txt) {
+    var p = document.createElement("div");
+    p.className = "pop-txt"; p.textContent = txt;
+    p.style.left = x + "px"; p.style.top = y + "px";
+    glass.appendChild(p);
+    setTimeout(function () { p.remove(); }, 950);
+  }
+  function capRewards(t) {
+    if (t === "coin") return [{ type: "coins", amount: S.premium ? 300 : 200 }];
+    if (t === "boost") { var b = ["wild", "undo", "draw"][(Math.random() * 3) | 0]; return [{ type: b, amount: 1 }]; }
+    if (t === "gem") return [{ type: "gem", amount: S.premium ? 8 : 5 }];
+    if (t === "gold") return [{ type: "coins", amount: 800 }, { type: "gem", amount: 3 }];
+    return [{ type: "coins", amount: S.premium ? 3000 : 2000 }, { type: "wild", amount: S.premium ? 3 : 2 }];
+  }
+  function openCapsule(t) {
+    var rws = capRewards(t);
+    var chips = rws.map(SB.rewardChip).join("");
+    if (t === "jack") chips += '<span class="sb-reward"><span class="ico">🖼️</span>Exclusive Avatar Frame</span>';
+    var m = SB.modal(
+      '<div class="cap-big">' + (t === "gold" ? "⭐" : TIERS[t].ico) + "</div>" +
+      "<h3 style='margin:6px 0'>" + (t === "jack" ? "JACKPOT!!!" : "Capsule opened!") + "</h3>" +
+      '<div class="open-chips">' + chips + "</div>" +
+      '<button class="sb-btn sb-btn-green sb-btn-block" id="collectBtn">Collect!</button>');
+    setTimeout(function () {
+      SB.grantRewards(rws, m.el.querySelector(".cap-big"));
+      SB.confetti(window.innerWidth / 2, window.innerHeight / 2, t === "jack" ? 160 : 80);
+    }, 500);
+    m.el.querySelector("#collectBtn").addEventListener("click", m.close);
+  }
+  async function doGrab() {
+    if (busy) return;
+    if (S.grabs <= 0) {
+      grabBtn.classList.remove("sb-shake"); void grabBtn.offsetWidth; grabBtn.classList.add("sb-shake");
+      coinSlot.classList.add("sb-shake"); setTimeout(function () { coinSlot.classList.remove("sb-shake"); }, 450);
+      SB.haptic(30); openShop("Out of grabs!"); return;
+    }
+    var ti = nearestCap();
+    if (ti < 0) return;
+    busy = true; dragging = false;
+    S.grabs--; st.save(); renderGrabs();
+    var mega = S.pity >= 100;
+    var el = capEls[ti], c = S.caps[ti];
+    var capX = el.offsetLeft, capY = el.offsetTop;
+    setClaw(capX + CW / 2, true);
+    oddsTag.style.display = "none";
+    await wait(280);
+    // descend
+    var targetH = capY - 8 - 20;
+    cable.style.height = targetH + "px";
+    await wait(540);
+    claw.classList.add("closed"); SB.haptic(12);
+    await wait(240);
+    var win = mega || Math.random() < effOdds(c.t) || c.t === "gold";
+    if (win) {
+      // carry up
+      el.classList.remove("targeted");
+      el.style.transition = "left 0.6s ease-in-out, top 0.55s ease-in-out";
+      cable.style.height = "14px";
+      el.style.top = (8 + 14 + 18) + "px";
+      el.style.left = (clawX - CW / 2) + "px";
+      await wait(580);
+      // travel to chute
+      setClaw(90, true);
+      claw.style.transition = "left 0.6s ease-in-out";
+      claw.style.left = "90px";
+      el.style.left = (90 - CW / 2) + "px";
+      await wait(640);
+      claw.classList.remove("closed");
+      el.style.transition = "top 0.45s cubic-bezier(0.5,0,0.8,0.4), opacity 0.45s";
+      el.style.top = (glass.clientHeight - 30) + "px";
+      el.style.opacity = "0";
+      SB.haptic(18);
+      await wait(470);
+      c.won = true;
+      if (mega) { S.pity = 0; pop(60, glass.clientHeight - 90, "MEGA GRAB!"); }
+      st.save();
+      el.remove(); capEls[ti] = null;
+      renderMeter(); renderPool();
+      openCapsule(c.t);
+      await wait(200);
+      busy = false;
+      checkCleared();
+    } else {
+      // near-miss slip: wobble, lift halfway, drop back
+      el.classList.add("wobble");
+      await wait(300);
+      var lift = 34;
+      el.style.transition = "top 0.4s ease-in-out";
+      cable.style.height = (targetH - lift) + "px";
+      el.style.top = (capY - lift) + "px";
+      await wait(430);
+      claw.classList.remove("closed"); SB.haptic(25);
+      el.style.transition = "top 0.5s cubic-bezier(0.34,1.8,0.64,1)";
+      el.style.top = capY + "px";
+      el.classList.remove("wobble");
+      pop(capX - 6, capY - 34, "So close!");
+      S.pity = Math.min(100, S.pity + 34);
+      st.save();
+      renderMeter();
+      pop(20, glass.clientHeight - 60, "+34% GRIP");
+      if (S.pity >= 100) SB.toast("MEGA GRAB ready — next grab is guaranteed!");
+      cable.style.height = "14px";
+      await wait(550);
+      el.style.transition = "";
+      busy = false;
+      if (S.grabs <= 0) setTimeout(function () { openShop("Out of grabs!"); }, 500);
+    }
+  }
+  grabBtn.addEventListener("click", doGrab);
+
+  // ---------- machine cleared ----------
+  function checkCleared() {
+    if (S.caps.some(function (c) { return !c.won; })) return;
+    clearBanner.classList.add("show");
+    oddsTag.style.display = "none";
+    if (!S.cleared) {
+      S.cleared = true; st.save();
+      setTimeout(function () {
+        SB.grantRewards([{ type: "coins", amount: 1000 }], clearBanner);
+        SB.confetti(window.innerWidth / 2, 220, 180);
+      }, 400);
+    }
+    document.getElementById("premiumBtn").style.display = S.premium ? "none" : "";
+  }
+  function newMachine(premium) {
+    S.premium = premium; S.caps = poolDef(premium); S.cleared = false; S.pity = 0;
+    st.save();
+    document.body.classList.toggle("premium", premium);
+    clearBanner.classList.remove("show");
+    layoutCapsules(); renderPool(); renderMeter(); renderGrabs();
+    capEls.forEach(function (e) { if (e) e.classList.add("tumble"); });
+  }
+  document.getElementById("premiumBtn").addEventListener("click", function () {
+    SB.buyIAP({
+      label: "👑 Premium Machine", price: "$9.99",
+      sub: "Gold cabinet · richer capsules · TWO jackpots · +5 grabs included",
+      contents: [{ type: "grab", amount: 5 }], grant: false,
+      onSuccess: function () { S.grabs += 5; newMachine(true); SB.toast("Premium Machine unlocked! 👑"); }
+    });
+  });
+  document.getElementById("restartBtn").addEventListener("click", function () {
+    newMachine(S.premium); SB.toast("Fresh machine loaded!");
+  });
+
+  // ---------- shop ----------
+  function today() { return new Date().toDateString(); }
+  function openShop(title) {
+    var shuffleUsed = S.shuffleDay === today();
+    var m = SB.modal(
+      "<h3 style='margin:0 0 2px'>" + (title || "Grab Shop") + "</h3>" +
+      "<div class='sb-muted' style='font-size:12px;font-weight:700;margin-bottom:4px'>All odds shown on machine · finite pool · misses always charge your grip meter</div>" +
+      '<button class="shop-opt" id="op1"><span class="so-ico">🕹️</span><span class="so-txt"><span class="so-name">3 Grabs</span><br><span class="so-sub">Quick top-up</span></span><span class="so-price">$0.99</span></button>' +
+      '<button class="shop-opt best" id="op2"><span class="so-ico">⭐</span><span class="so-txt"><span class="so-name">10 Grabs + Guaranteed Gold Capsule</span><br><span class="so-sub">Gold capsule added to the pool — 🎯 lock-on, 100% grab</span></span><span class="so-price">$4.99</span></button>' +
+      '<button class="shop-opt" id="op3"><span class="so-ico">💪</span><span class="so-txt"><span class="so-name">Strong Claw (5 min)</span><br><span class="so-sub">ALL success chances +25% · claw glows red</span></span><span class="so-price">$1.99</span></button>' +
+      '<button class="shop-opt" id="op4" ' + (shuffleUsed ? "disabled" : "") + '><span class="so-ico">🔀</span><span class="so-txt"><span class="so-name">Shuffle Machine</span><br><span class="so-sub">' + (shuffleUsed ? "Used today — back tomorrow!" : "Re-pile the capsules") + '</span></span><span class="so-price free">FREE 1/day</span></button>' +
+      '<button class="sb-sheet-cancel" id="opX">No thanks</button>');
+    m.el.querySelector("#opX").addEventListener("click", m.close);
+    m.el.querySelector("#op1").addEventListener("click", function () {
+      m.close();
+      SB.buyIAP({ label: "3 Grabs", price: "$0.99", sub: "Lucky Grabber · instant delivery",
+        contents: [{ type: "grab", amount: 3 }], grant: false,
+        onSuccess: function () { S.grabs += 3; st.save(); renderGrabs(); SB.toast("+3 Grabs! Good luck! 🕹️"); } });
+    });
+    m.el.querySelector("#op2").addEventListener("click", function () {
+      m.close();
+      SB.buyIAP({ label: "10 Grabs + Guaranteed Gold Capsule", price: "$4.99",
+        sub: "Gold capsule drops into the pool with a 🎯 lock-on — 100% grab chance",
+        contents: [{ type: "grab", amount: 10 }, { type: "star", amount: 1 }], grant: false,
+        onSuccess: function () {
+          S.grabs += 10;
+          S.caps.push({ t: "gold", won: false });
+          st.save(); renderGrabs(); layoutCapsules(); renderPool();
+          capEls.forEach(function (e) { if (e) e.classList.add("tumble"); });
+          SB.toast("Gold capsule added — it can't escape! 🎯");
+        } });
+    });
+    m.el.querySelector("#op3").addEventListener("click", function () {
+      m.close();
+      SB.buyIAP({ label: "💪 Strong Claw", price: "$1.99", sub: "All success chances +25% for 5 minutes", grant: false,
+        onSuccess: function () {
+          S.strongUntil = Date.now() + 5 * 60 * 1000; st.save();
+          renderStrong(); updateTarget(); SB.toast("Strong Claw active — odds +25%! 💪");
+        } });
+    });
+    m.el.querySelector("#op4").addEventListener("click", function () {
+      m.close();
+      S.shuffleDay = today();
+      // shuffle remaining capsule order
+      for (var i = S.caps.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0; var t2 = S.caps[i]; S.caps[i] = S.caps[j]; S.caps[j] = t2; }
+      st.save(); layoutCapsules(); renderPool();
+      capEls.forEach(function (e) { if (e) e.classList.add("tumble"); });
+      SB.haptic(20); SB.toast("Machine shuffled! 🔀");
+    });
+  }
+  document.getElementById("shopBtn").addEventListener("click", function () { openShop("Grab Shop"); });
+
+  // ---------- earn button ----------
+  var earnBtn = document.getElementById("earnBtn");
+  earnBtn.addEventListener("click", function () {
+    earnBtn.disabled = true;
+    earnBtn.textContent = "🃏 Playing level…";
+    setTimeout(function () {
+      S.grabs++; st.save(); renderGrabs();
+      earnBtn.disabled = false;
+      earnBtn.textContent = "🃏 Play a level (+1 grab)";
+      SB.haptic(20);
+      SB.toast("Level complete! +1 Grab 🕹️");
+      SB.confetti(window.innerWidth / 2, window.innerHeight - 220, 40);
+      coinSlot.classList.add("sb-bounce"); setTimeout(function () { coinSlot.classList.remove("sb-bounce"); }, 550);
+    }, 1200);
+  });
+
+  // ---------- info ----------
+  document.getElementById("infoBtn").addEventListener("click", function () {
+    var m = SB.modal(
+      "<h3>🕹️ Lucky Grabber</h3>" +
+      "<p style='font-size:13px;text-align:left;line-height:1.5'>Move the claw and grab capsules from a <b>finite, fully visible prize pool</b> — every capsule stays in the machine until you win it, so clearing the whole pool (jackpot included) is guaranteed with enough grabs. Success odds are shown per capsule tier, and <b>every miss charges the GRIP POWER meter by +34%</b>; a full meter makes your next grab a MEGA GRAB with a 100% catch on anything. Monetization is contextual: when you run out of grabs mid-pool you can buy grab packs, a temporary Strong Claw odds boost, or a guaranteed Gold capsule. Because failed grabs always feed the pity meter and odds are published, no spend ever feels wasted — the honest transparency itself drives conversion.</p>" +
+      "<button class='sb-btn sb-btn-blue sb-btn-block' id='okI'>Got it!</button>");
+    m.el.querySelector("#okI").addEventListener("click", m.close);
+  });
+
+  // ---------- boot ----------
+  layoutCapsules();
+  setClaw(glass.clientWidth * 0.55);
+  renderGrabs(); renderMeter(); renderPool(); renderStrong();
+  checkCleared();
+  window.addEventListener("resize", function () { layoutCapsules(); setClaw(clawX); renderMeter(); });
+})();
+</script>
+</body>
+</html>
