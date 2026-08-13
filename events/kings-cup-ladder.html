@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Skip-Bo · King's Cup Ladder</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+/* ---------- banner ---------- */
+.kc-banner{position:relative;border-radius:var(--sb-radius);padding:14px 14px 12px;color:#fff;overflow:hidden;
+  background:linear-gradient(160deg,#3b2670 0%,#1D4FA1 55%,#3E8EDE 100%);border:2px solid rgba(255,199,44,.5);box-shadow:var(--sb-shadow);}
+.kc-banner::before{content:"👑";position:absolute;right:-8px;top:-14px;font-size:86px;opacity:.16;transform:rotate(14deg);}
+.kc-banner h2{margin:0;font-size:20px;text-shadow:0 2px 0 rgba(0,0,0,.3);}
+.kc-banner .kc-sub{font-size:11.5px;color:#cfe3fb;font-weight:700;margin-top:2px;}
+.kc-toprow{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap;}
+.kc-info{width:44px;height:44px;margin-left:auto;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);
+  color:#fff;font-weight:900;font-size:17px;cursor:pointer;}
+/* league strip */
+.kc-leagues{display:flex;gap:6px;margin-top:10px;}
+.kc-league{flex:1;text-align:center;border-radius:11px;padding:6px 2px;font-size:10.5px;font-weight:800;
+  background:rgba(0,0,0,.28);color:#8fa8cc;border:1.5px solid transparent;}
+.kc-league .big{font-size:17px;display:block;}
+.kc-league.done{color:#b8e6c4;}
+.kc-league.now{background:rgba(255,199,44,.16);border-color:var(--sb-yellow);color:#fff;}
+.kc-league.next{color:#e7c7f5;}
+.kc-league small{display:block;font-size:8.5px;letter-spacing:.5px;font-weight:900;}
+/* ---------- cup meter + CTA ---------- */
+.kc-cta{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+.kc-cups{display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:900;font-size:15px;}
+.kc-cups .n{font-size:26px;color:var(--sb-yellow);text-shadow:0 2px 0 rgba(0,0,0,.35);}
+.kc-play-sub{display:block;font-size:10.5px;font-weight:800;opacity:.85;}
+.kc-hardbtn{position:relative;background:linear-gradient(180deg,#ff8a5c 0%,#D7263D 55%,#8f1024 100%)!important;}
+.kc-hardbtn::after{content:"BEST VALUE";position:absolute;top:-8px;right:10px;background:var(--sb-yellow);color:var(--sb-ink);
+  font-size:9px;font-weight:900;letter-spacing:.5px;padding:2px 8px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.3);}
+/* ---------- tabs ---------- */
+.kc-tabs{display:flex;gap:6px;margin:14px 0 10px;background:rgba(0,0,0,.25);border-radius:14px;padding:4px;}
+.kc-tab{flex:1;min-height:44px;border:none;border-radius:11px;font-family:var(--sb-font);font-weight:900;font-size:13.5px;
+  background:transparent;color:#bcd4f2;cursor:pointer;}
+.kc-tab.on{background:var(--sb-cream);color:var(--sb-ink);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.kc-tab .bdg{display:inline-block;min-width:17px;padding:1px 5px;border-radius:999px;background:var(--sb-red);color:#fff;font-size:10px;margin-left:3px;}
+/* ---------- leaderboard ---------- */
+.kc-promo{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--sb-ink);
+  background:linear-gradient(90deg,#f3d9ff,#ffe9f2);border:1.5px dashed #b05cd8;border-radius:12px;padding:8px 10px;margin-bottom:8px;}
+.kc-rival{font-size:12px;font-weight:800;color:#fff;background:rgba(0,0,0,.3);border-radius:10px;padding:7px 10px;margin-bottom:8px;text-align:center;}
+.kc-rival b{color:var(--sb-yellow);}
+.kc-list{max-height:352px;overflow-y:auto;border-radius:13px;background:rgba(253,246,227,.97);box-shadow:var(--sb-shadow);
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.kc-row{display:flex;align-items:center;gap:9px;padding:8px 11px;border-bottom:1px solid rgba(27,42,74,.08);font-size:13.5px;font-weight:700;min-height:44px;}
+.kc-row .rk{width:30px;text-align:center;font-weight:900;font-size:13px;color:#5a6b8c;flex:0 0 auto;}
+.kc-row .rk.medal{font-size:19px;}
+.kc-row .av{width:30px;height:30px;flex:0 0 auto;border-radius:50%;background:#e6eefb;display:grid;place-items:center;font-size:17px;position:relative;}
+.kc-row .av.crowned::after{content:"👑";position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:12px;}
+.kc-row .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kc-row .cups{font-weight:900;color:var(--sb-blue);flex:0 0 auto;}
+.kc-row.top10{background:linear-gradient(90deg,rgba(255,199,44,.14),transparent);}
+.kc-row.top3{background:linear-gradient(90deg,rgba(255,199,44,.32),rgba(255,199,44,.06));}
+.kc-row.me{position:sticky;top:0;bottom:0;z-index:5;background:linear-gradient(90deg,#1D4FA1,#3E8EDE);color:#fff;
+  border-top:1.5px solid var(--sb-yellow);border-bottom:1.5px solid var(--sb-yellow);}
+.kc-row.me .rk,.kc-row.me .cups{color:var(--sb-yellow);}
+.kc-zone{display:flex;align-items:center;gap:8px;padding:4px 11px;font-size:10px;font-weight:900;letter-spacing:.6px;color:#b05cd8;background:#faf3fd;}
+.kc-zone::before,.kc-zone::after{content:"";flex:1;height:1.5px;background:#dfc3ec;}
+/* ---------- milestones ---------- */
+.kc-pass{border-radius:var(--sb-radius);padding:12px;margin-bottom:10px;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#6a3aa2,#3b2670);border:2px solid rgba(255,199,44,.55);box-shadow:var(--sb-shadow);}
+.kc-pass h3{margin:0 0 2px;font-size:15px;}
+.kc-pass p{margin:0 0 9px;font-size:11.5px;color:#dcc9f2;font-weight:700;}
+.kc-pass .free-note{font-size:10.5px;color:#c3ecc9;font-weight:800;margin-top:7px;}
+.kc-track{background:rgba(253,246,227,.97);border-radius:var(--sb-radius);box-shadow:var(--sb-shadow);padding:5px 12px;}
+.kc-lanehead{display:grid;grid-template-columns:44px 1fr 1fr;gap:8px;padding:8px 0 4px;font-size:10px;font-weight:900;letter-spacing:.5px;color:#5a6b8c;text-align:center;}
+.kc-lanehead .royal{color:#8b3fbd;}
+.kc-ms{display:grid;grid-template-columns:44px 1fr 1fr;gap:8px;align-items:center;padding:9px 0;border-top:1.5px solid rgba(27,42,74,.08);position:relative;}
+.kc-node{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:12px;
+  background:#dfe8f6;color:#5a6b8c;border:2.5px solid #c2d2e8;position:relative;z-index:1;justify-self:center;}
+.kc-node.hit{background:linear-gradient(180deg,#ffd95e,var(--sb-yellow));color:var(--sb-ink);border-color:var(--sb-yellow-dark);}
+.kc-node small{position:absolute;bottom:-13px;font-size:8px;letter-spacing:.4px;color:#8296b5;font-weight:900;}
+.kc-cell{border-radius:11px;padding:6px;text-align:center;font-size:11.5px;font-weight:800;min-height:56px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#eef3fb;color:var(--sb-ink);}
+.kc-cell .rw{font-size:11px;line-height:1.25;}
+.kc-cell .rw .ico{font-size:13px;}
+.kc-cell.royal{background:linear-gradient(180deg,#f4e6ff,#e9d2fb);border:1.5px solid #cfa0e8;}
+.kc-cell .kc-claim{min-height:30px;min-width:74px;border:none;border-radius:9px;font-family:var(--sb-font);font-weight:900;font-size:11.5px;
+  color:#fff;background:linear-gradient(180deg,#3fc167,var(--sb-green));cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.2);animation:sbPulse 1.4s infinite;}
+.kc-cell .kc-lock{font-size:11px;color:#8b3fbd;font-weight:800;background:none;border:none;cursor:pointer;min-height:30px;font-family:var(--sb-font);}
+.kc-cell .done{color:var(--sb-green-dark);font-size:11px;}
+.kc-cell .todo{color:#8296b5;font-size:10px;}
+.kc-crownrow{display:flex;align-items:center;gap:10px;padding:11px 2px 9px;border-top:1.5px solid rgba(27,42,74,.08);font-size:11.5px;font-weight:800;color:var(--sb-ink);}
+.kc-crownrow .cf{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#fff2c4,#ffd95e);display:grid;place-items:center;font-size:22px;border:2.5px solid var(--sb-yellow-dark);}
+/* ---------- footer / finale ---------- */
+.kc-stats{display:flex;gap:6px;margin-top:12px;}
+.kc-stat{flex:1;background:rgba(0,0,0,.28);border-radius:12px;padding:8px 4px;text-align:center;color:#bcd4f2;font-size:9.5px;font-weight:800;letter-spacing:.4px;}
+.kc-stat b{display:block;font-size:16px;color:#fff;}
+.kc-finale-btn{margin-top:12px;opacity:.92;}
+.kc-final-rank{font-size:44px;font-weight:900;color:var(--sb-blue);line-height:1;}
+.kc-promote{display:inline-block;font-size:36px;animation:kcRise 1.1s cubic-bezier(.34,1.56,.64,1);}
+@keyframes kcRise{0%{transform:translateY(46px) scale(.4);opacity:0;}60%{transform:translateY(-8px) scale(1.15);}100%{transform:translateY(0) scale(1);opacity:1;}}
+.kc-recap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0;}
+.hidden{display:none!important;}
+@media (max-width:374px){.kc-cell{font-size:10.5px;}.kc-row{font-size:12.5px;}}
+</style>
+</head>
+<body>
+<div class="sb-app">
+<div class="sb-main">
+
+  <div class="kc-banner">
+    <h2>👑 King's Cup Ladder</h2>
+    <div class="kc-sub">Clear levels → earn Cups → climb the ladder. Everyone finishes the Milestone Track!</div>
+    <div class="kc-toprow">
+      <span class="sb-timer-chip">⏳ <span id="kc-timer">—</span></span>
+      <span class="sb-timer-chip" style="background:rgba(46,158,79,.9)">🛡️ Losses never cost Cups</span>
+      <button class="kc-info" id="kc-info" aria-label="Event rules">ⓘ</button>
+    </div>
+    <div class="kc-leagues">
+      <div class="kc-league done"><span class="big">🥉</span>BRONZE<small>CLEARED ✓</small></div>
+      <div class="kc-league now"><span class="big">🥈</span>SILVER<small>YOU ARE HERE</small></div>
+      <div class="kc-league next"><span class="big">💎</span>RUBY<small>TOP 3 PROMOTE</small></div>
+    </div>
+    <div class="kc-cta">
+      <div class="kc-cups">🏆 <span class="n" id="kc-mycups">0</span> Cups · Rank <span class="n" style="font-size:18px" id="kc-myrank">—</span></div>
+      <button class="sb-btn sb-btn-green sb-btn-block" id="kc-play">▶ Play level <span class="kc-play-sub">+1 🏆 per win · ~78% win rate</span></button>
+      <button class="sb-btn sb-btn-block kc-hardbtn" id="kc-hard">🔥 Hard level <span class="kc-play-sub">+3 🏆 per win · ~55% win rate</span></button>
+    </div>
+  </div>
+
+  <div class="kc-tabs">
+    <button class="kc-tab on" id="kc-tab-lb" data-tab="lb">🏆 Leaderboard</button>
+    <button class="kc-tab" id="kc-tab-ms" data-tab="ms">🏅 Milestones<span class="bdg hidden" id="kc-ms-bdg">1</span></button>
+  </div>
+
+  <div id="kc-panel-lb">
+    <div class="kc-promo">💎 <span><b>Top 3 promote to Ruby League</b> at event end — everyone below still keeps every Milestone reward.</span></div>
+    <div class="kc-rival" id="kc-rival"></div>
+    <div class="kc-list" id="kc-list"></div>
+  </div>
+
+  <div id="kc-panel-ms" class="hidden">
+    <div class="kc-pass" id="kc-pass"></div>
+    <div class="kc-track">
+      <div class="kc-lanehead"><span>CUPS</span><span>FREE LANE</span><span class="royal">👑 ROYAL LANE</span></div>
+      <div id="kc-ms-rows"></div>
+      <div class="kc-crownrow"><span class="cf" id="kc-cf">👑</span>
+        <span><b>Crown Avatar Frame</b> — exclusive Royal reward at 60 Cups. Free lane pays real rewards at every step, no purchase needed.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="kc-stats">
+    <div class="kc-stat"><b id="kc-st-plays">0</b>LEVELS PLAYED</div>
+    <div class="kc-stat"><b id="kc-st-wins">0</b>WINS</div>
+    <div class="kc-stat"><b id="kc-st-hard">0</b>HARD CLEARS</div>
+    <div class="kc-stat"><b id="kc-st-cups">0</b>CUPS EARNED</div>
+  </div>
+
+  <button class="sb-btn sb-btn-blue sb-btn-block sb-btn-sm kc-finale-btn" id="kc-finale">⏩ See finale — final standings &amp; rewards</button>
+
+</div>
+</div>
+<script src="../shared/core.js"></script>
+<script src="../shared/levelsim.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ================= config (compressed demo timers) ================ */
+var EVENT_MS = 12*60*1000;           // "7 days", compressed to 12 min for demo
+var BOT_TICK = 3500;                 // bots advance every 3.5s
+var MILES = [
+  {cups:5,  free:[{type:"coins",amount:500}],                              royal:[{type:"coins",amount:1000}]},
+  {cups:12, free:[{type:"wild",amount:2},{type:"coins",amount:750}],       royal:[{type:"wild",amount:4},{type:"coins",amount:1500}]},
+  {cups:25, free:[{type:"chest",amount:1},{type:"coins",amount:1000}],     royal:[{type:"chest",amount:2},{type:"coins",amount:2000}]},
+  {cups:40, free:[{type:"energy",amount:3},{type:"gem",amount:20}],        royal:[{type:"energy",amount:6},{type:"gem",amount:40}]},
+  {cups:60, free:[{type:"coins",amount:2500},{type:"chest",amount:1}],     royal:[{type:"coins",amount:5000},{type:"chest",amount:2}]}
+];
+var NAMES=["Priya","Leo","Marta","Kenji","Sofia","Omar","Ines","Diego","Hana","Tariq","Bea","Nikolai","Amara","Chen","Lucia","Ravi","Greta","Mateo","Yuki","Sam","Fatima","Oscar","Nina","Jamal","Elif","Pedro","Zoe","Anders","Mei","Carlos","Ida","Kwame","Rosa","Viktor","Aria","Deepak","Tilly","Hugo","Sana","Bruno","Lena","Ahmed","Chiara","Finn","Noor","Gustav","Paloma","Ilya","Marisol"];
+var AVS=["🦊","🐼","🦁","🐸","🐙","🦄","🐯","🦉","🐨","🐺","🦋","🐢","🦜","🐝","🦈","🐰","🦓","🐳","🦥","🐹","🦩","🐮","🦔","🐧","🦚","🐴","🦡","🐿️","🦭","🐞","🦅","🐊","🦢","🐘","🦂","🐬","🦌","🐫","🦃","🐈","🦎","🐕","🦙","🐆","🦕","🐇","🦝","🐓","🦖"];
+
+/* ================= state ================ */
+var st = SB.store("kings-cup-ladder", {start:0,end:0,cups:0,level:214,plays:0,wins:0,hardWins:0,
+  claimedFree:[],claimedRoyal:[],royal:false,crown:false,bots:null,lastTick:0,finaleDone:false});
+var d = st.data;
+var now = Date.now();
+if(!d.start){ d.start = now; d.end = now + EVENT_MS; d.lastTick = now; }
+if(!d.bots){
+  d.bots = NAMES.map(function(n,i){
+    return {name:n, av:AVS[i], cups:Math.floor(Math.random()*9), rate:0.25+Math.random()*1.45}; // cups per minute
+  });
+}
+/* catch-up: bots kept playing while page was closed */
+(function catchUp(){
+  var mins = Math.min((now - d.lastTick)/60000, EVENT_MS/60000);
+  if(mins > 0.05){
+    d.bots.forEach(function(b){ b.cups += Math.round(b.rate*mins*(0.7+Math.random()*0.6)); });
+    if(mins > 0.5) SB.toast("While you were away, rivals kept climbing…",2400);
+  }
+  d.lastTick = now;
+})();
+st.save();
+
+SB.init({title:"King's Cup Ladder", subtitle:"Silver League · Mini Event", resetKey:"kings-cup-ladder"});
+
+/* ================= helpers ================ */
+function $(id){ return document.getElementById(id); }
+function ended(){ return d.finaleDone || Date.now() >= d.end; }
+function standings(){
+  var all = d.bots.map(function(b,i){ return {name:b.name,av:b.av,cups:b.cups,me:false,i:i}; });
+  all.push({name:"You",av:"😎",cups:d.cups,me:true,i:-1});
+  all.sort(function(a,b){ return b.cups-a.cups || a.i-b.i; });
+  return all;
+}
+function myRank(){ var s=standings(); for(var i=0;i<s.length;i++) if(s[i].me) return i+1; return 50; }
+function wr(base){ if(window.__forceWin===true) return 1; if(window.__forceWin===false) return 0; return base; }
+function chips(list){ return list.map(SB.rewardChip).join(" "); }
+
+/* ================= leaderboard render ================ */
+var lastAheadNames = null, lastToast = 0;
+function renderBoard(){
+  var s = standings(), rank = myRank();
+  $("kc-mycups").textContent = d.cups;
+  $("kc-myrank").textContent = "#"+rank;
+  /* nearest rival callout */
+  var rv = $("kc-rival");
+  if(rank === 1){ rv.innerHTML = "👑 <b>You lead the ladder!</b> Keep clearing levels to stay ahead."; }
+  else { var ahead = s[rank-2]; rv.innerHTML = "🎯 <b>+"+Math.max(1,(ahead.cups-d.cups+1))+" cups</b> to pass <b>"+ahead.av+" "+ahead.name+"</b>"; }
+  /* rows */
+  var html = "";
+  s.forEach(function(p,idx){
+    var r = idx+1;
+    var cls = "kc-row"+(p.me?" me":r<=3?" top3":r<=10?" top10":"");
+    var rk = r===1?'<span class="rk medal">🥇</span>':r===2?'<span class="rk medal">🥈</span>':r===3?'<span class="rk medal">🥉</span>':'<span class="rk">'+r+'</span>';
+    html += '<div class="'+cls+'">'+rk+'<span class="av'+((p.me&&d.crown)?" crowned":"")+'">'+p.av+'</span><span class="nm">'+p.name+(p.me?" (You)":"")+'</span><span class="cups">🏆 '+p.cups+"</span></div>";
+    if(r===3) html += '<div class="kc-zone">▲ TOP 3 PROMOTE TO RUBY LEAGUE 💎</div>';
+    if(r===10) html += '<div class="kc-zone" style="color:#b8860b;background:#fdf8ea">▲ TOP 10 BONUS ZONE</div>';
+  });
+  $("kc-list").innerHTML = html;
+  /* overtake drama */
+  var aheadNames = s.slice(0,rank-1).map(function(p){return p.name;});
+  if(lastAheadNames){
+    var fresh = aheadNames.filter(function(n){ return lastAheadNames.indexOf(n)===-1; });
+    if(fresh.length && Date.now()-lastToast > 8000 && !ended()){
+      var b = s.filter(function(p){return p.name===fresh[0];})[0];
+      SB.toast(fresh[0]+" just passed you — "+(b.cups-d.cups)+" cup"+((b.cups-d.cups)>1?"s":"")+" ahead!",2600);
+      SB.haptic(12); lastToast = Date.now();
+    }
+  }
+  lastAheadNames = aheadNames;
+}
+
+/* ================= milestones render ================ */
+function claimable(){
+  var n=0;
+  MILES.forEach(function(m,i){
+    if(d.cups>=m.cups && d.claimedFree.indexOf(i)===-1) n++;
+    if(d.royal && d.cups>=m.cups && d.claimedRoyal.indexOf(i)===-1) n++;
+  });
+  return n;
+}
+function renderMs(){
+  $("kc-pass").innerHTML = d.royal
+    ? '<h3>👑 Royal Pass ACTIVE</h3><p>Royal lane unlocked — every milestone pays double, Crown Frame at 60 Cups.</p>'
+      +'<div class="free-note">✓ Purchased. Enjoy the double lane!</div>'
+    : '<h3>👑 Royal Pass</h3><p>Doubles every milestone reward + exclusive Crown Avatar Frame at 60 Cups.</p>'
+      +'<button class="sb-btn sb-btn-yellow sb-btn-sm" id="kc-buy">Unlock Royal · $4.99</button>'
+      +'<div class="free-note">🆓 No purchase needed — the Free lane pays real rewards at every single milestone.</div>';
+  var buy = $("kc-buy"); if(buy) buy.addEventListener("click", buyRoyal);
+
+  var html="";
+  MILES.forEach(function(m,i){
+    var hit = d.cups>=m.cups;
+    html += '<div class="kc-ms">'
+      +'<div class="kc-node'+(hit?" hit":"")+'">'+(hit?"✓":"")+' '+m.cups+'<small>CUPS</small></div>'
+      +cell(m,i,"free",hit)+cell(m,i,"royal",hit)+'</div>';
+  });
+  $("kc-ms-rows").innerHTML = html;
+  $("kc-ms-rows").querySelectorAll("[data-claim]").forEach(function(b){
+    b.addEventListener("click", function(){ claim(+b.getAttribute("data-claim"), b.getAttribute("data-lane"), b); });
+  });
+  $("kc-ms-rows").querySelectorAll("[data-royalgate]").forEach(function(b){ b.addEventListener("click", buyRoyal); });
+  $("kc-cf").style.filter = d.crown ? "none" : "grayscale(.9)";
+  var n = claimable(), bdg = $("kc-ms-bdg");
+  bdg.classList.toggle("hidden", n===0); bdg.textContent = n;
+}
+function cell(m,i,lane,hit){
+  var claimed = (lane==="free"?d.claimedFree:d.claimedRoyal).indexOf(i)!==-1;
+  var rws = m[lane].map(function(r){return '<span class="ico">'+SB.icon(r.type)+"</span>"+SB.fmt(r.amount);}).join(" · ");
+  var extra = (lane==="royal" && i===MILES.length-1) ? ' · <span class="ico">👑</span>Frame' : "";
+  var action;
+  if(claimed) action = '<span class="done">✓ Claimed</span>';
+  else if(!hit) action = '<span class="todo">'+(m.cups-d.cups)+' cups to go</span>';
+  else if(lane==="royal" && !d.royal) action = '<button class="kc-lock" data-royalgate>🔒 Royal only</button>';
+  else action = '<button class="kc-claim" data-claim="'+i+'" data-lane="'+lane+'">CLAIM</button>';
+  return '<div class="kc-cell '+lane+'"><span class="rw">'+rws+extra+'</span>'+action+'</div>';
+}
+function claim(i,lane,el){
+  var arr = lane==="free"?d.claimedFree:d.claimedRoyal;
+  if(arr.indexOf(i)!==-1) return;
+  arr.push(i); st.save();
+  SB.grantRewards(MILES[i][lane], el);
+  if(lane==="royal" && i===MILES.length-1 && !d.crown){ d.crown=true; st.save(); SB.toast("👑 Crown Avatar Frame unlocked!",2500); SB.confetti(); }
+  renderMs(); renderBoard();
+}
+
+/* ================= royal pass IAP (retro-grant celebration) ============ */
+function buyRoyal(){
+  if(d.royal) return;
+  SB.buyIAP({
+    label:"👑 Royal Pass — King's Cup Ladder",
+    price:"$4.99",
+    sub:"Doubles all milestone rewards + Crown Avatar Frame at 60 Cups. Free lane keeps paying either way.",
+    contents:[{type:"gem",amount:10}],
+    grant:false,
+    onSuccess:function(){
+      d.royal = true;
+      SB.grantRewards([{type:"gem",amount:10}]);
+      /* retroactive: royal rewards for milestones already passed */
+      var retro=[];
+      MILES.forEach(function(m,i){
+        if(d.cups>=m.cups && d.claimedRoyal.indexOf(i)===-1){
+          d.claimedRoyal.push(i);
+          m.royal.forEach(function(r){ retro.push(r); });
+          if(i===MILES.length-1) d.crown=true;
+        }
+      });
+      st.save();
+      if(retro.length){
+        SB.grantRewards(retro);
+        SB.modal('<h3 style="margin:0 0 6px">👑 Royal unlocked!</h3>'
+          +'<p class="sb-muted" style="font-size:13px;margin:0 0 10px">You already passed milestones — here are your retroactive Royal rewards:</p>'
+          +'<div class="kc-recap">'+chips(retro)+'</div>'
+          +'<button class="sb-btn sb-btn-green sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Collect &amp; climb!</button>');
+      } else SB.toast("👑 Royal Pass active — milestones now pay double!",2600);
+      renderMs(); renderBoard();
+    }
+  });
+}
+
+/* ================= level play (the ONLY fuel) ================ */
+function play(hard){
+  if(ended()){ SB.toast("Event finished — see the finale!"); return; }
+  var btnP=$("kc-play"), btnH=$("kc-hard");
+  btnP.disabled = btnH.disabled = true;
+  SB.playLevel({hard:hard, winRate:wr(hard?0.55:0.78), title:"Adventure Level "+d.level})
+  .then(function(res){
+    d.plays++; d.level++;
+    if(res.won){
+      d.wins++; if(hard) d.hardWins++;
+      var gain = hard?3:1;
+      d.cups += gain;
+      SB.toast("+"+gain+" 🏆 Cup"+(gain>1?"s":"")+"! ("+d.cups+" total)",2000);
+      SB.confetti(window.innerWidth/2, 250, 40);
+      var el=$("kc-mycups"); el.classList.remove("sb-bounce"); void el.offsetWidth; el.classList.add("sb-bounce");
+    } else {
+      SB.toast("No cups lost — your "+d.cups+" 🏆 are safe. Try again!",2200);
+    }
+    st.save();
+    renderBoard(); renderMs(); renderStats();
+    btnP.disabled = btnH.disabled = ended();
+  });
+}
+$("kc-play").addEventListener("click", function(){ play(false); });
+$("kc-hard").addEventListener("click", function(){ play(true); });
+
+/* ================= bots live ticking ================ */
+setInterval(function(){
+  if(ended()) return;
+  var t = Date.now();
+  d.bots.forEach(function(b){
+    if(Math.random() < b.rate*(BOT_TICK/60000)*1.15) b.cups += (Math.random()<0.18?2:1);
+  });
+  d.lastTick = t; st.save();
+  renderBoard();
+}, BOT_TICK);
+
+/* ================= stats ================ */
+function renderStats(){
+  $("kc-st-plays").textContent=d.plays; $("kc-st-wins").textContent=d.wins;
+  $("kc-st-hard").textContent=d.hardWins; $("kc-st-cups").textContent=d.cups;
+}
+
+/* ================= info modal ================ */
+$("kc-info").addEventListener("click", function(){
+  SB.modal('<h3 style="margin:0 0 8px">👑 How King\'s Cup Ladder works</h3>'
+    +'<div style="text-align:left;font-size:13px;line-height:1.55">'
+    +'<b>Earning Cups</b><br>▶ Clear a level: <b>+1 🏆</b> (~78% win rate)<br>🔥 Clear a HARD level: <b>+3 🏆</b> (~55% win rate)<br>'
+    +'🛡️ <b>Losses never remove Cups.</b> Your ladder only goes up.<br><br>'
+    +'<b>Two ways to win</b><br>🏅 <b>Milestone Track</b> — 5 personal goals (5/12/25/40/60 Cups). Every player can finish it, whatever their rank.<br>'
+    +'🏆 <b>Leaderboard</b> — 50 players. Top 3 promote to Ruby League. Rank rewards are a modest bonus; the Milestone Track is the main prize pool.<br><br>'
+    +'<b>👑 Royal Pass ($4.99, optional)</b><br>Doubles milestone rewards + Crown Frame. Buying later retro-grants Royal rewards for milestones you already passed. The Free lane always pays.<br><br>'
+    +'<span class="sb-muted" style="font-size:11px">Demo note: the 7-day event is compressed to 12 minutes; rivals are simulated players.</span></div>'
+    +'<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>');
+});
+
+/* ================= tabs ================ */
+document.querySelectorAll(".kc-tab").forEach(function(t){
+  t.addEventListener("click", function(){
+    document.querySelectorAll(".kc-tab").forEach(function(x){ x.classList.remove("on"); });
+    t.classList.add("on");
+    $("kc-panel-lb").classList.toggle("hidden", t.dataset.tab!=="lb");
+    $("kc-panel-ms").classList.toggle("hidden", t.dataset.tab!=="ms");
+    SB.haptic(8);
+  });
+});
+
+/* ================= finale ================ */
+function rankRewards(r){
+  if(r===1)  return [{type:"coins",amount:2000},{type:"gem",amount:20}];
+  if(r<=3)   return [{type:"coins",amount:1200},{type:"gem",amount:10}];
+  if(r<=10)  return [{type:"coins",amount:800}];
+  if(r<=25)  return [{type:"coins",amount:400}];
+  return [{type:"coins",amount:150}];
+}
+function showFinale(){
+  var rank = myRank(), rws = rankRewards(rank), promoted = rank<=3;
+  var granted = !d.finaleDone;
+  if(granted){ d.finaleDone = true; st.save(); SB.grantRewards(rws); if(promoted) SB.confetti(); }
+  var msDone = d.claimedFree.length, msLeft = claimable();
+  SB.modal(
+    '<div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#8b3fbd">EVENT FINALE · SILVER LEAGUE</div>'
+    +(promoted?'<div class="kc-promote">💎</div><h3 style="margin:2px 0">PROMOTED TO RUBY LEAGUE!</h3>':'<h3 style="margin:8px 0 2px">Final standings</h3>')
+    +'<div class="kc-final-rank">#'+rank+'</div>'
+    +'<div class="sb-muted" style="font-size:12px;margin-bottom:6px">of 50 players · '+d.cups+' 🏆 Cups'
+    +(promoted?'':' · finish Top 3 next time to reach 💎 Ruby')+'</div>'
+    +'<div style="font-size:12px;font-weight:800;margin-top:6px">Rank bonus'+(granted?' (collected)':' (already collected)')+'</div>'
+    +'<div class="kc-recap">'+chips(rws)+'</div>'
+    +'<div style="font-size:12px;font-weight:800">Milestone Track: '+msDone+'/'+MILES.length+' claimed'
+    +(msLeft?' · <span style="color:#D7263D">'+msLeft+' reward'+(msLeft>1?'s':'')+' still waiting!</span>':' — the real prize pool 💰')+'</div>'
+    +(msLeft?'<button class="sb-btn sb-btn-yellow sb-btn-block" style="margin-top:10px" id="kc-goclaim">🏅 Claim remaining milestones</button>':'')
+    +'<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:8px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Close</button>'
+  );
+  var g=$("kc-goclaim");
+  if(g) g.addEventListener("click", function(){
+    document.querySelector(".sb-modal-backdrop").remove();
+    $("kc-tab-ms").click();
+  });
+  $("kc-play").disabled = $("kc-hard").disabled = true;
+  $("kc-finale").textContent = "🏁 Event ended — view final standings";
+}
+$("kc-finale").addEventListener("click", showFinale);
+
+/* ================= countdown + boot ================ */
+SB.countdown($("kc-timer"), d.end, function(){
+  $("kc-timer").textContent = "Ended";
+  if(!d.finaleDone) showFinale();
+});
+if(d.finaleDone){ $("kc-play").disabled=$("kc-hard").disabled=true; $("kc-finale").textContent="🏁 Event ended — view final standings"; }
+renderBoard(); renderMs(); renderStats();
+
+/* first-visit rules peek */
+if(d.plays===0 && !d.finaleDone && d.cups===0) setTimeout(function(){ SB.toast("Clear levels to earn 🏆 Cups — losses never cost you anything!",2800); }, 700);
+})();
+</script>
+</body>
+</html>

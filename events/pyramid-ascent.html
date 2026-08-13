@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Skip-Bo · Pyramid Ascent</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+/* ================= desert hero scene ================= */
+.py-hero{position:relative;height:320px;border-radius:var(--sb-radius);overflow:hidden;
+  border:2px solid rgba(255,199,44,.5);box-shadow:var(--sb-shadow);
+  background:linear-gradient(180deg,#3d2f6e 0%,#8e4a6b 22%,#d06a4a 44%,#f3944a 62%,#ffc978 80%,#f6dfae 100%);}
+.py-sun{position:absolute;width:46px;height:46px;border-radius:50%;transition:left 1.2s linear,top 1.2s linear;
+  background:radial-gradient(circle at 42% 38%,#fffbe0,#ffd166 52%,#ff8f3c 100%);
+  box-shadow:0 0 34px 12px rgba(255,178,86,.55),0 0 80px 30px rgba(255,140,60,.28);}
+.py-haze{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,rgba(255,214,150,0),rgba(255,222,168,.75));}
+.py-dune{position:absolute;border-radius:50% 50% 0 0/100% 100% 0 0;}
+.py-dune.a{left:-24%;bottom:-30px;width:88%;height:96px;background:linear-gradient(180deg,#e8bd7f,#cf9a58);}
+.py-dune.b{right:-26%;bottom:-34px;width:92%;height:104px;background:linear-gradient(180deg,#f0cb92,#d9a765);}
+.py-dune.c{left:8%;bottom:-46px;width:96%;height:88px;background:linear-gradient(180deg,#f7dcae,#e0b478);}
+.py-palm{position:absolute;bottom:30px;font-size:24px;filter:brightness(.45) saturate(.7);opacity:.9;}
+.py-palm.p1{left:3px;transform:scaleX(-1);}
+.py-palm.p2{right:6px;font-size:19px;bottom:36px;}
+.py-palm.p3{right:52px;font-size:14px;bottom:44px;opacity:.6;}
+.py-bird{position:absolute;font-size:9px;opacity:.45;filter:brightness(.3);}
+
+/* ---- the stepped pyramid ---- */
+.py-pyr{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:90%;max-width:328px;}
+.py-band{position:relative;margin:0 auto 2px;height:16px;border-radius:2px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  font-size:8.5px;font-weight:900;letter-spacing:.2px;white-space:nowrap;overflow:hidden;
+  background:linear-gradient(180deg,#5b4530,#3a2a1a);color:rgba(255,238,214,.42);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.35);
+  transition:background .5s ease,color .5s ease,box-shadow .5s ease,transform .25s ease;}
+.py-band::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.22) 0 1.2px,transparent 1.2px 27px);opacity:.6;}
+.py-band.lit{background:linear-gradient(180deg,#f4d6a0,#c99a5c);color:#4a3113;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 0 rgba(0,0,0,.28),0 0 12px rgba(255,190,110,.45);}
+.py-band.claimed{background:linear-gradient(180deg,#fff0b8,#e8a91f);color:#5c3a04;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -2px 0 rgba(140,80,0,.4),0 0 14px rgba(255,196,60,.7);}
+.py-band.next{background:linear-gradient(180deg,#8d7350,#5c452c);color:#ffe6b8;
+  box-shadow:inset 0 0 0 1.5px rgba(255,214,120,.75),0 0 10px rgba(255,200,110,.35);}
+.py-band.ready{animation:pyReady 1.1s infinite;}
+@keyframes pyReady{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 0 6px rgba(255,220,120,.5);}
+  50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 18px 4px rgba(255,225,130,.95);}}
+.py-band:active{transform:scale(.97);}
+.py-torch{position:absolute;top:-6px;font-size:11px;line-height:1;filter:drop-shadow(0 0 5px #ffb347);animation:pyFlick .5s infinite alternate;}
+.py-torch.l{left:-8px;} .py-torch.r{right:-8px;}
+@keyframes pyFlick{from{transform:scale(.86) translateY(0);opacity:.85;}to{transform:scale(1.08) translateY(-1px);opacity:1;}}
+.py-cap{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(24px + 180px);
+  width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;
+  border-bottom:17px solid #4a3623;filter:drop-shadow(0 -1px 0 rgba(255,255,255,.1));transition:border-color .6s;}
+.py-cap.on{border-bottom-color:#ffd75e;filter:drop-shadow(0 0 12px #ffd166);}
+.py-capglow{position:absolute;left:62%;bottom:calc(24px + 196px);transform:translateX(-50%);font-size:15px;opacity:0;transition:opacity .6s;}
+.py-capglow.on{opacity:1;animation:pyFloat 1.8s ease-in-out infinite;}
+@keyframes pyFloat{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-5px);}}
+.py-beam{position:absolute;left:50%;bottom:calc(24px + 192px);width:0;height:0;opacity:0;transition:opacity .8s;
+  border-left:34px solid transparent;border-right:34px solid transparent;border-bottom:180px solid rgba(255,240,190,.35);
+  transform:translateX(-50%);filter:blur(3px);pointer-events:none;}
+.py-beam.on{opacity:1;animation:pyBeam 2.4s ease-in-out infinite;}
+@keyframes pyBeam{0%,100%{opacity:.5;}50%{opacity:.95;}}
+.py-sand{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;width:104%;height:26px;border-radius:50%;
+  background:radial-gradient(ellipse at 50% 30%,#f5dcae,#dcb479 62%,rgba(220,180,121,0));}
+.py-climber{position:absolute;left:50%;font-size:15px;line-height:1;pointer-events:none;z-index:2;
+  transform:translateX(-50%);transition:bottom .7s cubic-bezier(.34,1.5,.64,1);
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));}
+.py-climber .fig{display:block;animation:pyBob 1.5s ease-in-out infinite;}
+@keyframes pyBob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-3px) rotate(4deg);}}
+.py-climber.climbing .fig{animation:pyClimb .7s ease-in-out;}
+@keyframes pyClimb{0%{transform:translateY(6px) scale(.8) rotate(-14deg);}
+  45%{transform:translateY(-11px) scale(1.2) rotate(12deg);}100%{transform:translateY(0) scale(1) rotate(0);}}
+.py-chamber{position:absolute;left:50%;transform:translateX(-50%);bottom:4px;z-index:3;display:flex;gap:4px;font-size:14px;opacity:0;
+  padding:3px 9px 2px;border-radius:15px 15px 3px 3px;transition:opacity .7s;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 110%,rgba(90,45,0,.5),rgba(35,15,0,.94) 70%);
+  box-shadow:0 0 16px 4px rgba(255,205,110,.75),inset 0 0 10px rgba(0,0,0,.8);}
+.py-chamber.on{opacity:1;}
+.py-chamber span{animation:pyFloat 2.2s ease-in-out infinite;}
+.py-chamber span:nth-child(2){animation-delay:.3s;} .py-chamber span:nth-child(3){animation-delay:.6s;}
+.py-chamber span:nth-child(4){animation-delay:.9s;} .py-chamber span:nth-child(5){animation-delay:1.2s;}
+
+/* ---- hero overlays ---- */
+.py-heroTop{position:absolute;top:0;left:0;right:0;padding:9px 56px 12px 10px;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;
+  background:linear-gradient(180deg,rgba(20,20,50,.55),rgba(20,20,50,.12) 70%,transparent);}
+.py-heroTop h2{margin:0;font-size:16px;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.55);flex:1 1 100%;line-height:1.15;}
+.py-heroTop .py-tag{font-size:10px;font-weight:800;color:#ffe0b0;text-shadow:0 1px 2px rgba(0,0,0,.6);flex:1 1 100%;margin-top:-1px;}
+.py-info{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);
+  background:rgba(20,20,50,.35);color:#fff;font-weight:900;font-size:17px;cursor:pointer;z-index:4;}
+.py-chips{position:absolute;top:54px;left:10px;display:flex;gap:5px;flex-wrap:wrap;z-index:3;max-width:60%;}
+.py-day{background:rgba(20,30,60,.7);color:#ffd98a;font-weight:800;font-size:11px;border-radius:999px;padding:3px 9px;white-space:nowrap;}
+
+/* ================= HUD ================= */
+.py-hud{margin-top:10px;background:var(--sb-cream);border-radius:var(--sb-radius);box-shadow:var(--sb-shadow);padding:11px 12px 12px;}
+.py-hudTop{display:flex;align-items:center;gap:8px;}
+.py-tierNow{font-size:15px;font-weight:900;color:var(--sb-ink);}
+.py-tierNow b{color:#b57611;}
+.py-ptsNow{margin-left:auto;font-size:15px;font-weight:900;color:#b57611;white-space:nowrap;}
+.py-bar{position:relative;height:20px;border-radius:999px;background:#e3d6ba;margin-top:8px;overflow:hidden;
+  box-shadow:inset 0 2px 4px rgba(90,60,20,.25);}
+.py-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;transition:width .6s cubic-bezier(.22,1,.36,1);
+  background:linear-gradient(90deg,#ffb43c,#ffd95e,#fff0b8);box-shadow:0 0 10px rgba(255,190,60,.7);}
+.py-bar span{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;font-weight:900;color:#4a3113;
+  text-shadow:0 1px 0 rgba(255,255,255,.5);}
+.py-proj{margin-top:8px;font-size:11.5px;font-weight:700;color:#4a5b7c;line-height:1.4;
+  background:#eef3fb;border-radius:10px;padding:7px 9px;border-left:3px solid var(--sb-sky);}
+.py-proj b{color:var(--sb-blue);}
+/* ================= CTA ================= */
+.py-cta{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.py-cta .sb-btn{flex-direction:column;gap:1px;padding:10px 16px;line-height:1.2;}
+.py-sub{display:block;font-size:10.5px;font-weight:800;opacity:.9;}
+.py-hardbtn{position:relative;background:linear-gradient(180deg,#ff8a5c 0%,#D7263D 55%,#8f1024 100%)!important;}
+.py-hardbtn::after{content:"2.5× POINTS";position:absolute;top:-8px;right:10px;background:var(--sb-yellow);color:var(--sb-ink);
+  font-size:9px;font-weight:900;padding:2px 8px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.3);}
+/* ================= offers ================= */
+.py-offer{border-radius:var(--sb-radius);padding:11px 12px;margin-top:10px;color:#fff;position:relative;overflow:hidden;
+  box-shadow:var(--sb-shadow);border:2px solid rgba(255,199,44,.55);}
+.py-offer.pass{background:linear-gradient(135deg,#6a4a1f,#2f1f36);}
+.py-offer.boost{background:linear-gradient(135deg,#1e5c8a,#12324d);border-color:rgba(158,214,255,.5);}
+.py-offer.push{background:linear-gradient(135deg,#8f1024,#3d0a15);border-color:var(--sb-yellow);animation:pyPush 1.8s infinite;}
+@keyframes pyPush{0%,100%{box-shadow:0 0 0 0 rgba(255,199,44,.5);}50%{box-shadow:0 0 0 7px rgba(255,199,44,0);}}
+.py-offer h3{margin:0 0 2px;font-size:14.5px;}
+.py-offer p{margin:0 0 8px;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.82);line-height:1.4;}
+.py-offer .free{font-size:10.5px;font-weight:800;color:#bff0c8;margin-top:7px;line-height:1.45;
+  background:rgba(0,0,0,.25);border-radius:9px;padding:6px 8px;}
+.py-offer .free b{color:#fff;}
+.py-btnrow{display:flex;gap:8px;flex-wrap:wrap;}
+.py-btnrow .sb-btn{flex:1 1 auto;}
+/* ================= tier track ================= */
+.py-track{margin-top:12px;background:rgba(253,246,227,.97);border-radius:var(--sb-radius);box-shadow:var(--sb-shadow);padding:2px 12px 10px;}
+.py-trackHead{display:flex;align-items:center;gap:6px;padding:10px 0 6px;font-size:10.5px;font-weight:900;letter-spacing:.6px;color:#8a6b34;}
+.py-trackHead .ln{flex:1;height:1.5px;background:#e0d0ac;}
+.py-row{display:grid;grid-template-columns:42px 1fr 88px;gap:8px;align-items:center;padding:7px 0;
+  border-top:1.5px solid rgba(27,42,74,.09);position:relative;}
+.py-row.locked{opacity:.62;}
+.py-row.ready{background:linear-gradient(90deg,rgba(255,199,44,.28),rgba(255,199,44,0));border-radius:10px;}
+.py-nodewrap{min-height:44px;display:grid;place-items:center;cursor:pointer;}
+.py-node{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;position:relative;
+  font-weight:900;font-size:14px;background:linear-gradient(180deg,#6b5237,#43301c);color:#e6d3b4;border:2px solid #35240f;}
+.py-node.done{background:linear-gradient(180deg,#ffe08a,#e0a41c);color:#4a3113;border-color:#b57611;}
+.py-node.now{background:linear-gradient(180deg,#f4d6a0,#c99a5c);color:#4a3113;border-color:#8a6b34;}
+.py-node small{position:absolute;bottom:-11px;font-size:7.5px;letter-spacing:.4px;color:#8a6b34;font-weight:900;white-space:nowrap;}
+.py-rw{font-size:11.5px;font-weight:800;color:var(--sb-ink);line-height:1.45;}
+.py-rw .ico{font-size:13px;}
+.py-cost{font-size:10px;font-weight:900;color:#8a6b34;letter-spacing:.3px;}
+.py-passtag{display:inline-block;font-size:8.5px;font-weight:900;letter-spacing:.4px;background:linear-gradient(90deg,#f0c14b,#d99b1c);
+  color:#3a2708;border-radius:5px;padding:1px 5px;margin-left:3px;vertical-align:1px;}
+.py-act{justify-self:end;text-align:center;}
+.py-claim{min-height:44px;min-width:84px;border:none;border-radius:9px;font-family:var(--sb-font);font-weight:900;font-size:11.5px;
+  color:#fff;background:linear-gradient(180deg,#3fc167,var(--sb-green));cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.22);animation:sbPulse 1.4s infinite;}
+.py-todo{font-size:10px;font-weight:800;color:#8296b5;line-height:1.35;display:block;}
+.py-done{font-size:10.5px;font-weight:900;color:var(--sb-green-dark);}
+.py-claimall{margin-top:9px;}
+/* ================= stats / footer ================= */
+.py-stats{display:flex;gap:6px;margin-top:12px;}
+.py-stat{flex:1;background:rgba(0,0,0,.3);border-radius:12px;padding:8px 3px;text-align:center;color:#ffd98a;font-size:9px;font-weight:800;letter-spacing:.3px;}
+.py-stat b{display:block;font-size:16px;color:#fff;}
+.py-demo{display:flex;gap:6px;margin-top:12px;}
+.py-demo button{flex:1;min-height:44px;border-radius:12px;border:1px dashed rgba(255,255,255,.4);background:rgba(0,0,0,.28);
+  color:#cfe3fb;font-family:var(--sb-font);font-weight:800;font-size:11px;cursor:pointer;padding:6px;}
+.py-recap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:9px 0;}
+.py-miss{text-align:left;font-size:11.5px;font-weight:700;color:#5a6b8c;background:#f1e6cc;border-radius:10px;padding:8px 10px;margin:8px 0;line-height:1.5;}
+.hidden{display:none!important;}
+@media (max-width:374px){
+  .py-row{grid-template-columns:38px 1fr 80px;}
+  .py-rw{font-size:10.5px;}
+  .py-offer h3{font-size:13.5px;}
+}
+</style>
+</head>
+<body>
+<div class="sb-app">
+<div class="sb-main">
+
+  <div class="py-hero" id="py-hero">
+    <div class="py-sun" id="py-sun"></div>
+    <div class="py-haze"></div>
+    <div class="py-dune a"></div><div class="py-dune b"></div><div class="py-dune c"></div>
+    <span class="py-palm p1">🌴</span><span class="py-palm p2">🌴</span><span class="py-palm p3">🌴</span>
+    <div class="py-beam" id="py-beam"></div>
+    <div class="py-capglow" id="py-capglow">✨</div>
+    <div class="py-cap" id="py-cap"></div>
+    <div class="py-sand"></div>
+    <div class="py-chamber" id="py-chamber"><span>💎</span><span>🏆</span><span>🪙</span><span>🃏</span><span>💎</span></div>
+    <div class="py-pyr" id="py-pyr">
+      <div class="py-climber" id="py-climber"><span class="fig">🧗</span></div>
+    </div>
+    <div class="py-heroTop">
+      <h2>🔺 Pyramid Ascent</h2>
+      <div class="py-tag">Clear levels → earn points → light all 10 tiers</div>
+    </div>
+    <button class="py-info" id="py-info" aria-label="Event rules">ⓘ</button>
+    <div class="py-chips">
+      <span class="sb-timer-chip">⏳ <span id="py-timer">—</span></span>
+      <span class="py-day" id="py-day">Day 1 of 7</span>
+    </div>
+  </div>
+
+  <div class="py-hud">
+    <div class="py-hudTop">
+      <span class="py-tierNow">Tier <b id="py-tier">0</b> <span style="font-weight:700;color:#8a6b34;font-size:12px">of 10</span></span>
+      <span class="py-ptsNow">🔺 <span id="py-pts">0</span> pts</span>
+    </div>
+    <div class="py-bar"><i id="py-fill" style="width:0"></i><span id="py-barlbl">—</span></div>
+    <div class="py-proj" id="py-proj">Play a few levels — your finish projection appears here.</div>
+  </div>
+
+  <div class="py-cta">
+    <button class="sb-btn sb-btn-green sb-btn-block" id="py-play">▶ Play level <span class="py-sub">+10 pts per clear · +5 first-try bonus</span></button>
+    <button class="sb-btn sb-btn-block py-hardbtn" id="py-hard">🔥 Hard level <span class="py-sub">+25 pts per clear · ~55% win rate</span></button>
+  </div>
+
+  <div id="py-offers"></div>
+
+  <div class="py-track">
+    <div class="py-trackHead"><span class="ln"></span><span>🔺 THE TEN TIERS · TOP TO BASE</span><span class="ln"></span></div>
+    <div id="py-rows"></div>
+    <button class="sb-btn sb-btn-yellow sb-btn-block sb-btn-sm py-claimall hidden" id="py-claimall">🎁 Claim all ready tiers</button>
+  </div>
+
+  <div id="py-offers2"></div>
+
+  <div class="py-stats">
+    <div class="py-stat"><b id="py-st-pts">0</b>ASCENT POINTS</div>
+    <div class="py-stat"><b id="py-st-tiers">0</b>TIERS CLAIMED</div>
+    <div class="py-stat"><b id="py-st-hard">0</b>HARD CLEARS</div>
+    <div class="py-stat"><b id="py-st-plays">0</b>LEVELS PLAYED</div>
+  </div>
+
+  <div class="py-demo">
+    <button id="py-simday">⏩ DEMO · simulate a day of play</button>
+    <button id="py-finale">🏁 DEMO · jump to event end</button>
+  </div>
+
+</div>
+</div>
+<script src="../shared/core.js"></script>
+<script src="../shared/levelsim.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* =========================================================================
+   CONFIG — tuned by Monte-Carlo pacing sim (20k runs/persona, 7-day window)
+   Free typical player (18 attempts/day, 35% hard): median finish = TIER 8 = 80%
+   ========================================================================= */
+var COST = [35,65,100,145,195,250,310,380,470,650];        // per-tier
+var CUM  = (function(){var a=[],s=0;COST.forEach(function(c){s+=c;a.push(s);});return a;})(); // 35…2600
+var TIERS = [
+  {rw:[{type:"coins",amount:200}]},
+  {rw:[{type:"coins",amount:350},{type:"wild",amount:1}]},
+  {rw:[{type:"coins",amount:500},{type:"energy",amount:2}]},
+  {rw:[{type:"coins",amount:800},{type:"chest",amount:1}], pass:[{type:"gem",amount:15}]},
+  {rw:[{type:"coins",amount:1200},{type:"wild",amount:2},{type:"gem",amount:10}]},
+  {rw:[{type:"coins",amount:1600},{type:"chest",amount:1},{type:"energy",amount:3}]},
+  {rw:[{type:"coins",amount:2200},{type:"wild",amount:3}]},
+  {rw:[{type:"coins",amount:3000},{type:"chest",amount:2},{type:"gem",amount:20}], pass:[{type:"chest",amount:2}]},
+  {rw:[{type:"coins",amount:4000},{type:"wild",amount:4},{type:"gem",amount:30}]},
+  {rw:[{type:"coins",amount:6000},{type:"wild",amount:5},{type:"gem",amount:40},{type:"trophy",amount:1}]}
+];
+var TEASE = ["200🪙","350🪙","500🪙","800🪙","1.2K🪙","1.6K🪙","2.2K🪙","3K🪙","4K🪙","👑6K🪙"];
+var EVENT_MS = 12*60*1000;      // "7 days" compressed to 12 min for the demo
+var DAY_MS   = EVENT_MS/7;
+var PTS_WIN=10, PTS_HARD=25, PTS_FIRST=5;
+var BOOST_PTS=300, PUSH_PTS=250, PUSH_NEAR=150;
+
+/* ================= state ================= */
+var st = SB.store("pyramid-ascent", {start:0,end:0,ff:0,points:0,claimed:[],level:214,plays:0,wins:0,
+  hardWins:0,retry:false,pass:false,boosts:0,push:false,pushSeen:false,finaleDone:false});
+var d = st.data;
+if(!d.start){ d.start=Date.now(); d.end=d.start+EVENT_MS; }
+st.save();
+
+SB.init({title:"Pyramid Ascent", subtitle:"7-Day Milestone Tower · Mini Event", resetKey:"pyramid-ascent"});
+
+/* ================= helpers ================= */
+function $(id){ return document.getElementById(id); }
+function now(){ return Date.now()+d.ff; }
+function ended(){ return d.finaleDone || now() >= d.end; }
+function frac(){ return Math.max(0, Math.min(1, (now()-d.start)/EVENT_MS)); }
+function dayNo(){ return Math.min(7, 1+Math.floor(frac()*7)); }
+function unlocked(){ var n=0; for(var i=0;i<10;i++) if(d.points>=CUM[i]) n=i+1; return n; }
+function claimedCount(){ return d.claimed.length; }
+function topClaimed(){ var m=0; d.claimed.forEach(function(i){ if(i+1>m) m=i+1; }); return m; }
+function mult(){ return d.pass?1.5:1; }
+function wr(base){ if(window.__forceWin===true) return 1; if(window.__forceWin===false) return 0; return base; }
+function chips(l){ return l.map(SB.rewardChip).join(" "); }
+function rwText(l){ return l.map(function(r){
+  return '<span class="ico">'+(r.type==="trophy"?"👑":SB.icon(r.type))+'</span>'+
+    (r.type==="trophy"?"Pharaoh's Crown":SB.fmt(r.amount)); }).join(" · "); }
+/* average points a clear is worth at the player's current multiplier (free-path maths) */
+function ptsPerLevel(){ return (PTS_WIN + PTS_FIRST*0.78) * mult(); }
+function levelsFor(p){ return Math.max(1, Math.ceil(p/ptsPerLevel())); }
+
+/* ================= pyramid scene ================= */
+var bandsBuilt=false;
+function buildBands(){
+  var pyr=$("py-pyr"), html="";
+  for(var t=10;t>=1;t--){
+    html += '<div class="py-band" data-t="'+t+'" style="width:'+(96-(t-1)*7)+'%"></div>';
+  }
+  pyr.insertAdjacentHTML("afterbegin", html);
+  pyr.querySelectorAll(".py-band").forEach(function(b){
+    b.addEventListener("click", function(){ tierPopup(+b.getAttribute("data-t")); });
+  });
+  bandsBuilt=true;
+}
+function renderScene(){
+  if(!bandsBuilt) buildBands();
+  var un=unlocked(), tc=topClaimed(), f=frac();
+  $("py-sun").style.left = (66+f*14)+"%";
+  $("py-sun").style.top  = (9+f*32)+"%";
+  document.querySelectorAll(".py-band").forEach(function(b){
+    var t=+b.getAttribute("data-t"), done=d.claimed.indexOf(t-1)!==-1, ready=(un>=t&&!done);
+    b.className="py-band"+(done?" claimed":(un>=t?" lit":(t===un+1?" next":"")))+(ready?" ready":"");
+    b.innerHTML = (done?'<span class="py-torch l">🔥</span><span class="py-torch r">🔥</span>':"")+
+      (done?"✓ ":"")+"T"+t+" "+TEASE[t-1];
+  });
+  var cl=$("py-climber");
+  cl.style.bottom = (tc===0 ? -15 : tc===10 ? 181 : tc*18-2)+"px";
+  cl.style.left = (tc===0 ? "26%" : tc===10 ? "39%" : tc===9 ? "50%" : "33%");
+  var done10 = d.claimed.indexOf(9)!==-1;
+  $("py-cap").classList.toggle("on", done10);
+  $("py-capglow").classList.toggle("on", done10);
+  $("py-beam").classList.toggle("on", done10);
+  $("py-chamber").classList.toggle("on", done10);
+  $("py-day").textContent = ended()?"Event over":"Day "+dayNo()+" of 7";
+}
+function hopClimber(){
+  var cl=$("py-climber");
+  cl.classList.remove("climbing"); void cl.offsetWidth; cl.classList.add("climbing");
+}
+
+/* ================= HUD ================= */
+function renderHud(){
+  var un=unlocked();
+  $("py-tier").textContent = un;
+  $("py-pts").textContent = SB.fmt(d.points);
+  var lo = un>0?CUM[un-1]:0, hi = un<10?CUM[un]:CUM[9];
+  var pct = un>=10 ? 100 : Math.max(2, Math.round((d.points-lo)/(hi-lo)*100));
+  $("py-fill").style.width = pct+"%";
+  $("py-barlbl").textContent = un>=10 ? "CAPSTONE REACHED · 2,600 / 2,600"
+    : (d.points-lo)+" / "+(hi-lo)+" pts to Tier "+(un+1);
+  /* honest projection */
+  var f=frac(), p=$("py-proj");
+  if(ended()){
+    p.innerHTML = "🏁 The ascent has ended. Final tier reached: <b>Tier "+un+"</b>.";
+  } else if(d.plays<3 || f<0.04){
+    p.innerHTML = "📈 Play a few levels — we'll project your finishing tier here (real maths, no pressure).";
+  } else {
+    var proj = d.points/f, pt=0;
+    for(var i=0;i<10;i++) if(proj>=CUM[i]) pt=i+1;
+    var perDay = Math.round(d.points/Math.max(0.14,f)/7);
+    p.innerHTML = "📈 At your pace (<b>~"+perDay+" pts/day</b>) you'll reach <b>Tier "+pt+"</b> by the deadline."+
+      (pt<10 ? " Tier 10 needs <b>"+SB.fmt(CUM[9]-d.points)+"</b> more pts — about <b>"+levelsFor(CUM[9]-d.points)+"</b> more clears." : " 👑 Capstone is in range!");
+  }
+}
+
+/* ================= tier track ================= */
+function renderTrack(){
+  var un=unlocked(), html="", ready=0;
+  for(var t=10;t>=1;t--){
+    var i=t-1, done=d.claimed.indexOf(i)!==-1, hit=un>=t;
+    if(hit&&!done) ready++;
+    var act;
+    if(done) act='<span class="py-done">✓ Claimed</span>';
+    else if(hit) act='<button class="py-claim" data-claim="'+i+'">CLAIM</button>';
+    else act='<span class="py-todo"><b>'+SB.fmt(CUM[i]-d.points)+'</b> pts to go<br>~'+levelsFor(CUM[i]-d.points)+' clears</span>';
+    var pass = TIERS[i].pass ? '<span class="py-passtag">+ PASS '+rwText(TIERS[i].pass).replace(/<[^>]+>/g,"").trim()+'</span>' : "";
+    html += '<div class="py-row'+(done?"":(hit?" ready":" locked"))+'">'+
+      '<div class="py-nodewrap" data-peek="'+t+'"><div class="py-node '+(done?"done":(hit?"now":""))+'">'+(done?"✓":t)+'<small>TIER '+t+'</small></div></div>'+
+      '<div><div class="py-rw">'+rwText(TIERS[i].rw)+pass+'</div>'+
+      '<div class="py-cost">'+SB.fmt(COST[i])+' pts this tier · '+SB.fmt(CUM[i])+' total</div></div>'+
+      '<div class="py-act">'+act+'</div></div>';
+  }
+  $("py-rows").innerHTML = html;
+  $("py-rows").querySelectorAll("[data-claim]").forEach(function(b){
+    b.addEventListener("click", function(){ claim(+b.getAttribute("data-claim"), b); });
+  });
+  $("py-rows").querySelectorAll("[data-peek]").forEach(function(b){
+    b.addEventListener("click", function(){ tierPopup(+b.getAttribute("data-peek")); });
+  });
+  $("py-claimall").classList.toggle("hidden", ready<2);
+}
+function claim(i, el){
+  if(d.claimed.indexOf(i)!==-1 || d.points<CUM[i]) return;
+  d.claimed.push(i); st.save();
+  var rw = TIERS[i].rw.slice();
+  if(d.pass && TIERS[i].pass) rw = rw.concat(TIERS[i].pass);
+  SB.grantRewards(rw.filter(function(r){return r.type!=="trophy";}), el);
+  hopClimber(); SB.haptic(25);
+  if(i===9){
+    SB.confetti(window.innerWidth/2, 200, 140);
+    setTimeout(capstoneModal, 500);
+  } else {
+    SB.confetti(window.innerWidth/2, 240, 45);
+    SB.toast("Tier "+(i+1)+" claimed — torches lit! 🔥",2000);
+  }
+  renderAll();
+}
+$("py-claimall").addEventListener("click", function(){
+  var un=unlocked(), any=false;
+  for(var t=1;t<=un;t++) if(d.claimed.indexOf(t-1)===-1){ claim(t-1, this); any=true; }
+  if(any) SB.toast("All ready tiers claimed!",1800);
+});
+function capstoneModal(){
+  SB.modal('<div style="font-size:11px;font-weight:900;letter-spacing:1.2px;color:#b57611">TREASURE CHAMBER UNSEALED</div>'+
+    '<div style="font-size:52px;line-height:1.2">👑</div>'+
+    '<h3 style="margin:0 0 4px">Pharaoh\'s Crown earned!</h3>'+
+    '<p class="sb-muted" style="font-size:12.5px;margin:0 0 10px">You lit all ten tiers and reached the golden capstone. The Crown is a permanent profile cosmetic.</p>'+
+    '<div class="py-recap">'+chips(TIERS[9].rw.filter(function(r){return r.type!=="trophy";}))+'</div>'+
+    '<button class="sb-btn sb-btn-yellow sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Glorious!</button>');
+}
+function tierPopup(t){
+  var i=t-1, done=d.claimed.indexOf(i)!==-1, hit=unlocked()>=t;
+  SB.modal('<h3 style="margin:0 0 2px">🔺 Tier '+t+(t===10?" · Capstone":"")+'</h3>'+
+    '<div class="sb-muted" style="font-size:11.5px;margin-bottom:9px">'+SB.fmt(COST[i])+' pts for this tier · '+SB.fmt(CUM[i])+' total ascent points</div>'+
+    '<div class="py-recap">'+chips(TIERS[i].rw)+(d.pass&&TIERS[i].pass?chips(TIERS[i].pass):"")+'</div>'+
+    '<div style="font-size:12px;font-weight:800;color:'+(done?"#1f7038":(hit?"#b57611":"#5a6b8c"))+'">'+
+      (done?"✓ Claimed — torches lit":(hit?"Ready to claim!":SB.fmt(CUM[i]-d.points)+" pts to go · about "+levelsFor(CUM[i]-d.points)+" more clears"))+'</div>'+
+    '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:11px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Close</button>');
+}
+
+/* ================= offers (free path always shown) ================= */
+function renderOffers(){
+  var un=unlocked(), html="", html2="";
+  /* contextual FINAL PUSH — only within PUSH_NEAR pts of tier 9 or 10 */
+  var target = (un===7||un===8) ? 8 : (un===9 ? 9 : -1);
+  var gap = target>=0 ? CUM[target]-d.points : 1e9;
+  var showPush = !d.push && !ended() && target>=0 && gap>0 && gap<=PUSH_NEAR;
+  if(showPush){
+    html += '<div class="py-offer push"><h3>⛰️ Final Push · Tier '+(target+1)+' is '+gap+' pts away</h3>'+
+      '<p>+'+PUSH_PTS+' Ascent Points, 2 🃏 Wild Cards and 10 💎 — enough to top out Tier '+(target+1)+' right now.</p>'+
+      '<div class="py-btnrow"><button class="sb-btn sb-btn-yellow sb-btn-sm" id="py-buypush">Final Push · $3.99</button></div>'+
+      '<div class="free">🆓 <b>Free path:</b> clear <b>'+levelsFor(gap)+' more level'+(levelsFor(gap)>1?"s":"")+'</b> (or '+Math.ceil(gap/(PTS_HARD*mult()))+' hard clears) and Tier '+(target+1)+' is yours for nothing. You have <b><span id="py-pushtime">time</span></b> left.</div></div>';
+  }
+  /* Explorer's Pass */
+  if(!d.pass){
+    html2 += '<div class="py-offer pass"><h3>🧭 Explorer\'s Pass</h3>'+
+      '<p>Every clear pays <b>1.5× ascent points</b> for the rest of the event · 🔥 golden torch cosmetic · 2 exclusive side-rewards at Tier 4 (15 💎) and Tier 8 (2 🎁).</p>'+
+      '<div class="py-btnrow"><button class="sb-btn sb-btn-yellow sb-btn-sm" id="py-buypass">Unlock · $4.99</button></div>'+
+      '<div class="free">🆓 <b>No purchase needed:</b> the 10 tiers and all their rewards are on the free path. Our pacing data: a typical free player finishes <b>Tier 8 of 10</b> in the 7 days; dedicated free players reach the capstone.</div></div>';
+  } else {
+    html2 += '<div class="py-offer pass"><h3>🧭 Explorer\'s Pass ACTIVE 🔥</h3>'+
+      '<p>All clears pay 1.5× points · torch cosmetic equipped · side-rewards unlock at Tier 4 &amp; Tier 8.</p></div>';
+  }
+  /* Ascent Boost */
+  if(!ended() && un<10){
+    html2 += '<div class="py-offer boost"><h3>⛏️ Ascent Boost · +'+BOOST_PTS+' points</h3>'+
+      '<p>Instantly adds '+BOOST_PTS+' Ascent Points to your climb. Repeatable.'+(d.boosts?' Bought '+d.boosts+'×.':'')+'</p>'+
+      '<div class="py-btnrow"><button class="sb-btn sb-btn-yellow sb-btn-sm" id="py-buyboost">Boost · $1.99</button></div>'+
+      '<div class="free">🆓 <b>Or clear '+levelsFor(BOOST_PTS)+' levels</b> — same '+BOOST_PTS+' points, zero cost. Hard levels get you there in '+Math.ceil(BOOST_PTS/(PTS_HARD*mult()))+'.</div></div>';
+  }
+  $("py-offers").innerHTML = html;
+  $("py-offers2").innerHTML = html2;
+  var b;
+  if((b=$("py-buypass"))) b.addEventListener("click", buyPass);
+  if((b=$("py-buyboost"))) b.addEventListener("click", buyBoost);
+  if((b=$("py-buypush"))) b.addEventListener("click", function(){ buyPush(target); });
+  var pt=$("py-pushtime");
+  if(pt) SB.countdown(pt, d.end-d.ff);
+  if(showPush && !d.pushSeen){ d.pushSeen=true; st.save(); SB.haptic(18); }
+}
+function celebrate(title, body, extra){
+  SB.confetti();
+  SB.modal('<div style="font-size:44px;line-height:1.15">'+ (extra||"🎉") +'</div>'+
+    '<h3 style="margin:2px 0 4px">'+title+'</h3>'+
+    '<p class="sb-muted" style="font-size:12.5px;margin:0 0 10px">'+body+'</p>'+
+    '<button class="sb-btn sb-btn-green sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Keep climbing!</button>');
+}
+function buyPass(){
+  SB.buyIAP({label:"🧭 Explorer's Pass · Pyramid Ascent", price:"$4.99",
+    sub:"1.5× ascent points for the whole event + torch cosmetic + Tier 4 & Tier 8 side-rewards. The free path still reaches every tier.",
+    contents:[{type:"gem",amount:15}], grant:false,
+    onSuccess:function(){
+      d.pass=true; st.save();
+      SB.grantRewards([{type:"gem",amount:15}]);
+      /* retroactive: side-rewards for tiers already claimed — never dead-end a purchase */
+      var retro=[];
+      d.claimed.forEach(function(i){ if(TIERS[i].pass) retro=retro.concat(TIERS[i].pass); });
+      if(retro.length) SB.grantRewards(retro);
+      celebrate("Explorer's Pass active!","Every clear now pays <b>1.5×</b> points"+(retro.length?" — and we back-paid the side-rewards for tiers you already claimed.":". Torch cosmetic equipped."),"🧭");
+      renderAll();
+    }});
+}
+function buyBoost(){
+  SB.buyIAP({label:"⛏️ Ascent Boost · +"+BOOST_PTS+" points", price:"$1.99",
+    sub:"Instantly adds "+BOOST_PTS+" Ascent Points. You can also earn them free by clearing about "+levelsFor(BOOST_PTS)+" levels.",
+    contents:[], grant:false,
+    onSuccess:function(){
+      d.boosts++; addPoints(BOOST_PTS, true); st.save();
+      celebrate("+"+BOOST_PTS+" Ascent Points!","You're now at <b>"+SB.fmt(d.points)+"</b> points — Tier <b>"+unlocked()+"</b>. Claim anything newly unlocked below.","⛏️");
+    }});
+}
+function buyPush(target){
+  SB.buyIAP({label:"⛰️ Final Push · Tier "+(target+1), price:"$3.99",
+    sub:"+"+PUSH_PTS+" Ascent Points plus 2 Wild Cards and 10 Gems. Offered once, only because you're close.",
+    contents:[{type:"wild",amount:2},{type:"gem",amount:10}], grant:false,
+    onSuccess:function(){
+      d.push=true; st.save();
+      SB.grantRewards([{type:"wild",amount:2},{type:"gem",amount:10}]);
+      addPoints(PUSH_PTS, true);
+      celebrate("Final Push delivered!","+"+PUSH_PTS+" points — you're at Tier <b>"+unlocked()+"</b>. The capstone is close.","⛰️");
+    }});
+}
+
+/* ================= points + level play (the ONLY free fuel) ================= */
+function addPoints(n, silent){
+  var before=unlocked();
+  d.points += Math.round(n); st.save();
+  var el=$("py-pts"); el.classList.remove("sb-bounce"); void el.offsetWidth; el.classList.add("sb-bounce");
+  if(unlocked()>before && !silent) SB.toast("🔺 Tier "+unlocked()+" unlocked — claim it below!",2400);
+  renderAll();
+}
+function play(hard){
+  if(ended()){ SB.toast("The ascent has ended — see your recap."); return; }
+  $("py-play").disabled=$("py-hard").disabled=true;
+  SB.playLevel({hard:hard, winRate:wr(hard?0.55:0.78), title:"Adventure Level "+d.level})
+  .then(function(res){
+    d.plays++;
+    if(res.won){
+      d.wins++; if(hard) d.hardWins++;
+      var first = !d.retry;
+      var base = (hard?PTS_HARD:PTS_WIN) + (first?PTS_FIRST:0);
+      var gain = Math.round(base*mult());
+      d.retry=false; d.level++;
+      addPoints(gain, true);
+      SB.toast("+"+gain+" 🔺 pts"+(first?" (first-try bonus!)":"")+(d.pass?" · Pass 1.5×":"")+" — "+SB.fmt(d.points)+" total",2200);
+      SB.confetti(window.innerWidth/2, 230, 36);
+    } else {
+      d.retry=true; st.save();
+      SB.toast("Points are never lost — your "+SB.fmt(d.points)+" 🔺 are safe. Retry Level "+d.level+"!",2400);
+    }
+    st.save(); renderAll();
+    $("py-play").disabled=$("py-hard").disabled=ended();
+  });
+}
+$("py-play").addEventListener("click", function(){ play(false); });
+$("py-hard").addEventListener("click", function(){ play(true); });
+
+/* ================= demo controls ================= */
+$("py-simday").addEventListener("click", function(){
+  if(ended()){ SB.toast("Event already ended."); return; }
+  /* replays one day of the 'typical player' persona used in the pacing sim */
+  var attempts=18, hardShare=0.35, first=!d.retry, gained=0, hw=0, w=0;
+  for(var i=0;i<attempts;i++){
+    var hard=Math.random()<hardShare, p=hard?0.55:0.78;
+    if(Math.random()<p){
+      gained += Math.round(((hard?PTS_HARD:PTS_WIN)+(first?PTS_FIRST:0))*mult());
+      w++; if(hard) hw++; first=true;
+    } else first=false;
+  }
+  d.plays+=attempts; d.wins+=w; d.hardWins+=hw; d.retry=!first;
+  d.ff += DAY_MS;
+  addPoints(gained, true);
+  restartTimer();
+  SB.toast("Demo: 1 day simulated · "+attempts+" levels, "+w+" clears, +"+gained+" 🔺",2800);
+  if(ended() && !d.finaleDone) showRecap();
+});
+$("py-finale").addEventListener("click", function(){ if(!d.finaleDone){ d.ff = d.end-d.start+1000; st.save(); restartTimer(); } showRecap(); });
+
+/* ================= recap ================= */
+function showRecap(){
+  var un=unlocked();
+  /* never dead-end: auto-collect anything unlocked but unclaimed */
+  var auto=[], autoN=0;
+  for(var t=1;t<=un;t++) if(d.claimed.indexOf(t-1)===-1){
+    d.claimed.push(t-1); autoN++;
+    auto=auto.concat(TIERS[t-1].rw.filter(function(r){return r.type!=="trophy";}));
+    if(d.pass&&TIERS[t-1].pass) auto=auto.concat(TIERS[t-1].pass);
+  }
+  if(auto.length) SB.grantRewards(auto);
+  var granted=!d.finaleDone;
+  d.finaleDone=true; st.save();
+  var missed=[];
+  for(var i=un;i<10;i++) missed.push("Tier "+(i+1)+" — "+rwText(TIERS[i].rw).replace(/<span class="ico">/g,"").replace(/<\/span>/g,""));
+  SB.modal(
+    '<div style="font-size:11px;font-weight:900;letter-spacing:1.2px;color:#b57611">ASCENT COMPLETE · 7 DAYS</div>'+
+    '<div style="font-size:46px;line-height:1.2">'+(un===10?"👑":un>=8?"🔺":"⛰️")+'</div>'+
+    '<h3 style="margin:0 0 2px">You reached Tier '+un+' of 10</h3>'+
+    '<div class="sb-muted" style="font-size:12px;margin-bottom:6px">'+SB.fmt(d.points)+' ascent points · '+d.hardWins+' hard clear'+(d.hardWins===1?'':'s')+' · '+Math.round(un/10*100)+'% of the pyramid lit</div>'+
+    (autoN?'<div style="font-size:12px;font-weight:800;color:#1f7038">✓ We auto-collected '+autoN+' tier'+(autoN>1?"s":"")+' you\'d unlocked but not claimed.</div><div class="py-recap">'+chips(auto)+'</div>':"")+
+    (missed.length?'<div class="py-miss"><b>Not reached this time:</b><br>'+missed.join("<br>")+'</div>':
+      '<div class="py-miss" style="color:#1f7038"><b>Every single tier claimed — the capstone is yours. 👑</b></div>')+
+    '<div style="font-size:12px;font-weight:800;color:var(--sb-blue)">⛰️ Next ascent starts in <b>2d 04h</b> — points reset, rewards keep.</div>'+
+    '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:11px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Close</button>');
+  if(granted) SB.confetti();
+  renderAll();
+}
+
+/* ================= info modal ================= */
+$("py-info").addEventListener("click", function(){
+  SB.modal('<h3 style="margin:0 0 8px">🔺 How Pyramid Ascent works</h3>'+
+    '<div style="text-align:left;font-size:12.5px;line-height:1.55">'+
+    '<b>Ascent Points — earned only by playing</b><br>▶ Clear a level: <b>+10</b><br>🔥 Clear a HARD level: <b>+25</b> (2.5×)<br>⭐ First-try clear: <b>+5</b> bonus<br>'+
+    '🛡️ <b>Losing never removes points.</b> The climb only goes up.<br><br>'+
+    '<b>The ten tiers</b><br>Each tier costs more than the last (35 → 650) and pays more, ending at the golden capstone: 6,000 🪙, 5 🃏, 40 💎 and the <b>Pharaoh\'s Crown</b>.<br><br>'+
+    '<b>What a free player gets</b><br>Our pacing simulation (20,000 runs per player type over the 7-day window):<br>'+
+    '· Typical free player — 18 levels/day, ~1/3 hard — finishes at <b>Tier 8 of 10 (80%)</b>.<br>'+
+    '· Dedicated free player — ~28 levels/day — reaches <b>Tier 9</b>, and <b>43%</b> of them take the capstone with no purchase.<br>'+
+    '· Casual free player — 8 levels/day — finishes around <b>Tier 5–6</b>.<br>'+
+    'The top two tiers are meant to be a stretch. They are never locked behind money.<br><br>'+
+    '<b>Optional purchases</b><br>🧭 <b>Explorer\'s Pass $4.99</b> — 1.5× points all event, torch cosmetic, Tier 4 &amp; 8 side-rewards (back-paid if you already passed them).<br>'+
+    '⛏️ <b>Ascent Boost $1.99</b> — +300 points, same as ~22 free clears.<br>'+
+    '⛰️ <b>Final Push $3.99</b> — only offered when you are within 150 points of Tier 9 or 10, always shown next to the free alternative.<br><br>'+
+    '<b>Nothing is ever stranded</b><br>Unclaimed tiers you unlocked are auto-collected when the event ends.<br><br>'+
+    '<span class="sb-muted" style="font-size:11px">Demo note: the 7-day event is compressed to 12 minutes. The DEMO buttons at the bottom simulate a day of play using the same pacing maths.</span></div>'+
+    '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>');
+});
+
+/* ================= stats + boot ================= */
+function renderStats(){
+  $("py-st-pts").textContent=SB.fmt(d.points);
+  $("py-st-tiers").textContent=claimedCount();
+  $("py-st-hard").textContent=d.hardWins;
+  $("py-st-plays").textContent=d.plays;
+}
+function renderAll(){
+  renderScene(); renderHud(); renderTrack(); renderOffers(); renderStats();
+  if(ended()){ $("py-play").disabled=$("py-hard").disabled=true; }
+}
+
+var timerIv=null;
+function restartTimer(){
+  if(timerIv) clearInterval(timerIv);
+  timerIv = SB.countdown($("py-timer"), d.end-d.ff, function(){
+    $("py-timer").textContent="Ended";
+    $("py-play").disabled=$("py-hard").disabled=true;
+    if(!d.finaleDone) showRecap();
+  });
+}
+restartTimer();
+setInterval(function(){ if(ended()) $("py-play").disabled=$("py-hard").disabled=true; else renderScene(); }, 4000);
+if(ended()){ $("py-play").disabled=$("py-hard").disabled=true; }
+renderAll();
+if(d.plays===0 && d.points===0) setTimeout(function(){
+  SB.toast("Clear levels to earn 🔺 Ascent Points — every tier pays, all 10 are free-reachable.",3000);
+},700);
+
+window.__pyDebug = {state:d, cum:CUM, addPoints:addPoints};
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Skip-Bo · Team Harvest</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+/* ---------- layout ---------- */
+.th-toprow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.th-info{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:19px;font-weight:900;cursor:pointer;}
+.th-sec{margin-bottom:12px;}
+/* ---------- wagon scene ---------- */
+.th-scene{position:relative;height:190px;border-radius:16px;overflow:hidden;box-shadow:var(--sb-shadow);
+  background:linear-gradient(180deg,#7ec4f2 0%,#bfe3fb 46%,#e8c96a 47%,#d9a943 100%);}
+.th-sun{position:absolute;top:12px;right:16px;width:36px;height:36px;border-radius:50%;
+  background:radial-gradient(circle,#fff6c9 20%,#FFC72C 70%);box-shadow:0 0 24px 8px rgba(255,199,44,.55);}
+.th-hill{position:absolute;bottom:78px;width:70%;height:60px;border-radius:50% 50% 0 0;background:#c9992f;opacity:.55;}
+.th-hill.h2{left:45%;width:80%;height:46px;opacity:.4;}
+.th-barn{position:absolute;bottom:80px;left:10px;font-size:30px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+.th-wagon{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;width:212px;height:96px;}
+.th-bed{position:absolute;left:0;right:0;bottom:20px;top:14px;border-radius:6px 6px 12px 12px;
+  background:repeating-linear-gradient(90deg,#8a5a2b 0 22px,#7a4c21 22px 26px);
+  border:3px solid #5d3a17;box-shadow:inset 0 -10px 16px rgba(0,0,0,.3);}
+.th-wheel{position:absolute;bottom:-2px;width:34px;height:34px;border-radius:50%;background:#3b2410;
+  border:5px solid #241505;box-shadow:inset 0 0 0 3px #6b4a22;}
+.th-wheel.w1{left:22px;}.th-wheel.w2{right:22px;}
+.th-pile{position:absolute;left:6px;right:6px;bottom:38px;height:88px;pointer-events:none;}
+.th-crop{position:absolute;font-size:17px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));animation:thPop .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes thPop{from{transform:scale(0);}to{transform:scale(1);}}
+.th-score{position:absolute;top:8px;left:12px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35);}
+.th-score b{font-size:26px;}.th-score small{display:block;font-size:10px;font-weight:800;letter-spacing:1px;opacity:.95;}
+.th-teamtag{position:absolute;top:10px;right:60px;background:rgba(27,42,74,.75);color:#fff;font-size:11px;font-weight:900;
+  padding:4px 10px;border-radius:999px;}
+/* milestone progress */
+.th-prog{position:relative;height:20px;border-radius:999px;background:rgba(27,42,74,.25);margin:10px 2px 4px;overflow:hidden;}
+.th-prog-fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#2E9E4F,#3fc167);border-radius:999px;transition:width .6s ease;}
+.th-prog-lab{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.4);}
+.th-miles{display:flex;gap:8px;}
+.th-mile{flex:1;background:var(--sb-cream);border-radius:14px;padding:8px 6px;text-align:center;box-shadow:var(--sb-shadow);}
+.th-mile .em{font-size:26px;}
+.th-mile .pt{font-size:11px;font-weight:900;color:#5a6b8c;}
+.th-mile button{margin-top:5px;width:100%;min-height:44px;border:none;border-radius:10px;font-weight:900;font-size:12px;cursor:pointer;
+  font-family:var(--sb-font);background:linear-gradient(180deg,#ffd95e,#FFC72C);color:var(--sb-ink);box-shadow:0 3px 0 rgba(0,0,0,.2);}
+.th-mile button:disabled{background:#cfd6e4;color:#8b97ad;box-shadow:none;}
+.th-mile.done{opacity:.75;}
+.th-gatehint{font-size:10.5px;font-weight:700;color:#a8552a;text-align:center;margin-top:5px;}
+/* ---------- play buttons ---------- */
+.th-play{display:flex;gap:10px;}
+.th-play .sb-btn{flex:1;min-height:56px;font-size:15px;flex-direction:column;gap:1px;padding:9px 6px;}
+.th-play .sb-btn small{font-size:11px;font-weight:800;opacity:.92;}
+.th-x2{display:inline-block;background:#D7263D;color:#fff;font-size:10px;font-weight:900;border-radius:999px;padding:1px 7px;margin-left:4px;}
+/* ---------- team panel ---------- */
+.th-member{display:flex;align-items:center;gap:9px;padding:6px 0;}
+.th-av{position:relative;width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:22px;
+  border:2.5px solid var(--sb-sky);flex:0 0 auto;}
+.th-av.me{border-color:var(--sb-yellow);box-shadow:0 0 0 2px rgba(255,199,44,.4);}
+.th-av.tractor{border-color:#2E9E4F;box-shadow:0 0 0 3px rgba(46,158,79,.55);}
+.th-av .bdg{position:absolute;right:-6px;bottom:-4px;font-size:12px;background:#D7263D;color:#fff;border-radius:999px;
+  padding:0 4px;font-weight:900;line-height:15px;}
+.th-av .frame{position:absolute;left:-8px;top:-10px;font-size:14px;}
+.th-mname{font-weight:900;font-size:13px;color:var(--sb-ink);white-space:nowrap;}
+.th-mrole{font-size:10px;font-weight:700;color:#7a89a8;}
+.th-barwrap{flex:1;min-width:0;}
+.th-bar{height:13px;border-radius:999px;background:rgba(27,42,74,.12);overflow:hidden;}
+.th-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#3E8EDE,#1D4FA1);transition:width .5s;}
+.th-bar.me i{background:linear-gradient(90deg,#FFC72C,#e0a400);}
+.th-mpts{font-weight:900;font-size:13px;min-width:44px;text-align:right;color:var(--sb-ink);}
+.th-cheer{flex:0 0 auto;width:46px;height:44px;border:none;border-radius:12px;background:linear-gradient(180deg,#ffd95e,#FFC72C);
+  font-size:18px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.18);}
+.th-cheer:disabled{background:#e2e7f0;filter:grayscale(1);opacity:.55;}
+.th-cheer:active{transform:translateY(2px);box-shadow:none;}
+/* ---------- feed ---------- */
+.th-feed{max-height:118px;overflow:hidden;font-size:12px;}
+.th-feed div{padding:4px 0;border-bottom:1px dashed rgba(27,42,74,.12);font-weight:700;color:#41527a;animation:thPop .3s;}
+.th-feed div:first-child{color:var(--sb-ink);}
+/* ---------- leaderboard ---------- */
+.th-rival{display:flex;align-items:center;gap:8px;padding:9px 10px;margin:5px 0;background:rgba(27,42,74,.16);border-radius:12px;color:#fff;}
+.th-rival.mine{background:linear-gradient(90deg,rgba(255,199,44,.32),rgba(255,199,44,.14));border:1.5px solid var(--sb-yellow);}
+.th-rival .rk{width:26px;font-weight:900;font-size:14px;text-align:center;}
+.th-rival .tn{flex:1;font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.th-rival .tp{font-weight:900;font-size:13px;color:var(--sb-yellow);}
+.th-delta{display:flex;align-items:center;gap:7px;background:rgba(215,38,61,.85);color:#fff;border-radius:12px;
+  padding:8px 12px;font-size:12.5px;font-weight:800;margin-bottom:6px;}
+.th-delta.lead{background:rgba(46,158,79,.85);}
+/* ---------- offers ---------- */
+.th-offers{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.th-offer{background:var(--sb-cream);border-radius:14px;padding:11px 10px;text-align:center;box-shadow:var(--sb-shadow);
+  display:flex;flex-direction:column;}
+.th-offer .em{font-size:30px;}
+.th-offer h4{margin:4px 0 2px;font-size:13.5px;color:var(--sb-ink);}
+.th-offer p{margin:0 0 8px;font-size:10.5px;font-weight:700;color:#5a6b8c;flex:1;}
+.th-offer .sb-btn{min-height:44px;font-size:14px;}
+.th-owned{display:grid;place-items:center;min-height:44px;font-weight:900;color:#2E9E4F;font-size:14px;}
+.th-freepath{margin-top:8px;font-size:11px;font-weight:700;color:#3a6b46;text-align:center;background:rgba(46,158,79,.12);
+  border-radius:10px;padding:7px 10px;}
+/* ---------- footer / podium ---------- */
+.th-foot{font-size:11.5px;font-weight:700;color:rgba(255,255,255,.85);text-align:center;padding:6px 0 2px;}
+.th-podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:12px 0;}
+.th-pod{width:80px;border-radius:10px 10px 0 0;color:#fff;text-align:center;padding-top:6px;font-weight:900;}
+.th-pod .pe{font-size:28px;display:block;}
+.th-pod .pn{font-size:10.5px;display:block;padding:0 3px;}
+.th-pod .pp{font-size:11px;color:rgba(255,255,255,.9);}
+.th-pod.p1{height:96px;background:linear-gradient(180deg,#FFC72C,#e0a400);}
+.th-pod.p2{height:74px;background:linear-gradient(180deg,#b9c6d8,#8fa0b8);}
+.th-pod.p3{height:60px;background:linear-gradient(180deg,#d8925a,#b06a33);}
+.th-pod.mine{outline:3px solid #fff;outline-offset:-3px;}
+h3.th-h{color:#fff;font-size:14px;margin:0 0 7px;text-shadow:0 1px 0 rgba(0,0,0,.3);}
+h3.th-h .sub{font-weight:700;font-size:11px;color:var(--sb-sky-light);margin-left:6px;}
+@media (max-width:374px){.th-wagon{width:186px;}.th-play .sb-btn{font-size:13.5px;}}
+</style>
+</head>
+<body>
+<div class="sb-app">
+<div class="sb-main">
+
+  <div class="th-toprow">
+    <span class="sb-timer-chip">🌾 Ends in <span id="th-cd"></span></span>
+    <span class="sb-timer-chip" style="background:rgba(46,158,79,.9);">Fri–Mon Festival</span>
+    <button class="th-info" id="th-info" aria-label="Event rules">ⓘ</button>
+  </div>
+
+  <div class="th-sec th-scene" id="th-scene">
+    <div class="th-sun"></div><div class="th-hill"></div><div class="th-hill h2"></div>
+    <div class="th-barn">🏚️</div>
+    <div class="th-score"><small>TEAM HARVEST</small><b id="th-teampts">0</b> <span style="font-weight:800;font-size:12px;">pts</span></div>
+    <div class="th-teamtag">🃏 Wild Cards</div>
+    <div class="th-wagon">
+      <div class="th-pile" id="th-pile"></div>
+      <div class="th-bed"></div>
+      <div class="th-wheel w1"></div><div class="th-wheel w2"></div>
+    </div>
+  </div>
+
+  <div class="th-sec">
+    <div class="th-prog"><div class="th-prog-fill" id="th-fill" style="width:0%"></div><div class="th-prog-lab" id="th-proglab"></div></div>
+    <div class="th-miles" id="th-miles"></div>
+    <div class="th-gatehint" id="th-gate" style="display:none;">🔒 Clear at least 1 level to claim team chests</div>
+  </div>
+
+  <div class="th-sec th-play">
+    <button class="sb-btn sb-btn-green" id="th-play-n"></button>
+    <button class="sb-btn sb-btn-red" id="th-play-h"></button>
+  </div>
+
+  <div class="th-sec sb-panel">
+    <h3 class="th-h" style="color:var(--sb-ink);">👥 Wild Cards — who's pulling weight?<span class="sub" style="color:#7a89a8;">tap 👏 to cheer</span></h3>
+    <div id="th-members"></div>
+    <div style="border-top:2px dashed rgba(27,42,74,.15);margin-top:6px;padding-top:7px;">
+      <div class="th-feed" id="th-feed"></div>
+    </div>
+  </div>
+
+  <div class="th-sec">
+    <h3 class="th-h">🏆 Harvest Festival — 10 teams <span class="sub">Top 3 win podium prizes</span></h3>
+    <div class="th-delta" id="th-delta"></div>
+    <div id="th-board"></div>
+  </div>
+
+  <div class="th-sec th-offers" id="th-offers"></div>
+  <div class="th-freepath">🌱 No purchase needed — every level you clear feeds the wagon, and cheering teammates earns points back too!</div>
+
+  <div class="th-sec" style="margin-top:12px;">
+    <button class="sb-btn sb-btn-blue sb-btn-block" id="th-finale">⏩ See finale (demo)</button>
+  </div>
+
+  <div class="th-foot" id="th-foot"></div>
+</div>
+</div>
+<script src="../shared/core.js"></script>
+<script src="../shared/levelsim.js"></script>
+<script>
+(function(){
+"use strict";
+var DUR=15*60*1000;              // demo-compressed "72h Fri–Mon"
+var MILES=[500,1200,2500];
+var MILE_META=[
+  {em:"🎁",name:"Bronze Chest",rw:[{type:"coins",amount:300},{type:"wild",amount:1}]},
+  {em:"🎁",name:"Silver Chest",rw:[{type:"coins",amount:600},{type:"energy",amount:2}]},
+  {em:"🎁",name:"Golden Chest",rw:[{type:"coins",amount:1200},{type:"gem",amount:5},{type:"chest",amount:1}]}
+];
+var PODIUM=[[{type:"coins",amount:2000},{type:"gem",amount:5}],
+            [{type:"coins",amount:1200},{type:"gem",amount:3}],
+            [{type:"coins",amount:800},{type:"gem",amount:2}]];
+var now=Date.now();
+function mkBots(){return [
+  {name:"Maya",av:"🦊",role:"the carry 🔥",pts:88,intMs:26000,big:.65,nextAt:now+9000},
+  {name:"Leo",av:"🐺",role:"steady grinder",pts:52,intMs:42000,big:.25,nextAt:now+16000},
+  {name:"Priya",av:"🦉",role:"night owl",pts:61,intMs:50000,big:.4,nextAt:now+24000},
+  {name:"Sam",av:"🐢",role:"a bit idle…",pts:14,intMs:115000,big:.1,nextAt:now+50000}
+];}
+function mkRivals(){
+  var t=[["Golden Geese","🦢",255,20000],["Lucky Ducks","🦆",238,24000],["Card Sharks","🦈",230,26000],
+         ["Pumpkin Kings","🎃",205,30000],["Barn Owls","🦉",178,34000],["Corn Crushers","🌽",150,38000],
+         ["Hay Makers","🌾",118,42000],["Apple Aces","🍎",92,48000],["Turbo Turkeys","🦃",60,55000]];
+  return t.map(function(r,i){return {name:r[0],av:r[1],pts:r[2],intMs:r[3],nextAt:now+6000+i*4000};});
+}
+var st=SB.store("team-harvest",{
+  start:now,end:now+DUR,myPts:0,myLevels:0,hardClears:0,
+  booster:false,pass:false,ended:false,
+  claimed:[false,false,false],botClaimNoted:[false,false,false],
+  bots:mkBots(),rivals:mkRivals(),
+  feed:[{t:"🍂 Harvest Festival begins! Fill the wagon together.",ts:now}],
+  rankHist:[],lastRank:null,cheerAt:{}
+});
+var s=st.data;
+SB.init({title:"Team Harvest 🌾",subtitle:"Wild Cards 🃏 · clear levels, fill the team wagon",resetKey:"team-harvest"});
+
+// ---------- helpers ----------
+function teamPts(){return s.myPts+s.bots.reduce(function(a,b){return a+b.pts;},0);}
+function feed(t){s.feed.unshift({t:t,ts:Date.now()});s.feed=s.feed.slice(0,14);renderFeed();st.save();}
+function standings(){
+  var rows=s.rivals.map(function(r){return {name:r.name,av:r.av,pts:r.pts,mine:false};});
+  rows.push({name:"Wild Cards",av:"🃏",pts:teamPts(),mine:true});
+  rows.sort(function(a,b){return b.pts-a.pts;});
+  return rows;
+}
+function myRank(rows){for(var i=0;i<rows.length;i++)if(rows[i].mine)return i+1;return 10;}
+function myGain(base){return s.booster?base*2:base;}
+
+// ---------- offline catch-up (reload) ----------
+(function catchUp(){
+  var t=Date.now(),sum=0;
+  s.bots.forEach(function(b){var n=0;
+    while(b.nextAt<=t&&n<4){var g=Math.random()<b.big?25:10;b.pts+=g;sum+=g;n++;b.nextAt+=b.intMs*(0.7+Math.random()*0.6);}
+    if(b.nextAt<=t)b.nextAt=t+b.intMs*(0.5+Math.random());});
+  s.rivals.forEach(function(r){var n=0;
+    while(r.nextAt<=t&&n<6){r.pts+=Math.random()<0.3?25:10;n++;r.nextAt+=r.intMs*(0.7+Math.random()*0.6);}
+    if(r.nextAt<=t)r.nextAt=t+r.intMs*(0.5+Math.random());});
+  if(sum>0)s.feed.unshift({t:"⏰ While you were away, teammates hauled in +"+sum+" pts (capped — no runaway)",ts:t});
+  st.save();
+})();
+
+// ---------- wagon ----------
+var CROPS=["🎃","🌽","🍎","🥕","🎃","🌽"];
+function renderWagon(){
+  var tp=teamPts();
+  document.getElementById("th-teampts").textContent=SB.fmt(tp);
+  var pile=document.getElementById("th-pile");
+  var want=Math.min(36,Math.floor(tp/70));
+  while(pile.children.length>want)pile.removeChild(pile.lastChild);
+  while(pile.children.length<want){
+    var i=pile.children.length,el=document.createElement("span");
+    el.className="th-crop";el.textContent=CROPS[i%CROPS.length];
+    el.style.left=((i*37+13)%84)+"%";
+    el.style.bottom=(Math.floor(i/9)*15)+"px";
+    el.style.zIndex=String(9-Math.floor(i/9));
+    pile.appendChild(el);
+  }
+  var next=MILES.find(function(m){return tp<m;});
+  var fill=document.getElementById("th-fill"),lab=document.getElementById("th-proglab");
+  if(next){var prev=MILES[MILES.indexOf(next)-1]||0;
+    fill.style.width=Math.min(100,(tp-prev)/(next-prev)*100)+"%";
+    lab.textContent=SB.fmt(tp)+" / "+SB.fmt(next)+" pts to next team chest";
+  }else{fill.style.width="100%";lab.textContent="All team chests unlocked! 🎉";}
+}
+
+// ---------- milestones ----------
+function renderMiles(){
+  var tp=teamPts(),box=document.getElementById("th-miles");box.innerHTML="";
+  MILES.forEach(function(m,i){
+    var d=document.createElement("div");d.className="th-mile"+(s.claimed[i]?" done":"");
+    var unlocked=tp>=m,gateOk=s.myLevels>=1;
+    d.innerHTML='<div class="em">'+(unlocked?MILE_META[i].em:"🔒")+'</div><div class="pt">'+SB.fmt(m)+' pts</div>'+
+      '<button data-i="'+i+'" '+(!unlocked||s.claimed[i]||!gateOk?"disabled":"")+'>'+
+      (s.claimed[i]?"Claimed ✓":unlocked?(gateOk?"Claim":"🔒 Locked"):"Team goal")+'</button>';
+    box.appendChild(d);
+  });
+  document.getElementById("th-gate").style.display=(s.myLevels<1&&tp>=MILES[0])?"block":"none";
+  box.querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var i=+b.dataset.i;if(s.claimed[i])return;
+      s.claimed[i]=true;
+      var rw=MILE_META[i].rw.map(function(r){return {type:r.type,amount:r.amount*(s.pass?2:1)};});
+      SB.grantRewards(rw,b);SB.confetti();
+      SB.toast(MILE_META[i].name+" claimed!"+(s.pass?" (×2 Harvest Pass share)":""));
+      st.save();renderMiles();
+    });
+  });
+}
+function checkBotClaims(){
+  var tp=teamPts();
+  MILES.forEach(function(m,i){
+    if(tp>=m&&!s.botClaimNoted[i]){
+      s.botClaimNoted[i]=true;
+      feed("🎉 Team goal "+SB.fmt(m)+" reached! "+s.bots[i%4].name+" and the team claimed the "+MILE_META[i].name+" 🎁");
+      SB.toast("🌾 Team milestone reached — "+MILE_META[i].name+" ready to claim!");
+      renderMiles();
+    }
+  });
+}
+
+// ---------- members ----------
+function renderMembers(){
+  var box=document.getElementById("th-members");box.innerHTML="";
+  var all=[{name:"You",av:"😄",role:"that's you"+(s.booster?" · booster active":""),pts:s.myPts,me:true}].concat(s.bots);
+  var max=Math.max.apply(null,all.map(function(m){return m.pts;}).concat([1]));
+  all.forEach(function(m,idx){
+    var row=document.createElement("div");row.className="th-member";
+    row.innerHTML='<div class="th-av'+(m.me?" me":"")+(m.me&&s.pass?" tractor":"")+'">'+m.av+
+      (m.me&&s.pass?'<span class="frame">🚜</span>':"")+(m.me&&s.booster?'<span class="bdg">×2</span>':"")+'</div>'+
+      '<div style="width:64px;flex:0 0 auto;"><div class="th-mname">'+m.name+'</div><div class="th-mrole">'+m.role+'</div></div>'+
+      '<div class="th-barwrap"><div class="th-bar'+(m.me?" me":"")+'"><i style="width:'+(m.pts/max*100)+'%"></i></div></div>'+
+      '<div class="th-mpts">'+SB.fmt(m.pts)+'</div>'+
+      (m.me?'<div style="width:46px;flex:0 0 auto;"></div>':'<button class="th-cheer" data-b="'+(idx-1)+'" aria-label="Cheer '+m.name+'">👏</button>');
+    box.appendChild(row);
+  });
+  box.querySelectorAll(".th-cheer").forEach(function(b){
+    var i=+b.dataset.b,bot=s.bots[i];
+    if(s.ended||(s.cheerAt[bot.name]&&Date.now()-s.cheerAt[bot.name]<60000))b.disabled=true;
+    b.addEventListener("click",function(){
+      s.cheerAt[bot.name]=Date.now();b.disabled=true;SB.haptic(15);
+      SB.toast("👏 You cheered "+bot.name+"!");
+      feed("👏 You cheered "+bot.name+" on!");
+      setTimeout(function(){
+        if(s.ended)return;
+        var g=15+Math.floor(Math.random()*16);bot.pts+=g;
+        feed(bot.av+" "+bot.name+" felt the love! +"+g+" 🌽 burst for the team");
+        refresh();st.save();
+      },3500+Math.random()*2500);
+      st.save();
+    });
+  });
+}
+
+// ---------- feed ----------
+function renderFeed(){
+  var f=document.getElementById("th-feed");
+  f.innerHTML=s.feed.slice(0,5).map(function(e){return "<div>"+e.t+"</div>";}).join("");
+}
+
+// ---------- leaderboard ----------
+function renderBoard(){
+  var rows=standings(),box=document.getElementById("th-board");box.innerHTML="";
+  rows.forEach(function(r,i){
+    var d=document.createElement("div");d.className="th-rival"+(r.mine?" mine":"");
+    var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+    d.innerHTML='<span class="rk">'+medal+'</span><span style="font-size:18px;">'+r.av+'</span>'+
+      '<span class="tn">'+r.name+(r.mine?" (you)":"")+'</span><span class="tp">'+SB.fmt(r.pts)+'</span>';
+    box.appendChild(d);
+  });
+  var rk=myRank(rows),delta=document.getElementById("th-delta");
+  if(rk===1){var chase=rows[1];delta.className="th-delta lead";
+    delta.innerHTML="👑 Your team leads! "+chase.av+" "+chase.name+" is "+SB.fmt(rows[0].pts-chase.pts)+" pts behind — keep harvesting!";
+  }else{var ahead=rows[rk-2];delta.className="th-delta";
+    delta.innerHTML="🎯 "+ahead.av+" "+ahead.name+" is "+SB.fmt(ahead.pts-rows[rk-1].pts)+" pts ahead — clear levels to catch them!";
+  }
+  // rank history + overtake toasts
+  if(s.lastRank!=null&&rk>s.lastRank&&!s.ended){
+    SB.toast("😱 "+rows[rk-2].av+" "+rows[rk-2].name+" passed you! "+SB.fmt(rows[rk-2].pts-rows[rk-1].pts)+" pts ahead");SB.haptic(25);
+  }else if(s.lastRank!=null&&rk<s.lastRank&&!s.ended){
+    SB.toast("🚜 Wild Cards climbed to #"+rk+"!");SB.confetti(window.innerWidth/2,180,40);
+  }
+  if(s.lastRank!==rk){s.lastRank=rk;s.rankHist.push(rk);s.rankHist=s.rankHist.slice(-8);st.save();}
+  document.getElementById("th-foot").textContent=
+    "Your harvest: "+SB.fmt(s.myPts)+" pts · "+s.myLevels+" levels ("+s.hardClears+" hard) · Team rank: "+
+    (s.rankHist.length?s.rankHist.map(function(r){return "#"+r;}).join(" → "):"#"+rk);
+}
+
+// ---------- play buttons ----------
+var btnN=document.getElementById("th-play-n"),btnH=document.getElementById("th-play-h");
+function renderPlay(){
+  btnN.innerHTML="▶ Play level<small>+"+myGain(10)+" pts"+(s.booster?' <span class="th-x2">×2</span>':"")+"</small>";
+  btnH.innerHTML="🔥 Hard level<small>+"+myGain(25)+" pts"+(s.booster?' <span class="th-x2">×2</span>':"")+"</small>";
+  btnN.disabled=btnH.disabled=s.ended;
+}
+function play(hard){
+  if(s.ended)return;
+  var wr=window.__forceWin===true?1:(window.__forceWin===false?0:undefined);
+  SB.playLevel({hard:hard,winRate:wr,title:"Adventure Level "+(214+s.myLevels)}).then(function(res){
+    if(res.won){
+      var g=myGain(hard?25:10);
+      s.myPts+=g;s.myLevels++;if(hard)s.hardClears++;
+      feed("😄 You +"+g+" "+(hard?"🔥 hard clear!":"🌽 level clear!"));
+      SB.grantRewards([{type:"coins",amount:hard?60:35}],hard?btnH:btnN);
+      SB.toast("+"+g+" harvest pts for Wild Cards! 🌾");
+      checkBotClaims();refresh();st.save();
+    }else{
+      SB.toast("So close! No harvest this time — try again 💪");
+    }
+  });
+}
+btnN.addEventListener("click",function(){play(false);});
+btnH.addEventListener("click",function(){play(true);});
+
+// ---------- offers ----------
+function renderOffers(){
+  var box=document.getElementById("th-offers");box.innerHTML="";
+  var o1=document.createElement("div");o1.className="th-offer";
+  o1.innerHTML='<div class="em">⚡</div><h4>Team Booster</h4><p>YOUR contributions ×2 for the rest of the event. Badge on your avatar!</p>'+
+    (s.booster?'<div class="th-owned">✓ Active</div>':'<button class="sb-btn sb-btn-green sb-btn-block" id="th-buy1">$1.99</button>');
+  var o2=document.createElement("div");o2.className="th-offer";
+  o2.innerHTML='<div class="em">🚜</div><h4>Harvest Pass</h4><p>×2 YOUR share of team chests + exclusive tractor avatar frame.</p>'+
+    (s.pass?'<div class="th-owned">✓ Owned</div>':'<button class="sb-btn sb-btn-yellow sb-btn-block" id="th-buy2">$2.99</button>');
+  box.appendChild(o1);box.appendChild(o2);
+  var b1=document.getElementById("th-buy1");
+  if(b1)b1.addEventListener("click",function(){
+    SB.buyIAP({label:"Team Booster ⚡",price:"$1.99",sub:"Your level clears earn ×2 harvest points until the festival ends",grant:false,
+      onSuccess:function(){s.booster=true;st.save();
+        feed("🦊 Maya: WOW, You grabbed a Team Booster! ⚡ Carry us!");
+        SB.toast("⚡ Booster active — your clears now earn ×2!");refresh();}});
+  });
+  var b2=document.getElementById("th-buy2");
+  if(b2)b2.addEventListener("click",function(){
+    SB.buyIAP({label:"Harvest Pass 🚜",price:"$2.99",sub:"Double YOUR share of every team chest + tractor avatar frame",grant:false,
+      onSuccess:function(){s.pass=true;st.save();
+        feed("🐺 Leo: nice tractor frame, You! 🚜 Chest shares doubled!");
+        SB.toast("🚜 Harvest Pass active — chest shares ×2!");refresh();}});
+  });
+}
+
+// ---------- info modal ----------
+document.getElementById("th-info").addEventListener("click",function(){
+  SB.modal('<h3 style="margin:0 0 8px;">🌾 Team Harvest Rules</h3>'+
+    '<div style="text-align:left;font-size:13px;font-weight:600;color:#41527a;line-height:1.5;">'+
+    '<p>🃏 You + 4 teammates on <b>Wild Cards</b>. Every main level you clear adds <b>+10 pts</b> (hard <b>+25</b>) to the TEAM wagon.</p>'+
+    '<p>🎁 Team chests at <b>500 / 1200 / 2500</b> pts — every member claims, but you must clear <b>at least 1 level</b> to claim.</p>'+
+    '<p>🏆 Top-3 of 10 teams at festival end win podium prizes split among members.</p>'+
+    '<p>👏 Cheer a teammate — they respond with a point burst.</p>'+
+    '<p>🤖 Teammates play on their own schedule and <b>cap at 30 pts/hr</b> — no runaway scores.</p>'+
+    '<p class="sb-muted" style="font-size:11px;">Fri–Mon 72h event · compressed to 15 min for this demo.</p></div>'+
+    '<button class="sb-btn sb-btn-blue sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>');
+});
+
+// ---------- finale ----------
+function finale(){
+  if(s.ended)return;
+  s.ended=true;st.save();renderPlay();
+  var rows=standings(),rk=myRank(rows);
+  var all=[{name:"You",av:"😄",pts:s.myPts}].concat(s.bots);
+  all.sort(function(a,b){return b.pts-a.pts;});
+  var mvp=all[0],meMvp=mvp.name==="You";
+  var order=[1,0,2];
+  var pods=order.map(function(idx){
+    var t=rows[idx];
+    return '<div class="th-pod p'+(idx+1)+(t.mine?" mine":"")+'"><span class="pe">'+t.av+'</span><span class="pn">'+t.name+'</span><span class="pp">'+SB.fmt(t.pts)+'</span></div>';
+  }).join("");
+  var won=rk<=3,gateOk=s.myLevels>=1;
+  var prize=won?PODIUM[rk-1].map(function(r){return {type:r.type,amount:r.amount*(s.pass?2:1)};}):null;
+  var html='<h3 style="margin:0;">🎪 Harvest Festival Finale</h3>'+
+    '<div class="th-podium">'+pods+'</div>'+
+    '<p style="font-weight:900;font-size:16px;margin:4px 0;">Wild Cards finished <span style="color:'+(won?"#2E9E4F":"#D7263D")+';">#'+rk+'</span> of 10!</p>'+
+    '<p style="font-weight:800;font-size:13px;margin:4px 0;">👑 Team MVP: '+mvp.av+' '+mvp.name+' — '+SB.fmt(mvp.pts)+' pts'+(meMvp?" — THAT'S YOU!":"")+'</p>'+
+    '<p style="font-size:12px;font-weight:700;color:#5a6b8c;margin:4px 0 10px;">Chest recap: '+s.claimed.filter(Boolean).length+'/3 team chests claimed · your harvest '+SB.fmt(s.myPts)+' pts</p>'+
+    (won?(gateOk?'<div class="sb-sheet-contents" style="justify-content:center;">'+prize.map(SB.rewardChip).join("")+'</div>'+
+      (s.pass?'<p style="font-size:11px;font-weight:800;color:#2E9E4F;margin:2px 0 8px;">🚜 Harvest Pass doubled your share!</p>':"")+
+      '<button class="sb-btn sb-btn-yellow sb-btn-block" id="th-claim-pod">Collect podium prize! 🏆</button>'
+      :'<p style="font-size:12px;font-weight:800;color:#a8552a;">🔒 Podium share requires 1+ level cleared</p>')
+    :'<p style="font-size:12px;font-weight:700;color:#5a6b8c;">No podium this time — the next festival starts Friday! 🌱</p>')+
+    '<button class="sb-sheet-cancel" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Close</button>';
+  var m=SB.modal(html);
+  SB.confetti();SB.haptic(35);
+  if(meMvp)setTimeout(function(){SB.confetti(window.innerWidth/2,200,60);},600);
+  var cb=m.el.querySelector("#th-claim-pod");
+  if(cb)cb.addEventListener("click",function(){
+    SB.grantRewards(prize,cb);SB.confetti();
+    cb.disabled=true;cb.textContent="Collected ✓";
+  });
+  var fb=document.getElementById("th-finale");
+  fb.disabled=true;fb.textContent="🎪 Festival ended — final rank #"+rk;
+}
+document.getElementById("th-finale").addEventListener("click",finale);
+SB.countdown(document.getElementById("th-cd"),s.end,function(){if(!s.ended)finale();});
+
+// ---------- live sim tick ----------
+setInterval(function(){
+  if(s.ended)return;
+  var t=Date.now(),changed=false;
+  s.bots.forEach(function(b){
+    if(t>=b.nextAt){
+      var hard=Math.random()<b.big,g=hard?25:10;b.pts+=g;
+      feed(b.av+" "+b.name+" +"+g+(hard?" 🔥 hard clear!":" 🌽 level clear"));
+      b.nextAt=t+b.intMs*(0.7+Math.random()*0.6);changed=true;
+    }});
+  s.rivals.forEach(function(r){
+    if(t>=r.nextAt){r.pts+=Math.random()<0.3?25:10;r.nextAt=t+r.intMs*(0.7+Math.random()*0.6);changed=true;}
+  });
+  if(changed){checkBotClaims();refresh();st.save();}
+},1000);
+
+// ---------- render all ----------
+function refresh(){renderWagon();renderMiles();renderMembers();renderBoard();renderPlay();renderFeed();renderOffers();}
+refresh();
+if(s.ended){renderPlay();var fb=document.getElementById("th-finale");fb.disabled=true;fb.textContent="🎪 Festival ended";}
+})();
+</script>
+</body>
+</html>

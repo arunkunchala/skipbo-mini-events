@@ -1,40 +1,69 @@
-# Skip-Bo Monetization Mini-Event Prototypes
+# Skip-Bo Mini-Event Prototypes
 
-Ten playable mobile-web prototypes of monetization mini-events for Skip-Bo, built for Liquidnitro Games. Each event wraps Skip-Bo's existing economy (coins, energy, boosters, $0.99–$19.99 IAP tiers) in a new interactive mechanic proven in top-grossing casual games.
+**22 playable mobile-web prototypes** of LiveOps mini-events for Skip-Bo, built for Liquidnitro Games — 10 monetization events and 12 engagement events. No build step, no dependencies: open `index.html` (or the GitHub Pages link) on a phone.
 
-**Live demo:** open `index.html` (or the GitHub Pages link) on a phone — everything is portrait mobile-first, no build step, no dependencies.
+All purchases are simulated. Wallet and event state persist in localStorage; every screen has a demo reset.
 
-## The 10 events
+---
 
-| # | Event | Mechanic | Proven by |
-|---|-------|----------|-----------|
-| 1 | **Treasure Elevator** | Progressive offer chain (free → $1.99 → free → $4.99 → grand prize) | Royal Match Endless Treasure (+20% revenue in 30 days) |
-| 2 | **Prize Drop** | Physics plinko with progressive jackpot, multipliers, ball IAPs | Monopoly GO! Peg-E |
-| 3 | **Pack Your Prize Box** | Build-your-own-bundle as a packing game with discount meter | Merge Mansion / AFK Arena custom bundles |
-| 4 | **Treasure Dig** | Grid excavation with partial-reveal near-miss telegraphing | Monopoly GO Treasures / Fishdom digs |
-| 5 | **Build Before Sunset** | Timer-build with speed-ups, Foreman & Grand Opening packs | Construction metas / timer monetization |
-| 6 | **Rescue Run** | The viral pin-pull ad as an honest playable event | Hero Rescue-style ads |
-| 7 | **Sorting Warehouse** | Conveyor color-sort with holding-slot tension | Viral sort/bus-jam creatives |
-| 8 | **Lucky Grabber** | Claw machine with finite visible pool + pity meter | Bingo Pop claw |
-| 9 | **Reward Workshop** | Craft the reward you choose; buy only the missing ingredient | Ingredient-gap monetization |
-| 10 | **Collector's Showcase** | Sticker album with duplicate→wildcard meter and deadline offers | Monopoly GO albums |
+## Part 1 — Monetization events (10)
 
-## Design rules baked into every prototype
+Wrapping Skip-Bo's *existing* IAPs, coins, energy and boosters in new interactive systems. The governing rule from the research: **the purchase is never the final moment** — celebration and further claiming always come after checkout.
 
-- Play → earn inputs → interact with a satisfying system → visible progress/ownership → contextual IAP → **celebration and more claiming AFTER the purchase** (never a dead end at checkout).
-- No hard blocks: every paywall has a slower free path ("Play a level" simulates returning to core Skip-Bo play).
-- Honest presentation: visible odds, visible prize pools, pity meters — the viral ad mechanics without the bait.
-- All purchases are simulated. Wallet and event state persist in localStorage; every screen has a demo reset.
+| Event | Mechanic | Proven by |
+|---|---|---|
+| **Treasure Elevator** | Progressive offer chain: free floors → $1.99 → richer free floors → $4.99 → rooftop grand prize | Royal Match Endless Treasure (+20% revenue, first 30 days) |
+| **Prize Drop** | Physics plinko: progressive jackpot, moving ×2 pocket, ×1/×2/×3 stakes, milestone track | Monopoly GO! Peg-E |
+| **Pack Your Prize Box** | Build-your-own-bundle as a packing game; slot sizes, live price, discount meter | Merge Mansion / AFK Arena BYOB |
+| **Treasure Dig** | Excavation grid with partial-reveal near-miss telegraphing; scanner/dynamite | Monopoly GO Treasures, Fishdom |
+| **Build Before Sunset** | Timer build with speed-ups, Foreman pack, second worker, Grand Opening pack | Construction metas |
+| **Rescue Run** | The viral pin-pull ad rebuilt as an honest playable event | Hero Rescue-style creatives |
+| **Sorting Warehouse** | Conveyor colour-sort with holding-slot tension; jams pause, never destroy | Viral sort / bus-jam creatives |
+| **Lucky Grabber** | Claw machine with a finite *visible* prize pool, published odds, pity meter | Bingo Pop claw |
+| **Reward Workshop** | Craft the reward you choose; monetizes the exact missing ingredient | Ingredient-gap monetization |
+| **Collector's Showcase** | Sticker album; duplicates always feed a wildcard meter | Monopoly GO albums |
+
+## Part 2 — Engagement events (12)
+
+Every one is **fuelled by main-level completion** — the dominant pattern across Royal Match, Toon Blast, Fishdom, Monopoly GO and Coin Master. Clearing a Skip-Bo adventure level is the only way to earn event input; **hard levels pay ~2×**, which converts "play more" into "play harder" without new content. A shared level simulator (`shared/levelsim.js`) stands in for real adventure play.
+
+| Event | Archetype | Fuel → output |
+|---|---|---|
+| **Stock Pile Streak** | Risk / double-or-nothing ladder | clear = climb a rung; bank anytime |
+| **Double-or-Nothing Dash** | Daily jackpot, first-try streak | 7 consecutive first-try clears = jackpot |
+| **Wild Card Wager** | Ticket-wager arena | wager 1–3 tickets on yourself; **your real clear rate is displayed** |
+| **Salvage Run** | Loss-insurance collection | clears salvage crates; losses breach the hull; bank before you sink |
+| **Grand Prix Circuit** | 5-player bracket race | clear = 1 segment, first-try = 2 (nitro) |
+| **King's Cup Ladder** | Safe-accumulation leaderboard + milestone lane | clear = cups; nothing ever resets |
+| **Pyramid Ascent** | Escalating milestone tower | clear = 10 pts, hard = 25; free players reach ~80% of tiers |
+| **Chestnut Dig** | Dig with published odds + pity | clear = dig ticket, hard = power dig (3-tile cross) |
+| **Card-Back Album** | Endless prestige collection | clears = packs; completing the album prestiges instead of ending |
+| **Harvest Festival** | Build-track with free/premium lanes | clear = 3 planks, hard = 7; free lane completes the whole scene |
+| **Team Harvest** | 10-team tournament | your clears feed a shared team score |
+| **Bridge Builders** | Partner co-op | clears earn rivets both partners spend on a shared build |
+
+### Honest-mechanics rules enforced in every engagement event
+
+1. **Visible odds and pity.** Any randomness publishes its exact odds on screen and carries a free, always-active pity counter (Chestnut Dig's guarantee was verified against a 2.3M-dig simulation; Card-Back Album's against 200k rolls).
+2. **A slower free path behind every paywall.** Every refill, multiplier or insurance offer shows its free equivalent — a regen timer, a pity threshold, or "clear N more levels" — *in the same view*.
+3. **Never dead-end at checkout.** Loss and depletion moments always present a non-paid option alongside the paid one.
+4. **Leaderboard + milestone hybrid.** Competitive events pair rankings with a personal milestone track so every participant earns something.
+5. **Losses never destroy banked value.** Risk events knock you down, not to zero, and banked rewards are always safe.
 
 ## Structure
 
 ```
-index.html            — hub screen
+index.html            — hub (Monetization / Engagement tabs)
 shared/core.css       — Skip-Bo design system
-shared/core.js        — wallet, fake-IAP sheet, rewards/confetti/countdown helpers
+shared/core.js        — wallet, fake-IAP sheet, rewards, confetti, countdowns
+shared/levelsim.js    — animated Skip-Bo level simulator (SB.playLevel)
 events/*.html         — one self-contained playable event per file
 ```
 
-Each event page declares an ⓘ info modal explaining the mechanic and its monetization logic for stakeholders.
+Each event page carries an ⓘ modal explaining the mechanic and its engagement/monetization logic for stakeholders.
+
+## Verification
+
+All 23 pages were played end-to-end in headless Chromium at 390×844 and 360×740: zero console/page errors, zero horizontal overflow, touch targets ≥44px, and reward/economy maths proven by scripted runs (wallet asserted before/after every grant). Pacing simulations back the published claims in Pyramid Ascent (~80% free tiers), Harvest Festival (~41 clears to finish), Chestnut Dig and Card-Back Album.
 
 *Prototype only — not affiliated with Mattel. All art is emoji/CSS placeholder.*

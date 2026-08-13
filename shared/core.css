@@ -129,8 +129,9 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
 .sb-btn-yellow { background: linear-gradient(180deg, #ffd95e 0%, var(--sb-yellow) 55%, var(--sb-yellow-dark) 100%); color: var(--sb-ink); text-shadow: none; }
 .sb-btn-red { background: linear-gradient(180deg, #ef5468 0%, var(--sb-red) 55%, var(--sb-red-dark) 100%); }
 .sb-btn-blue { background: linear-gradient(180deg, #5ba0e8 0%, var(--sb-sky) 55%, var(--sb-blue) 100%); }
-.sb-btn-sm { font-size: 13px; padding: 8px 14px; border-radius: 11px; }
+.sb-btn-sm { font-size: 13px; padding: 8px 14px; border-radius: 11px; min-height: 44px; }
 .sb-btn-block { display: flex; width: 100%; }
+.sb-btn-stack { flex-direction: column; gap: 2px; line-height: 1.15; }
 
 /* ---------- Cards / panels ---------- */
 .sb-panel {
@@ -182,7 +183,7 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
 
 /* ---------- Bottom sheet (IAP) ---------- */
 .sb-sheet-backdrop {
-  position: fixed; inset: 0; z-index: 200;
+  position: fixed; inset: 0; z-index: 280;
   background: rgba(10, 20, 40, 0.65);
   display: flex; align-items: flex-end; justify-content: center;
   opacity: 0; pointer-events: none;
@@ -221,6 +222,7 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
   transition: all 0.25s ease;
   max-width: 92vw; text-align: center;
 }
+.sb-toast.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 76px); }
 .sb-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ---------- Flying reward ---------- */
@@ -244,8 +246,16 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
   border: 1px solid rgba(255,255,255,0.25);
   border-radius: 999px;
   font-size: 11px; font-weight: 700;
-  padding: 6px 12px; cursor: pointer;
+  width: 44px; height: 44px; padding: 0; cursor: pointer;
+  overflow: hidden; white-space: nowrap;
+  opacity: 0.5;
+  transition: width 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
 }
+.sb-demo-reset:hover, .sb-demo-reset:focus, .sb-demo-reset.open {
+  width: auto; padding: 0 14px; opacity: 1;
+}
+.sb-demo-reset .lbl { display: none; margin-left: 5px; }
+.sb-demo-reset:hover .lbl, .sb-demo-reset:focus .lbl, .sb-demo-reset.open .lbl { display: inline; }
 
 /* ---------- Modal (centered) ---------- */
 .sb-modal-backdrop {

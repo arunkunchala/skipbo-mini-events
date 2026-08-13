@@ -7,56 +7,73 @@
 <title>Skip-Bo Mini-Event Prototypes</title>
 <link rel="stylesheet" href="shared/core.css">
 <style>
-  .hub-hero {
-    text-align: center;
-    padding: 18px 10px 6px;
-    color: #fff;
-  }
+  .hub-hero { text-align: center; padding: 16px 10px 4px; color: #fff; }
   .hub-hero .logo {
     display: inline-block;
     background: linear-gradient(180deg, #2a5cb0, #1D4FA1);
     border: 3px solid var(--sb-yellow);
     border-radius: 18px;
-    padding: 10px 26px;
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: 1px;
+    padding: 9px 26px;
+    font-size: 26px; font-weight: 900; letter-spacing: 1px;
     color: var(--sb-yellow);
     text-shadow: 0 2px 0 rgba(0,0,0,0.35);
     box-shadow: var(--sb-shadow);
     transform: rotate(-2deg);
   }
-  .hub-hero p { margin: 10px 4px 0; font-size: 13px; color: var(--sb-sky-light); font-weight: 600; }
-  .hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .hub-hero p { margin: 9px 4px 0; font-size: 12px; color: var(--sb-sky-light); font-weight: 600; line-height: 1.45; }
+
+  .hub-tabs { display: flex; gap: 8px; margin: 16px 0 4px; }
+  .hub-tab {
+    flex: 1; border: 2px solid rgba(255,255,255,0.22); cursor: pointer;
+    background: rgba(255,255,255,0.10); color: #fff;
+    font-family: var(--sb-font); font-weight: 800; font-size: 12.5px;
+    border-radius: 13px; padding: 9px 6px; min-height: 52px; line-height: 1.2;
+    transition: transform 0.08s;
+  }
+  .hub-tab small { display: block; font-size: 9.5px; font-weight: 700; color: var(--sb-sky-light); margin-top: 2px; }
+  .hub-tab.on {
+    background: linear-gradient(180deg, #ffd95e, var(--sb-yellow));
+    color: var(--sb-ink); border-color: #fff;
+    box-shadow: 0 0 14px rgba(255,199,44,0.5);
+  }
+  .hub-tab.on small { color: #6b5510; }
+
+  .hub-secnote {
+    background: rgba(0,0,0,0.24); border-left: 3px solid var(--sb-yellow);
+    border-radius: 0 10px 10px 0; padding: 9px 11px; margin: 12px 0 4px;
+    color: #fff; font-size: 11.5px; font-weight: 600; line-height: 1.5;
+  }
+  .hub-secnote b { color: var(--sb-yellow); }
+
+  .hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 12px; }
+  .hub-sec { display: none; }
+  .hub-sec.on { display: block; }
+
   .evt-card {
-    display: block;
-    text-decoration: none;
-    background: var(--sb-cream);
-    border-radius: 16px;
-    box-shadow: var(--sb-shadow);
-    overflow: hidden;
-    color: var(--sb-ink);
-    transition: transform 0.1s ease;
+    display: block; text-decoration: none;
+    background: var(--sb-cream); border-radius: 16px;
+    box-shadow: var(--sb-shadow); overflow: hidden;
+    color: var(--sb-ink); transition: transform 0.1s ease;
     border: 2px solid rgba(255,255,255,0.5);
   }
   .evt-card:active { transform: scale(0.96); }
-  .evt-art {
-    height: 86px;
-    display: grid; place-items: center;
-    font-size: 42px;
-    position: relative;
-  }
+  .evt-art { height: 80px; display: grid; place-items: center; font-size: 38px; position: relative; }
   .evt-art .badge {
-    position: absolute; top: 6px; left: 6px;
-    font-size: 9px; font-weight: 900; letter-spacing: 0.5px;
+    position: absolute; top: 5px; left: 5px;
+    font-size: 8.5px; font-weight: 900; letter-spacing: 0.4px;
     color: #fff; background: var(--sb-red);
-    padding: 3px 7px; border-radius: 999px;
-    text-transform: uppercase;
+    padding: 3px 6px; border-radius: 999px; text-transform: uppercase;
   }
-  .evt-body { padding: 9px 10px 11px; }
-  .evt-body h3 { margin: 0 0 3px; font-size: 14px; line-height: 1.15; }
-  .evt-body p { margin: 0; font-size: 10.5px; line-height: 1.35; color: #5a6b8c; font-weight: 600; }
-  .foot-note { text-align: center; color: rgba(255,255,255,0.65); font-size: 11px; margin-top: 20px; font-weight: 600; padding: 0 20px; line-height: 1.5;}
+  .evt-art .fuel {
+    position: absolute; bottom: 5px; right: 5px;
+    font-size: 8px; font-weight: 900; letter-spacing: 0.3px;
+    color: var(--sb-ink); background: rgba(255,255,255,0.9);
+    padding: 2px 6px; border-radius: 999px;
+  }
+  .evt-body { padding: 8px 9px 10px; }
+  .evt-body h3 { margin: 0 0 3px; font-size: 13.5px; line-height: 1.15; }
+  .evt-body p { margin: 0; font-size: 10px; line-height: 1.35; color: #5a6b8c; font-weight: 600; }
+  .foot-note { text-align: center; color: rgba(255,255,255,0.62); font-size: 10.5px; margin-top: 18px; font-weight: 600; padding: 0 12px 4px; line-height: 1.55; }
 </style>
 </head>
 <body>
@@ -64,56 +81,140 @@
   <div class="sb-main">
     <div class="hub-hero">
       <div class="logo">SKIP-BO</div>
-      <p>Monetization Mini-Event Prototypes · 10 playable concepts<br>Liquidnitro Games · Internal demo</p>
+      <p>Mini-Event Prototypes · 22 playable concepts<br>Liquidnitro Games · Internal demo</p>
     </div>
-    <div class="hub-grid">
-      <a class="evt-card" href="events/treasure-elevator.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#FFC72C,#e0a400)"><span class="badge">Offer chain</span>🏨</div>
-        <div class="evt-body"><h3>Treasure Elevator</h3><p>Endless-Treasure evolution — ride floors of free rewards gated by escalating IAPs</p></div>
-      </a>
-      <a class="evt-card" href="events/prize-drop.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#3E8EDE,#1D4FA1)"><span class="badge">Plinko</span>🎡</div>
-        <div class="evt-body"><h3>Prize Drop</h3><p>Physics peg-board with jackpot pocket, multipliers & extra-ball IAPs</p></div>
-      </a>
-      <a class="evt-card" href="events/prize-box.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#2E9E4F,#1f7038)"><span class="badge">BYOB</span>📦</div>
-        <div class="evt-body"><h3>Pack Your Prize Box</h3><p>Drag rewards into your own box — build the exact bundle you want to buy</p></div>
-      </a>
-      <a class="evt-card" href="events/treasure-dig.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#a9703f,#6e4423)"><span class="badge">Excavation</span>⛏️</div>
-        <div class="evt-body"><h3>Treasure Dig</h3><p>Uncover buried chests tile by tile — scanners, dynamite & shovel packs</p></div>
-      </a>
-      <a class="evt-card" href="events/build-before-sunset.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#ef7d4f,#c74b1e)"><span class="badge">Timer build</span>🏗️</div>
-        <div class="evt-body"><h3>Build Before Sunset</h3><p>Finish the venue before the party — speed-ups, second worker & finish packs</p></div>
-      </a>
-      <a class="evt-card" href="events/rescue-run.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#8e6ee0,#5b3fb0)"><span class="badge">Pin-pull</span>🪢</div>
-        <div class="evt-body"><h3>Rescue Run</h3><p>The viral pin-pull ad as a real event — free Fluffy & the reward crates</p></div>
-      </a>
-      <a class="evt-card" href="events/sorting-warehouse.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#4fb8c9,#2a7f8f)"><span class="badge">Sort</span>🏭</div>
-        <div class="evt-body"><h3>Sorting Warehouse</h3><p>Sort parcels off the conveyor into colored crates — capacity & undo IAPs</p></div>
-      </a>
-      <a class="evt-card" href="events/lucky-grabber.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#e05c8a,#a82e5c)"><span class="badge">Claw</span>🕹️</div>
-        <div class="evt-body"><h3>Lucky Grabber</h3><p>Claw machine with visible prize pool & a grip-power pity meter</p></div>
-      </a>
-      <a class="evt-card" href="events/reward-workshop.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#7a8ca8,#4a5c78)"><span class="badge">Craft</span>⚗️</div>
-        <div class="evt-body"><h3>Reward Workshop</h3><p>Combine chips into the reward you choose — buy only the missing piece</p></div>
-      </a>
-      <a class="evt-card" href="events/collectors-showcase.html">
-        <div class="evt-art" style="background:linear-gradient(160deg,#d9a441,#9c6f1d)"><span class="badge">Album</span>🖼️</div>
-        <div class="evt-body"><h3>Collector's Showcase</h3><p>Complete the postcard album — duplicates feed a wildcard meter</p></div>
-      </a>
+
+    <div class="hub-tabs">
+      <button class="hub-tab on" data-sec="mon">💰 Monetization<small>10 events</small></button>
+      <button class="hub-tab" data-sec="eng">🔥 Engagement<small>12 events</small></button>
     </div>
-    <p class="foot-note">All purchases are simulated — no real transactions. Wallet, prices and rewards mirror Skip-Bo Mobile's live economy ($0.99–$19.99 tiers, coins, energy & boosters).</p>
+
+    <!-- ============ MONETIZATION ============ -->
+    <div class="hub-sec on" id="sec-mon">
+      <div class="hub-secnote">
+        Wrapping Skip-Bo's <b>existing IAPs and rewards</b> in new interactive systems. Rule: the purchase is never the last beat — <b>celebration and more claiming come after checkout</b>.
+      </div>
+      <div class="hub-grid">
+        <a class="evt-card" href="events/treasure-elevator.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#FFC72C,#e0a400)"><span class="badge">Offer chain</span>🏨</div>
+          <div class="evt-body"><h3>Treasure Elevator</h3><p>Ride 14 floors of free rewards gated by escalating IAPs</p></div>
+        </a>
+        <a class="evt-card" href="events/prize-drop.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#3E8EDE,#1D4FA1)"><span class="badge">Plinko</span>🎡</div>
+          <div class="evt-body"><h3>Prize Drop</h3><p>Physics peg-board with progressive jackpot & multipliers</p></div>
+        </a>
+        <a class="evt-card" href="events/prize-box.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#2E9E4F,#1f7038)"><span class="badge">BYOB</span>📦</div>
+          <div class="evt-body"><h3>Pack Your Prize Box</h3><p>Pack the exact bundle you want, then buy that box</p></div>
+        </a>
+        <a class="evt-card" href="events/treasure-dig.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#a9703f,#6e4423)"><span class="badge">Excavation</span>⛏️</div>
+          <div class="evt-body"><h3>Treasure Dig</h3><p>Uncover buried chests — scanners, dynamite & shovels</p></div>
+        </a>
+        <a class="evt-card" href="events/build-before-sunset.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#ef7d4f,#c74b1e)"><span class="badge">Timer build</span>🏗️</div>
+          <div class="evt-body"><h3>Build Before Sunset</h3><p>Finish the venue before the party — speed-ups & packs</p></div>
+        </a>
+        <a class="evt-card" href="events/rescue-run.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#8e6ee0,#5b3fb0)"><span class="badge">Pin-pull</span>🪢</div>
+          <div class="evt-body"><h3>Rescue Run</h3><p>The viral pin-pull ad, made honest and actually playable</p></div>
+        </a>
+        <a class="evt-card" href="events/sorting-warehouse.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#4fb8c9,#2a7f8f)"><span class="badge">Sort</span>🏭</div>
+          <div class="evt-body"><h3>Sorting Warehouse</h3><p>Sort the conveyor into crates — capacity & undo offers</p></div>
+        </a>
+        <a class="evt-card" href="events/lucky-grabber.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#e05c8a,#a82e5c)"><span class="badge">Claw</span>🕹️</div>
+          <div class="evt-body"><h3>Lucky Grabber</h3><p>Claw machine with a visible prize pool & pity meter</p></div>
+        </a>
+        <a class="evt-card" href="events/reward-workshop.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#7a8ca8,#4a5c78)"><span class="badge">Craft</span>⚗️</div>
+          <div class="evt-body"><h3>Reward Workshop</h3><p>Craft your chosen reward; buy only the missing piece</p></div>
+        </a>
+        <a class="evt-card" href="events/collectors-showcase.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#d9a441,#9c6f1d)"><span class="badge">Album</span>🖼️</div>
+          <div class="evt-body"><h3>Collector's Showcase</h3><p>Postcard album where duplicates feed a wildcard meter</p></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ============ ENGAGEMENT ============ -->
+    <div class="hub-sec" id="sec-eng">
+      <div class="hub-secnote">
+        Every one of these is <b>fuelled by main-level completion</b> — clear Skip-Bo levels to feed the event. <b>Hard levels pay ~2×.</b> Each ships visible odds, a free path behind every paywall, and never dead-ends at checkout.
+      </div>
+      <div class="hub-grid">
+        <a class="evt-card" href="events/stockpile-streak.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#e8564f,#a3211c)"><span class="badge">Risk · wager</span><span class="fuel">CLEARS → RUNGS</span>🎴</div>
+          <div class="evt-body"><h3>Stock Pile Streak</h3><p>Double-or-nothing ladder — push higher or bank it safe</p></div>
+        </a>
+        <a class="evt-card" href="events/double-or-nothing-dash.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#ffb03a,#c96a00)"><span class="badge">Daily jackpot</span><span class="fuel">7 FIRST-TRY WINS</span>💰</div>
+          <div class="evt-body"><h3>Double-or-Nothing Dash</h3><p>Beat 7 levels in a row, first try — crack the jackpot</p></div>
+        </a>
+        <a class="evt-card" href="events/wild-card-wager.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#2E9E4F,#14532b)"><span class="badge">Wager arena</span><span class="fuel">YOUR REAL ODDS</span>🎟️</div>
+          <div class="evt-body"><h3>Wild Card Wager</h3><p>Bet tickets on yourself — your true clear rate is shown</p></div>
+        </a>
+        <a class="evt-card" href="events/salvage-run.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#2a7f9e,#0d3b52)"><span class="badge">Loss budget</span><span class="fuel">CLEARS → SALVAGE</span>🚢</div>
+          <div class="evt-body"><h3>Salvage Run</h3><p>Dive deeper for a bigger multiplier — or bank before you sink</p></div>
+        </a>
+        <a class="evt-card" href="events/grand-prix.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#d94a3d,#7a1f18)"><span class="badge">5-player race</span><span class="fuel">CLEARS → LAPS</span>🏎️</div>
+          <div class="evt-body"><h3>Grand Prix Circuit</h3><p>3-lap bracket race — first-try clears give nitro</p></div>
+        </a>
+        <a class="evt-card" href="events/kings-cup-ladder.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#c9a227,#7d5f0a)"><span class="badge">Leaderboard</span><span class="fuel">SAFE ACCRUAL</span>🏆</div>
+          <div class="evt-body"><h3>King's Cup Ladder</h3><p>50-player board + personal milestone lane — nobody loses progress</p></div>
+        </a>
+        <a class="evt-card" href="events/pyramid-ascent.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#e0b56a,#8a5a1e)"><span class="badge">Milestone</span><span class="fuel">CLEARS → POINTS</span>🔺</div>
+          <div class="evt-body"><h3>Pyramid Ascent</h3><p>10 escalating tiers — free players reach ~80%</p></div>
+        </a>
+        <a class="evt-card" href="events/chestnut-dig.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#d98032,#6e3d13)"><span class="badge">Dig · pity</span><span class="fuel">HARD → POWER DIG</span>🌰</div>
+          <div class="evt-body"><h3>Chestnut Dig</h3><p>Published odds + a visible free pity counter</p></div>
+        </a>
+        <a class="evt-card" href="events/cardback-album.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#6f5bd1,#332472)"><span class="badge">Endless set</span><span class="fuel">CLEARS → PACKS</span>🃏</div>
+          <div class="evt-body"><h3>Card-Back Album</h3><p>Collect 9 card backs, then prestige — no completion slump</p></div>
+        </a>
+        <a class="evt-card" href="events/farm-buildup.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#e39a3c,#8a4d16)"><span class="badge">Build track</span><span class="fuel">CLEARS → PLANKS</span>🎡</div>
+          <div class="evt-body"><h3>Harvest Festival</h3><p>Build the festival scene — free lane completes it all</p></div>
+        </a>
+        <a class="evt-card" href="events/team-harvest.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#3fa15c,#1a5c2e)"><span class="badge">Team co-op</span><span class="fuel">TEAM POOL</span>🚜</div>
+          <div class="evt-body"><h3>Team Harvest</h3><p>10-team tournament — your clears feed the team score</p></div>
+        </a>
+        <a class="evt-card" href="events/bridge-builders.html">
+          <div class="evt-art" style="background:linear-gradient(160deg,#3d8fc4,#154a70)"><span class="badge">Partner</span><span class="fuel">SHARED BUILD</span>🌉</div>
+          <div class="evt-body"><h3>Bridge Builders</h3><p>Partner event — clears earn rivets for a shared bridge</p></div>
+        </a>
+      </div>
+    </div>
+
+    <p class="foot-note">All purchases are simulated — no real transactions. Prices, wallet and rewards mirror Skip-Bo Mobile's live economy ($0.99–$19.99 tiers, coins, energy & boosters). Engagement events include a level simulator standing in for real adventure play.</p>
   </div>
 </div>
 <script src="shared/core.js"></script>
 <script>
-  SB.init({ hub: true, title: "Mini-Event Hub", subtitle: "Tap an event to play", resetKey: "hub" });
+  SB.init({ hub: true, title: "Mini-Event Hub", subtitle: "22 playable prototypes", resetKey: "hub" });
+  var KEY = "sb_hub_tab";
+  var tabs = [].slice.call(document.querySelectorAll(".hub-tab"));
+  function show(sec) {
+    tabs.forEach(function (t) { t.classList.toggle("on", t.dataset.sec === sec); });
+    document.getElementById("sec-mon").classList.toggle("on", sec === "mon");
+    document.getElementById("sec-eng").classList.toggle("on", sec === "eng");
+    try { localStorage.setItem(KEY, sec); } catch (e) {}
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () { show(t.dataset.sec); SB.haptic(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+  });
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved) show(saved);
 </script>
 </body>
 </html>

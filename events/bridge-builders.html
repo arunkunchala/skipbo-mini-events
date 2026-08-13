@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Bridge Builders — Skip-Bo Mini Event</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+/* ---------- Bridge Builders ---------- */
+.bb-toprow { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.bb-info { width:44px; height:44px; border-radius:12px; border:none; background:rgba(255,255,255,0.18); color:#fff; font-size:19px; font-weight:900; cursor:pointer; }
+.bb-info:active { transform:scale(0.92); }
+
+/* choose partner */
+.bb-choose h2 { color:#fff; text-align:center; margin:6px 0 2px; font-size:21px; text-shadow:0 2px 0 rgba(0,0,0,.3); }
+.bb-choose .sub { color:var(--sb-sky-light); text-align:center; font-size:13px; font-weight:700; margin-bottom:14px; }
+.bb-pcard { display:flex; align-items:center; gap:12px; background:var(--sb-cream); border-radius:16px; box-shadow:var(--sb-shadow); padding:12px 14px; margin-bottom:12px; }
+.bb-pav { width:58px; height:58px; border-radius:50%; display:grid; place-items:center; font-size:32px; background:linear-gradient(160deg,#9cc8f5,#3E8EDE); border:3px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,.25); flex:0 0 auto; }
+.bb-pmeta { flex:1 1 auto; min-width:0; }
+.bb-pname { font-weight:900; font-size:16px; }
+.bb-pdesc { font-size:11px; color:#5a6b8c; font-weight:700; }
+.bb-badge { display:inline-block; font-size:10px; font-weight:900; letter-spacing:.5px; border-radius:999px; padding:2px 9px; margin:3px 0; color:#fff; }
+.bb-badge.hot { background:var(--sb-green); } .bb-badge.mid { background:var(--sb-yellow-dark); } .bb-badge.low { background:#7a89a8; }
+.bb-tip { text-align:center; color:#ffe9a8; font-size:12px; font-weight:800; margin-top:4px; }
+
+/* sky scene */
+.bb-scene { position:relative; height:196px; border-radius:var(--sb-radius); overflow:hidden; box-shadow:var(--sb-shadow); background:linear-gradient(180deg,#8ec9f7 0%,#bfe0fb 55%,#e6f3ff 100%); margin-bottom:12px; }
+.bb-cloud { position:absolute; font-size:26px; opacity:.85; animation:bbDrift 16s linear infinite; }
+@keyframes bbDrift { from{ transform:translateX(-60px);} to{ transform:translateX(440px);} }
+.bb-isle { position:absolute; bottom:8px; width:78px; height:92px; }
+.bb-isle .top { position:absolute; top:26px; left:0; right:0; height:26px; background:linear-gradient(180deg,#5ec97a,#2E9E4F); border-radius:14px 14px 4px 4px; box-shadow:0 2px 0 rgba(0,0,0,.15); }
+.bb-isle .rock { position:absolute; top:46px; left:10px; right:10px; height:44px; background:linear-gradient(180deg,#9c7a54,#6b4f31); clip-path:polygon(0 0,100% 0,72% 100%,30% 86%); }
+.bb-isle .deco { position:absolute; top:2px; width:100%; text-align:center; font-size:24px; }
+.bb-isle.left { left:2px; } .bb-isle.right { right:2px; }
+.bb-bridge { position:absolute; left:74px; right:74px; top:96px; height:34px; }
+.bb-rope { position:absolute; left:-8px; right:-8px; height:3px; background:#8a6a3f; border-radius:3px; }
+.bb-rope.r1 { top:-9px; } .bb-rope.r2 { bottom:-2px; }
+.bb-secs { position:absolute; inset:0; display:flex; gap:3px; }
+.bb-sec { flex:1; position:relative; display:flex; gap:2px; align-items:stretch; padding:2px 1px; background:rgba(138,106,63,.18); border-radius:4px; }
+.bb-sec.cur { outline:2px dashed rgba(255,199,44,.9); outline-offset:1px; }
+.bb-plank { flex:1; border-radius:2px; background:transparent; }
+.bb-plank.on { background:linear-gradient(180deg,#d9a55e,#a8763a); box-shadow:0 1px 0 rgba(0,0,0,.3); animation:bbPop .3s; }
+@keyframes bbPop { from{ transform:scaleY(.2);} to{ transform:scaleY(1);} }
+.bb-stamp { position:absolute; top:-22px; left:50%; transform:translateX(-50%); font-size:13px; background:rgba(255,255,255,.92); border-radius:999px; padding:1px 6px; box-shadow:0 2px 5px rgba(0,0,0,.25); white-space:nowrap; }
+.bb-hammer { position:absolute; top:-30px; left:50%; font-size:22px; transform:translateX(-50%); animation:bbHam .5s ease; pointer-events:none; }
+@keyframes bbHam { 0%{ transform:translateX(-50%) rotate(-40deg) translateY(-8px); opacity:0;} 40%{ opacity:1;} 100%{ transform:translateX(-50%) rotate(18deg) translateY(2px); opacity:0;} }
+.bb-walker { position:absolute; top:66px; font-size:22px; transition:left 3s ease-in-out; z-index:5; }
+
+/* team panel */
+.bb-team { background:var(--sb-cream); border-radius:var(--sb-radius); box-shadow:var(--sb-shadow); padding:12px 14px; margin-bottom:12px; }
+.bb-team-head { display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:900; margin-bottom:7px; }
+.bb-mini-av { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; font-size:17px; background:#dcecfd; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,.2); }
+.bb-bar { position:relative; height:22px; border-radius:999px; background:#e3dcc8; overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,.15); }
+.bb-bar .you { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(180deg,#ffd95e,#e0a400); transition:width .5s; }
+.bb-bar .pal { position:absolute; top:0; bottom:0; background:linear-gradient(180deg,#5ba0e8,#1D4FA1); transition:all .5s; }
+.bb-bar .lbl { position:absolute; inset:0; display:grid; place-items:center; font-size:12px; font-weight:900; color:var(--sb-ink); text-shadow:0 1px 0 rgba(255,255,255,.5); }
+.bb-legend { display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:#5a6b8c; margin-top:5px; }
+.bb-dot { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:3px; vertical-align:-1px; }
+.bb-momo { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:12px; font-weight:800; color:var(--sb-ink); }
+.bb-momo .pulse { animation:sbPulse 1.2s infinite; }
+.bb-feed { margin-top:6px; font-size:11px; font-weight:700; color:#5a6b8c; min-height:14px; }
+.bb-finish { margin-top:10px; }
+
+/* nudge bubble */
+.bb-nudge { position:fixed; left:50%; transform:translateX(-50%) translateY(8px); bottom:150px; z-index:290; background:#fff; color:var(--sb-ink); border-radius:16px 16px 16px 4px; box-shadow:0 8px 24px rgba(0,0,0,.35); padding:10px 14px; font-size:13px; font-weight:800; max-width:88vw; display:flex; gap:8px; align-items:center; opacity:0; transition:all .3s; pointer-events:none; }
+.bb-nudge.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* wheel */
+.bb-wheel-panel { background:linear-gradient(180deg,#2a5cb0,#1D4FA1); border:2px solid rgba(255,255,255,.18); border-radius:var(--sb-radius); box-shadow:var(--sb-shadow); padding:14px; margin-bottom:12px; text-align:center; color:#fff; }
+.bb-wheel-wrap { position:relative; width:212px; height:212px; margin:10px auto 6px; }
+.bb-pointer { position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:24px; z-index:4; filter:drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
+.bb-wheel { width:212px; height:212px; border-radius:50%; border:6px solid var(--sb-yellow); box-shadow:0 6px 18px rgba(0,0,0,.4), inset 0 0 24px rgba(0,0,0,.25); position:relative; transition:transform 2.3s cubic-bezier(.15,.9,.25,1); }
+.bb-wheel .wl { position:absolute; left:50%; top:50%; margin:-13px 0 0 -13px; width:26px; height:26px; display:grid; place-items:center; font-weight:900; font-size:15px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+.bb-wheel .wl.gold { color:var(--sb-ink); text-shadow:0 1px 0 rgba(255,255,255,.5); font-size:16px; }
+.bb-hub { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff,#e8dbb8 60%,#c9b98c); display:grid; place-items:center; font-size:24px; box-shadow:0 3px 8px rgba(0,0,0,.4); z-index:3; }
+.bb-odds { font-size:11px; font-weight:800; color:var(--sb-sky-light); margin:4px 0 10px; }
+.bb-spin-val { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:40px; font-weight:900; color:var(--sb-yellow); text-shadow:0 3px 0 rgba(0,0,0,.4); z-index:6; animation:sbBounce .6s; pointer-events:none; }
+.bb-crew { display:inline-block; margin-top:6px; font-size:11px; font-weight:900; background:rgba(255,199,44,.2); border:1px solid rgba(255,199,44,.6); color:var(--sb-yellow); border-radius:999px; padding:2px 10px; }
+
+/* fuel + offers */
+.bb-fuel { display:flex; gap:10px; margin-bottom:12px; }
+.bb-fuel .sb-btn { flex:1; font-size:14px; padding:13px 8px; }
+.bb-offers { display:flex; gap:10px; margin-bottom:12px; }
+.bb-offer { flex:1; background:var(--sb-cream); border-radius:14px; box-shadow:var(--sb-shadow); padding:10px; text-align:center; cursor:pointer; border:2px solid transparent; min-height:44px; }
+.bb-offer:active { transform:scale(.97); }
+.bb-offer.gold { border-color:var(--sb-yellow); background:linear-gradient(180deg,#fff8e0,#ffedb0); }
+.bb-offer.owned { opacity:.75; pointer-events:none; }
+.bb-offer .big { font-size:24px; }
+.bb-offer .nm { font-weight:900; font-size:12px; }
+.bb-offer .pr { font-weight:900; font-size:13px; color:var(--sb-green-dark); }
+.bb-offer .fp { font-size:9px; font-weight:700; color:#7a89a8; }
+
+.bb-stats { display:flex; justify-content:space-around; background:rgba(0,0,0,.25); border-radius:14px; padding:10px 6px; color:#fff; text-align:center; margin-bottom:8px; }
+.bb-stats .v { font-size:16px; font-weight:900; color:var(--sb-yellow); }
+.bb-stats .k { font-size:10px; font-weight:700; color:var(--sb-sky-light); }
+.bb-rivets { display:inline-flex; align-items:center; gap:5px; background:rgba(0,0,0,.3); border:1.5px solid rgba(255,255,255,.35); border-radius:999px; padding:3px 12px; font-weight:900; font-size:14px; color:#fff; }
+.bb-done-panel { text-align:center; color:#fff; background:linear-gradient(180deg,#2a5cb0,#1D4FA1); border:2px solid rgba(255,199,44,.7); border-radius:var(--sb-radius); box-shadow:var(--sb-shadow); padding:18px; margin-bottom:12px; }
+</style>
+</head>
+<body>
+<div class="sb-app"><div class="sb-main">
+
+  <div class="bb-toprow">
+    <span class="sb-timer-chip">⏳ <span id="bb-timer">—</span></span>
+    <span class="bb-rivets" id="bb-rivets-chip">🔩 <span id="bb-rivets">0</span></span>
+    <button class="bb-info" id="bb-info">ⓘ</button>
+  </div>
+
+  <!-- Partner choice -->
+  <div class="bb-choose" id="bb-choose" style="display:none">
+    <h2>🌉 Bridge Builders</h2>
+    <div class="sub">Team up to build the Skytrails rope bridge — 5 sections, shared rewards!</div>
+    <div id="bb-plist"></div>
+    <div class="bb-tip">💡 Tip: active partners hammer more planks while you play levels!</div>
+  </div>
+
+  <!-- Main build view -->
+  <div id="bb-build" style="display:none">
+    <div class="bb-scene" id="bb-scene">
+      <span class="bb-cloud" style="top:8px; animation-duration:19s;">☁️</span>
+      <span class="bb-cloud" style="top:34px; animation-duration:26s; animation-delay:-9s;">☁️</span>
+      <span class="bb-cloud" style="top:16px; font-size:18px; animation-duration:14s; animation-delay:-5s;">☁️</span>
+      <div class="bb-isle left"><div class="top"></div><div class="rock"></div><div class="deco">🏕️</div></div>
+      <div class="bb-isle right"><div class="top"></div><div class="rock"></div><div class="deco">🏆</div></div>
+      <span class="bb-walker" id="bb-walk-you" style="left:36px">😎</span>
+      <span class="bb-walker" id="bb-walk-pal" style="left:14px">🦊</span>
+      <div class="bb-bridge">
+        <div class="bb-rope r1"></div><div class="bb-rope r2"></div>
+        <div class="bb-secs" id="bb-secs"></div>
+      </div>
+    </div>
+
+    <div class="bb-team">
+      <div class="bb-team-head">
+        <span class="sb-row"><span class="bb-mini-av">😎</span> You</span>
+        <span id="bb-sec-label">Section 1 of 5</span>
+        <span class="sb-row" id="bb-pal-head"><span class="bb-mini-av" id="bb-pal-av">🦊</span> <span id="bb-pal-name">—</span></span>
+      </div>
+      <div class="bb-bar">
+        <div class="you" id="bb-bar-you"></div>
+        <div class="pal" id="bb-bar-pal"></div>
+        <div class="lbl" id="bb-bar-lbl">0 / 100</div>
+      </div>
+      <div class="bb-legend">
+        <span><span class="bb-dot" style="background:#e0a400"></span>Your planks</span>
+        <span><span class="bb-dot" style="background:#3E8EDE"></span><span id="bb-pal-name2">Partner</span>'s planks</span>
+      </div>
+      <div class="bb-momo"><span id="bb-momo-ico" class="pulse">🔥</span><span id="bb-momo-txt">Partner momentum: high</span></div>
+      <div class="bb-feed" id="bb-feed"></div>
+      <div class="bb-finish" id="bb-finish"></div>
+    </div>
+
+    <div class="bb-wheel-panel" id="bb-wheel-panel">
+      <div style="font-weight:900; font-size:15px;">🎡 Construction Wheel</div>
+      <div class="bb-wheel-wrap">
+        <div class="bb-pointer">🔻</div>
+        <div class="bb-wheel" id="bb-wheel"></div>
+        <div class="bb-hub">🔨</div>
+      </div>
+      <div class="bb-odds" id="bb-odds"></div>
+      <button class="sb-btn sb-btn-yellow sb-btn-block" id="bb-spin">SPIN — 2 🔩</button>
+      <span class="bb-crew" id="bb-crew" style="display:none"></span>
+    </div>
+
+    <div class="bb-fuel">
+      <button class="sb-btn sb-btn-green" id="bb-play">▶ Play level<br><small>+2 🔩</small></button>
+      <button class="sb-btn sb-btn-red" id="bb-hard">🔥 Hard level<br><small>+5 🔩</small></button>
+    </div>
+
+    <div class="bb-offers">
+      <div class="bb-offer" id="bb-buy-rivets">
+        <div class="big">🔩</div><div class="nm">Rivet Pack ×10</div>
+        <div class="pr">$0.99</div><div class="fp">or free: play levels</div>
+      </div>
+      <div class="bb-offer gold" id="bb-buy-wrench">
+        <div class="big">🔧</div><div class="nm">Golden Wrench</div>
+        <div class="pr" id="bb-wrench-pr">$2.99</div><div class="fp">adds a 75-pt slice</div>
+      </div>
+    </div>
+
+    <div class="bb-stats">
+      <div><div class="v" id="bb-st-you">0</div><div class="k">YOUR POINTS</div></div>
+      <div><div class="v" id="bb-st-pal">0</div><div class="k" id="bb-st-pal-k">PARTNER PTS</div></div>
+      <div><div class="v" id="bb-st-secs">0/5</div><div class="k">SECTIONS BUILT</div></div>
+    </div>
+  </div>
+
+  <div class="bb-nudge" id="bb-nudge"></div>
+</div></div>
+
+<script src="../shared/core.js"></script>
+<script src="../shared/levelsim.js"></script>
+<script>
+(function () {
+  "use strict";
+  SB.init({ title: "🌉 Bridge Builders", subtitle: "Partner event · Skytrails", resetKey: "bridge-builders" });
+
+  // ---------- config ----------
+  var SEC_NEED = [100, 130, 170, 220, 280];       // late sections need more points…
+  var CREW_BONUS = 0.10;                           // …but your crew bonus grows +10%/section
+  var SPIN_COST = 2, PLANKS = 7;
+  var WHEEL_BASE = [5, 10, 15, 20, 30, 50], GOLD = 75;
+  var EVENT_MS = 45 * 60 * 1000;                   // "5 days" compressed to 45 min for demo
+  var CHESTS = [
+    [{ type: "coins", amount: 200 }, { type: "energy", amount: 1 }],
+    [{ type: "coins", amount: 300 }, { type: "wild", amount: 1 }],
+    [{ type: "coins", amount: 400 }, { type: "undo", amount: 1 }, { type: "energy", amount: 1 }],
+    [{ type: "coins", amount: 600 }, { type: "wild", amount: 1 }],
+    [{ type: "coins", amount: 1500 }, { type: "wild", amount: 2 }]
+  ];
+  var PARTNERS = {
+    maya: { name: "Maya", av: "🦊", tier: "hot", act: "Very active", desc: "Plays daily · 12 partner events", interval: 18000 },
+    sam:  { name: "Sam",  av: "🐻", tier: "mid", act: "Casual",      desc: "Plays most evenings · 4 events", interval: 38000 },
+    nia:  { name: "Nia",  av: "🐣", tier: "low", act: "New player",  desc: "Just joined Skytrails · 0 events", interval: 62000 }
+  };
+  var SPIN_MSGS = ["{p} spun {v}! 🔨", "{p} hammered {v} planks! 🪵", "{p} landed {v} — nice! 🎡", "+{v} from {p}! 🔩"];
+  var NUDGES = ["We're so close on section {s}! 🌉", "One good spin finishes section {s} — got rivets? 🔩", "I just added planks — your turn, partner! 🔨", "Section {s} won't build itself… let's go! 💪"];
+
+  // ---------- state ----------
+  var box = SB.store("bridge-builders", {
+    phase: "choose", partnerId: null, rivets: 4,
+    section: 0, prog: 0, youPts: 0, palPts: 0,
+    secStamps: [], wrench: false, done: false,
+    endTs: 0, lastPalTs: 0, feed: []
+  });
+  var st = box.data;
+  if (!st.endTs) { st.endTs = Date.now() + EVENT_MS; box.save(); }
+  var lastAction = Date.now(), nudgeShownAt = 0, spinning = false, wheelRot = 0, nextPalAt = 0;
+
+  function pal() { return PARTNERS[st.partnerId] || PARTNERS.maya; }
+  function crewMult() { return 1 + CREW_BONUS * st.section; }
+  function slices() { return st.wrench ? WHEEL_BASE.concat([GOLD]) : WHEEL_BASE; }
+  function el(id) { return document.getElementById(id); }
+  function touch() { lastAction = Date.now(); }
+
+  // ---------- countdown ----------
+  SB.countdown(el("bb-timer"), st.endTs, function () {
+    SB.toast("⏳ Event ended — thanks for building!");
+  });
+
+  // ---------- info modal ----------
+  el("bb-info").addEventListener("click", function () {
+    touch();
+    SB.modal(
+      '<h3 style="margin:0 0 8px">🌉 How Bridge Builders works</h3>' +
+      '<div style="text-align:left;font-size:13px;font-weight:600;line-height:1.5">' +
+      '<p>🔩 <b>Clear main levels to earn rivets</b> — every clear pays +2 🔩, hard levels +5 🔩. Levels are the only fuel.</p>' +
+      '<p>🎡 Spend 2 🔩 to spin the Construction Wheel. <b>All slices have equal odds</b> — ' +
+      (st.wrench ? "7 slices, each exactly 1 in 7 (14.3%)." : "6 slices, each exactly 1 in 6 (16.7%).") + "</p>" +
+      '<p>🤝 You and ' + pal().name + ' build the same bridge. Every finished section drops a <b>milestone chest for both of you</b>.</p>' +
+      '<p>📈 Later sections need more points, but your <b>crew bonus grows +10% per section</b> and your partner speeds up too.</p>' +
+      '<p style="color:#7a89a8">Demo note: the 5-day event timer and partner activity are compressed for this prototype.</p>' +
+      "</div>" +
+      '<button class="sb-btn sb-btn-blue sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it</button>'
+    );
+  });
+
+  // ---------- partner choice ----------
+  function renderChoose() {
+    el("bb-choose").style.display = "block";
+    el("bb-build").style.display = "none";
+    var html = "";
+    Object.keys(PARTNERS).forEach(function (id) {
+      var p = PARTNERS[id];
+      html += '<div class="bb-pcard">' +
+        '<div class="bb-pav">' + p.av + "</div>" +
+        '<div class="bb-pmeta"><div class="bb-pname">' + p.name + "</div>" +
+        '<span class="bb-badge ' + p.tier + '">' + p.act.toUpperCase() + "</span>" +
+        '<div class="bb-pdesc">' + p.desc + "</div></div>" +
+        '<button class="sb-btn sb-btn-blue sb-btn-sm" data-pick="' + id + '">Team up</button></div>';
+    });
+    el("bb-plist").innerHTML = html;
+    el("bb-plist").querySelectorAll("[data-pick]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        st.partnerId = b.getAttribute("data-pick");
+        st.phase = "build";
+        st.lastPalTs = Date.now();
+        box.save();
+        SB.confetti();
+        SB.toast("🤝 " + pal().name + " joined your crew!");
+        addFeed(pal().name + " waves hello 👋 Let's build!");
+        enterBuild();
+      });
+    });
+  }
+
+  // ---------- wheel ----------
+  function renderWheel() {
+    var s = slices(), n = s.length, ang = 360 / n;
+    var cols = ["#3E8EDE", "#2E9E4F", "#D7263D", "#1D4FA1", "#e0731d", "#7a4fd1"];
+    var grad = [], labels = "";
+    s.forEach(function (v, i) {
+      grad.push((v === GOLD ? "#FFC72C" : cols[i % cols.length]) + " " + (i * ang) + "deg " + ((i + 1) * ang) + "deg");
+      var mid = (i + 0.5) * ang;
+      labels += '<div class="wl' + (v === GOLD ? " gold" : "") + '" style="transform:rotate(' + mid + 'deg) translateY(-76px)">' + v + "</div>";
+    });
+    var w = el("bb-wheel");
+    w.style.background = "conic-gradient(" + grad.join(",") + ")";
+    w.innerHTML = labels;
+    el("bb-odds").textContent = st.wrench
+      ? "Fair wheel: 7 slices incl. GOLD 75 · equal odds — each 1 in 7 (14.3%)"
+      : "Fair wheel: 6 slices · equal odds — each slice 1 in 6 (16.7%)";
+  }
+
+  function spin() {
+    touch();
+    if (spinning || st.done) return;
+    if (st.rivets < SPIN_COST) {
+      el("bb-rivets-chip").classList.remove("sb-shake"); void el("bb-rivets-chip").offsetWidth;
+      el("bb-rivets-chip").classList.add("sb-shake");
+      SB.haptic(12);
+      var m = SB.modal(
+        '<h3 style="margin:0 0 6px">Need more rivets 🔩</h3>' +
+        '<p style="font-size:13px;font-weight:700;color:#5a6b8c;margin:0 0 14px">A spin costs 2 🔩. Every main-level clear pays rivets!</p>' +
+        '<button class="sb-btn sb-btn-green sb-btn-block" id="bb-nr-play">▶ Play a level (+2 🔩 free)</button>' +
+        '<div style="height:8px"></div>' +
+        '<button class="sb-btn sb-btn-yellow sb-btn-block" id="bb-nr-buy">Rivet Pack ×10 — $0.99</button>'
+      );
+      m.el.querySelector("#bb-nr-play").addEventListener("click", function () { m.close(true); doLevel(false); });
+      m.el.querySelector("#bb-nr-buy").addEventListener("click", function () { m.close(true); offerRivets(); });
+      return;
+    }
+    st.rivets -= SPIN_COST; box.save();
+    spinning = true;
+    el("bb-spin").disabled = true;
+    var s = slices(), n = s.length, ang = 360 / n;
+    var idx = Math.floor(Math.random() * n);
+    var jitter = (Math.random() - 0.5) * ang * 0.6;
+    var base = Math.ceil(wheelRot / 360) * 360;
+    wheelRot = base + 4 * 360 + (360 - (idx + 0.5) * ang) + jitter;
+    el("bb-wheel").style.transform = "rotate(" + wheelRot + "deg)";
+    SB.haptic(10);
+    renderHud();
+    setTimeout(function () {
+      spinning = false;
+      el("bb-spin").disabled = false;
+      var raw = s[idx], pts = Math.ceil(raw * crewMult());
+      var pop = document.createElement("div");
+      pop.className = "bb-spin-val";
+      pop.textContent = "+" + pts;
+      el("bb-wheel-panel").querySelector(".bb-wheel-wrap").appendChild(pop);
+      setTimeout(function () { pop.remove(); }, 1100);
+      if (raw === GOLD) { SB.confetti(); SB.toast("🌟 GOLDEN SLICE! +" + pts + " points!"); }
+      SB.haptic(25);
+      hammerFx();
+      addPoints("you", pts);
+    }, 2350);
+  }
+
+  // ---------- bridge / points ----------
+  function hammerFx() {
+    var sec = el("bb-secs").children[Math.min(st.section, 4)];
+    if (!sec) return;
+    var h = document.createElement("span");
+    h.className = "bb-hammer";
+    h.textContent = "🔨";
+    sec.appendChild(h);
+    setTimeout(function () { h.remove(); }, 550);
+  }
+
+  function addPoints(who, pts, silent) {
+    if (st.done) return;
+    // partner leaves the very last planks of the final section for YOU (social beat)
+    if (who === "pal" && st.section === 4) {
+      var room = SEC_NEED[4] - st.prog - 12;
+      if (pts >= room) {
+        pts = Math.max(0, room);
+        if (!silent) addFeed(pal().name + " left the final planks for you! 🔨✨");
+        if (pts === 0) { renderAll(); return; }
+      }
+    }
+    if (who === "you") st.youPts += pts; else st.palPts += pts;
+    st.prog += pts;
+    var completedNow = [];
+    while (st.section < 5 && st.prog >= SEC_NEED[st.section]) {
+      st.prog -= SEC_NEED[st.section];
+      st.secStamps[st.section] = true;
+      st.section++;
+      completedNow.push(st.section); // 1-based
+    }
+    box.save();
+    renderAll();
+    if (completedNow.length) {
+      completedNow.forEach(function (secNum, i) {
+        setTimeout(function () {
+          if (secNum >= 5) finale(); else milestone(secNum, who);
+        }, i * 400 + 350);
+      });
+    }
+  }
+
+  function milestone(secNum, who) {
+    SB.confetti();
+    var rw = CHESTS[secNum - 1];
+    var m = SB.modal(
+      '<div style="font-size:44px">🎁</div>' +
+      '<h3 style="margin:4px 0 4px">Section ' + secNum + " built!</h3>" +
+      '<div style="font-size:26px;margin:2px 0 6px">😎 🤝 ' + pal().av + "</div>" +
+      '<p style="font-size:13px;font-weight:700;color:#5a6b8c;margin:0 0 10px">' +
+      (who === "pal" ? pal().name + " hammered the last plank — " : "You hammered the last plank — ") +
+      "milestone chest for <b>both</b> of you! " + pal().name + " got one too 🎉</p>" +
+      '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">' +
+      rw.map(SB.rewardChip).join("") + "</div>" +
+      '<button class="sb-btn sb-btn-green sb-btn-block" id="bb-claim">Claim chest 🎁</button>'
+    );
+    m.el.querySelector("#bb-claim").addEventListener("click", function (e) {
+      SB.grantRewards(rw, e.target);
+      addFeed(pal().name + ": \"Section " + secNum + " done — we're unstoppable! 🙌\"");
+      m.close(true);
+    });
+  }
+
+  function finale() {
+    st.done = true; box.save();
+    renderAll();
+    // walk both avatars across the bridge
+    var w = window.innerWidth > 480 ? 480 : window.innerWidth;
+    el("bb-walk-you").style.left = (w - 118) + "px";
+    el("bb-walk-pal").style.left = (w - 92) + "px";
+    SB.confetti(); SB.haptic(40);
+    setTimeout(function () { SB.confetti(window.innerWidth * 0.3, 140); }, 600);
+    setTimeout(function () { SB.confetti(window.innerWidth * 0.7, 120); }, 1200);
+    setTimeout(function () {
+      var rw = CHESTS[4];
+      var m = SB.modal(
+        '<div style="font-size:46px">🌉✨</div>' +
+        '<h3 style="margin:4px 0 4px">THE BRIDGE IS COMPLETE!</h3>' +
+        '<div style="font-size:30px;margin:4px 0">😎🤜🤛' + pal().av + "</div>" +
+        '<p style="font-size:13px;font-weight:700;color:#5a6b8c;margin:0 0 10px">You and ' + pal().name +
+        " crossed the Skytrails together. High five, partner! Grand chest for both:</p>" +
+        '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px">' +
+        rw.map(SB.rewardChip).join("") + "</div>" +
+        '<div style="font-weight:900;font-size:13px;background:linear-gradient(180deg,#fff8e0,#ffedb0);border:2px solid var(--sb-yellow);border-radius:12px;padding:8px;margin-bottom:14px">🖼️ EXCLUSIVE: Skytrails Avatar Frame</div>' +
+        '<button class="sb-btn sb-btn-yellow sb-btn-block" id="bb-grand">Claim grand chest 🏆</button>'
+      );
+      m.el.querySelector("#bb-grand").addEventListener("click", function (e) {
+        SB.grantRewards(rw, e.target);
+        SB.confetti();
+        SB.toast("🖼️ Skytrails Frame unlocked!");
+        m.close(true);
+      });
+    }, 3300);
+  }
+
+  // ---------- partner sim ----------
+  function schedulePal() {
+    var iv = pal().interval * Math.pow(0.92, st.section);   // partner momentum grows too
+    nextPalAt = Date.now() + iv * (0.75 + Math.random() * 0.5);
+  }
+  function palSpin(silent) {
+    var v = WHEEL_BASE[Math.floor(Math.random() * WHEEL_BASE.length)];
+    st.lastPalTs = Date.now(); box.save();
+    if (!silent) {
+      var msg = SPIN_MSGS[Math.floor(Math.random() * SPIN_MSGS.length)].replace("{p}", pal().name).replace("{v}", v);
+      addFeed(msg);
+      SB.toast(pal().av + " " + msg, 1600);
+      hammerFx();
+    }
+    addPoints("pal", v, silent);
+    return v;
+  }
+  function catchUp() {
+    if (!st.lastPalTs || st.done) return;
+    var iv = pal().interval * Math.pow(0.92, st.section);
+    var missed = Math.min(8, Math.floor((Date.now() - st.lastPalTs) / iv));
+    if (missed <= 0) return;
+    var total = 0;
+    for (var i = 0; i < missed; i++) total += palSpin(true) || 0;
+    st.lastPalTs = Date.now(); box.save();
+    if (total > 0) {
+      addFeed(pal().name + " kept building while you were away: +" + total + " pts 🔨");
+      setTimeout(function () { SB.toast("👋 While you were away, " + pal().name + " added +" + total + " pts!"); }, 700);
+    }
+  }
+  function addFeed(msg) {
+    st.feed.unshift(msg);
+    st.feed = st.feed.slice(0, 3);
+    box.save();
+    el("bb-feed").innerHTML = st.feed.map(function (f, i) {
+      return '<div style="opacity:' + (1 - i * 0.3) + '">💬 ' + f + "</div>";
+    }).join("");
+  }
+
+  // ---------- nudge (idle ~90s) ----------
+  function maybeNudge() {
+    if (st.done || st.phase !== "build") return;
+    var now = Date.now();
+    if (now - lastAction > 90000 && now - nudgeShownAt > 120000) {
+      nudgeShownAt = now;
+      var n = el("bb-nudge");
+      n.innerHTML = '<span style="font-size:22px">' + pal().av + "</span><span><b>" + pal().name + ":</b> " +
+        NUDGES[Math.floor(Math.random() * NUDGES.length)].replace("{s}", st.section + 1) + "</span>";
+      n.classList.add("show");
+      SB.haptic(15);
+      setTimeout(function () { n.classList.remove("show"); }, 6000);
+    }
+  }
+
+  // ---------- levels (THE fuel) ----------
+  function doLevel(hard) {
+    touch();
+    var btn = hard ? el("bb-hard") : el("bb-play");
+    btn.disabled = true;
+    SB.playLevel({
+      hard: hard,
+      title: "Skytrails Level " + (214 + st.youPts % 40),
+      winRate: window.__forceWin ? 1 : undefined
+    }).then(function (res) {
+      btn.disabled = false;
+      if (res.won) {
+        var r = hard ? 5 : 2;
+        st.rivets += r; box.save();
+        renderHud();
+        SB.toast("🔩 +" + r + " rivets earned! Spin the wheel!");
+        SB.haptic(20);
+        el("bb-rivets-chip").classList.remove("sb-bounce"); void el("bb-rivets-chip").offsetWidth;
+        el("bb-rivets-chip").classList.add("sb-bounce");
+      } else {
+        SB.toast("So close! No rivets this time — try again ▶");
+      }
+    });
+  }
+
+  // ---------- IAP ----------
+  function offerRivets() {
+    touch();
+    SB.buyIAP({
+      label: "🔩 Rivet Pack ×10",
+      price: "$0.99",
+      sub: "Instant 10 rivets = 5 spins · FREE PATH: play levels — every clear pays +2 🔩 (hard +5 🔩)",
+      contents: [{ type: "token", amount: 10 }],
+      grant: false,
+      onSuccess: function () {
+        st.rivets += 10; box.save();
+        renderHud();
+        SB.toast("🔩 +10 rivets — happy hammering!");
+      }
+    });
+  }
+  function offerWrench() {
+    touch();
+    if (st.wrench) return;
+    SB.buyIAP({
+      label: "🔧 Golden Wrench (permanent)",
+      price: "$2.99",
+      sub: "Upgrades YOUR wheel forever this event: adds a GOLD 75-point slice. New odds shown honestly: 7 slices, each 1 in 7 (14.3%). FREE PATH: the base wheel still builds everything.",
+      contents: [{ type: "star", amount: 1 }],
+      grant: false,
+      onSuccess: function () {
+        st.wrench = true; box.save();
+        renderWheel(); renderHud();
+        SB.toast("🔧 Golden slice added — 75 pts now in play!");
+        addFeed(pal().name + ": \"Whoa, a golden wrench?! 🤩\"");
+      }
+    });
+  }
+  function offerFinish() {
+    touch();
+    var need = SEC_NEED[st.section] - st.prog;
+    SB.buyIAP({
+      label: "🔨 Finish Section " + (st.section + 1) + " now",
+      price: "$1.99",
+      sub: "Hammers the last " + need + " points instantly + drops the section chest. FREE PATH: keep spinning — you're already " + Math.round(st.prog / SEC_NEED[st.section] * 100) + "% there!",
+      contents: CHESTS[st.section],
+      grant: false,
+      onSuccess: function () {
+        addPoints("you", need);
+      }
+    });
+  }
+  el("bb-buy-rivets").addEventListener("click", offerRivets);
+  el("bb-buy-wrench").addEventListener("click", offerWrench);
+
+  // ---------- render ----------
+  function renderBridge() {
+    var wrap = el("bb-secs");
+    wrap.innerHTML = "";
+    for (var i = 0; i < 5; i++) {
+      var sec = document.createElement("div");
+      sec.className = "bb-sec" + (i === st.section && !st.done ? " cur" : "");
+      var fill = i < st.section ? PLANKS : (i === st.section ? Math.floor(st.prog / SEC_NEED[i] * PLANKS) : 0);
+      for (var p = 0; p < PLANKS; p++) {
+        var pl = document.createElement("div");
+        pl.className = "bb-plank" + (p < fill ? " on" : "");
+        sec.appendChild(pl);
+      }
+      if (st.secStamps[i]) {
+        var stamp = document.createElement("span");
+        stamp.className = "bb-stamp";
+        stamp.textContent = "😎" + pal().av;
+        sec.appendChild(stamp);
+      }
+      wrap.appendChild(sec);
+    }
+  }
+  function renderHud() {
+    el("bb-rivets").textContent = st.rivets;
+    el("bb-st-you").textContent = SB.fmt(st.youPts);
+    el("bb-st-pal").textContent = SB.fmt(st.palPts);
+    el("bb-st-secs").textContent = Math.min(5, st.section) + "/5";
+    el("bb-crew").style.display = st.section > 0 ? "inline-block" : "none";
+    el("bb-crew").textContent = "📈 Crew bonus ×" + crewMult().toFixed(1) + " on every spin";
+    el("bb-spin").textContent = st.done ? "🌉 Bridge complete!" : "SPIN — " + SPIN_COST + " 🔩  (you have " + st.rivets + ")";
+    el("bb-spin").disabled = spinning || st.done;
+  }
+  function renderTeam() {
+    var p = pal();
+    el("bb-pal-av").textContent = p.av;
+    el("bb-pal-name").textContent = p.name;
+    el("bb-pal-name2").textContent = p.name;
+    el("bb-st-pal-k").textContent = p.name.toUpperCase() + " PTS";
+    el("bb-walk-pal").textContent = p.av;
+    if (st.done) {
+      el("bb-sec-label").textContent = "🏆 Bridge complete!";
+      el("bb-bar-you").style.width = "100%";
+      el("bb-bar-pal").style.left = "100%"; el("bb-bar-pal").style.width = "0";
+      el("bb-bar-lbl").textContent = "All 5 sections built!";
+      el("bb-finish").innerHTML = "";
+      return;
+    }
+    var need = SEC_NEED[st.section];
+    el("bb-sec-label").textContent = "Section " + (st.section + 1) + " of 5";
+    var totalSec = st.youPts + st.palPts;
+    var youShare = totalSec > 0 ? st.youPts / totalSec : 0.5;
+    var pct = Math.min(1, st.prog / need);
+    var youW = pct * youShare * 100, palW = pct * (1 - youShare) * 100;
+    el("bb-bar-you").style.width = youW + "%";
+    el("bb-bar-pal").style.left = youW + "%";
+    el("bb-bar-pal").style.width = palW + "%";
+    el("bb-bar-lbl").textContent = st.prog + " / " + need;
+    // contextual finish-section offer only at >=80%
+    if (pct >= 0.8) {
+      if (!el("bb-finish").firstChild) {
+        el("bb-finish").innerHTML =
+          '<button class="sb-btn sb-btn-red sb-btn-block sb-btn-sm" id="bb-finish-btn">🔨 Finish Section ' +
+          (st.section + 1) + " — $1.99 <small>(or keep spinning free)</small></button>";
+        el("bb-finish-btn").addEventListener("click", offerFinish);
+      }
+    } else el("bb-finish").innerHTML = "";
+  }
+  function renderMomentum() {
+    if (st.done) { el("bb-momo-txt").textContent = "You crossed together! 🙌"; el("bb-momo-ico").textContent = "🏆"; return; }
+    var since = Date.now() - st.lastPalTs;
+    var iv = pal().interval;
+    if (since < iv * 1.4) { el("bb-momo-ico").textContent = "🔥"; el("bb-momo-txt").textContent = pal().name + "'s momentum: HIGH — building right now"; }
+    else if (since < iv * 3) { el("bb-momo-ico").textContent = "🙂"; el("bb-momo-txt").textContent = pal().name + "'s momentum: steady"; }
+    else { el("bb-momo-ico").textContent = "💤"; el("bb-momo-txt").textContent = pal().name + " is resting — carry the team!"; }
+  }
+  function renderAll() { renderBridge(); renderTeam(); renderHud(); renderMomentum(); }
+
+  function enterBuild() {
+    el("bb-choose").style.display = "none";
+    el("bb-build").style.display = "block";
+    el("bb-buy-wrench").classList.toggle("owned", st.wrench);
+    el("bb-wrench-pr").textContent = st.wrench ? "OWNED ✓" : "$2.99";
+    renderWheel();
+    renderAll();
+    addFeed.render = true;
+    el("bb-feed").innerHTML = st.feed.map(function (f, i) {
+      return '<div style="opacity:' + (1 - i * 0.3) + '">💬 ' + f + "</div>";
+    }).join("");
+    catchUp();
+    schedulePal();
+  }
+
+  // ---------- wire up ----------
+  el("bb-spin").addEventListener("click", spin);
+  el("bb-play").addEventListener("click", function () { doLevel(false); });
+  el("bb-hard").addEventListener("click", function () { doLevel(true); });
+  document.addEventListener("pointerdown", touch, { capture: true });
+
+  setInterval(function () {
+    if (st.phase !== "build" || st.done) return;
+    if (Date.now() >= nextPalAt) { palSpin(false); schedulePal(); el("bb-buy-wrench").classList.toggle("owned", st.wrench); }
+    renderMomentum();
+    maybeNudge();
+  }, 1000);
+
+  // wrench ownership refresh
+  setInterval(function () {
+    el("bb-buy-wrench").classList.toggle("owned", st.wrench);
+    el("bb-wrench-pr").textContent = st.wrench ? "OWNED ✓" : "$2.99";
+  }, 1500);
+
+  // test hooks
+  window.__bb = { state: st, addPoints: addPoints, palSpin: palSpin, save: function(){ box.save(); }, render: renderAll };
+
+  // ---------- boot ----------
+  if (st.phase === "build") enterBuild(); else renderChoose();
+})();
+</script>
+</body>
+</html>

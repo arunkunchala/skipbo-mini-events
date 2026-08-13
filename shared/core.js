@@ -24,13 +24,15 @@
   var ICONS = {
     coins: "🪙", energy: "⚡", wild: "🃏", undo: "↩️", draw: "🎴",
     reverse: "🔄", chest: "🎁", gem: "💎", token: "🎟️", star: "⭐", shovel: "⛏️",
-    ball: "🔮", grab: "🕹️", tool: "🔧", key: "🗝️"
+    ball: "🔮", grab: "🕹️", tool: "🔧", key: "🗝️", trophy: "🏆", ticket: "🎫",
+    plank: "🪵"
   };
   var LABELS = {
     coins: "Coins", energy: "Energy", wild: "Wild Card", undo: "Undo",
     draw: "Draw+", reverse: "Reverse", chest: "Chest", gem: "Gems",
     token: "Event Tokens", star: "Stars", shovel: "Shovels", ball: "Drop Balls",
-    grab: "Grabs", tool: "Tools", key: "Keys"
+    grab: "Grabs", tool: "Tools", key: "Keys", trophy: "Trophies", ticket: "Tickets",
+    plank: "Planks"
   };
 
   // ---------- wallet ----------
@@ -77,8 +79,15 @@
     if (opts.resetKey) {
       var r = document.createElement("button");
       r.className = "sb-demo-reset";
-      r.textContent = "⟲ Reset demo";
+      r.innerHTML = '⟲<span class="lbl">Reset demo</span>';
+      r.setAttribute("aria-label", "Reset demo");
       r.addEventListener("click", function () {
+        // first tap expands the label, second tap resets (avoids accidental wipes on touch)
+        if (!r.classList.contains("open")) {
+          r.classList.add("open");
+          setTimeout(function () { r.classList.remove("open"); }, 2600);
+          return;
+        }
         sDel("sb_evt_" + opts.resetKey);
         sDel(WKEY);
         location.reload();
@@ -191,9 +200,13 @@
   function bal(type) { return wallet[type] || 0; }
 
   // ---------- reward chip HTML ----------
+  // rw: {type, amount} or {icon, label, amount} for event-local currencies
   function rewardChip(rw) {
-    return '<span class="sb-reward"><span class="ico">' + (ICONS[rw.type] || "🎁") + "</span>" +
-      fmt(rw.amount) + " " + (LABELS[rw.type] || rw.type) + "</span>";
+    var ic = rw.icon || ICONS[rw.type] || "🎁";
+    var lb = rw.label || LABELS[rw.type] || rw.type;
+    if (rw.amount === 1 && /s$/.test(lb) && !/ss$/.test(lb)) lb = lb.replace(/s$/, "");
+    return '<span class="sb-reward"><span class="ico">' + ic + "</span>" +
+      fmt(rw.amount) + " " + lb + "</span>";
   }
   function icon(type) { return ICONS[type] || "🎁"; }
 
@@ -275,7 +288,8 @@
     var cy = y == null ? canvas.height / 3 : y;
     var colors = ["#FFC72C", "#D7263D", "#2E9E4F", "#3E8EDE", "#ffffff", "#FDF6E3"];
     var parts = [];
-    for (var i = 0; i < (count || 80); i++) {
+    var nParts = (count == null ? 80 : count);
+    for (var i = 0; i < nParts; i++) {
       parts.push({
         x: cx, y: cy,
         vx: (Math.random() - 0.5) * 14,
@@ -314,14 +328,15 @@
   var confettiParts = [];
 
   // ---------- countdown helper ----------
-  function countdown(el, endTs, onEnd) {
+  function countdown(el, endTs, onEnd, urgentMs) {
+    var UR = urgentMs == null ? 3600000 : urgentMs;
     function tick() {
       var left = Math.max(0, endTs - Date.now());
       var h = Math.floor(left / 3600000);
       var m = Math.floor((left % 3600000) / 60000);
       var s = Math.floor((left % 60000) / 1000);
       el.textContent = (h > 0 ? h + "h " : "") + String(m).padStart(2, "0") + "m " + String(s).padStart(2, "0") + "s";
-      if (left < 3600000 && el.parentElement) el.parentElement.classList.add("urgent");
+      if (el.parentElement) el.parentElement.classList.toggle("urgent", left < UR);
       if (left <= 0) { clearInterval(iv); if (onEnd) onEnd(); }
     }
     var iv = setInterval(tick, 1000);

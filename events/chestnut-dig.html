@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Chestnut Dig — Skip-Bo Mini Event</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+/* ============ layout ============ */
+body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5a1e 100%); }
+.sb-main { padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 92px); }
+.sb-demo-reset { bottom:calc(env(safe-area-inset-bottom,0px) + 88px); }
+.sb-toast { bottom:auto; top:calc(env(safe-area-inset-top,0px) + 64px); transform:translateX(-50%) translateY(-14px); }
+.sb-toast.show { transform:translateX(-50%) translateY(0); }
+.sb-topbar { background:rgba(43,26,12,.94); border-bottom:2px solid rgba(217,139,43,.5); }
+
+/* ============ header ============ */
+.hdr { display:flex; align-items:center; gap:7px; margin-bottom:9px; }
+.sb-timer-chip { background:linear-gradient(180deg,#c25a1e,#8a3a10); border:1.5px solid rgba(255,214,140,.5); min-height:30px; }
+.patchbadge { display:inline-flex; align-items:center; gap:5px; background:linear-gradient(180deg,#5e3a14,#3a2209); border:1.5px solid rgba(255,214,140,.45); color:#ffd9a0; font-weight:900; font-size:11.5px; border-radius:999px; padding:5px 10px; white-space:nowrap; }
+.info-btn { margin-left:auto; width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(255,214,140,.4); background:rgba(0,0,0,.3); color:#ffe3b8; font-size:18px; font-weight:900; cursor:pointer; flex:0 0 auto; }
+
+/* ============ resources ============ */
+.res { display:flex; gap:8px; margin-bottom:9px; }
+.rescard { flex:1; display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,rgba(255,236,200,.96),rgba(240,214,170,.92)); border:2px solid #7a4a18; border-radius:13px; padding:7px 9px; box-shadow:0 3px 8px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.6); }
+.rescard .em { font-size:21px; line-height:1; }
+.rescard b { display:block; font-size:17px; color:#4a2a11; line-height:1.05; }
+.rescard small { display:block; font-size:9px; font-weight:800; color:#8a5a2a; letter-spacing:.4px; text-transform:uppercase; }
+.regen { font-size:9px; font-weight:800; color:#2E9E4F; }
+
+/* ============ pity meter ============ */
+.pity { background:linear-gradient(180deg,#3f2a12,#291a09); border:2px solid rgba(255,199,44,.55); border-radius:14px; padding:9px 10px 8px; margin-bottom:9px; box-shadow:0 4px 12px rgba(0,0,0,.4); display:flex; gap:10px; align-items:center; }
+.acorn { position:relative; width:30px; height:38px; flex:0 0 auto; }
+.acorn .body { position:absolute; left:2px; top:11px; width:26px; height:27px; border-radius:48% 48% 52% 52% / 34% 34% 66% 66%; background:#4a3418; overflow:hidden; box-shadow:inset 0 -3px 5px rgba(0,0,0,.5), 0 2px 3px rgba(0,0,0,.45); }
+.acorn .fill { position:absolute; left:0; right:0; bottom:0; height:0%; background:linear-gradient(180deg,#ffe07a,#e8a52c 60%,#c07a12); transition:height .45s cubic-bezier(.34,1.56,.64,1); }
+.acorn .fill::after { content:""; position:absolute; left:0; right:0; top:-2px; height:3px; background:rgba(255,245,200,.85); border-radius:50%; }
+.acorn .cap { position:absolute; left:0; top:4px; width:30px; height:13px; border-radius:50% 50% 30% 30% / 70% 70% 40% 40%; background:repeating-linear-gradient(90deg,#6b4a1e 0 2px,#553a15 2px 4px); box-shadow:inset 0 2px 0 rgba(255,220,160,.3), 0 1px 2px rgba(0,0,0,.5); }
+.acorn .stem { position:absolute; left:13px; top:0; width:4px; height:7px; border-radius:2px; background:#3d2a10; }
+.pity .ptxt { flex:1 1 auto; min-width:0; }
+.pity .ptit { color:var(--sb-yellow); font-weight:900; font-size:12.5px; text-shadow:0 1px 0 rgba(0,0,0,.5); line-height:1.2; }
+.pity .psub { color:#ffd9a0; font-size:9.5px; font-weight:800; margin-top:2px; }
+.pips { display:flex; gap:2px; margin-top:5px; }
+.pip { flex:1; height:8px; border-radius:3px; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.15); }
+.pip.on { background:linear-gradient(180deg,#ffe07a,#d98b2b); border-color:#ffe7ae; box-shadow:0 0 5px rgba(255,199,44,.8); }
+.pity.ready { animation:glowRing 1.3s ease-in-out infinite; }
+@keyframes glowRing { 0%,100%{box-shadow:0 0 0 0 rgba(255,199,44,.5),0 4px 12px rgba(0,0,0,.4);} 50%{box-shadow:0 0 0 6px rgba(255,199,44,0),0 0 16px 3px rgba(255,199,44,.75),0 4px 12px rgba(0,0,0,.4);} }
+
+/* ============ forest scene ============ */
+.forest { position:relative; border-radius:17px; padding:0 8px 9px; margin-bottom:9px; overflow:hidden; border:2.5px solid #3a2209;
+  background:
+    radial-gradient(circle at 12% 30%, rgba(217,139,43,.28) 0 7%, transparent 8%), radial-gradient(circle at 30% 52%, rgba(232,165,44,.16) 0 5%, transparent 6%),
+    radial-gradient(circle at 62% 88%, rgba(163,63,18,.22) 0 6%, transparent 7%), radial-gradient(circle at 76% 18%, rgba(184,97,31,.28) 0 6%, transparent 7%),
+    radial-gradient(circle at 42% 72%, rgba(138,68,22,.32) 0 8%, transparent 9%), radial-gradient(circle at 88% 62%, rgba(217,139,43,.2) 0 5%, transparent 6%),
+    linear-gradient(180deg,#4d2b10 0%,#603715 45%,#71421a 100%);
+  box-shadow:inset 0 3px 8px rgba(255,214,150,.18), inset 0 -6px 14px rgba(0,0,0,.5), 0 6px 16px rgba(0,0,0,.45);
+}
+/* canopy: overlapping leaf clumps (generated) hanging off a dark branch */
+.canopy { position:relative; height:44px; margin:0 -8px 6px; overflow:hidden;
+  background:linear-gradient(180deg,#16300d 0 15px,#1a3a10 15px 20px, rgba(26,58,16,0) 21px);
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.5)); }
+.canopy .branch { position:absolute; left:-4px; right:-4px; top:19px; height:5px; border-radius:4px; z-index:0;
+  background:linear-gradient(180deg,#6b4a1e,#3a2209); box-shadow:0 2px 3px rgba(0,0,0,.6); }
+.canopy .cl { position:absolute; border-radius:52% 48% 46% 54% / 54% 50% 50% 46%; }
+.canopy .hang { position:absolute; font-size:11px; transform-origin:50% 0; animation:sway 3.6s ease-in-out infinite; opacity:.92; }
+@keyframes sway { 0%,100%{transform:rotate(-14deg);} 50%{transform:rotate(14deg);} }
+.lf { position:absolute; top:-18px; font-size:13px; pointer-events:none; opacity:.55; animation:fall linear infinite; z-index:4; filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+@keyframes fall { 0%{transform:translate(0,0) rotate(0deg);} 50%{transform:translate(16px,180px) rotate(180deg);} 100%{transform:translate(-6px,360px) rotate(360deg); opacity:0;} }
+
+/* ============ grid + tiles ============ */
+.grid { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; position:relative; z-index:2; }
+.tile { position:relative; aspect-ratio:1; border:none; padding:0; border-radius:9px; overflow:visible; cursor:pointer; background:transparent; font-family:var(--sb-font); }
+.hole { position:absolute; inset:0; border-radius:9px; overflow:hidden;
+  background:radial-gradient(circle at 46% 54%, #241505 0%, #150c03 78%);
+  box-shadow:inset 0 4px 7px rgba(0,0,0,.9), inset -1px -2px 3px rgba(255,200,130,.12); }
+.hole::after { content:""; position:absolute; inset:0; /* leaf crumbs left in the hole */
+  background:radial-gradient(circle at 26% 72%, rgba(184,97,31,.5) 0 10%, transparent 11%), radial-gradient(circle at 66% 78%, rgba(217,139,43,.4) 0 8%, transparent 9%), radial-gradient(circle at 50% 62%, rgba(120,70,28,.55) 0 7%, transparent 8%); }
+.mound { position:absolute; inset:0; border-radius:9px; transition:opacity .2s, transform .2s; overflow:hidden;
+  background:
+    /* pebbles + crumbs, then sunlight from the upper-left */
+    radial-gradient(circle at 25% 33%, rgba(70,34,10,.2) 0 6%, transparent 7%), radial-gradient(circle at 40% 78%, rgba(70,34,10,.14) 0 4%, transparent 5%),
+    radial-gradient(circle at 88% 26%, rgba(255,226,170,.14) 0 4%, transparent 5%), radial-gradient(circle at 14% 62%, rgba(70,34,10,.13) 0 4%, transparent 5%),
+    radial-gradient(circle at 74% 63%, rgba(70,34,10,.16) 0 5%, transparent 6%), radial-gradient(circle at 58% 20%, rgba(255,226,170,.14) 0 4%, transparent 5%),
+    radial-gradient(ellipse 78% 52% at 34% 6%, rgba(255,230,180,.34), transparent 72%),
+    linear-gradient(158deg,#d18227 0%,#b05c1d 40%,#8a4416 76%,#65310f 100%);
+  box-shadow:inset 2px 2px 0 rgba(255,232,180,.32), inset -2px -3px 0 rgba(0,0,0,.38), 0 2px 4px rgba(0,0,0,.42); }
+/* fallen leaves resting on the mound (pointed both ends, faint centre vein) */
+.mound::before, .mound i {
+  content:""; position:absolute; width:36%; height:18%; left:10%; top:19%;
+  border-radius:64% 5% 64% 5%; transform:rotate(-24deg); opacity:.92;
+  background:linear-gradient(to bottom, transparent 42%, rgba(104,46,10,.34) 47% 53%, transparent 58%), linear-gradient(128deg, rgba(255,246,214,.3) 0 28%, transparent 46%), linear-gradient(142deg,#eeb352 0%,#c25a1e 58%,#93400f 100%);
+  box-shadow:0 1px 2px rgba(0,0,0,.3); }
+.mound i { width:25%; height:13%; left:56%; top:56%; transform:rotate(28deg); opacity:.8;
+  background:linear-gradient(to bottom, transparent 42%, rgba(104,46,10,.3) 47% 53%, transparent 58%), linear-gradient(142deg,#d9973a 0%,#a3480f 60%,#7c320a 100%); }
+/* grass blades along the bottom edge */
+.mound::after { content:""; position:absolute; left:0; right:0; bottom:0; height:40%;
+  background:
+    radial-gradient(ellipse 6% 52% at 11% 106%, #5c8f33 0 66%, transparent 68%), radial-gradient(ellipse 5% 74% at 19% 110%, #4a7a2c 0 66%, transparent 68%),
+    radial-gradient(ellipse 6% 44% at 27% 106%, #3d6b22 0 66%, transparent 68%), radial-gradient(ellipse 5% 66% at 49% 110%, #5c8f33 0 66%, transparent 68%),
+    radial-gradient(ellipse 6% 50% at 57% 106%, #43702a 0 66%, transparent 68%), radial-gradient(ellipse 5% 78% at 78% 112%, #5c8f33 0 66%, transparent 68%),
+    radial-gradient(ellipse 6% 46% at 86% 106%, #3d6b22 0 66%, transparent 68%), linear-gradient(180deg,transparent 34%, rgba(0,0,0,.3) 100%); }
+.tile:nth-child(3n)   .mound { filter:brightness(1.07) hue-rotate(-5deg); }
+.tile:nth-child(5n)   .mound { filter:brightness(.9) hue-rotate(4deg); }
+.tile:nth-child(7n)   .mound { filter:brightness(1.03) saturate(1.15); }
+.tile:nth-child(4n)   .mound::before { left:46%; top:52%; transform:rotate(38deg); }
+.tile:nth-child(4n)   .mound i       { left:14%; top:20%; transform:rotate(-16deg); }
+.tile:nth-child(6n+1) .mound::before { left:36%; top:24%; transform:rotate(-54deg); }
+.tile:nth-child(6n+5) .mound::before { left:14%; top:52%; transform:rotate(12deg); }
+.tile:nth-child(6n+5) .mound i       { left:52%; top:18%; transform:rotate(64deg); }
+.tile:nth-child(7n+3) .mound::before { left:48%; top:18%; transform:rotate(70deg); }
+.tile:nth-child(5n+2) .mound i       { left:18%; top:66%; transform:rotate(-40deg); }
+.tile:active .mound { transform:scale(.94); }
+.tile.dug .mound { opacity:0; transform:scale(1.3) rotate(6deg); pointer-events:none; }
+/* power dig: the 3-tile cross is marked before it blows */
+.tile.cross::after { content:""; position:absolute; inset:-2px; border-radius:11px; z-index:5; pointer-events:none;
+  border:2.5px solid #ffe07a; box-shadow:0 0 12px 2px rgba(255,199,44,.85), inset 0 0 10px rgba(255,224,140,.6);
+  animation:crossFlash .5s ease-out infinite alternate; }
+@keyframes crossFlash { 0%{opacity:.55;} 100%{opacity:1;} }
+.tile.cross .mound { filter:brightness(1.35) saturate(1.2) !important; }
+
+/* found marker left in the hole */
+.mark { position:absolute; inset:0; display:grid; place-items:center; font-size:16px; opacity:.62; z-index:1; pointer-events:none; }
+.mark.gold { opacity:.95; filter:drop-shadow(0 0 5px rgba(255,199,44,.9)); }
+/* the pop that appears on reveal */
+.pop { position:absolute; inset:-6px; display:grid; place-items:center; z-index:6; pointer-events:none; animation:popIn .42s cubic-bezier(.34,1.56,.64,1); }
+@keyframes popIn { 0%{transform:scale(.2); opacity:0;} 60%{transform:scale(1.22);} 100%{transform:scale(1); opacity:1;} }
+.pop.rare::before { content:""; position:absolute; width:150%; height:150%; border-radius:50%; background:radial-gradient(circle,rgba(255,214,90,.85) 0%,rgba(255,199,44,.35) 40%,transparent 68%); animation:rareGlow .9s ease-out; }
+@keyframes rareGlow { 0%{transform:scale(.3); opacity:0;} 40%{opacity:1;} 100%{transform:scale(1.5); opacity:0;} }
+.part { position:absolute; left:50%; top:50%; font-size:11px; pointer-events:none; z-index:7; animation:scatter .62s ease-out forwards; }
+@keyframes scatter { 0%{transform:translate(-50%,-50%) scale(.5); opacity:1;} 100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.05) rotate(var(--rot)); opacity:0;} }
+.soil { position:absolute; left:50%; top:50%; width:5px; height:5px; border-radius:50%; background:#4a2a11; z-index:7; animation:scatter .5s ease-out forwards; }
+
+/* ============ glossy chestnut CSS art ============ */
+.nut { position:relative; width:var(--s,26px); height:var(--s,26px); }
+.nut i { position:absolute; left:6%; bottom:0; width:88%; height:82%; border-radius:50% 50% 46% 46% / 62% 62% 38% 38%;
+  background:radial-gradient(circle at 33% 26%, #b9793a 0%, #8a4d1c 38%, #5b2f10 78%, #3d1e08 100%);
+  box-shadow:inset -2px -3px 4px rgba(0,0,0,.5), 0 2px 3px rgba(0,0,0,.5); }
+.nut i::after { content:""; position:absolute; left:20%; bottom:4%; width:60%; height:34%; border-radius:50%; background:radial-gradient(ellipse at 50% 60%, #f0e0b4 0%, #cdb283 60%, transparent 78%); }
+.nut b { position:absolute; left:44%; top:-2%; width:14%; height:26%; border-radius:40% 40% 20% 20%; background:#4a2a11; transform:rotate(-8deg); }
+.nut u { position:absolute; left:22%; top:16%; width:26%; height:20%; border-radius:50%; background:rgba(255,246,220,.75); filter:blur(.6px); transform:rotate(-24deg); }
+.nut.g i { background:radial-gradient(circle at 32% 24%, #fff5c0 0%, #ffd95e 30%, #e0a400 62%, #9c6b06 100%); box-shadow:inset -2px -3px 4px rgba(120,80,0,.5), 0 0 12px rgba(255,199,44,.9); }
+.nut.g i::after { background:radial-gradient(ellipse at 50% 60%, #fffdf0 0%, #ffeaa8 60%, transparent 78%); }
+.nut.g b { background:#9c6b06; }
+.nut.g::after { content:"✦"; position:absolute; right:-16%; top:-14%; color:#fff8d0; font-size:calc(var(--s,26px) * .5); text-shadow:0 0 6px #ffd95e; animation:tw 1.4s ease-in-out infinite; }
+@keyframes tw { 0%,100%{transform:scale(.7); opacity:.6;} 50%{transform:scale(1.15); opacity:1;} }
+
+/* ---- inline acorn (cache) art ---- */
+.acn { position:relative; display:inline-block; width:var(--s,24px); height:calc(var(--s,24px) * 1.16); vertical-align:middle; }
+.acn i { position:absolute; left:8%; bottom:0; width:84%; height:66%; border-radius:46% 46% 50% 50% / 26% 26% 74% 74%;
+  background:radial-gradient(circle at 34% 28%, #eccb92 0%, #c69a55 48%, #8f6a30 100%); box-shadow:inset -2px -2px 3px rgba(0,0,0,.32), 0 1px 2px rgba(0,0,0,.45); }
+.acn s { position:absolute; left:0; top:5%; width:100%; height:44%; text-decoration:none; border-radius:50% 50% 32% 32% / 62% 62% 38% 38%;
+  background:repeating-linear-gradient(90deg,#6b4a1e 0 2px,#553a15 2px 4px); box-shadow:inset 0 2px 0 rgba(255,220,160,.32), 0 1px 2px rgba(0,0,0,.5); }
+.acn b { position:absolute; left:44%; top:-6%; width:11%; height:17%; border-radius:2px; background:#3d2a10; }
+.acn u { position:absolute; left:20%; bottom:16%; width:22%; height:19%; border-radius:50%; background:rgba(255,250,225,.62); filter:blur(.5px); }
+
+/* ============ near-miss banner ============ */
+.nearmiss { margin-top:8px; border-radius:11px; padding:7px 9px; font-size:11.5px; font-weight:800; text-align:center; line-height:1.35;
+  background:linear-gradient(180deg,rgba(255,236,200,.95),rgba(240,210,160,.92)); color:#5b2f10; border:2px solid #a33f12; box-shadow:0 3px 8px rgba(0,0,0,.35); position:relative; z-index:2; }
+.nearmiss.hot { background:linear-gradient(180deg,#ffe9ad,#ffd066); border-color:#c25a1e; animation:sbPulse 1.4s infinite; }
+.nearmiss.done { background:linear-gradient(180deg,#dff5df,#b9e8bd); border-color:#2E9E4F; color:#1f7038; }
+
+/* ============ basket ============ */
+.basket { position:relative; border-radius:14px; padding:22px 11px 11px; margin-bottom:9px; color:#f6e6c8; border:2.5px solid #4a2a11;
+  background:
+    repeating-linear-gradient(58deg, rgba(0,0,0,.16) 0 5px, transparent 5px 11px),
+    repeating-linear-gradient(-58deg, rgba(0,0,0,.16) 0 5px, transparent 5px 11px),
+    linear-gradient(180deg,#a5732f 0%,#7a4d1d 60%,#5c3512 100%);
+  box-shadow:inset 0 -4px 10px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,224,150,.3), 0 5px 12px rgba(0,0,0,.4); }
+.basket::before { content:""; position:absolute; left:-2px; right:-2px; top:-2px; height:15px; border-radius:14px 14px 8px 8px;
+  background:repeating-linear-gradient(90deg,#c08a3c 0 7px,#8a5a20 7px 14px); border:2px solid #4a2a11; box-shadow:0 2px 4px rgba(0,0,0,.45); }
+.basket h4 { margin:0 0 7px; font-size:12px; letter-spacing:.6px; text-transform:uppercase; color:#ffd9a0; text-shadow:0 1px 0 rgba(0,0,0,.5); }
+.haul { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.hitem { background:rgba(0,0,0,.3); border:1.5px solid rgba(255,214,140,.3); border-radius:10px; padding:6px 3px 5px; text-align:center; }
+.hitem .em { font-size:17px; line-height:1.1; display:flex; align-items:center; justify-content:center; height:24px; }
+.hitem b { display:block; font-size:14px; color:#ffe3b8; line-height:1.2; }
+.hitem small { font-size:8.5px; font-weight:800; color:#d5ab73; letter-spacing:.2px; }
+
+/* ============ odds panel ============ */
+.odds { background:var(--sb-cream); border-radius:14px; box-shadow:var(--sb-shadow); margin-bottom:9px; overflow:hidden; }
+.odds > summary { list-style:none; cursor:pointer; padding:11px 12px; font-weight:900; font-size:13px; color:var(--sb-ink); display:flex; align-items:center; gap:7px; min-height:44px; }
+.odds > summary::-webkit-details-marker { display:none; }
+.odds > summary .arw { margin-left:auto; font-size:12px; color:#8a6a3a; transition:transform .2s; }
+.odds[open] > summary .arw { transform:rotate(180deg); }
+.otbl { width:100%; border-collapse:collapse; font-size:11.5px; }
+.otbl th { background:#efe2c4; color:#6b4a1e; font-size:9.5px; letter-spacing:.4px; text-transform:uppercase; padding:5px 6px; text-align:left; }
+.otbl td { padding:6px; border-top:1px solid rgba(107,74,30,.16); vertical-align:middle; color:var(--sb-ink); }
+.otbl td.pc { font-weight:900; text-align:right; white-space:nowrap; }
+.otbl td.tl { text-align:center; color:#6b4a1e; font-weight:800; }
+.oico { display:inline-flex; align-items:center; justify-content:center; width:22px; vertical-align:middle; margin-right:3px; }
+.otbl tr.gold td { background:rgba(255,199,44,.22); }
+.otbl tr.grand td { background:rgba(215,38,61,.12); }
+.otbl tr.tot td { background:#efe2c4; font-weight:900; font-size:11px; }
+.odds .note { padding:8px 12px 11px; font-size:10.5px; line-height:1.5; color:#5a4a30; }
+.odds .note b { color:#8a4416; }
+.left { padding:7px 12px 2px; font-size:10.5px; font-weight:800; color:#6b4a1e; line-height:1.9; }
+.lgrp { display:inline-flex; align-items:center; white-space:nowrap; }
+.lsep { padding:0 5px; opacity:.5; }
+
+/* ============ offers ============ */
+.offer { border-radius:14px; padding:11px 12px; margin-bottom:9px; color:#fff; box-shadow:var(--sb-shadow);
+  background:linear-gradient(150deg,#6b3d16,#3a2209); border:2px solid var(--sb-yellow); }
+.offer.pass { background:linear-gradient(150deg,#5b2a86,#2c1147); border-color:#e0b0ff; }
+.offer h4 { margin:0 0 3px; font-size:13.5px; color:var(--sb-yellow); }
+.offer.pass h4 { color:#f0d0ff; }
+.offer p { margin:0 0 8px; font-size:11.5px; line-height:1.45; color:#ffeed6; }
+.offer .row { display:flex; gap:9px; align-items:center; }
+.offer .sb-btn-sm { min-height:44px; font-size:13.5px; flex:0 0 auto; }
+.offer .free { font-size:10.5px; color:#ffd9a0; font-weight:700; margin-top:7px; line-height:1.45; border-top:1px dashed rgba(255,214,140,.35); padding-top:6px; }
+.offer.owned { opacity:.9; border-color:#2E9E4F; }
+.ownedtag { display:inline-block; background:var(--sb-green); color:#fff; font-size:10px; font-weight:900; border-radius:999px; padding:3px 9px; }
+
+/* ============ stats + playbar ============ */
+.stats { text-align:center; color:#ffd9a0; font-size:11.5px; font-weight:800; padding:2px 0 4px; }
+.playbar { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:480px; z-index:120; display:flex; gap:9px;
+  padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px); background:linear-gradient(180deg,rgba(43,26,12,0) 0%,rgba(30,17,7,.96) 34%); }
+.playbar .sb-btn { flex:1; flex-direction:column; gap:1px; padding:9px 6px; min-height:52px; }
+.playbar .sb-btn small { font-size:9.5px; font-weight:800; opacity:.92; }
+
+/* ============ modal bits ============ */
+.mrow { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin:10px 0 12px; }
+.mleft { text-align:left; font-size:12.5px; line-height:1.6; }
+.mleft b { color:#8a4416; }
+.regbox { background:#efe2c4; border-radius:12px; padding:10px; margin:10px 0; font-size:12px; font-weight:800; color:#5b2f10; }
+.regbox .big { font-size:20px; color:#c25a1e; font-weight:900; }
+.bignut { display:flex; justify-content:center; margin:6px 0 2px; }
+.mbtn { font-size:15px; padding:10px 12px; margin-bottom:8px; flex-direction:column; gap:1px; }
+.mbtn .sm { font-size:10.5px; font-weight:800; opacity:.92; }
+/* squirrel companion hop */
+.squirrel { position:fixed; z-index:210; font-size:26px; pointer-events:none;
+  transition:left .6s cubic-bezier(.3,-0.3,.5,1.4), top .6s cubic-bezier(.3,-0.3,.5,1.4); }
+</style>
+</head>
+<body>
+<div class="sb-app">
+<div class="sb-main">
+
+  <div class="hdr">
+    <span class="sb-timer-chip">🍂 <span id="cd">—</span></span>
+    <span class="patchbadge" id="pbadge">🌲 Patch 1</span>
+    <button class="info-btn" id="infoBtn" aria-label="Event info">ⓘ</button>
+  </div>
+
+  <div class="res">
+    <div class="rescard"><span class="em">🎫</span><div><b id="tkN">0</b><small>Dig tickets</small><span class="regen" id="regen"></span></div></div>
+    <div class="rescard"><span class="em">✚</span><div><b id="pwN">0</b><small>Power digs</small></div></div>
+  </div>
+
+  <div class="pity" id="pityBox">
+    <div class="acorn"><div class="stem"></div><div class="body"><div class="fill" id="pfill"></div></div><div class="cap"></div></div>
+    <div class="ptxt">
+      <div class="ptit" id="ptit">Golden chestnut guaranteed in 12 digs</div>
+      <div class="psub">Free &amp; always active · resets when you find one</div>
+      <div class="pips" id="pips"></div>
+    </div>
+  </div>
+
+  <div class="forest" id="forest">
+    <div class="canopy" id="canopy"></div>
+    <div class="grid" id="grid"></div>
+    <div class="nearmiss" id="nearmiss" style="display:none"></div>
+  </div>
+
+  <div class="basket">
+    <h4>🧺 Forager's basket — patch <span id="bpatch">1</span></h4>
+    <div class="haul">
+      <div class="hitem"><span class="em"><span class="nut" style="--s:21px"><b></b><i></i><u></u></span></span><b id="hNut">0</b><small>Chestnuts</small></div>
+      <div class="hitem"><span class="em"><span class="acn" style="--s:19px"><b></b><i></i><s></s><u></u></span></span><b id="hAcorn">0</b><small>Caches</small></div>
+      <div class="hitem"><span class="em"><span class="nut g" style="--s:21px"><b></b><i></i><u></u></span></span><b id="hGold">0</b><small>Golden</small></div>
+      <div class="hitem"><span class="em">🪙</span><b id="hCoins">0</b><small>Coins</small></div>
+    </div>
+  </div>
+
+  <details class="odds" id="oddsPanel" open>
+    <summary>📊 Dig odds — this patch <span class="arw">▾</span></summary>
+    <div class="left" id="oleft"></div>
+    <table class="otbl" id="otbl"></table>
+    <div class="note" id="onote"></div>
+  </details>
+
+  <div id="offers"></div>
+  <div class="stats" id="stats"></div>
+</div>
+</div>
+
+<div class="playbar">
+  <button class="sb-btn sb-btn-green" id="playBtn">▶ Play level<small>clear = +1 🎫 dig ticket</small></button>
+  <button class="sb-btn sb-btn-red" id="hardBtn">🔥 Hard level<small>clear = +1 ✚ power dig (3 tiles)</small></button>
+</div>
+
+<script src="../shared/core.js"></script>
+<script src="../shared/levelsim.js"></script>
+<script>
+(function () {
+"use strict";
+SB.init({ title: "Chestnut Dig", subtitle: "Autumn Forage · 4 days · every 2 weeks", resetKey: "chestnut-dig" });
+
+/* ================= config ================= */
+var PITY = 12;                       // golden chestnut guaranteed within 12 digs
+var SIZE = 36;                       // 6x6
+var TICKET_CAP = 5;
+var REGEN_MS = 40 * 1000;            // demo stand-in for "1 per 20 min"
+var SQUIRREL_MS = 45 * 1000;         // demo stand-in for "auto-dig every 2h"
+var EVENT_MS = 8 * 60 * 1000;        // demo stand-in for 4 days
+var VIRT = 4 * 24 * 3600 * 1000 / EVENT_MS;
+
+// tile mix per patch tier — the odds table is generated FROM this object
+var COMP = {
+  1: { grand:1, gold:3, acorn:8,  nut:18, dud:6 },
+  2: { grand:1, gold:5, acorn:10, nut:16, dud:4 },
+  3: { grand:1, gold:7, acorn:11, nut:14, dud:3 }
+};
+var ORDER = ["grand","gold","acorn","nut","dud"];
+var INFO = {
+  grand: { nm:"Golden Squirrel hoard", cls:"grand" }, gold: { nm:"Golden chestnut", cls:"gold" },
+  acorn: { nm:"Acorn cache", cls:"" },  nut: { nm:"Chestnut", cls:"" },  dud: { nm:"Empty burrow", cls:"" }
+};
+function tierOf(p) { return Math.min(p, 3); }
+function mult(p) { return 1 + 0.3 * (p - 1); }
+function rewardsFor(t, p) {
+  var m = mult(p);
+  if (t === "nut")   return [{ type:"coins", amount: Math.round(60 * m) }];
+  if (t === "acorn") return [{ type:"coins", amount: Math.round(250 * m) }];
+  if (t === "gold")  return [{ type:"wild", amount:1 }, { type:"gem", amount: Math.round(5 * m) }];
+  if (t === "grand") return [{ type:"coins", amount:3000 }, { type:"wild", amount:3 }, { type:"gem", amount:20 }];
+  return [];
+}
+function rewardText(t, p) {
+  if (t === "dud") return "nothing";
+  return rewardsFor(t, p).map(function (r) { return SB.icon(r.type) + " " + SB.fmt(r.amount); }).join(" ");
+}
+
+/* ================= grid + pity core (shared with the simulator) ================= */
+function buildGrid(patch) {
+  var c = COMP[tierOf(patch)], a = [];
+  ORDER.forEach(function (k) { for (var i = 0; i < c[k]; i++) a.push(k); });
+  for (var i = a.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0, t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+// Resolves one tile. Mutates state.grid (pity upgrade) and state.pity. Returns {out, forced}.
+function resolveTile(state, idx) {
+  var raw = state.grid[idx];
+  if (raw === "gold" || raw === "grand") { state.pity = 0; return { out: raw, forced: false }; }
+  if (state.pity >= PITY - 1) { state.grid[idx] = "gold"; state.pity = 0; return { out: "gold", forced: true }; }
+  state.pity++;
+  return { out: raw, forced: false };
+}
+
+/* ================= state ================= */
+var S = SB.store("chestnut-dig", {
+  tickets: 3, power: 1, pity: 0, patch: 1, grid: null, dug: [], found: [],
+  digs: 0, rares: 0, patches: 0, grandFound: false, pass: false, lvl: 214,
+  haul: { nut:0, acorn:0, gold:0, dud:0, grand:0, coins:0 },
+  endTs: 0, nextTicket: 0, nextSquirrel: 0
+});
+var st = S.data;
+if (!st.grid || st.grid.length !== SIZE) { st.grid = buildGrid(st.patch); st.dug = []; st.found = []; }
+if (!st.endTs || st.endTs < Date.now() - 864e5) st.endTs = Date.now() + EVENT_MS;
+if (!st.nextTicket) st.nextTicket = Date.now() + REGEN_MS;
+if (!st.nextSquirrel) st.nextSquirrel = Date.now() + SQUIRREL_MS;
+S.save();
+
+function $(s) { return document.querySelector(s); }
+function remaining() { var n = 0; for (var i = 0; i < SIZE; i++) if (!st.dug[i]) n++; return n; }
+function countLeft(t) { var n = 0; for (var i = 0; i < SIZE; i++) if (!st.dug[i] && st.grid[i] === t) n++; return n; }
+
+/* ================= render ================= */
+function nutArt(gold, size) {
+  return '<span class="nut' + (gold ? " g" : "") + '" style="--s:' + (size || 26) + 'px"><b></b><i></i><u></u></span>';
+}
+function acornArt(size) {
+  return '<span class="acn" style="--s:' + (size || 22) + 'px"><b></b><i></i><s></s><u></u></span>';
+}
+// one icon system used by the grid, the odds table and the "still buried" line
+function art(t, size) {
+  if (t === "nut")   return nutArt(false, size || 26);
+  if (t === "gold")  return nutArt(true, size || 26);
+  if (t === "acorn") return acornArt((size || 26) * 0.85);
+  if (t === "grand") return '<span style="font-size:' + (size || 26) + 'px;line-height:1">🐿️</span>';
+  return '<span style="font-size:' + (size || 26) * 0.72 + 'px;line-height:1;opacity:.85">🕳️</span>';
+}
+function tileFace(t) {
+  if (t === "gold")  return art(t, 32);
+  if (t === "grand") return art(t, 30);
+  return art(t, 29);
+}
+function buildTiles() {
+  var h = "";
+  for (var i = 0; i < SIZE; i++) {
+    h += '<button class="tile' + (st.dug[i] ? " dug" : "") + '" data-i="' + i + '" aria-label="Dig tile ' + (i + 1) + '">' +
+      '<span class="hole"></span>' +
+      (st.dug[i] ? '<span class="mark' + (st.found[i] === "gold" || st.found[i] === "grand" ? " gold" : "") + '">' + markFace(st.found[i]) + "</span>" : "") +
+      '<span class="mound"><i></i></span></button>';
+  }
+  $("#grid").innerHTML = h;
+}
+function markFace(t) {
+  if (!t) return "·";
+  if (t === "dud") return '<span style="font-size:11px;opacity:.7">·</span>';
+  return art(t, t === "grand" ? 18 : 17);
+}
+function renderRes() {
+  $("#tkN").textContent = st.tickets;
+  $("#pwN").textContent = st.power;
+}
+function renderPity() {
+  var left = PITY - st.pity;
+  $("#pfill").style.height = (st.pity / PITY * 100) + "%";
+  $("#pfill").style.opacity = st.pity ? 1 : 0;
+  $("#ptit").innerHTML = left <= 1
+    ? "✨ Golden chestnut guaranteed on your <b>NEXT dig</b>"
+    : "Golden chestnut guaranteed in <b>" + left + " digs</b>";
+  $("#pityBox").classList.toggle("ready", left <= 1);
+  var p = "";
+  for (var i = 0; i < PITY; i++) p += '<span class="pip' + (i < st.pity ? " on" : "") + '"></span>';
+  $("#pips").innerHTML = p;
+}
+function renderHaul() {
+  $("#hNut").textContent = st.haul.nut;
+  $("#hAcorn").textContent = st.haul.acorn;
+  $("#hGold").textContent = st.haul.gold + st.haul.grand;
+  $("#hCoins").textContent = SB.fmt(st.haul.coins);
+  $("#bpatch").textContent = st.patch;
+  $("#pbadge").innerHTML = "🌲 Patch " + st.patch + (st.patch > 1 ? " · deeper" : "");
+}
+function renderOdds() {
+  var c = COMP[tierOf(st.patch)], p = st.patch;
+  var rows = ORDER.map(function (k) {
+    var pct = (c[k] / SIZE * 100);
+    return '<tr class="' + INFO[k].cls + '"><td><span class="oico">' + art(k, 19) + "</span>" + INFO[k].nm + "</td>" +
+      '<td class="tl">' + c[k] + "</td>" +
+      '<td class="pc">' + pct.toFixed(2) + "%</td>" +
+      "<td>" + rewardText(k, p) + "</td></tr>";
+  }).join("");
+  $("#otbl").innerHTML = "<tr><th>Under the leaves</th><th>Tiles</th><th>Chance</th><th>Pays</th></tr>" + rows +
+    '<tr class="tot"><td>Total</td><td class="tl">36</td><td class="pc">100.00%</td><td>every dig resolves</td></tr>';
+  var lft = ORDER.filter(function (k) { return countLeft(k) > 0; }).map(function (k) {
+    return '<span class="lgrp">' + art(k, 15) + "&nbsp;" + countLeft(k) + "</span>";
+  }).join('<span class="lsep">·</span>');
+  $("#oleft").innerHTML = "Still buried in this patch: <b>" + (lft || "—") + "</b> in " + remaining() + " tiles";
+  $("#onote").innerHTML = "Every patch is <b>36 real tiles</b> dealt face-down — the table above is the literal tile count, " +
+    "so chances shift as you dig (no reshuffling, no hidden re-rolls). " +
+    (st.patch > 1 ? "<b>Patch " + st.patch + "</b> is a deeper patch: more golden chestnuts, fewer empty burrows. " : "") +
+    "<b>Empty burrows are real</b> — " + (c.dud / SIZE * 100).toFixed(2) + "% of tiles pay nothing, and we show them here rather than hide them. " +
+    "The 12-dig pity guarantee can only <b>add</b> golden chestnuts, so your real golden rate is <b>≥ " + (c.gold / SIZE * 100).toFixed(2) + "%</b>.";
+}
+function renderNearMiss() {
+  var el = $("#nearmiss"), rem = remaining();
+  if (st.grandFound) {
+    el.style.display = ""; el.className = "nearmiss done";
+    el.innerHTML = "🐿️ Golden Squirrel hoard claimed from this patch!";
+    return;
+  }
+  if (rem <= 10) {
+    el.style.display = ""; el.className = "nearmiss" + (rem <= 4 ? " hot" : "");
+    el.innerHTML = "🐿️ <b>Golden Squirrel still buried</b> — " + rem + " tiles left, so it's <b>1 in " + rem + "</b> per dig now.";
+    return;
+  }
+  el.style.display = "none";
+}
+function renderStats() {
+  $("#stats").innerHTML = "⛏️ Digs: <b>" + st.digs + "</b> · ✨ Rares found: <b>" + st.rares +
+    "</b> · 🌲 Patches cleared: <b>" + st.patches + "</b>";
+}
+function renderOffers() {
+  var h = "";
+  h += '<div class="offer"><h4>🎫 5 Dig Tickets — $0.99</h4><p>Five instant digs on this patch. Tickets are tickets: the odds table above does not change.</p>' +
+    '<div class="row"><button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyT">Get 5 tickets — $0.99</button></div>' +
+    '<div class="free">Free path: <b>every level clear = 1 ticket</b>, plus 1 free ticket every 20 min (up to ' + TICKET_CAP + ' banked). ' +
+    'Purchased digs advance the same free pity meter.</div></div>';
+  h += '<div class="offer"><h4>✚ Power Dig Pack — $1.99</h4><p>3 Power Digs. Each clears a 3-tile cross ✚ in one tap — all 3 tiles count toward the pity guarantee.</p>' +
+    '<div class="row"><button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyP">Get 3 power digs — $1.99</button></div>' +
+    '<div class="free">Free path: <b>every hard-level clear = 1 Power Dig</b>. Hard levels are the fastest free route to 3 tiles at once.</div></div>';
+  h += '<div class="offer pass' + (st.pass ? " owned" : "") + '"><h4>🍁 Forager\'s Pass — $4.99</h4>' +
+    "<p>Every level clear pays <b>+2 tickets</b> instead of 1 for the rest of the event, and a squirrel companion auto-digs 1 tile every 2h " +
+    "(demo: every " + Math.round(SQUIRREL_MS / 1000) + "s).</p>" +
+    '<div class="row">' + (st.pass ? '<span class="ownedtag">✓ ACTIVE — squirrel foraging</span>'
+      : '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyPass">Get the pass — $4.99</button>') + "</div>" +
+    '<div class="free">Free path: the pass adds <b>digs</b>, never odds. Golden chestnut chance, the 36-tile mix and the 12-dig guarantee are identical with or without it.</div></div>';
+  $("#offers").innerHTML = h;
+  if ($("#buyT")) $("#buyT").addEventListener("click", buyTickets);
+  if ($("#buyP")) $("#buyP").addEventListener("click", buyPower);
+  if ($("#buyPass")) $("#buyPass").addEventListener("click", buyPass);
+}
+function renderAll() { renderRes(); renderPity(); renderHaul(); renderOdds(); renderNearMiss(); renderStats(); renderOffers(); }
+
+/* ================= digging ================= */
+var busy = false;
+function scatter(tile, gold) {
+  var bits = ["🍂", "🍁", "🍂"];
+  for (var i = 0; i < 7; i++) {
+    var s = document.createElement("span");
+    s.className = "part";
+    s.textContent = bits[i % bits.length];
+    var a = (i / 7) * Math.PI * 2 + Math.random();
+    s.style.setProperty("--dx", Math.cos(a) * (26 + Math.random() * 16) + "px");
+    s.style.setProperty("--dy", (Math.sin(a) * (22 + Math.random() * 14) - 10) + "px");
+    s.style.setProperty("--rot", (Math.random() * 540 - 270) + "deg");
+    s.style.animationDelay = (i * 12) + "ms";
+    tile.appendChild(s);
+    (function (n) { setTimeout(function () { n.remove(); }, 760); })(s);
+  }
+  for (var j = 0; j < 6; j++) {
+    var d = document.createElement("span");
+    d.className = "soil";
+    var b = Math.random() * Math.PI * 2;
+    d.style.setProperty("--dx", Math.cos(b) * (16 + Math.random() * 14) + "px");
+    d.style.setProperty("--dy", (Math.sin(b) * 16 - 6) + "px");
+    d.style.setProperty("--rot", "0deg");
+    tile.appendChild(d);
+    (function (n) { setTimeout(function () { n.remove(); }, 620); })(d);
+  }
+}
+function digTile(idx, delay) {
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      var tile = $('.tile[data-i="' + idx + '"]');
+      var r = resolveTile(st, idx);
+      var out = r.out;
+      st.dug[idx] = true; st.found[idx] = out;
+      st.digs++; st.haul[out]++;
+      if (out === "gold" || out === "grand") st.rares++;
+      if (out === "grand") st.grandFound = true;
+      var rw = rewardsFor(out, st.patch);
+      rw.forEach(function (x) { if (x.type === "coins") st.haul.coins += x.amount; });
+
+      tile.classList.add("dug");
+      tile.classList.remove("cross");
+      SB.haptic(out === "grand" ? 40 : (out === "gold" ? 25 : 10));
+      scatter(tile);
+      var pop = document.createElement("span");
+      pop.className = "pop" + (out === "gold" || out === "grand" ? " rare" : "");
+      pop.innerHTML = tileFace(out);
+      tile.appendChild(pop);
+
+      setTimeout(function () {
+        if (rw.length) SB.grantRewards(rw, tile);
+        var mk = document.createElement("span");
+        mk.className = "mark" + (out === "gold" || out === "grand" ? " gold" : "");
+        mk.innerHTML = markFace(out);
+        pop.remove(); tile.appendChild(mk);
+        if (out === "dud") SB.toast("🕳️ Empty burrow — nothing here. Pity meter still advanced.");
+        if (out === "gold") {
+          var b = tile.getBoundingClientRect();
+          SB.confetti(b.left + b.width / 2, b.top + b.height / 2, 38);
+          SB.toast(r.forced ? "✨ PITY GUARANTEE — golden chestnut!" : "✨ Golden chestnut!");
+        }
+        renderAll();
+        if (out === "grand") setTimeout(function () { grandModal(); }, 260);
+        resolve();
+      }, 430);
+    }, delay || 0);
+  });
+}
+function crossOf(idx) {
+  var r = (idx / 6) | 0, c = idx % 6, out = [idx];
+  var cand = [];
+  if (c > 0) cand.push(idx - 1);
+  if (c < 5) cand.push(idx + 1);
+  if (r > 0) cand.push(idx - 6);
+  if (r < 5) cand.push(idx + 6);
+  cand.forEach(function (i) { if (out.length < 3 && !st.dug[i]) out.push(i); });
+  if (out.length < 3) { // fall back to any nearby untouched tile
+    for (var i = 0; i < SIZE && out.length < 3; i++) if (!st.dug[i] && out.indexOf(i) < 0) out.push(i);
+  }
+  return out;
+}
+function onTile(e) {
+  var t = e.target.closest(".tile");
+  if (!t || busy) return;
+  var idx = +t.dataset.i;
+  if (st.dug[idx]) { SB.toast("Already dug — pick a fresh mound."); return; }
+  if (st.power > 0) return doDig(idx, true);
+  if (st.tickets > 0) return doDig(idx, false);
+  outOfTickets();
+}
+function doDig(idx, power) {
+  busy = true;
+  var list = power ? crossOf(idx) : [idx];
+  var lead = 0;
+  if (power) {
+    st.power--;
+    list.forEach(function (i) { var el = $('.tile[data-i="' + i + '"]'); if (el) el.classList.add("cross"); });
+    SB.toast("✚ POWER DIG — clearing " + list.length + " tiles!");
+    SB.haptic(25);
+    lead = 340;
+  } else st.tickets--;
+  renderRes(); S.save();
+  var chain = new Promise(function (r) { setTimeout(r, lead); });
+  list.forEach(function (i, n) { chain = chain.then(function () { return digTile(i, n ? 130 : 0); }); });
+  chain.then(function () {
+    S.save(); busy = false; renderAll();
+    if (remaining() === 0) setTimeout(patchClear, 420);
+  });
+}
+$("#grid").addEventListener("click", onTile);
+
+/* ================= grand prize + patch clear ================= */
+function grandModal() {
+  var rw = rewardsFor("grand", st.patch);
+  SB.confetti(); setTimeout(function () { SB.confetti(window.innerWidth / 2, 180, 90); }, 400);
+  var m = SB.modal('<div style="font-size:46px">🐿️</div><h3 style="margin:2px 0 4px">GOLDEN SQUIRREL HOARD!</h3>' +
+    '<p class="sb-muted" style="font-size:12px;margin:0">The 1-in-36 tile of this patch — you found it.</p>' +
+    '<div class="mrow">' + rw.map(SB.rewardChip).join("") + "</div>" +
+    '<button class="sb-btn sb-btn-green sb-btn-block" id="gOk">Grab the hoard!</button>');
+  m.el.querySelector("#gOk").addEventListener("click", function () { m.close(); });
+}
+function patchClear() {
+  st.patches++;
+  var bonus = [{ type:"coins", amount: Math.round(1000 * mult(st.patch)) }, { type:"gem", amount:10 }];
+  SB.grantRewards(bonus);
+  SB.confetti();
+  var np = st.patch + 1, c = COMP[tierOf(np)], oldc = COMP[tierOf(st.patch)];
+  var deeper = tierOf(np) !== tierOf(st.patch);
+  var m = SB.modal('<div style="font-size:40px">🍁</div><h3 style="margin:2px 0 4px">PATCH ' + st.patch + " CLEARED!</h3>" +
+    '<p class="sb-muted" style="font-size:12px;margin:0">Season bonus for turning over all 36 tiles</p>' +
+    '<div class="mrow">' + bonus.map(SB.rewardChip).join("") + "</div>" +
+    '<div class="regbox" style="text-align:left">🌲 <b>Patch ' + np + " opens — " + (deeper ? "a deeper part of the forest" : "same depth, fresh 36 tiles") + "</b><br>" +
+    '<span style="font-weight:700;font-size:11.5px">Golden chestnuts: ' + oldc.gold + " → <b>" + c.gold + "</b> tiles &nbsp;·&nbsp; Empty burrows: " + oldc.dud + " → <b>" + c.dud + "</b> tiles<br>" +
+    "Your pity meter carries over — it never resets between patches.</span></div>" +
+    '<button class="sb-btn sb-btn-green sb-btn-block" id="pcOk">Open Patch ' + np + "</button>");
+  m.el.querySelector("#pcOk").addEventListener("click", function () { m.close(); });
+  m.el.addEventListener("click", function (e) { if (e.target === m.el) newPatch(); });
+  var closed = false;
+  function newPatch() {
+    if (closed) return; closed = true;
+    st.patch = np; st.grid = buildGrid(np); st.dug = []; st.found = [];
+    st.grandFound = false;
+    st.haul = { nut:0, acorn:0, gold:0, dud:0, grand:0, coins:0 };
+    S.save(); buildTiles(); renderAll();
+    $("#oddsPanel").setAttribute("open", "");
+    SB.toast("🌲 Patch " + np + " — updated odds table above");
+  }
+  m.el.querySelector("#pcOk").addEventListener("click", newPatch);
+}
+
+/* ================= tickets: free regen + offers ================= */
+function outOfTickets() {
+  var m = SB.modal('<h3 style="margin:0 0 2px">Out of digs</h3>' +
+    '<p class="sb-muted" style="font-size:12px;margin:0 0 4px">Three ways forward — one of them is free and already running.</p>' +
+    '<div class="regbox">⏳ Next <b>free</b> ticket in <span class="big" id="regCd">--</span><br>' +
+    '<span style="font-weight:700;font-size:11px">1 free ticket every 20 min, up to ' + TICKET_CAP + ' banked (demo: ' + Math.round(REGEN_MS / 1000) + "s)</span></div>" +
+    '<button class="sb-btn sb-btn-green sb-btn-block mbtn" id="mPlay">▶ Play a level<span class="sm">clear = +1 🎫</span></button>' +
+    '<button class="sb-btn sb-btn-red sb-btn-block mbtn" id="mHard">🔥 Play a hard level<span class="sm">clear = +1 ✚ (3 tiles)</span></button>' +
+    '<div style="height:10px"></div>' +
+    '<button class="sb-btn sb-btn-yellow sb-btn-block mbtn" id="mBuy">🎫 5 Dig Tickets — $0.99</button>' +
+    '<div class="note" style="font-size:10.5px;color:#5a4a30;line-height:1.5;margin-top:8px">Buying only skips the wait. ' +
+    "Your <b>" + (PITY - st.pity) + "-dig</b> golden guarantee, the 36-tile mix and the odds table are exactly the same either way.</div>" +
+    '<button class="sb-sheet-cancel" id="mNo">Not now</button>');
+  var cdEl = m.el.querySelector("#regCd");
+  var iv = setInterval(function () {
+    var left = Math.max(0, st.nextTicket - Date.now());
+    cdEl.textContent = Math.floor(left / 60000) + ":" + String(Math.floor(left % 60000 / 1000)).padStart(2, "0");
+    if (st.tickets > 0) { clearInterval(iv); m.close(true); SB.toast("🎫 Free ticket ready — dig!"); }
+  }, 250);
+  function shut() { clearInterval(iv); m.close(true); }
+  m.el.querySelector("#mNo").addEventListener("click", shut);
+  m.el.querySelector("#mPlay").addEventListener("click", function () { shut(); play(false); });
+  m.el.querySelector("#mHard").addEventListener("click", function () { shut(); play(true); });
+  m.el.querySelector("#mBuy").addEventListener("click", function () { shut(); buyTickets(); });
+}
+function buyTickets() {
+  SB.buyIAP({ label:"5 Dig Tickets", price:"$0.99", grant:false, sub:"Odds unchanged · pity meter unchanged",
+    contents:[{ type:"token", amount:5 }],
+    onSuccess: function () {
+      st.tickets += 5; S.save(); renderAll();
+      SB.toast("🎫 +5 Dig Tickets — happy foraging!");
+    } });
+}
+function buyPower() {
+  SB.buyIAP({ label:"Power Dig Pack", price:"$1.99", grant:false, sub:"3 Power Digs · 3 tiles each · 9 tiles total",
+    contents:[{ type:"shovel", amount:3 }],
+    onSuccess: function () { st.power += 3; S.save(); renderAll(); SB.toast("✚ +3 Power Digs!"); } });
+}
+function buyPass() {
+  SB.buyIAP({ label:"Forager's Pass", price:"$4.99", grant:false, sub:"+2 tickets per clear · squirrel companion",
+    onSuccess: function () {
+      st.pass = true; st.nextSquirrel = Date.now() + SQUIRREL_MS; S.save(); renderAll();
+      SB.confetti(window.innerWidth / 2, 200, 100);
+      var m = SB.modal('<div style="font-size:44px">🐿️🍁</div><h3 style="margin:2px 0 4px">FORAGER\'S PASS ACTIVE!</h3>' +
+        '<p style="font-size:12.5px;line-height:1.55;margin:0 0 4px">Your squirrel companion has joined the dig. Every level clear now pays <b>+2 🎫</b>, ' +
+        "and the squirrel turns over one tile on its own every 2h.</p>" +
+        '<p style="font-size:11px;color:#5a4a30;line-height:1.5">It digs faster — it never digs luckier. Same 36-tile mix, same 12-dig guarantee.</p>' +
+        '<button class="sb-btn sb-btn-green sb-btn-block" id="fpOk">Let\'s forage!</button>');
+      m.el.querySelector("#fpOk").addEventListener("click", function () { m.close(); });
+    } });
+}
+
+/* ================= fuel: play levels ================= */
+function play(hard) {
+  var wr; if (window.__forceWin === true) wr = 1; else if (window.__forceWin === false) wr = 0;
+  $("#playBtn").disabled = true; $("#hardBtn").disabled = true;
+  SB.playLevel({ hard: hard, winRate: wr, instant: !!window.__instant, title: "Adventure Level " + st.lvl })
+    .then(function (res) {
+      $("#playBtn").disabled = false; $("#hardBtn").disabled = false;
+      st.lvl++;
+      if (res.won) {
+        if (hard) {
+          st.power++;
+          if (st.pass) { st.tickets = Math.min(TICKET_CAP + 20, st.tickets + 2); SB.toast("🔥 +1 ✚ Power Dig · 🍁 Pass +2 🎫"); }
+          else SB.toast("🔥 +1 Power Dig — clear a 3-tile cross!");
+        } else {
+          var n = st.pass ? 2 : 1;
+          st.tickets += n;
+          SB.toast(st.pass ? "🍁 Pass: +2 Dig Tickets!" : "🎫 +1 Dig Ticket!");
+        }
+      } else SB.toast("So close — no ticket. Run it again!");
+      S.save(); renderAll();
+    });
+}
+$("#playBtn").addEventListener("click", function () { play(false); });
+$("#hardBtn").addEventListener("click", function () { play(true); });
+
+/* ================= squirrel companion + regen + countdown ================= */
+function squirrelDig() {
+  var free = [];
+  for (var i = 0; i < SIZE; i++) if (!st.dug[i]) free.push(i);
+  if (!free.length || busy) return;
+  var idx = free[(Math.random() * free.length) | 0];
+  busy = true;
+  SB.toast("🐿️ Your companion dug a tile for you!");
+  // the squirrel hops from the edge of the patch to the tile it turns over
+  var tile = $('.tile[data-i="' + idx + '"]'), fr = $("#forest").getBoundingClientRect();
+  var sq = document.createElement("div");
+  sq.className = "squirrel"; sq.textContent = "🐿️";
+  sq.style.left = (fr.left + 6) + "px"; sq.style.top = (fr.bottom - 30) + "px";
+  document.body.appendChild(sq);
+  var tr = tile.getBoundingClientRect();
+  requestAnimationFrame(function () { requestAnimationFrame(function () {
+    sq.style.left = (tr.left + tr.width / 2 - 13) + "px";
+    sq.style.top = (tr.top - 6) + "px";
+  }); });
+  setTimeout(function () { sq.remove(); }, 900);
+  digTile(idx, 620).then(function () {
+    S.save(); busy = false; renderAll();
+    if (remaining() === 0) setTimeout(patchClear, 420);
+  });
+}
+function tick() {
+  var now = Date.now();
+  // free ticket regen
+  if (st.tickets < TICKET_CAP) {
+    if (now >= st.nextTicket) {
+      st.tickets++; st.nextTicket = now + REGEN_MS; S.save();
+      renderRes(); SB.toast("🎫 Free ticket added (1 per 20 min)");
+    }
+    var l = Math.max(0, st.nextTicket - now);
+    $("#regen").textContent = "+1 free in " + Math.floor(l / 60000) + ":" + String(Math.floor(l % 60000 / 1000)).padStart(2, "0");
+  } else { st.nextTicket = now + REGEN_MS; $("#regen").textContent = "banked (max " + TICKET_CAP + ")"; }
+  // squirrel companion
+  if (st.pass) {
+    if (now >= st.nextSquirrel) { st.nextSquirrel = now + SQUIRREL_MS; S.save(); squirrelDig(); }
+  } else st.nextSquirrel = now + SQUIRREL_MS;
+  // event countdown (virtual 4 days)
+  var left = Math.max(0, st.endTs - now), v = left * VIRT;
+  var d = Math.floor(v / 864e5), h = Math.floor(v % 864e5 / 36e5), mn = Math.floor(v % 36e5 / 6e4);
+  $("#cd").textContent = d > 0 ? d + "d " + h + "h" : h + "h " + String(mn).padStart(2, "0") + "m";
+  document.querySelector(".sb-timer-chip").classList.toggle("urgent", left < EVENT_MS / 4);
+  if (left <= 0) {
+    st.endTs = now + EVENT_MS; S.save();
+    var m = SB.modal("<h3>🍂 Forage window closed</h3><p style='font-size:12.5px;line-height:1.55'>Chestnut Dig runs 4 days every 2 weeks. " +
+      "Your patch, pity meter and basket are saved for the next window.</p>" +
+      '<button class="sb-btn sb-btn-blue sb-btn-block" id="evOk">See you in 2 weeks</button>');
+    m.el.querySelector("#evOk").addEventListener("click", function () { m.close(); });
+  }
+}
+setInterval(tick, 500);
+
+/* ================= info ================= */
+$("#infoBtn").addEventListener("click", function () {
+  var c = COMP[tierOf(st.patch)];
+  var m = SB.modal("<h3>ⓘ Chestnut Dig</h3>" +
+    '<div class="mleft">' +
+    "<b>Every dig is earned by playing</b><br>▶ Level clear = <b>+1 🎫 Dig Ticket</b>.<br>🔥 Hard clear = <b>+1 ✚ Power Dig</b> (clears a 3-tile cross).<br>" +
+    "Plus 1 free ticket every 20 min, up to " + TICKET_CAP + " banked.<br><br>" +
+    "<b>The odds table is the tile list</b><br>A patch is 36 face-down tiles in the exact mix shown on screen (" +
+    c.grand + " hoard · " + c.gold + " golden · " + c.acorn + " caches · " + c.nut + " chestnuts · " + c.dud + " empty). " +
+    "Nothing re-rolls behind the scenes — so the live 'still buried' line is your true remaining chance.<br><br>" +
+    "<b>Pity is free and always on</b><br>If " + (PITY - 1) + " digs pass with no golden chestnut, your " + PITY + "th is upgraded to one — guaranteed. " +
+    "The meter carries across patches and counts <i>every</i> tile: free, regenerated, power-dug, squirrel-dug or purchased.<br><br>" +
+    "<b>Bundles buy digs, never odds</b><br>No pack, pass or price improves a tile's chance. The free path reaches every reward, including the Golden Squirrel hoard.<br><br>" +
+    "<b>Clearing a patch</b><br>All 36 tiles = season bonus + a deeper patch with a new, published table. Endless.<br><br>" +
+    "<i>Demo timers: 4 days runs in 8 minutes; ticket regen 20 min → " + Math.round(REGEN_MS / 1000) + "s; squirrel 2h → " + Math.round(SQUIRREL_MS / 1000) + "s.</i>" +
+    "</div><button class='sb-btn sb-btn-blue sb-btn-block' style='margin-top:12px' id='iOk'>Got it</button>");
+  m.el.querySelector("#iOk").addEventListener("click", function () { m.close(); });
+});
+
+/* ================= scenery: canopy clumps + falling leaves ================= */
+(function canopy() {
+  // three depth rows of leaf clumps: dark green behind, autumn tones in front
+  var rows = [
+    // ragged bottom edge of the canopy mass
+    { n:24, r:[17,25], y:[6,15], cols:[["#245012","#14300a"],["#1e4213","#132c09"],["#2a5418","#173209"]] },
+    // texture inside the mass
+    { n:20, r:[13,20], y:[-2,7], cols:[["#3d6b22","#20440f"],["#a33f12","#6b2708"],["#31601c","#1a3a10"]] },
+    // sunlit autumn highlights on top
+    { n:16, r:[10,16], y:[-6,4], cols:[["#c25a1e","#7d3208"],["#e0a02c","#a3660f"],["#5c8f33","#2f5c1e"],["#b8611f","#7a3d10"]] }
+  ];
+  var h = '<div class="branch"></div>';
+  rows.forEach(function (row, ri) {
+    for (var i = 0; i < row.n; i++) {
+      var d = row.r[0] + Math.random() * (row.r[1] - row.r[0]);
+      var x = (i + Math.random() * 0.55) * (100 / row.n) - 4;
+      var y = row.y[0] + Math.random() * (row.y[1] - row.y[0]);
+      var c = row.cols[(Math.random() * row.cols.length) | 0];
+      h += '<i class="cl" style="left:' + x.toFixed(1) + "%;top:" + y.toFixed(1) + "px;width:" + d.toFixed(0) + "px;height:" + d.toFixed(0) +
+        "px;z-index:" + ri + ";background:radial-gradient(circle at 36% 30%," + c[0] + " 0%," + c[0] + " 46%," + c[1] + " 100%);" +
+        "transform:rotate(" + ((Math.random() * 60 - 30) | 0) + 'deg)"></i>';
+    }
+  });
+  h += '<span class="hang" style="left:23%;top:26px;z-index:4">🍁</span>' +
+       '<span class="hang" style="left:69%;top:28px;animation-duration:4.4s;animation-direction:reverse;z-index:4">🍂</span>';
+  $("#canopy").innerHTML = h;
+})();
+(function leaves() {
+  var f = $("#forest"), bits = ["🍂", "🍁", "🍃"], h = "";
+  for (var i = 0; i < 9; i++) {
+    h += '<span class="lf" style="left:' + (4 + i * 11) + "%;animation-duration:" + (6 + Math.random() * 6).toFixed(1) +
+      "s;animation-delay:-" + (Math.random() * 8).toFixed(1) + 's;font-size:' + (11 + Math.random() * 5).toFixed(0) + 'px">' +
+      bits[i % bits.length] + "</span>";
+  }
+  f.insertAdjacentHTML("beforeend", h);
+})();
+
+buildTiles(); renderAll(); tick();
+
+/* ================= test hooks ================= */
+// usePity=false → raw published-table draw. usePity=true → live game path.
+// fixedPatch pins the tier so a single published table can be verified exactly.
+function simulate(n, usePity, fixedPatch) {
+  var patch = fixedPatch || 1;
+  var s = { grid: buildGrid(patch), pity: 0 }, dug = 0;
+  var counts = { grand:0, gold:0, acorn:0, nut:0, dud:0 };
+  var forced = 0, since = 0, maxGap = 0, patches = 0;
+  for (var i = 0; i < n; i++) {
+    if (dug >= SIZE) { patches++; if (!fixedPatch) patch++; s.grid = buildGrid(patch); dug = 0; }
+    var out;
+    if (usePity === false) out = s.grid[dug];
+    else { var r = resolveTile(s, dug); out = r.out; if (r.forced) forced++; }
+    counts[out]++;
+    since++;
+    if (out === "gold" || out === "grand") { if (since > maxGap) maxGap = since; since = 0; }
+    dug++;
+  }
+  var pct = {};
+  ORDER.forEach(function (k) { pct[k] = +(counts[k] / n * 100).toFixed(4); });
+  return { n:n, tier:tierOf(patch), pity:usePity !== false, counts:counts, pct:pct,
+    maxDigsBetweenRares:maxGap, forcedByPity:forced, patchesCleared:patches,
+    rarePct:+((counts.gold + counts.grand) / n * 100).toFixed(4) };
+}
+function simulateGaps(n, fixedPatch) { return simulate(n, true, fixedPatch); }
+window.__dig = { st:st, S:S, COMP:COMP, PITY:PITY, buildGrid:buildGrid, resolveTile:resolveTile,
+  simulate:simulate, simulateGaps:simulateGaps, renderAll:renderAll, buildTiles:buildTiles,
+  digTile:digTile, patchClear:patchClear, outOfTickets:outOfTickets, play:play };
+})();
+</script>
+</body>
+</html>

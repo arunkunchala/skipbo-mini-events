@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Skip-Bo · Harvest Festival</title>
+<link rel="stylesheet" href="../shared/core.css">
+<style>
+/* ================= banner ================= */
+.fb-banner{position:relative;border-radius:var(--sb-radius);padding:12px 12px 10px;color:#fff;overflow:hidden;background:linear-gradient(160deg,#8a4a12 0%,#c8791f 50%,#e0a531 100%);border:2px solid rgba(255,199,44,.55);box-shadow:var(--sb-shadow);}
+.fb-banner::before{content:"🍂";position:absolute;right:-6px;top:-16px;font-size:80px;opacity:.2;transform:rotate(16deg);}
+.fb-banner h2{margin:0;font-size:19px;text-shadow:0 2px 0 rgba(0,0,0,.3);}
+.fb-banner .fb-sub{font-size:11.5px;color:#ffeccd;font-weight:700;margin-top:2px;}
+.fb-toprow{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.fb-banner h2,.fb-banner .fb-sub{padding-right:48px;}
+.fb-info{position:absolute;top:9px;right:9px;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.16);color:#fff;font-weight:900;font-size:17px;cursor:pointer;z-index:2;}
+
+/* ================= scene stage ================= */
+#fb-scene-wrap{margin-top:10px;border-radius:var(--sb-radius);overflow:hidden;box-shadow:var(--sb-shadow);border:2px solid rgba(255,199,44,.5);position:relative;}
+#fb-stage{width:360px;height:240px;position:relative;transform-origin:0 0;overflow:hidden;background:linear-gradient(180deg,#3f8fd8 0%,#7fbbe8 24%,#c7e0ef 38%,#ffdcae 48%,#ffbf7d 57%,#ffab5f 100%);transition:filter 1.2s ease;}
+#fb-stage.dusk{background:linear-gradient(180deg,#16244f 0%,#3c3a76 34%,#8a4d7a 58%,#e0724a 80%,#f2a25c 100%);}
+#fb-stage *{position:absolute;}
+.fb-el{opacity:0;pointer-events:none;}
+.fb-el.on{opacity:1;}
+
+/* sky furniture */
+.fb-sun{left:290px;top:24px;width:42px;height:42px;border-radius:50%;z-index:2;background:radial-gradient(circle at 40% 38%,#fff8d8,#ffd75e 55%,#ffb43c 100%);box-shadow:0 0 26px 10px rgba(255,214,110,.55);transition:all 1.2s ease;}
+.dusk .fb-sun{top:150px;opacity:.55;background:radial-gradient(circle at 40% 38%,#ffe7c0,#ff9a4d 60%,#e2603a 100%);box-shadow:0 0 22px 8px rgba(255,140,70,.4);}
+.fb-star{width:2px;height:2px;border-radius:50%;background:#fff;z-index:2;opacity:0;transition:opacity 1.4s ease;}
+.dusk .fb-star{opacity:.9;animation:fbTwinkle 3s infinite;}
+@keyframes fbTwinkle{0%,100%{opacity:.85;}50%{opacity:.25;}}
+.fb-cloud{z-index:3;background:#fff;border-radius:999px;opacity:.85;filter:blur(.2px);}
+.fb-cloud::before,.fb-cloud::after{content:"";position:absolute;background:#fff;border-radius:50%;}
+.fb-cloud.c1{width:56px;height:15px;top:34px;animation:fbDrift 46s linear infinite;}
+.fb-cloud.c1::before{width:24px;height:24px;left:9px;top:-11px;}
+.fb-cloud.c1::after{width:17px;height:17px;left:31px;top:-8px;}
+.fb-cloud.c2{width:40px;height:11px;top:62px;opacity:.7;animation:fbDrift 68s linear infinite;animation-delay:-22s;}
+.fb-cloud.c2::before{width:18px;height:18px;left:7px;top:-8px;}
+.fb-cloud.c3{width:70px;height:16px;top:16px;opacity:.55;animation:fbDrift 88s linear infinite;animation-delay:-54s;}
+.fb-cloud.c3::before{width:28px;height:28px;left:14px;top:-13px;}
+.fb-cloud.c3::after{width:20px;height:20px;left:42px;top:-9px;}
+@keyframes fbDrift{from{left:-90px;}to{left:370px;}}
+.dusk .fb-cloud{opacity:.35;background:#c8b3d8;}
+.dusk .fb-cloud::before,.dusk .fb-cloud::after{background:#c8b3d8;}
+.fb-bird{width:12px;height:5px;z-index:3;opacity:.4;animation:fbDrift 60s linear infinite;}
+.fb-bird::before,.fb-bird::after{content:"";position:absolute;top:0;width:7px;height:5px;border-top:1.5px solid #33425e;border-radius:50% 50% 0 0;}
+.fb-bird::before{left:0;transform:rotate(-12deg);}
+.fb-bird::after{right:0;transform:rotate(12deg);}
+.fb-leaf{font-size:11px;z-index:6;opacity:0;animation:fbLeaf 13s linear infinite;}
+@keyframes fbLeaf{0%{transform:translate(0,0) rotate(0);opacity:0;}
+  12%{opacity:.95;}88%{opacity:.9;}100%{transform:translate(-78px,132px) rotate(340deg);opacity:0;}}
+
+/* hills + ground */
+.fb-hill{border-radius:50% 50% 0 0;z-index:4;}
+.fb-hill.h1{left:-40px;bottom:52px;width:230px;height:78px;background:linear-gradient(180deg,#a8bc63,#7f9b45);}
+.fb-hill.h2{left:150px;bottom:54px;width:260px;height:64px;background:linear-gradient(180deg,#bccc78,#93a851);}
+.dusk .fb-hill.h1{background:linear-gradient(180deg,#3f5a52,#2c4340);}
+.dusk .fb-hill.h2{background:linear-gradient(180deg,#4a6357,#334a44);}
+.fb-ground{left:0;bottom:0;width:360px;height:64px;z-index:5;background:linear-gradient(180deg,#96b249 0%,#749235 45%,#5c7a2a 100%);}
+.fb-ground::after{content:"";position:absolute;inset:0;opacity:.35;background:repeating-linear-gradient(96deg,rgba(255,255,255,.12) 0 2px,transparent 2px 9px);}
+.dusk .fb-ground{background:linear-gradient(180deg,#3d5c35 0%,#2f4a2a 45%,#243c21 100%);}
+
+/* ---- 1. plowed field ---- */
+#fb-m1{left:0;bottom:0;width:150px;height:64px;z-index:6;clip-path:polygon(0 14%,58% 0,100% 44%,84% 100%,0 100%);background:repeating-linear-gradient(84deg,#8a5a2e 0 5px,#6d4522 5px 9px,#a06d38 9px 13px);box-shadow:inset 0 6px 10px rgba(0,0,0,.18);transform-origin:0 100%;}
+#fb-m1.on{animation:fbGrow .7s cubic-bezier(.34,1.56,.64,1);}
+.fb-crop{font-size:12px;z-index:7;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));}
+.fb-sprout{width:3px;height:7px;background:#5ea52f;border-radius:2px 2px 0 0;z-index:7;}
+
+/* ---- 2. barn + silo ---- */
+#fb-m2{left:10px;bottom:60px;width:120px;height:74px;z-index:9;transform-origin:50% 100%;}
+#fb-m2.on{animation:fbRaise .75s cubic-bezier(.34,1.56,.64,1);}
+.fb-barn-body{left:0;bottom:0;width:80px;height:36px;border-radius:2px;background:linear-gradient(180deg,#e05744 0%,#c33a2c 45%,#992418 100%);box-shadow:inset -8px 0 12px rgba(0,0,0,.2);}
+.fb-barn-roof{left:-5px;bottom:34px;width:90px;height:28px;background:linear-gradient(180deg,#a8291c,#7d1a11);clip-path:polygon(50% 0,86% 38%,100% 100%,0 100%,14% 38%);}
+.fb-barn-roof::after{content:"";position:absolute;left:50%;top:-2px;width:3px;height:6px;background:#fdf6e3;transform:translateX(-50%);}
+.fb-barn-door{left:29px;bottom:0;width:24px;height:24px;background:#8e2016;border:2px solid #fdf6e3;border-bottom:none;border-radius:2px 2px 0 0;overflow:hidden;}
+.fb-barn-door::before,.fb-barn-door::after{content:"";position:absolute;left:-4px;top:10px;width:32px;height:2.5px;background:#fdf6e3;}
+.fb-barn-door::before{transform:rotate(38deg);}
+.fb-barn-door::after{transform:rotate(-38deg);}
+.fb-barn-win{width:11px;height:9px;background:#ffd75e;border:1.5px solid #fdf6e3;border-radius:2px;box-shadow:0 0 0 0 rgba(255,215,94,0);transition:box-shadow .6s;}
+.fb-barn-win.w1{left:11px;bottom:20px;}
+.fb-barn-win.w2{left:58px;bottom:20px;}
+.fb-barn-win.w3{left:36px;bottom:36px;width:9px;height:8px;}
+.dusk .fb-barn-win{box-shadow:0 0 9px 2px rgba(255,215,94,.8);}
+.fb-silo{left:84px;bottom:0;width:22px;height:56px;border-radius:3px;background:linear-gradient(90deg,#a99e88 0%,#efe9d8 38%,#f7f3e6 52%,#b8ac95 100%);}
+.fb-silo::before{content:"";position:absolute;left:-2px;top:-9px;width:26px;height:14px;border-radius:50% 50% 0 0;background:linear-gradient(90deg,#7f6f56,#cbbfa4 45%,#8a7a60);}
+.fb-silo::after{content:"";position:absolute;inset:0;border-radius:3px;opacity:.5;background:repeating-linear-gradient(180deg,transparent 0 7px,rgba(0,0,0,.16) 7px 8px);}
+
+/* ---- 3. windmill ---- */
+#fb-m3{left:288px;bottom:56px;width:70px;height:104px;z-index:9;transform-origin:50% 100%;}
+#fb-m3.on{animation:fbRaise .75s cubic-bezier(.34,1.56,.64,1);}
+.fb-mill-tower{left:15px;bottom:0;width:40px;height:72px;clip-path:polygon(32% 0,68% 0,88% 100%,12% 100%);background:linear-gradient(90deg,#8d7a5c 0%,#e6dcc2 40%,#f3ecd8 55%,#a08c6a 100%);}
+.fb-mill-tower::after{content:"";position:absolute;inset:0;opacity:.45;background:repeating-linear-gradient(180deg,transparent 0 9px,rgba(0,0,0,.15) 9px 10px);}
+.fb-mill-cap{left:24px;bottom:68px;width:22px;height:11px;border-radius:50% 50% 0 0;background:linear-gradient(180deg,#c1382a,#8c2118);}
+.fb-mill-door{left:29px;bottom:0;width:12px;height:16px;background:#6d5a3c;border-radius:2px 2px 0 0;}
+.fb-mill-blades{left:0;bottom:44px;width:70px;height:70px;animation:fbSpin 7s linear infinite;}
+.fb-blade{left:50%;top:50%;width:7px;height:31px;margin-left:-3.5px;margin-top:-31px;transform-origin:50% 100%;border-radius:2px 2px 0 0;background:linear-gradient(180deg,#fffdf3 0%,#e6d9b6 100%);border:1px solid #a08c6a;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.fb-blade:nth-child(1){transform:rotate(0deg);}
+.fb-blade:nth-child(2){transform:rotate(90deg);}
+.fb-blade:nth-child(3){transform:rotate(180deg);}
+.fb-blade:nth-child(4){transform:rotate(270deg);}
+.fb-mill-hub{left:50%;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#7d1a11;border:1.5px solid #fdf6e3;}
+@keyframes fbSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* ---- 4. orchard ---- */
+#fb-m4{left:0;bottom:0;width:360px;height:240px;z-index:8;}
+.fb-tree{transform-origin:50% 100%;}
+.fb-tree .tr{left:50%;bottom:0;width:5px;height:12px;margin-left:-2.5px;border-radius:2px;background:linear-gradient(90deg,#6b4423,#8f5c2e 50%,#5c3a1d);}
+.fb-tree .cn{left:50%;bottom:9px;width:28px;height:25px;margin-left:-14px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#f2b845 0%,#e08a2c 45%,#b8541c 100%);box-shadow:inset -4px -4px 7px rgba(0,0,0,.18);}
+.fb-tree .cn::after{content:"";position:absolute;left:5px;top:6px;width:4px;height:4px;border-radius:50%;background:#d7263d;box-shadow:10px 3px 0 #d7263d,5px 11px 0 #d7263d,15px 10px 0 #c11f34;}
+.fb-tree.t2 .cn{background:radial-gradient(circle at 34% 30%,#e8d05a 0%,#c9962c 45%,#96601b 100%);}
+.fb-tree.t3 .cn{background:radial-gradient(circle at 34% 30%,#e8845a 0%,#c9502c 48%,#8d2f18 100%);}
+.fb-tree.small .cn{width:22px;height:20px;margin-left:-11px;bottom:8px;}
+.fb-tree.small .cn::after{left:4px;top:5px;width:3px;height:3px;box-shadow:8px 3px 0 #d7263d,4px 9px 0 #d7263d,12px 8px 0 #c11f34;}
+.fb-tree.small .tr{height:10px;width:4px;margin-left:-2px;}
+#fb-m4.on .fb-tree{animation:fbPop .6s cubic-bezier(.34,1.56,.64,1) backwards;}
+#fb-m4.on .fb-tree.t2{animation-delay:.12s;}
+#fb-m4.on .fb-tree.t3{animation-delay:.24s;}
+
+/* ---- 5. hay bales + fence ---- */
+#fb-m5{left:0;bottom:0;width:360px;height:70px;z-index:12;}
+#fb-m5.on{animation:fbFadeUp .6s ease backwards;}
+.fb-fence{left:0;bottom:6px;width:360px;height:26px;}
+.fb-fence .post{bottom:0;width:5px;height:26px;border-radius:1px;background:linear-gradient(90deg,#8a6a44,#c9a875 45%,#7a5a38);}
+.fb-fence .rail{left:0;width:360px;height:5px;border-radius:2px;background:linear-gradient(180deg,#d0b083,#9c7c50);box-shadow:0 1px 2px rgba(0,0,0,.25);}
+.fb-fence .rail.r1{bottom:17px;}
+.fb-fence .rail.r2{bottom:6px;}
+.fb-bale{border-radius:50%;background:radial-gradient(circle at 36% 32%,#f7d786 0%,#e3b452 45%,#b98a2c 100%);border:1.5px solid #a97c26;box-shadow:0 2px 4px rgba(0,0,0,.28);}
+.fb-bale::before{content:"";position:absolute;inset:5px;border-radius:50%;border:1.5px dashed rgba(140,96,26,.55);}
+.fb-bale::after{content:"";position:absolute;inset:11px;border-radius:50%;border:1.5px solid rgba(140,96,26,.4);}
+
+/* ---- 6. festival stage + bunting ---- */
+#fb-m6{left:0;bottom:0;width:360px;height:110px;z-index:13;transform-origin:60% 100%;}
+#fb-m6.on{animation:fbRaise .7s cubic-bezier(.34,1.56,.64,1);}
+.fb-stg-plat{left:200px;bottom:26px;width:96px;height:12px;border-radius:2px;background:linear-gradient(180deg,#c9a06a,#8b6535);box-shadow:0 2px 3px rgba(0,0,0,.3);}
+.fb-stg-plat::after{content:"";position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(0,0,0,.22) 11px 12px);}
+.fb-stg-post{bottom:36px;width:4px;height:24px;background:linear-gradient(90deg,#8b6535,#c9a06a);}
+.fb-stg-post.p1{left:206px;}
+.fb-stg-post.p2{left:288px;}
+.fb-stg-awn{left:196px;bottom:58px;width:104px;height:20px;clip-path:polygon(6% 0,94% 0,100% 78%,92% 100%,84% 78%,76% 100%,68% 78%,60% 100%,52% 78%,44% 100%,36% 78%,28% 100%,20% 78%,12% 100%,4% 78%,0 78%);background:repeating-linear-gradient(90deg,#d7263d 0 10px,#fdf6e3 10px 20px);box-shadow:0 2px 4px rgba(0,0,0,.25);}
+.fb-stg-sign{left:216px;bottom:50px;width:64px;height:12px;border-radius:3px;background:#fdf6e3;border:1.5px solid #b8541c;font-size:7px;font-weight:900;letter-spacing:.6px;color:#a8291c;text-align:center;line-height:10px;}
+.fb-stg-act{bottom:38px;font-size:11px;}
+.fb-flag{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:11px solid #d7263d;transform-origin:50% 0;animation:fbFlutter 2.6s ease-in-out infinite;}
+@keyframes fbFlutter{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
+
+/* ---- 7. string lights ---- */
+#fb-m7{left:0;top:0;width:360px;height:120px;z-index:20;}
+#fb-m7.on{animation:fbFade .8s ease backwards;}
+.fb-wire{background:#4a3a2a;height:2px;border-radius:2px;opacity:.55;transform-origin:0 50%;}
+.fb-bulb{width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c8,#ffd75e 60%,#f0a92c);box-shadow:0 0 6px 2px rgba(255,215,94,.5);animation:fbGlow 2.4s ease-in-out infinite;}
+.dusk .fb-bulb{box-shadow:0 0 12px 5px rgba(255,214,110,.75);}
+@keyframes fbGlow{0%,100%{filter:brightness(1);}50%{filter:brightness(1.55);}}
+
+/* ---- 8. ferris wheel ---- */
+#fb-m8{left:134px;bottom:52px;width:94px;height:128px;z-index:10;transform-origin:50% 100%;}
+#fb-m8.on{animation:fbRaise .9s cubic-bezier(.34,1.56,.64,1);}
+.fb-fw-leg{bottom:0;width:7px;height:56px;background:linear-gradient(90deg,#4d5a72,#98a7bf 45%,#5c6a82);border-radius:2px;}
+.fb-fw-leg.l1{left:38px;transform:rotate(12deg);transform-origin:50% 100%;}
+.fb-fw-leg.l2{left:50px;transform:rotate(-12deg);transform-origin:50% 100%;}
+.fb-fw-base{left:24px;bottom:-2px;width:46px;height:7px;border-radius:3px;background:linear-gradient(180deg,#7b8aa2,#414d63);}
+.fb-fw-wheel{left:1px;bottom:48px;width:92px;height:92px;animation:fbSpin 16s linear infinite;}
+.fb-fw-rim{inset:0;border-radius:50%;border:4px solid #f4e6bd;box-shadow:0 0 0 2px rgba(0,0,0,.12),inset 0 0 12px rgba(0,0,0,.15);}
+.fb-fw-rim::after{content:"";position:absolute;inset:9px;border-radius:50%;border:2px solid rgba(244,230,189,.6);}
+.fb-fw-spoke{left:50%;top:50%;width:2px;height:92px;margin:-46px 0 0 -1px;background:linear-gradient(180deg,#fdf6e3,rgba(253,246,227,.45));transform-origin:50% 50%;}
+.fb-fw-hub{left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a8,#e0a531);border:2px solid #a8791c;}
+.fb-gond{width:14px;height:11px;margin:-5.5px 0 0 -7px;border-radius:3px 3px 6px 6px;border:1.5px solid rgba(0,0,0,.25);box-shadow:0 1px 2px rgba(0,0,0,.3);animation:fbSpinBack 16s linear infinite;}
+.fb-gond::before{content:"";position:absolute;left:50%;top:-5px;width:1.5px;height:5px;background:#8a7a60;transform:translateX(-50%);}
+@keyframes fbSpinBack{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
+.dusk .fb-fw-rim{box-shadow:0 0 10px 2px rgba(255,214,110,.55),inset 0 0 12px rgba(0,0,0,.2);}
+
+/* ---- plaque + fireworks ---- */
+.fb-plaque{left:6px;bottom:4px;z-index:26;background:linear-gradient(180deg,#fff6d8,#ffd75e);border:1.5px solid #a8791c;border-radius:7px;padding:2px 7px;font-size:7.5px;font-weight:900;color:#7d4a10;white-space:nowrap;letter-spacing:.3px;box-shadow:0 2px 6px rgba(0,0,0,.4);animation:fbPop .6s cubic-bezier(.34,1.56,.64,1);}
+.fb-fw{width:6px;height:6px;border-radius:50%;z-index:22;pointer-events:none;}
+@keyframes fbBurst{0%{transform:scale(.2);opacity:1;}70%{opacity:1;}100%{transform:scale(1);opacity:0;}}
+
+/* ---- reveal keyframes ---- */
+@keyframes fbGrow{from{transform:scaleY(.1);opacity:0;}to{transform:scaleY(1);opacity:1;}}
+@keyframes fbRaise{0%{transform:translateY(34px) scale(.72);opacity:0;}60%{opacity:1;}100%{transform:translateY(0) scale(1);opacity:1;}}
+@keyframes fbPop{0%{transform:scale(.2);opacity:0;}70%{transform:scale(1.14);opacity:1;}100%{transform:scale(1);opacity:1;}}
+@keyframes fbFadeUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+@keyframes fbFade{from{opacity:0;}to{opacity:1;}}
+.fb-dust{z-index:24;font-size:16px;pointer-events:none;animation:fbDust .8s ease-out forwards;}
+@keyframes fbDust{0%{transform:translateY(0) scale(.6);opacity:1;}100%{transform:translateY(-34px) scale(1.5);opacity:0;}}
+
+/* ================= HUD ================= */
+.fb-hud{margin-top:10px;background:rgba(0,0,0,.28);border-radius:14px;padding:9px 11px;color:#fff;}
+.fb-hudtop{display:flex;align-items:center;gap:8px;}
+.fb-planks{font-size:22px;font-weight:900;color:var(--sb-yellow);text-shadow:0 2px 0 rgba(0,0,0,.35);white-space:nowrap;}
+.fb-planks small{font-size:10px;color:#d9e6f8;letter-spacing:.5px;}
+.fb-nextlbl{margin-left:auto;text-align:right;font-size:11px;font-weight:800;color:#d9e6f8;line-height:1.25;}
+.fb-nextlbl b{color:#fff;font-size:12.5px;display:block;}
+.fb-bar{margin-top:7px;height:13px;border-radius:999px;background:rgba(0,0,0,.4);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.5);}
+.fb-bar i{display:block;height:100%;border-radius:999px;width:0;transition:width .5s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,#ffd95e,var(--sb-yellow) 60%,#e0a400);}
+.fb-help{margin-top:6px;font-size:11px;font-weight:800;color:#ffe6a8;text-align:center;}
+
+/* ================= build + play ================= */
+.fb-actions{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
+.fb-actions .sb-btn{flex-direction:column;gap:1px;padding:9px 14px;line-height:1.15;}
+.fb-buildbtn{position:relative;background:linear-gradient(180deg,#ffb04d 0%,#e07b1f 55%,#a8520f 100%)!important;}
+.fb-buildbtn.ready{animation:sbPulse 1.3s infinite;}
+.fb-b-sub{display:block;font-size:10.5px;font-weight:800;opacity:.9;}
+.fb-hardbtn{position:relative;background:linear-gradient(180deg,#ff8a5c 0%,#D7263D 55%,#8f1024 100%)!important;}
+.fb-hardbtn::after{content:"2× PLANKS";position:absolute;top:-8px;right:10px;background:var(--sb-yellow);color:var(--sb-ink);font-size:9px;font-weight:900;letter-spacing:.5px;padding:2px 8px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.3);}
+
+/* ================= offers ================= */
+.fb-short{margin-top:10px;border-radius:14px;padding:10px 11px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#a8291c,#e07b1f);border:2px solid var(--sb-yellow);box-shadow:var(--sb-shadow);animation:fbFadeUp .4s ease;}
+.fb-short h4{margin:0 0 3px;font-size:14px;}
+.fb-short p{margin:0 0 8px;font-size:11.5px;font-weight:700;color:#ffe6c4;}
+.fb-short .fb-orfree{display:block;margin-top:7px;font-size:11px;font-weight:800;color:#c8f0cf;text-align:center;}
+.fb-offers{display:flex;gap:8px;margin-top:10px;}
+.fb-offer{flex:1;background:var(--sb-cream);border-radius:13px;padding:9px 8px;text-align:center;box-shadow:var(--sb-shadow);display:flex;flex-direction:column;align-items:center;gap:4px;}
+.fb-offer .em{font-size:20px;}
+.fb-offer .ti{font-size:11.5px;font-weight:900;color:var(--sb-ink);line-height:1.2;}
+.fb-offer .ds{font-size:10px;font-weight:700;color:#5a6b8c;line-height:1.25;}
+.fb-offer button{width:100%;min-height:44px;border:none;border-radius:10px;font-family:var(--sb-font);font-weight:900;font-size:12px;color:#fff;background:linear-gradient(180deg,#3fc167,var(--sb-green));box-shadow:0 2px 0 rgba(0,0,0,.2);cursor:pointer;margin-top:auto;}
+.fb-freenote{margin-top:8px;font-size:10.5px;font-weight:800;color:#c8f0cf;text-align:center;line-height:1.4;}
+
+/* ================= tabs ================= */
+.fb-tabs{display:flex;gap:6px;margin:12px 0 10px;background:rgba(0,0,0,.25);border-radius:14px;padding:4px;}
+.fb-tab{flex:1;min-height:44px;border:none;border-radius:11px;font-family:var(--sb-font);font-weight:900;font-size:13.5px;background:transparent;color:#f0dcc0;cursor:pointer;}
+.fb-tab.on{background:var(--sb-cream);color:var(--sb-ink);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.fb-tab .bdg{display:inline-block;min-width:17px;padding:1px 5px;border-radius:999px;background:var(--sb-red);color:#fff;font-size:10px;margin-left:3px;}
+
+/* ================= builder's pass track ================= */
+.fb-pass{border-radius:var(--sb-radius);padding:12px;margin-bottom:10px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#5a3b8f,#2c2454);border:2px solid rgba(255,199,44,.55);box-shadow:var(--sb-shadow);}
+.fb-pass h3{margin:0 0 2px;font-size:15px;}
+.fb-pass p{margin:0 0 9px;font-size:11.5px;color:#e0d2f5;font-weight:700;}
+.fb-pass .free-note{font-size:10.5px;color:#c3ecc9;font-weight:800;margin-top:8px;line-height:1.4;}
+.fb-track{background:rgba(253,246,227,.97);border-radius:var(--sb-radius);box-shadow:var(--sb-shadow);padding:4px 11px 10px;}
+.fb-lanehead{display:grid;grid-template-columns:52px 1fr 1fr;gap:7px;padding:8px 0 4px;font-size:9.5px;font-weight:900;letter-spacing:.4px;color:#5a6b8c;text-align:center;}
+.fb-lanehead .prem{color:#7b3fbd;}
+.fb-ms{display:grid;grid-template-columns:52px 1fr 1fr;gap:7px;align-items:center;padding:8px 0;border-top:1.5px solid rgba(27,42,74,.08);}
+.fb-node{width:48px;border-radius:11px;padding:4px 2px;text-align:center;background:#e6edf8;border:2px solid #c2d2e8;color:#5a6b8c;justify-self:center;}
+.fb-node .em{font-size:17px;display:block;line-height:1.1;}
+.fb-node small{display:block;font-size:8.5px;font-weight:900;letter-spacing:.2px;}
+.fb-node.hit{background:linear-gradient(180deg,#ffd95e,var(--sb-yellow));border-color:var(--sb-yellow-dark);color:#7d4a10;}
+.fb-node.now{border-color:var(--sb-green);background:#e6f6ea;color:#1f7038;animation:sbPulse 1.6s infinite;}
+.fb-cell{border-radius:11px;padding:5px;text-align:center;font-size:11px;font-weight:800;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#eef3fb;color:var(--sb-ink);}
+.fb-cell .rw{font-size:10.5px;line-height:1.3;}
+.fb-cell .rw .ico{font-size:12px;}
+.fb-cell.prem{background:linear-gradient(180deg,#f2e6ff,#e4d2fb);border:1.5px solid #cba0e8;}
+.fb-cell .claim{min-height:44px;min-width:74px;border:none;border-radius:9px;font-family:var(--sb-font);font-weight:900;font-size:11px;color:#fff;background:linear-gradient(180deg,#3fc167,var(--sb-green));cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.2);animation:sbPulse 1.4s infinite;}
+.fb-cell .lock{font-size:10.5px;color:#7b3fbd;font-weight:800;background:none;border:none;cursor:pointer;min-height:44px;font-family:var(--sb-font);}
+.fb-cell .done{color:var(--sb-green-dark);font-size:10.5px;}
+.fb-cell .todo{color:#8296b5;font-size:9.5px;}
+.fb-grandrow{display:flex;align-items:center;gap:9px;padding:10px 2px 4px;border-top:1.5px solid rgba(27,42,74,.08);font-size:11px;font-weight:800;color:var(--sb-ink);}
+.fb-grandrow .gf{width:44px;height:44px;flex:0 0 auto;border-radius:50%;background:radial-gradient(circle,#fff2c4,#ffd95e);display:grid;place-items:center;font-size:22px;border:2.5px solid var(--sb-yellow-dark);}
+
+/* ================= misc ================= */
+.fb-stats{display:flex;gap:6px;margin-top:12px;}
+.fb-stat{flex:1;background:rgba(0,0,0,.28);border-radius:12px;padding:8px 3px;text-align:center;color:#f0dcc0;font-size:9px;font-weight:800;letter-spacing:.3px;}
+.fb-stat b{display:block;font-size:16px;color:#fff;}
+.fb-recap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0;}
+.fb-retro{opacity:0;transform:translateY(10px) scale(.8);transition:all .4s cubic-bezier(.34,1.56,.64,1);}
+.fb-retro.in{opacity:1;transform:none;}
+.hidden{display:none!important;}
+@media (max-width:374px){.fb-cell{font-size:10px;}.fb-lanehead{font-size:9px;}.fb-offer .ti{font-size:11px;}}
+</style>
+</head>
+<body>
+<div class="sb-app">
+<div class="sb-main">
+
+  <div class="fb-banner">
+    <h2>🍁 Harvest Festival</h2>
+    <div class="fb-sub">Clear levels → earn 🪵 Planks → build the festival, piece by piece.</div>
+    <div class="fb-toprow">
+      <span class="sb-timer-chip">⏳ <span id="fb-timer">—</span></span>
+      <span class="sb-timer-chip" style="background:rgba(46,158,79,.9)">🛡️ Losses never cost Planks</span>
+      <button class="fb-info" id="fb-info" aria-label="Event rules">ⓘ</button>
+    </div>
+  </div>
+
+  <div id="fb-scene-wrap">
+    <div id="fb-stage">
+      <div class="fb-sun"></div>
+      <div class="fb-cloud c1"></div>
+      <div class="fb-cloud c2"></div>
+      <div class="fb-cloud c3"></div>
+      <div class="fb-hill h1"></div>
+      <div class="fb-hill h2"></div>
+      <div class="fb-ground"></div>
+
+      <div class="fb-el" id="fb-m1"></div>
+      <div class="fb-el" id="fb-m1x"></div>
+
+      <div class="fb-el" id="fb-m2">
+        <div class="fb-barn-roof"></div>
+        <div class="fb-barn-body"></div>
+        <div class="fb-barn-win w1"></div>
+        <div class="fb-barn-win w2"></div>
+        <div class="fb-barn-win w3"></div>
+        <div class="fb-barn-door"></div>
+        <div class="fb-silo"></div>
+      </div>
+
+      <div class="fb-el" id="fb-m3">
+        <div class="fb-mill-tower"></div>
+        <div class="fb-mill-door"></div>
+        <div class="fb-mill-cap"></div>
+        <div class="fb-mill-blades">
+          <div class="fb-blade"></div><div class="fb-blade"></div>
+          <div class="fb-blade"></div><div class="fb-blade"></div>
+          <div class="fb-mill-hub"></div>
+        </div>
+      </div>
+
+      <div class="fb-el" id="fb-m4">
+        <div class="fb-tree t1" style="left:232px;bottom:94px"><div class="cn"></div><div class="tr"></div></div>
+        <div class="fb-tree t2 small" style="left:258px;bottom:100px"><div class="cn"></div><div class="tr"></div></div>
+        <div class="fb-tree t3" style="left:284px;bottom:92px"><div class="cn"></div><div class="tr"></div></div>
+      </div>
+
+      <div class="fb-el" id="fb-m5">
+        <div class="fb-fence" id="fb-fence"><div class="rail r1"></div><div class="rail r2"></div></div>
+        <div class="fb-bale" style="left:300px;bottom:22px;width:32px;height:32px"></div>
+        <div class="fb-bale" style="left:332px;bottom:20px;width:22px;height:22px"></div>
+        <div class="fb-bale" style="left:14px;bottom:24px;width:26px;height:26px"></div>
+      </div>
+
+      <div class="fb-el" id="fb-m6">
+        <div class="fb-stg-awn"></div>
+        <div class="fb-stg-sign">HARVEST</div>
+        <div class="fb-stg-post p1"></div>
+        <div class="fb-stg-post p2"></div>
+        <div class="fb-stg-plat"></div>
+        <div class="fb-stg-act" style="left:228px">🎻</div>
+        <div class="fb-stg-act" style="left:264px">🪗</div>
+        <div class="fb-flag" style="left:206px;bottom:60px"></div>
+        <div class="fb-flag" style="left:290px;bottom:60px"></div>
+      </div>
+
+      <div class="fb-el" id="fb-m7"></div>
+
+      <div class="fb-el" id="fb-m8">
+        <div class="fb-fw-leg l1"></div>
+        <div class="fb-fw-leg l2"></div>
+        <div class="fb-fw-base"></div>
+        <div class="fb-fw-wheel" id="fb-fw-wheel"><div class="fb-fw-rim"></div><div class="fb-fw-hub"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fb-hud">
+    <div class="fb-hudtop">
+      <div class="fb-planks">🪵 <span id="fb-planks">0</span><small> PLANKS</small></div>
+      <div class="fb-nextlbl" id="fb-nextlbl"></div>
+    </div>
+    <div class="fb-bar"><i id="fb-bar"></i></div>
+    <div class="fb-help" id="fb-help"></div>
+  </div>
+
+  <div class="fb-actions">
+    <button class="sb-btn sb-btn-block fb-buildbtn" id="fb-build">🔨 Build</button>
+    <button class="sb-btn sb-btn-green sb-btn-block" id="fb-play">▶ Play level <span class="fb-b-sub">+3 🪵 per clear · +1 first try · ~78% win</span></button>
+    <button class="sb-btn sb-btn-block fb-hardbtn" id="fb-hard">🔥 Hard level <span class="fb-b-sub">+7 🪵 per clear · +1 first try · ~55% win</span></button>
+  </div>
+
+  <div id="fb-shortwrap"></div>
+
+  <div class="fb-offers">
+    <div class="fb-offer">
+      <span class="em">🪵</span>
+      <span class="ti">Plank Bundle</span>
+      <span class="ds">+40 Planks<br>≈ 13 level clears</span>
+      <button id="fb-buy-bundle">$1.99</button>
+    </div>
+    <div class="fb-offer">
+      <span class="em">⚡</span>
+      <span class="ti">Instant Build</span>
+      <span class="ds" id="fb-instant-ds">Finish current build now</span>
+      <button id="fb-buy-instant">$0.99</button>
+    </div>
+  </div>
+  <div class="fb-freenote">🆓 Every offer is optional — planks from level clears build the entire festival on their own.</div>
+
+  <div class="fb-tabs">
+    <button class="fb-tab on" data-tab="build">🏗️ Build Site</button>
+    <button class="fb-tab" data-tab="pass">🎫 Builder's Pass<span class="bdg hidden" id="fb-bdg">1</span></button>
+  </div>
+
+  <div id="fb-panel-build">
+    <div class="fb-stats">
+      <div class="fb-stat"><b id="fb-st-plays">0</b>LEVELS PLAYED</div>
+      <div class="fb-stat"><b id="fb-st-wins">0</b>CLEARS</div>
+      <div class="fb-stat"><b id="fb-st-hard">0</b>HARD CLEARS</div>
+      <div class="fb-stat"><b id="fb-st-planks">0</b>PLANKS EARNED</div>
+    </div>
+    <div class="fb-freenote" id="fb-pace"></div>
+  </div>
+
+  <div id="fb-panel-pass" class="hidden">
+    <div class="fb-pass" id="fb-passcard"></div>
+    <div class="fb-track">
+      <div class="fb-lanehead"><span>BUILD</span><span>FREE LANE</span><span class="prem">🎫 PASS LANE</span></div>
+      <div id="fb-ms-rows"></div>
+      <div class="fb-grandrow"><span class="gf">🎡</span>
+        <span><b>Festival Master trophy</b> lands when the Ferris Wheel turns — free lane, no purchase. The Pass only adds a bonus layer on top.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+<script src="../shared/core.js"></script>
+<script src="../shared/levelsim.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ================= config ================= */
+var EVENT_MS = 18*60*1000;   // "18 days" compressed to 18 min for the demo
+var PLANK = {normal:3, hard:7, firstTry:1};
+var BUNDLE = 40;
+
+var MILES = [
+  {cost:7,  em:"🌾", name:"Plowed Field",  el:"fb-m1", blurb:"Turn the soil and sow the first rows.",
+   free:[{type:"coins",amount:300}],
+   prem:[{type:"coins",amount:600},{type:"draw",amount:1}]},
+  {cost:11, em:"🏚️", name:"The Big Barn",  el:"fb-m2", blurb:"Raise the barn and the grain silo.",
+   free:[{type:"wild",amount:1}],
+   prem:[{type:"wild",amount:2},{type:"coins",amount:500}]},
+  {cost:16, em:"🌬️", name:"Windmill",      el:"fb-m3", blurb:"Sails turning in the autumn wind.",
+   free:[{type:"coins",amount:500},{type:"energy",amount:2}],
+   prem:[{type:"coins",amount:1000},{type:"energy",amount:4}]},
+  {cost:22, em:"🍎", name:"Apple Orchard", el:"fb-m4", blurb:"Three trees, heavy with fruit.",
+   free:[{type:"chest",amount:1}],
+   prem:[{type:"chest",amount:2},{type:"gem",amount:10}]},
+  {cost:28, em:"🌾", name:"Hay & Fences",  el:"fb-m5", blurb:"Bales stacked, fences up.",
+   free:[{type:"coins",amount:800},{type:"undo",amount:2}],
+   prem:[{type:"coins",amount:1600},{type:"undo",amount:4},{type:"gem",amount:10}]},
+  {cost:35, em:"🎪", name:"Festival Stage",el:"fb-m6", blurb:"Bunting, banner and a band.",
+   free:[{type:"energy",amount:3},{type:"gem",amount:10}],
+   prem:[{type:"energy",amount:6},{type:"gem",amount:25}]},
+  {cost:43, em:"💡", name:"String Lights", el:"fb-m7", blurb:"Dusk falls, the lights come on.",
+   free:[{type:"coins",amount:1200},{type:"wild",amount:2}],
+   prem:[{type:"coins",amount:2500},{type:"wild",amount:4},{type:"chest",amount:1}]},
+  {cost:53, em:"🎡", name:"Ferris Wheel",  el:"fb-m8", blurb:"The grand centerpiece — festival open!",
+   free:[{type:"coins",amount:5000},{type:"wild",amount:5},{type:"gem",amount:30},{type:"trophy",amount:1}],
+   prem:[{type:"coins",amount:10000},{type:"wild",amount:8},{type:"gem",amount:60},{type:"chest",amount:2}]}
+];
+var TOTAL_COST = MILES.reduce(function(a,m){return a+m.cost;},0);   // 215
+
+/* ================= state ================= */
+var st = SB.store("farm-buildup", {start:0,end:0,planks:0,built:0,pass:false,claimedPrem:[],
+  plays:0,wins:0,hardWins:0,earned:0,attempts:0,level:214,shortShown:false,extended:false});
+var d = st.data;
+if(!d.start){ d.start = Date.now(); d.end = d.start + EVENT_MS; }
+st.save();
+
+SB.init({title:"Harvest Festival", subtitle:"Farm Build-Up · Mini Event", resetKey:"farm-buildup"});
+
+function $(id){ return document.getElementById(id); }
+function wr(base){ if(window.__forceWin===true) return 1; if(window.__forceWin===false) return 0; return base; }
+function chips(list){ return list.map(SB.rewardChip).join(" "); }
+function done(){ return d.built >= MILES.length; }
+function cur(){ return done() ? null : MILES[d.built]; }
+function need(){ var m=cur(); return m ? Math.max(0, m.cost - d.planks) : 0; }
+function clearsToGo(){ return Math.ceil(need()/PLANK.normal); }
+
+/* ================= scene: generated pieces ================= */
+var stage = $("fb-stage");
+
+/* stars for the dusk sky */
+(function(){
+  for(var i=0;i<26;i++){
+    var s=document.createElement("div");
+    s.className="fb-star";
+    s.style.left=(6+Math.random()*348)+"px";
+    s.style.top=(4+Math.random()*96)+"px";
+    s.style.animationDelay=(Math.random()*3)+"s";
+    if(Math.random()<0.3){ s.style.width=s.style.height="3px"; }
+    stage.insertBefore(s, stage.firstChild.nextSibling);
+  }
+  var b=document.createElement("div");
+  b.className="fb-bird"; b.style.top="56px"; b.style.animationDuration="52s";
+  stage.appendChild(b);
+  [[300,26,0],[214,10,4.5],[130,34,9]].forEach(function(L){
+    var e=document.createElement("div");
+    e.className="fb-leaf"; e.textContent="🍂";
+    e.style.left=L[0]+"px"; e.style.top=L[1]+"px"; e.style.animationDelay=L[2]+"s";
+    stage.appendChild(e);
+  });
+})();
+
+/* field furrow decorations (pumpkins + sprouts) */
+(function(){
+  var host=$("fb-m1x");
+  host.style.cssText="left:0;bottom:0;width:150px;height:64px;z-index:7;";
+  var pumpkins=[[16,10],[46,4],[86,22]];
+  pumpkins.forEach(function(p){
+    var e=document.createElement("div");
+    e.className="fb-crop"; e.textContent="🎃";
+    e.style.left=p[0]+"px"; e.style.bottom=p[1]+"px";
+    host.appendChild(e);
+  });
+  for(var i=0;i<12;i++){
+    var s=document.createElement("div");
+    s.className="fb-sprout";
+    s.style.left=(8+Math.random()*120)+"px";
+    s.style.bottom=(4+Math.random()*40)+"px";
+    host.appendChild(s);
+  }
+})();
+
+/* fence posts */
+(function(){
+  var f=$("fb-fence");
+  for(var x=4;x<360;x+=28){
+    var p=document.createElement("div");
+    p.className="post"; p.style.left=x+"px";
+    f.appendChild(p);
+  }
+})();
+
+/* bunting over the festival stage */
+(function(){
+  var host=$("fb-m6");
+  var x0=194, x1=302, y0=98, sag=-14, n=11;
+  var cols=["#d7263d","#ffc72c","#2e9e4f","#3e8ede","#fdf6e3"];
+  [x0,x1].forEach(function(px){                       // poles the bunting hangs from
+    var pole=document.createElement("div");
+    pole.style.cssText="left:"+(px-1)+"px;bottom:60px;width:3px;height:42px;border-radius:2px;"+
+      "background:linear-gradient(90deg,#7a5a38,#c9a875 45%,#6d4f30);";
+    host.appendChild(pole);
+  });
+  for(var i=0;i<n;i++){
+    var t=i/(n-1);
+    var x=x0+(x1-x0)*t;
+    var y=y0+sag*Math.sin(Math.PI*t);
+    var tri=document.createElement("div");
+    tri.style.cssText="left:"+x+"px;bottom:"+y+"px;width:0;height:0;border-left:5px solid transparent;"+
+      "border-right:5px solid transparent;border-top:10px solid "+cols[i%cols.length]+";";
+    host.appendChild(tri);
+    var w=document.createElement("div");
+    w.className="fb-wire";
+    w.style.cssText="left:"+x+"px;bottom:"+(y+10)+"px;width:"+((x1-x0)/(n-1)+2)+"px;transform:rotate("+
+      (-Math.atan(sag*Math.PI*Math.cos(Math.PI*t)/(x1-x0))*180/Math.PI)+"deg);";
+    host.appendChild(w);
+  }
+})();
+
+/* string lights: two swags across the sky */
+(function(){
+  var host=$("fb-m7");
+  function swag(x0,x1,y0,y1,sag,n){
+    for(var i=0;i<n;i++){
+      var t=i/(n-1);
+      var x=x0+(x1-x0)*t;
+      var y=y0+(y1-y0)*t+sag*Math.sin(Math.PI*t);
+      if(i<n-1){
+        var t2=(i+1)/(n-1);
+        var nx=x0+(x1-x0)*t2, ny=y0+(y1-y0)*t2+sag*Math.sin(Math.PI*t2);
+        var w=document.createElement("div");
+        var len=Math.sqrt((nx-x)*(nx-x)+(ny-y)*(ny-y));
+        w.className="fb-wire";
+        w.style.cssText="left:"+x+"px;top:"+y+"px;width:"+len+"px;transform:rotate("+
+          (Math.atan2(ny-y,nx-x)*180/Math.PI)+"deg);";
+        host.appendChild(w);
+      }
+      var b=document.createElement("div");
+      b.className="fb-bulb";
+      b.style.cssText="left:"+(x-4)+"px;top:"+(y+2)+"px;animation-delay:"+(i*0.18)+"s;";
+      host.appendChild(b);
+    }
+  }
+  swag(-6,182,18,30,26,9);
+  swag(178,366,30,14,26,9);
+})();
+
+/* ferris wheel spokes + gondolas */
+(function(){
+  var w=$("fb-fw-wheel");
+  var n=8, R=42;
+  for(var i=0;i<n/2;i++){
+    var s=document.createElement("div");
+    s.className="fb-fw-spoke";
+    s.style.transform="rotate("+(i*180/(n/2))+"deg)";
+    w.appendChild(s);
+  }
+  var cols=["#d7263d","#ffc72c","#2e9e4f","#3e8ede","#f2a25c","#c05fd8","#fdf6e3","#ff8a5c"];
+  for(var j=0;j<n;j++){
+    var a=(j*2*Math.PI/n)-Math.PI/2;
+    var g=document.createElement("div");
+    g.className="fb-gond";
+    g.style.left=(46+R*Math.cos(a))+"px";
+    g.style.top=(46+R*Math.sin(a))+"px";
+    g.style.background="linear-gradient(180deg,"+cols[j]+",rgba(0,0,0,.25))";
+    w.appendChild(g);
+  }
+})();
+
+/* responsive scale: the scene is authored at 360x240 */
+function fitScene(){
+  var wrap=$("fb-scene-wrap");
+  var s=wrap.clientWidth/360;
+  stage.style.transform="scale("+s+")";
+  wrap.style.height=(240*s)+"px";
+}
+window.addEventListener("resize", fitScene);
+setTimeout(fitScene,0);
+
+/* ================= scene reveal ================= */
+function showBuilt(animate){
+  for(var i=0;i<MILES.length;i++){
+    var el=$(MILES[i].el);
+    if(i < d.built) el.classList.add("on"); else el.classList.remove("on");
+  }
+  $("fb-m1x").classList.toggle("on", d.built>=1);
+  stage.classList.toggle("dusk", d.built>=7);
+  var pl=$("fb-plaque");
+  if(done() && !pl){
+    var p=document.createElement("div");
+    p.className="fb-plaque"; p.id="fb-plaque";
+    p.textContent="🏆 FESTIVAL COMPLETE · HARVEST '25";
+    stage.appendChild(p);
+  }
+}
+
+function dustPuff(){
+  for(var i=0;i<5;i++){
+    (function(k){
+      setTimeout(function(){
+        var e=document.createElement("div");
+        e.className="fb-dust";
+        e.textContent = k%2 ? "💨" : "🔨";
+        e.style.left=(60+Math.random()*220)+"px";
+        e.style.bottom=(40+Math.random()*40)+"px";
+        stage.appendChild(e);
+        setTimeout(function(){ e.remove(); },900);
+      }, k*90);
+    })(i);
+  }
+}
+
+function fireworks(rounds){
+  var cols=["#ffc72c","#d7263d","#2e9e4f","#3e8ede","#ffffff","#f2a25c"];
+  for(var r=0;r<rounds;r++){
+    (function(rr){
+      setTimeout(function(){
+        var cx=40+Math.random()*280, cy=18+Math.random()*76;
+        var col=cols[(Math.random()*cols.length)|0];
+        var flash=document.createElement("div");
+        flash.className="fb-fw";
+        flash.style.cssText="left:"+(cx-3)+"px;top:"+(cy-3)+"px;width:14px;height:14px;background:#fff;"+
+          "box-shadow:0 0 18px 8px "+col+";transition:transform .5s ease-out,opacity .5s ease-out;";
+        stage.appendChild(flash);
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){
+          flash.style.transform="scale(2.2)"; flash.style.opacity="0"; }); });
+        setTimeout(function(){ flash.remove(); }, 700);
+        for(var i=0;i<16;i++){
+          var a=i*2*Math.PI/16, dist=24+Math.random()*20;
+          var p=document.createElement("div");
+          p.className="fb-fw";
+          p.style.cssText="left:"+cx+"px;top:"+cy+"px;width:8px;height:8px;background:"+col+";box-shadow:0 0 8px 3px "+col+
+            ";transform:translate("+(Math.cos(a)*dist)+"px,"+(Math.sin(a)*dist)+"px);opacity:0;"+
+            "transition:transform .7s ease-out,opacity .7s ease-out;";
+          stage.appendChild(p);
+          (function(pp,ax,ay){
+            requestAnimationFrame(function(){ requestAnimationFrame(function(){
+              pp.style.opacity="1"; pp.style.transform="translate("+ax+"px,"+ay+"px)";
+              setTimeout(function(){ pp.style.opacity="0"; pp.style.transform="translate("+(ax*1.5)+"px,"+(ay*1.5+14)+"px)"; },420);
+            });});
+          })(p, Math.cos(a)*dist, Math.sin(a)*dist);
+          setTimeout(function(){ p.remove(); }, 1300);
+        }
+      }, rr*380);
+    })(r);
+  }
+}
+
+/* ================= HUD ================= */
+function renderHud(){
+  $("fb-planks").textContent = d.planks;
+  var m=cur();
+  if(m){
+    $("fb-nextlbl").innerHTML = "<b>"+m.em+" "+m.name+"</b>Build "+(d.built+1)+" of 8 · "+m.cost+" 🪵";
+    $("fb-bar").style.width = Math.min(100, d.planks/m.cost*100)+"%";
+    $("fb-help").innerHTML = need()===0
+      ? "✅ Enough planks — tap BUILD!"
+      : need()+" more 🪵 · about <b>"+clearsToGo()+"</b> level clear"+(clearsToGo()>1?"s":"")+" to go (or "+Math.ceil(need()/PLANK.hard)+" hard clear"+(Math.ceil(need()/PLANK.hard)>1?"s":"")+")";
+    $("fb-build").innerHTML = (need()===0?"🔨 BUILD: ":"🔒 ")+m.name+
+      '<span class="fb-b-sub">'+(need()===0 ? "Costs "+m.cost+" 🪵 · "+m.blurb : need()+" more planks needed")+"</span>";
+    $("fb-build").disabled = need()>0;
+    $("fb-build").classList.toggle("ready", need()===0);
+    $("fb-instant-ds").innerHTML = "Finish <b>"+m.name+"</b> now";
+  } else {
+    $("fb-nextlbl").innerHTML = "<b>🎡 Festival open!</b>All 8 builds complete";
+    $("fb-bar").style.width="100%";
+    $("fb-help").innerHTML = "🏆 Your festival stays on your farm as a permanent trophy.";
+    $("fb-build").innerHTML = '🎉 Festival complete<span class="fb-b-sub">Keep clearing levels for souvenir coin bonuses</span>';
+    $("fb-build").disabled = true;
+    $("fb-build").classList.remove("ready");
+    $("fb-instant-ds").innerHTML = "Everything is built!";
+    $("fb-buy-instant").disabled = true;
+    $("fb-buy-instant").style.filter="grayscale(1)";
+  }
+  $("fb-st-plays").textContent=d.plays;
+  $("fb-st-wins").textContent=d.wins;
+  $("fb-st-hard").textContent=d.hardWins;
+  $("fb-st-planks").textContent=d.earned;
+  var remain = Math.max(0, TOTAL_COST - d.earned);
+  $("fb-pace").innerHTML = done()
+    ? "🎡 You built all 8 pieces in "+d.wins+" level clears. Total plank cost: "+TOTAL_COST+" 🪵."
+    : "Whole festival = "+TOTAL_COST+" 🪵 total · ~"+Math.ceil(remain/5.3)+" more clears at a normal mix. Free lane finishes on its own.";
+  renderShort();
+}
+
+/* contextual "just short" offer — always shows the free path too */
+function renderShort(){
+  var host=$("fb-shortwrap");
+  var m=cur(), n=need();
+  if(!m || n===0 || n>8){ host.innerHTML=""; return; }
+  host.innerHTML =
+    '<div class="fb-short">'+'<h4>🔨 So close — '+n+' 🪵 short!</h4>'+'<p>'+m.em+' <b>'+m.name+'</b> is '+n+' plank'+(n>1?"s":"")+' away. Finish it now, or keep clearing levels.</p>'
+    +'<button class="sb-btn sb-btn-yellow sb-btn-block sb-btn-sm" id="fb-short-buy">⚡ Finish this build · $0.99</button>'
+    +'<span class="fb-orfree">🆓 …or clear <b>'+clearsToGo()+' more level'+(clearsToGo()>1?"s":"")+'</b> — free, and it costs you nothing to try.</span>'
+    +'<button class="sb-btn sb-btn-green sb-btn-block sb-btn-sm" style="margin-top:7px" id="fb-short-play">▶ Play a level instead</button>'+'</div>';
+  $("fb-short-buy").addEventListener("click", instantBuild);
+  $("fb-short-play").addEventListener("click", function(){ play(false); });
+  if(!d.shortShown){ d.shortShown=true; st.save(); SB.haptic(10); }
+}
+
+/* ================= building ================= */
+function doBuild(free){
+  var i=d.built, m=MILES[i];
+  if(!m) return;
+  if(free && d.planks < m.cost) return;
+  if(free) d.planks -= m.cost;
+  d.built++;
+  st.save();
+  SB.haptic(28);
+  dustPuff();
+  showBuilt(true);
+  var wrap=$("fb-scene-wrap"), r=wrap.getBoundingClientRect();
+  SB.confetti(r.left+r.width/2, r.top+r.height/2, 46);
+  setTimeout(function(){ SB.grantRewards(m.free, wrap); }, 520);
+  if(i===6) SB.toast("💡 The lights are on — the farm turns to dusk!", 2400);
+  if(d.built===MILES.length){ setTimeout(grandFinale, 900); }
+  else {
+    SB.modal(
+      '<div style="font-size:11px;font-weight:900;letter-spacing:1px;color:#a8520f">BUILD '+(i+1)+' OF 8 COMPLETE</div>'+'<div style="font-size:46px;line-height:1.2">'+m.em+'</div>'
+      +'<h3 style="margin:0 0 4px">'+m.name+' built!</h3>'+'<p class="sb-muted" style="font-size:12.5px;margin:0 0 8px">'+m.blurb+'</p>'+'<div class="fb-recap">'+chips(m.free)+'</div>'
+      +(d.pass ? '<div style="font-size:11.5px;font-weight:800;color:#7b3fbd">🎫 Pass lane reward ready to claim on the track</div>'
+               : '<div style="font-size:11px;font-weight:800;color:#5a6b8c">Next up: '+MILES[i+1].em+' '+MILES[i+1].name+' · '+MILES[i+1].cost+' 🪵</div>')
+      +'<button class="sb-btn sb-btn-green sb-btn-block" style="margin-top:10px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Keep building!</button>');
+  }
+  renderHud(); renderTrack();
+}
+
+function instantBuild(){
+  var m=cur();
+  if(!m) return;
+  SB.buyIAP({
+    label:"⚡ Instant Build — "+m.name,
+    price:"$0.99",
+    sub:"Completes "+m.name+" right now, planks or not. You keep the planks you already earned.",
+    grant:false,
+    onSuccess:function(){
+      SB.toast("⚡ "+m.name+" built instantly!",2000);
+      doBuild(false);
+    }
+  });
+}
+
+function grandFinale(){
+  fireworks(9);
+  if(d.planks>0){                       // leftover planks never go to waste
+    var swap = d.planks*25;
+    d.planks = 0; st.save();
+    setTimeout(function(){ SB.toast("Leftover planks traded in for "+SB.fmt(swap)+" coins!",2400);
+      SB.grantRewards([{type:"coins",amount:swap}]); }, 2600);
+  }
+  SB.confetti(window.innerWidth/2, window.innerHeight/3, 150);
+  setTimeout(function(){ SB.confetti(window.innerWidth*0.25, window.innerHeight/2.4, 90); }, 500);
+  setTimeout(function(){ SB.confetti(window.innerWidth*0.75, window.innerHeight/2.4, 90); }, 900);
+  SB.haptic(60);
+  var grand=MILES[7].free;
+  setTimeout(function(){
+    SB.modal(
+      '<div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#a8520f">HARVEST FESTIVAL</div>'+'<div style="font-size:54px;line-height:1.15">🎡</div>'
+      +'<h3 style="margin:0 0 4px">THE FESTIVAL IS OPEN!</h3>'
+      +'<p class="sb-muted" style="font-size:12.5px;margin:0 0 8px">All 8 builds finished in '+d.wins+' level clear'+(d.wins===1?'':'s')+'. The scene stays on your farm as a permanent trophy.</p>'
+      +'<div class="fb-recap">'+chips(grand)+'</div>'+'<div style="font-size:11.5px;font-weight:800;color:var(--sb-green-dark)">🏆 "Festival Master" trophy unlocked</div>'
+      +(d.pass?'':'<div style="font-size:11px;font-weight:800;color:#7b3fbd;margin-top:6px">The Builder\'s Pass can still be bought — it retro-pays every Pass-lane reward for all 8 builds.</div>')
+      +'<button class="sb-btn sb-btn-yellow sb-btn-block" style="margin-top:10px" id="fb-celebrate">🎉 Celebrate!</button>');
+    fireworks(6);
+    var cb=$("fb-celebrate");
+    if(cb) cb.addEventListener("click", function(){
+      document.querySelector(".sb-modal-backdrop").remove();
+      fireworks(7);
+      SB.confetti(window.innerWidth/2, window.innerHeight/3, 110);
+      SB.haptic(40);
+      var wrap=$("fb-scene-wrap");
+      if(wrap) wrap.scrollIntoView({behavior:"smooth", block:"center"});
+    });
+  }, 1900);
+}
+
+$("fb-build").addEventListener("click", function(){ if(need()===0) doBuild(true); });
+
+/* ================= level play (the only free fuel) ================= */
+function play(hard){
+  var pb=$("fb-play"), hb=$("fb-hard");
+  pb.disabled = hb.disabled = true;
+  SB.playLevel({hard:hard, winRate:wr(hard?0.55:0.78), title:"Adventure Level "+d.level})
+  .then(function(res){
+    d.plays++; d.attempts++;
+    if(res.won){
+      d.wins++; if(hard) d.hardWins++;
+      var first = (d.attempts===1);
+      d.attempts=0; d.level++;
+      if(done()){
+        var c = hard?600:250;
+        SB.toast("🎉 Souvenir bonus +"+SB.fmt(c)+" coins!",2000);
+        SB.grantRewards([{type:"coins",amount:c}]);
+      } else {
+        var gain = (hard?PLANK.hard:PLANK.normal) + (first?PLANK.firstTry:0);
+        d.planks += gain; d.earned += gain;
+        SB.toast("+"+gain+" 🪵 Planks"+(first?" (first-try bonus!)":"")+" — "+d.planks+" total",2100);
+        var el=$("fb-planks"); el.classList.remove("sb-bounce"); void el.offsetWidth; el.classList.add("sb-bounce");
+        if(need()===0) setTimeout(function(){
+          if(cur() && need()===0) SB.toast("🔨 Enough planks — build "+cur().name+"!",2200);
+        }, 1500);
+      }
+    } else {
+      SB.toast("No planks lost — your "+d.planks+" 🪵 are safe. Try again!",2200);
+    }
+    st.save();
+    renderHud(); renderTrack();
+    pb.disabled = hb.disabled = false;
+  });
+}
+$("fb-play").addEventListener("click", function(){ play(false); });
+$("fb-hard").addEventListener("click", function(){ play(true); });
+
+/* ================= offers ================= */
+$("fb-buy-bundle").addEventListener("click", function(){
+  SB.buyIAP({
+    label:"🪵 Plank Bundle",
+    price:"$1.99",
+    sub:"+"+BUNDLE+" Planks, straight into your stack. Roughly 13 level clears' worth.",
+    grant:false,
+    onSuccess:function(){
+      d.planks += BUNDLE; d.earned += BUNDLE; st.save();
+      SB.toast("+"+BUNDLE+" 🪵 Planks added!",2200);
+      var el=$("fb-planks"); el.classList.remove("sb-bounce"); void el.offsetWidth; el.classList.add("sb-bounce");
+      renderHud(); renderTrack();
+    }
+  });
+});
+$("fb-buy-instant").addEventListener("click", instantBuild);
+
+/* ================= builder's pass ================= */
+function claimablePrem(){
+  var n=0;
+  for(var i=0;i<d.built;i++) if(d.pass && d.claimedPrem.indexOf(i)===-1) n++;
+  return n;
+}
+function renderTrack(){
+  $("fb-passcard").innerHTML = d.pass
+    ? '<h3>🎫 Builder\'s Pass ACTIVE</h3><p>Pass lane unlocked on all 8 builds — claim each one on the track below.</p>'
+      +'<div class="free-note">✓ Purchased. The free lane keeps paying too — nothing was replaced.</div>'
+    : '<h3>🎫 Builder\'s Pass · $9.99</h3><p>Adds a second reward lane to all 8 builds — including 10,000 coins and 60 gems at the Ferris Wheel.</p>'
+      +'<button class="sb-btn sb-btn-yellow sb-btn-sm" id="fb-buy-pass">Unlock Pass lane · $9.99</button>'
+      +'<div class="free-note">🆓 <b>The full scene and every free reward is completable without the Pass.</b> Buy it late and it retro-pays every build you already finished.</div>';
+  var bp=$("fb-buy-pass"); if(bp) bp.addEventListener("click", buyPass);
+
+  var html="";
+  MILES.forEach(function(m,i){
+    var built = i < d.built;
+    var isNow = (i === d.built);
+    html += '<div class="fb-ms">'+'<div class="fb-node'+(built?" hit":isNow?" now":"")+'"><span class="em">'+m.em+'</span><small>'+(built?"✓ BUILT":m.cost+" 🪵")+'</small></div>'
+      +freeCell(m,i,built)+premCell(m,i,built)+'</div>';
+  });
+  $("fb-ms-rows").innerHTML = html;
+  Array.prototype.forEach.call($("fb-ms-rows").querySelectorAll("[data-claim]"), function(b){
+    b.addEventListener("click", function(){ claimPrem(+b.getAttribute("data-claim"), b); });
+  });
+  Array.prototype.forEach.call($("fb-ms-rows").querySelectorAll("[data-gate]"), function(b){
+    b.addEventListener("click", buyPass);
+  });
+  var n=claimablePrem(), bdg=$("fb-bdg");
+  bdg.classList.toggle("hidden", n===0); bdg.textContent=n;
+}
+function rwLine(list){
+  return list.map(function(r){ return '<span class="ico">'+SB.icon(r.type)+"</span>"+SB.fmt(r.amount); }).join(" · ");
+}
+function freeCell(m,i,built){
+  return '<div class="fb-cell"><span class="rw">'+rwLine(m.free)+'</span>'+(built?'<span class="done">✓ Collected</span>':'<span class="todo">build to collect</span>')+'</div>';
+}
+function premCell(m,i,built){
+  var claimed = d.claimedPrem.indexOf(i)!==-1;
+  var action;
+  if(claimed) action='<span class="done">✓ Claimed</span>';
+  else if(!d.pass) action='<button class="lock" data-gate>🔒 Pass lane</button>';
+  else if(!built) action='<span class="todo">build to claim</span>';
+  else action='<button class="claim" data-claim="'+i+'">CLAIM</button>';
+  return '<div class="fb-cell prem"><span class="rw">'+rwLine(m.prem)+'</span>'+action+'</div>';
+}
+function claimPrem(i, el){
+  if(d.claimedPrem.indexOf(i)!==-1) return;
+  d.claimedPrem.push(i); st.save();
+  SB.grantRewards(MILES[i].prem, el);
+  renderTrack();
+}
+
+function buyPass(){
+  if(d.pass) return;
+  SB.buyIAP({
+    label:"🎫 Builder's Pass — Harvest Festival",
+    price:"$9.99",
+    sub:"Unlocks the Pass reward lane on all 8 builds. Retro-pays every build you have already finished.",
+    grant:false,
+    onSuccess:function(){
+      d.pass=true; st.save();
+      renderTrack();
+      var retro=[], idx=[];
+      for(var i=0;i<d.built;i++){
+        if(d.claimedPrem.indexOf(i)===-1){ idx.push(i); MILES[i].prem.forEach(function(r){ retro.push(r); }); }
+      }
+      if(retro.length){
+        var rows = idx.map(function(i){
+          return '<div class="fb-retro" data-r style="display:flex;align-items:center;gap:8px;background:#f2e6ff;border:1.5px solid #cba0e8;'
+            +'border-radius:11px;padding:6px 9px;margin-bottom:6px;font-size:11.5px;font-weight:800;text-align:left">'
+            +'<span style="font-size:20px">'+MILES[i].em+'</span><span style="flex:1">'+MILES[i].name+'<br><span style="color:#7b3fbd">'+rwLine(MILES[i].prem)+'</span></span>'
+            +'<span style="color:var(--sb-green-dark);font-weight:900">+</span></div>';
+        }).join("");
+        var mo = SB.modal(
+          '<div style="font-size:11px;font-weight:900;letter-spacing:1px;color:#7b3fbd">BUILDER\'S PASS UNLOCKED</div>'
+          +'<h3 style="margin:4px 0 4px">🎫 Retro-paying '+idx.length+' build'+(idx.length>1?"s":"")+'…</h3>'
+          +'<p class="sb-muted" style="font-size:12px;margin:0 0 10px">You had already finished these — the Pass lane pays out now.</p>'+'<div id="fb-retro-list">'+rows+'</div>'
+          +'<button class="sb-btn sb-btn-green sb-btn-block" style="margin-top:6px" id="fb-retro-ok">Collect all</button>');
+        var items = mo.el.querySelectorAll("[data-r]");
+        Array.prototype.forEach.call(items, function(it,k){
+          setTimeout(function(){ it.classList.add("in"); SB.haptic(8); }, 160+k*180);
+        });
+        mo.el.querySelector("#fb-retro-ok").addEventListener("click", function(){
+          idx.forEach(function(i){ if(d.claimedPrem.indexOf(i)===-1) d.claimedPrem.push(i); });
+          st.save();
+          SB.grantRewards(retro);
+          SB.confetti();
+          mo.close(true);
+          renderTrack();
+        });
+      } else {
+        SB.toast("🎫 Pass lane unlocked — claim it on every build!",2600);
+      }
+      $("fb-tabpass").click();
+    }
+  });
+}
+
+/* ================= tabs ================= */
+Array.prototype.forEach.call(document.querySelectorAll(".fb-tab"), function(t){
+  if(t.dataset.tab==="pass") t.id="fb-tabpass";
+  t.addEventListener("click", function(){
+    Array.prototype.forEach.call(document.querySelectorAll(".fb-tab"), function(x){ x.classList.remove("on"); });
+    t.classList.add("on");
+    $("fb-panel-build").classList.toggle("hidden", t.dataset.tab!=="build");
+    $("fb-panel-pass").classList.toggle("hidden", t.dataset.tab!=="pass");
+    SB.haptic(8);
+  });
+});
+
+/* ================= info modal ================= */
+$("fb-info").addEventListener("click", function(){
+  SB.modal('<h3 style="margin:0 0 8px">🍁 How Harvest Festival works</h3>'+'<div style="text-align:left;font-size:12.5px;line-height:1.55">'
+    +'<b>Planks come from playing</b><br>▶ Clear a level: <b>+3 🪵</b> (~78% win)<br>🔥 Clear a HARD level: <b>+7 🪵</b> (~55% win)<br>'
+    +'⭐ First-try clear: <b>+1 🪵</b> bonus<br>🛡️ <b>Losing never removes planks.</b><br><br>'
+    +'<b>8 builds, one growing scene</b><br>Costs: 7 · 11 · 16 · 22 · 28 · 35 · 43 · 53 = <b>'+TOTAL_COST+' 🪵</b> for the whole festival.<br>'
+    +'Simulated pacing: <b>~41 clears</b> at a 50/50 normal-hard mix (~57 all-normal, ~29 all-hard) across the 18-day event — about 2–3 clears a day.<br><br>'
+    +'<b>🎫 Builder\'s Pass ($9.99, optional)</b><br>Adds a second reward lane at all 8 builds. Bought late, it retro-pays every build you already finished. '
+    +'<b>The full scene and every free reward is completable without the Pass</b> — the Pass never gates a build.<br><br>'
+    +'<b>Speed-ups (optional)</b><br>🪵 Plank Bundle $1.99 = +40 planks · ⚡ Instant Build $0.99 = finish the current piece. Both only save time; nothing is exclusive to them.<br><br>'
+    +'<span class="sb-muted" style="font-size:11px">Demo note: the 18-day event is compressed to 18 minutes. Reset with the ⟲ button.</span></div>'
+    +'<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>');
+});
+
+/* ================= countdown (never dead-ends) ================= */
+function startTimer(){
+  SB.countdown($("fb-timer"), d.end, function(){
+    $("fb-timer").textContent="Ended";
+    SB.modal('<h3 style="margin:0 0 6px">🍂 Festival week is over</h3>'+'<p class="sb-muted" style="font-size:12.5px;margin:0 0 10px">You finished <b>'+d.built+' of 8</b> builds. '
+      +(done()?'Your festival stays on the farm forever.':'In the live game the scene carries into next season\'s event — nothing is lost.')+'</p>'
+      +'<button class="sb-btn sb-btn-green sb-btn-block" id="fb-extend">⏱️ Keep building (demo extension)</button>');
+    var e=$("fb-extend");
+    if(e) e.addEventListener("click", function(){
+      d.end = Date.now()+EVENT_MS; d.extended=true; st.save();
+      document.querySelector(".sb-modal-backdrop").remove();
+      startTimer();
+      SB.toast("Demo extended — keep building!",2000);
+    });
+  });
+}
+startTimer();
+
+/* ================= boot ================= */
+showBuilt(false);
+renderHud();
+renderTrack();
+if(done()) fireworks(3);
+if(d.plays===0 && d.built===0) setTimeout(function(){
+  SB.toast("Clear levels to earn 🪵 Planks — then build the festival!",2800);
+}, 700);
+
+/* demo hook for automated screenshots */
+window.__fb = {
+  state:d, MILES:MILES, TOTAL_COST:TOTAL_COST,
+  addPlanks:function(n){ d.planks+=n; d.earned+=n; st.save(); renderHud(); renderTrack(); },
+  buildTo:function(n){ while(d.built<n && d.built<MILES.length){ d.built++; } st.save(); showBuilt(false); renderHud(); renderTrack(); },
+  save:function(){ st.save(); }
+};
+})();
+</script>
+</body>
+</html>
