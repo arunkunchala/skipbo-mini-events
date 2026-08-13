@@ -6,23 +6,27 @@
 <title>Sorting Warehouse · Skip-Bo Event</title>
 <link rel="stylesheet" href="../shared/core.css">
 <style>
-  .ev-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .ev-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
   .ev-info-btn {
-    width:32px; height:32px; border-radius:50%; border:none; cursor:pointer;
-    background:rgba(255,255,255,0.18); color:#fff; font-weight:900; font-size:16px;
+    width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,0.18); color:#fff; font-weight:900; font-size:19px;
   }
+  .sb-modal { position:relative; } /* keeps modal above our backdrop shield */
+  /* core.css puts the reset button (z 100) under modal backdrops (z 220);
+     demo drivers need it reachable from the start/recap screens too */
+  .sb-demo-reset { z-index:260; }
   /* ---- HUD ---- */
-  .hud { display:flex; gap:6px; margin-bottom:10px; }
+  .hud { display:flex; gap:6px; margin-bottom:8px; }
   .hud-chip {
     flex:1 1 0; background:rgba(20,57,111,0.85); border:1.5px solid rgba(255,255,255,0.2);
-    border-radius:12px; padding:5px 4px; text-align:center; color:#fff; min-width:0;
+    border-radius:12px; padding:6px 4px; text-align:center; color:#fff; min-width:0; min-height:46px;
   }
   .hud-chip .lbl { font-size:9px; font-weight:700; color:var(--sb-sky-light); text-transform:uppercase; letter-spacing:0.5px; }
   .hud-chip .val { font-size:15px; font-weight:900; line-height:1.15; white-space:nowrap; }
   .hud-chip.timer-low .val { color:#ff8d9b; animation:sbPulse 0.8s infinite; }
   .hud-chip.combo-hot { border-color:var(--sb-yellow); background:rgba(255,199,44,0.25); }
   .hud-undo {
-    flex:0 0 auto; border:none; border-radius:12px; cursor:pointer; padding:0 10px;
+    flex:0 0 auto; min-width:46px; min-height:46px; border:none; border-radius:12px; cursor:pointer; padding:0 10px;
     background:linear-gradient(180deg,#5ba0e8,var(--sb-blue)); color:#fff; font-weight:900; font-size:13px;
     box-shadow:0 3px 0 rgba(0,0,0,0.3);
   }
@@ -30,67 +34,171 @@
   /* ---- Scene ---- */
   .scene {
     position:relative; border-radius:var(--sb-radius); overflow:hidden;
-    background:linear-gradient(180deg,#3a4a63 0%, #2c3950 46%, #57493a 46.5%, #6b5b48 100%);
+    background:linear-gradient(180deg,#33405c 0%, #33405c 128px, #5a6478 132px, #4a546a 100%);
     border:2px solid rgba(255,255,255,0.15); box-shadow:var(--sb-shadow);
     padding:10px 10px 12px;
   }
-  .scene::before { /* warehouse wall shelves */
-    content:""; position:absolute; left:0; right:0; top:0; height:44%;
-    background:
-      repeating-linear-gradient(90deg, transparent 0 54px, rgba(0,0,0,0.22) 54px 60px),
-      repeating-linear-gradient(0deg, transparent 0 26px, rgba(255,199,44,0.10) 26px 30px);
-    pointer-events:none;
+  .scene::after { /* jam vignette */
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:39;
+    box-shadow:inset 0 0 46px 6px rgba(215,38,61,0.65); opacity:0; transition:opacity 0.3s;
   }
-  /* ---- Belt ---- */
-  .belt-wrap { position:relative; margin-top:2px; }
+  .scene.jammed::after { opacity:1; animation:jamPulse 0.9s infinite; }
+  @keyframes jamPulse { 0%,100% { opacity:0.55; } 50% { opacity:1; } }
+  /* ---- Warehouse wall: shelving units stacked with stock boxes ---- */
+  .wall { position:absolute; left:0; right:0; top:0; height:132px; pointer-events:none; overflow:hidden;
+    background:
+      linear-gradient(180deg, rgba(255,236,180,0.30), rgba(255,236,180,0)) 50% 0 / 150px 26px no-repeat,
+      linear-gradient(180deg,#f4e2ae,#c8b276) 50% 3px / 110px 5px no-repeat,
+      linear-gradient(180deg,#2b3750 0%, #35425f 70%, #3d4a68 100%);
+  }
+  .wall::before { content:""; position:absolute; inset:0;
+    background:
+      /* rack uprights */
+      repeating-linear-gradient(90deg, #222b40 0 6px, rgba(0,0,0,0) 6px 112px) 0 0 / 112px 100%,
+      /* shelf row 1: stock boxes */
+      repeating-linear-gradient(90deg,
+        #b3543f 0 20px, #8f4030 20px 23px, rgba(0,0,0,0) 23px 31px,
+        #7e93b8 31px 49px, #66799c 49px 52px, rgba(0,0,0,0) 52px 60px,
+        #c9a06b 60px 84px, #a37f4e 84px 87px, rgba(0,0,0,0) 87px 112px) 8px 26px / 112px 20px repeat-x,
+      /* beam 1 */
+      linear-gradient(180deg,#f0b445,#c07f22) 0 46px / 100% 5px no-repeat,
+      /* shelf row 2 */
+      repeating-linear-gradient(90deg,
+        #c9a06b 0 22px, #9c7546 22px 25px, rgba(0,0,0,0) 25px 33px,
+        #4f9e63 33px 51px, #3d7a4c 51px 54px, rgba(0,0,0,0) 54px 62px,
+        #b98a5a 62px 84px, #93683c 84px 87px, rgba(0,0,0,0) 87px 112px) 20px 68px / 112px 20px repeat-x,
+      /* beam 2 */
+      linear-gradient(180deg,#f0b445,#c07f22) 0 88px / 100% 5px no-repeat,
+      /* floor shadow line at wall base */
+      linear-gradient(180deg, rgba(0,0,0,0) 0 122px, rgba(0,0,0,0.35) 132px);
+  }
+  .wall::after { content:"⚠ SORT BAY 3"; position:absolute; top:9px; left:10px;
+    background:var(--sb-yellow); color:#5c4708; font-size:8px; font-weight:900; letter-spacing:0.5px;
+    padding:2px 6px; border-radius:4px; border:1px solid #b8860b; }
+  /* ---- Warning beacon ---- */
+  .beacon { position:absolute; top:8px; right:12px; width:26px; height:30px; z-index:41; pointer-events:none; }
+  .beacon::after { content:""; position:absolute; bottom:0; left:0; width:26px; height:8px;
+    background:linear-gradient(180deg,#4a5468,#323a4c); border-radius:3px; }
+  .beacon i { position:absolute; bottom:6px; left:3px; width:20px; height:18px;
+    border-radius:10px 10px 3px 3px;
+    background:linear-gradient(180deg,#ff9d6b 0%, var(--sb-red) 70%); opacity:0.45; }
+  .beacon.on i { opacity:1; animation:beaconFlash 0.7s infinite; }
+  @keyframes beaconFlash {
+    0%,100% { box-shadow:0 0 6px 2px rgba(255,120,60,0.5); filter:brightness(1); }
+    50% { box-shadow:0 0 24px 12px rgba(255,120,60,0.95); filter:brightness(1.6); }
+  }
+  /* ---- Conveyor ---- */
+  .belt-wrap { position:relative; margin-top:100px; }
   .belt {
-    position:relative; height:86px; border-radius:10px; overflow:visible;
-    background:repeating-linear-gradient(90deg,#20283a 0 22px,#2b3550 22px 44px);
-    background-size:44px 100%;
-    border:3px solid #141a29; box-shadow:inset 0 4px 8px rgba(0,0,0,0.5);
+    position:relative; height:86px; border-radius:10px 10px 0 0; overflow:visible;
+    background:
+      repeating-linear-gradient(100deg, rgba(255,255,255,0.06) 0 8px, rgba(0,0,0,0) 8px 22px),
+      repeating-linear-gradient(90deg,#232c40 0 20px,#2f3b57 20px 22px,#28324a 22px 42px,#1c2335 42px 44px);
+    background-size:44px 100%, 44px 100%;
+    border:3px solid #141a29; border-bottom:none; box-shadow:inset 0 4px 8px rgba(0,0,0,0.5);
     animation:beltRoll 0.9s linear infinite;
   }
   .belt.paused { animation-play-state:paused; }
-  @keyframes beltRoll { from { background-position-x:0; } to { background-position-x:44px; } }
-  .belt-edge { height:7px; margin:0 6px; border-radius:0 0 8px 8px;
-    background:repeating-linear-gradient(45deg,#FFC72C 0 10px,#1B2A4A 10px 20px); opacity:0.85; }
+  @keyframes beltRoll { from { background-position-x:0,0; } to { background-position-x:44px,44px; } }
+  /* end roller drums the belt wraps around — spin in sync with the tread */
+  .endcap { position:absolute; top:-6px; bottom:-4px; width:15px; z-index:1; border-radius:8px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.18) 0 4px, rgba(0,0,0,0.12) 4px 9px),
+      linear-gradient(90deg,#8a95ae,#4a5468 45%,#283044);
+    border:2px solid #141a29; box-shadow:0 2px 5px rgba(0,0,0,0.5);
+    animation:capSpin 0.9s linear infinite;
+  }
+  .endcap.left { left:-8px; }
+  .endcap.right { right:-8px; background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.18) 0 4px, rgba(0,0,0,0.12) 4px 9px),
+      linear-gradient(270deg,#8a95ae,#4a5468 45%,#283044); }
+  .endcap::after { /* axle hub */
+    content:""; position:absolute; left:50%; top:50%; width:7px; height:7px;
+    transform:translate(-50%,-50%); border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #e6ecf8, #7c8399 60%, #3a4254);
+    box-shadow:0 0 0 1.5px #12172a;
+  }
+  @keyframes capSpin { from { background-position:0 0, 0 0; } to { background-position:0 9px, 0 0; } }
+  .belt.paused .endcap { animation-play-state:paused; }
+  /* hazard tape slaps across the belt while jammed */
+  .jam-tape { position:absolute; left:2px; right:2px; top:118px; height:15px; z-index:38; display:none;
+    background:repeating-linear-gradient(-45deg,#FFC72C 0 12px,#1B2A4A 12px 24px);
+    border:1.5px solid rgba(0,0,0,0.55); border-radius:4px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.55); transform:rotate(-1.4deg); pointer-events:none; }
+  .scene.jammed .jam-tape { display:block; animation:tapeSlide 1s linear infinite; }
+  @keyframes tapeSlide { from { background-position:0 0; } to { background-position:34px 0; } }
+  .rollers { height:13px; margin:0 3px; position:relative; z-index:1;
+    background:
+      radial-gradient(circle at 9px 6px, #cfd6e6 0 2px, #98a2ba 2.5px 5px, #4c5468 5.5px 6px, rgba(0,0,0,0) 6.5px) 0 0 / 18px 13px repeat-x,
+      linear-gradient(180deg,#39415a,#20263a);
+    border:2px solid #12172a; border-top:none; border-radius:0 0 4px 4px;
+  }
+  .belt-edge { height:6px; margin:1px 8px 0; border-radius:0 0 8px 8px;
+    background:repeating-linear-gradient(45deg,#FFC72C 0 10px,#1B2A4A 10px 20px); opacity:0.9; }
   .zones { position:absolute; inset:0; display:flex; pointer-events:none; }
-  .zone { flex:1; border-radius:8px; border:2px dashed transparent; margin:3px; opacity:0.55; }
-  .zone.z-red { border-color:var(--sb-red); } .zone.z-green { border-color:var(--sb-green); } .zone.z-blue { border-color:#7db9f5; }
-  .zone .ztag { position:absolute; top:-2px; font-size:9px; font-weight:900; padding:0 5px; border-radius:6px; color:#fff; }
-  /* ---- Parcels ---- */
+  .zone { flex:1; position:relative; border-radius:8px; border:2px dashed rgba(255,255,255,0.0); margin:3px; }
+  .zone.z-red { border-color:rgba(215,38,61,0.8); background:rgba(215,38,61,0.16); }
+  .zone.z-green { border-color:rgba(46,158,79,0.8); background:rgba(46,158,79,0.16); }
+  .zone.z-blue { border-color:rgba(125,185,245,0.8); background:rgba(62,142,222,0.16); }
+  .zone .ztag { position:absolute; top:-2px; left:50%; transform:translateX(-50%);
+    font-size:9px; font-weight:900; padding:1px 6px; border-radius:6px; color:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.4); }
+  /* ---- Parcels: dimensional cardboard boxes with colored tape + label ---- */
   .parcel {
-    position:absolute; top:14px; width:54px; height:58px; border-radius:9px; cursor:pointer;
-    border:2px solid rgba(0,0,0,0.35); box-shadow:0 4px 8px rgba(0,0,0,0.4);
+    position:absolute; top:14px; width:54px; height:58px; border-radius:7px; cursor:pointer;
+    touch-action:none;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.10) 0 10%, rgba(0,0,0,0) 30% 78%, rgba(0,0,0,0.20) 92%),
+      linear-gradient(180deg,#dcb37c 0%, #c69a5f 55%, #a97e46 100%);
+    border:2px solid #7d5a30; box-shadow:0 4px 8px rgba(0,0,0,0.45);
     display:grid; place-items:center; z-index:5; transition:transform 0.1s;
   }
-  .parcel:active { transform:scale(0.9); }
-  .parcel::before { content:""; position:absolute; left:50%; top:0; bottom:0; width:9px; transform:translateX(-50%);
-    background:rgba(255,255,255,0.35); }
-  .parcel .pcard {
-    position:relative; z-index:2; width:26px; height:34px; background:#fff; border-radius:4px;
-    display:grid; place-items:center; font-weight:900; font-size:16px; border:2px solid currentColor;
-    box-shadow:0 1px 3px rgba(0,0,0,0.3);
+  .parcel:active { transform:scale(0.92); }
+  .parcel::before { /* packing tape band, colored per destination */
+    content:""; position:absolute; left:50%; top:0; bottom:0; width:11px; transform:translateX(-50%);
+    background:rgba(255,255,255,0.4);
   }
-  .parcel.p-red { background:linear-gradient(180deg,#ef5468,var(--sb-red)); color:var(--sb-red); }
-  .parcel.p-green { background:linear-gradient(180deg,#3fc167,var(--sb-green)); color:var(--sb-green); }
-  .parcel.p-blue { background:linear-gradient(180deg,#5ba0e8,var(--sb-blue)); color:var(--sb-blue); }
-  .parcel.p-gold { background:linear-gradient(180deg,#ffe58a,var(--sb-yellow)); color:#b8860b; animation:goldGlow 0.8s infinite alternate; }
+  .parcel .ptop { /* box lid flaps */
+    position:absolute; top:0; left:0; right:0; height:13px; pointer-events:none;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,0) 0 calc(50% - 1px), rgba(0,0,0,0.28) calc(50% - 1px) calc(50% + 1px), rgba(0,0,0,0) calc(50% + 1px)),
+      linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.06));
+    border-bottom:1.5px solid rgba(0,0,0,0.25); border-radius:5px 5px 0 0;
+  }
+  .parcel .pcard { /* Skip-Bo shipping label */
+    position:relative; z-index:2; width:26px; height:34px; margin-top:7px; background:#fff; border-radius:4px;
+    display:grid; place-items:center; font-weight:900; font-size:16px; border:2px solid currentColor;
+    box-shadow:0 1px 3px rgba(0,0,0,0.35);
+  }
+  .parcel.p-red { color:var(--sb-red); } .parcel.p-red::before { background:rgba(215,38,61,0.88); }
+  .parcel.p-green { color:var(--sb-green); } .parcel.p-green::before { background:rgba(46,158,79,0.88); }
+  .parcel.p-blue { color:var(--sb-blue); } .parcel.p-blue::before { background:rgba(62,142,222,0.88); }
+  .parcel.p-gold { background:linear-gradient(180deg,#ffe58a,var(--sb-yellow)); border-color:#b8860b; color:#b8860b; animation:goldGlow 0.8s infinite alternate; }
+  .parcel.p-gold::before { background:rgba(255,255,255,0.55); }
   .parcel.p-gold::after { content:"✨"; position:absolute; top:-12px; right:-8px; font-size:14px; animation:sbPulse 1s infinite; }
-  .parcel.p-rainbow { background:linear-gradient(120deg,#ef5468,#ffd95e,#3fc167,#5ba0e8); color:var(--sb-blue-dark); }
+  .parcel.p-rainbow { background:linear-gradient(120deg,#ef5468,#ffd95e,#3fc167,#5ba0e8); border-color:var(--sb-blue-dark); color:var(--sb-blue-dark); }
   .parcel.p-rainbow::after { content:"🌈"; position:absolute; top:-13px; right:-9px; font-size:14px; }
   @keyframes goldGlow { from { box-shadow:0 0 6px 2px rgba(255,199,44,0.7);} to { box-shadow:0 0 14px 5px rgba(255,199,44,0.95);} }
   .parcel.flying { transition:left 0.55s cubic-bezier(0.4,-0.2,0.6,1), top 0.55s cubic-bezier(0.4,-0.2,0.6,1), transform 0.55s; z-index:60; pointer-events:none; }
-  /* ---- Holding slots ---- */
-  .slots { display:flex; gap:8px; justify-content:center; margin:14px 0 12px; position:relative; z-index:3; }
+  .parcel.dragging { transition:none; z-index:70; pointer-events:none; transform:scale(1.12) rotate(-3deg);
+    box-shadow:0 14px 22px rgba(0,0,0,0.55); }
+  /* ---- Holding rack ---- */
+  .rack { position:relative; margin:16px 2px 12px; padding:11px 8px 9px; border-radius:12px; z-index:3;
+    background:linear-gradient(180deg,#5b667e,#414b61);
+    border:2px solid #2e3547;
+    box-shadow:inset 0 2px 5px rgba(255,255,255,0.10), inset 0 -4px 8px rgba(0,0,0,0.3), 0 3px 6px rgba(0,0,0,0.3);
+  }
+  .rack-label { position:absolute; top:-9px; left:50%; transform:translateX(-50%); white-space:nowrap;
+    background:#2e3547; color:#c8d2e8; font-size:9px; font-weight:900; letter-spacing:1px;
+    padding:2px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); }
+  .slots { display:flex; gap:8px; justify-content:center; position:relative; }
   .tray {
-    width:64px; height:64px; border-radius:12px; position:relative;
-    background:linear-gradient(180deg,#8a7a63,#6e6250); border:2.5px solid #4c4335;
-    box-shadow:inset 0 5px 10px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.3);
+    width:64px; height:64px; border-radius:10px; position:relative;
+    background:linear-gradient(180deg,#7c8399,#59617a); border:2.5px solid #353d52;
+    box-shadow:inset 0 6px 10px rgba(0,0,0,0.5), inset 0 -1px 2px rgba(255,255,255,0.15);
     display:grid; place-items:center;
   }
-  .tray .tlabel { font-size:9px; font-weight:800; color:rgba(255,255,255,0.55); }
-  .tray.locked { filter:brightness(0.7); cursor:pointer; }
+  .tray .tlabel { font-size:9px; font-weight:800; color:rgba(255,255,255,0.5); }
+  .tray.locked { filter:brightness(0.65); cursor:pointer; }
   .tray.locked .tlabel { font-size:18px; }
   .tray .price-tag { position:absolute; bottom:-7px; left:50%; transform:translateX(-50%);
     background:var(--sb-yellow); color:var(--sb-ink); font-size:9px; font-weight:900;
@@ -98,33 +206,43 @@
   .tray.unlock-pop { animation:unlockPop 0.6s cubic-bezier(0.34,1.56,0.64,1); }
   @keyframes unlockPop { 0% { transform:scale(0) rotate(-20deg);} 100% { transform:scale(1) rotate(0);} }
   .tray .parcel { position:relative; top:auto; left:auto !important; }
-  /* ---- Crates ---- */
+  /* ---- Crates: wooden Skip-Bo crates ---- */
   .crates { display:flex; gap:8px; position:relative; z-index:3; }
   .crate {
-    flex:1; border-radius:12px; padding:8px 6px 7px; text-align:center; position:relative;
-    border:3px solid rgba(0,0,0,0.4); box-shadow:0 4px 8px rgba(0,0,0,0.35);
-    background-image:repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 6px, transparent 6px 15px);
+    flex:1; border-radius:10px; padding:0 6px 7px; text-align:center; position:relative; overflow:visible;
+    border:3px solid #55351a; box-shadow:inset 0 2px 3px rgba(255,255,255,0.2), 0 4px 8px rgba(0,0,0,0.4);
+    background-color:#8a5a34;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.20) 0 2px, rgba(0,0,0,0) 2px 14px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.07) 0 3px, rgba(0,0,0,0) 3px 26px),
+      linear-gradient(180deg,#a1703f,#7c4f28);
     transition:transform 0.15s;
   }
-  .crate.c-red { background-color:var(--sb-red); } .crate.c-green { background-color:var(--sb-green); } .crate.c-blue { background-color:var(--sb-sky); }
-  .crate .cico { font-size:24px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.4)); }
-  .crate .cmeter { height:9px; border-radius:6px; background:rgba(0,0,0,0.4); margin:5px 2px 3px; overflow:hidden; }
+  .crate .cband { margin:0 -6px 5px; border-radius:6px 6px 0 0; color:#fff; font-weight:900; font-size:11px;
+    padding:4px 0 3px; letter-spacing:0.8px; text-shadow:0 1px 0 rgba(0,0,0,0.4);
+    border-bottom:2px solid rgba(0,0,0,0.35); }
+  .cband.cb-red { background:linear-gradient(180deg,#ef5468,var(--sb-red)); }
+  .cband.cb-green { background:linear-gradient(180deg,#3fc167,var(--sb-green)); }
+  .cband.cb-blue { background:linear-gradient(180deg,#5ba0e8,var(--sb-sky)); }
+  .crate .cmeter { height:9px; border-radius:6px; background:rgba(0,0,0,0.45); margin:4px 2px 3px; overflow:hidden;
+    border:1px solid rgba(0,0,0,0.3); }
   .crate .cmeter i { display:block; height:100%; width:0%; border-radius:6px;
     background:linear-gradient(90deg,#ffd95e,var(--sb-yellow)); transition:width 0.35s cubic-bezier(0.34,1.56,0.64,1); }
   .crate .ccount { color:#fff; font-weight:900; font-size:12px; text-shadow:0 1px 0 rgba(0,0,0,0.4); }
+  .crate .cpay { color:#ffe9a8; font-weight:800; font-size:9px; margin-top:1px; text-shadow:0 1px 0 rgba(0,0,0,0.4); }
   .crate.premium { border-color:var(--sb-yellow); box-shadow:0 0 12px rgba(255,199,44,0.8), 0 4px 8px rgba(0,0,0,0.35); }
   .crate.premium::after { content:"👑 2×"; position:absolute; top:-11px; right:4px; background:var(--sb-yellow);
-    color:var(--sb-ink); font-size:9px; font-weight:900; padding:1px 6px; border-radius:8px; }
+    color:var(--sb-ink); font-size:9px; font-weight:900; padding:1px 6px; border-radius:8px; z-index:2; }
   .crate.choosable { animation:sbPulse 0.7s infinite; cursor:pointer; outline:3px solid #fff; }
   .crate.sealed { animation:sealPop 0.6s; }
   @keyframes sealPop { 0% { transform:scale(1);} 35% { transform:scale(1.15) rotate(-3deg);} 70% { transform:scale(0.95);} 100% { transform:scale(1);} }
-  .crate .seal-flash { position:absolute; inset:0; display:grid; place-items:center; border-radius:9px;
-    background:rgba(255,255,255,0.85); color:var(--sb-green-dark); font-weight:900; font-size:13px;
-    opacity:0; pointer-events:none; transition:opacity 0.2s; }
+  .crate .seal-flash { position:absolute; inset:0; display:grid; place-items:center; border-radius:7px;
+    background:rgba(255,255,255,0.88); color:var(--sb-green-dark); font-weight:900; font-size:12px; line-height:1.3;
+    opacity:0; pointer-events:none; transition:opacity 0.2s; z-index:3; }
   .crate .seal-flash.show { opacity:1; }
   /* ---- Jam banner ---- */
   .jam-banner {
-    position:absolute; left:8px; right:8px; top:8px; z-index:40; text-align:center; pointer-events:none;
+    position:absolute; left:10px; right:46px; top:8px; z-index:40; text-align:center; pointer-events:none;
     background:rgba(215,38,61,0.95); border:2px solid #fff; border-radius:14px;
     color:#fff; font-weight:900; font-size:14px; padding:9px 10px;
     display:none; box-shadow:var(--sb-shadow); animation:sbPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
@@ -132,8 +250,9 @@
   .jam-banner.show { display:block; }
   .jam-banner small { display:block; font-size:10px; font-weight:700; opacity:0.9; margin-top:2px; }
   /* ---- Forklift ---- */
-  .forklift { position:absolute; bottom:2px; left:-60px; font-size:30px; z-index:2; pointer-events:none;
+  .forklift { position:absolute; top:88px; left:-60px; font-size:26px; z-index:0; pointer-events:none;
     filter:drop-shadow(0 2px 2px rgba(0,0,0,0.4)); display:none; }
+  .belt-wrap { z-index:2; } /* belt covers the forklift's wheels as it drives the back aisle */
   .forklift.on { display:block; animation:forkDrive 9s linear infinite; }
   @keyframes forkDrive { 0% { left:-60px; transform:scaleX(-1);} 48% { left:calc(100% + 20px); transform:scaleX(-1);}
     50% { left:calc(100% + 20px); transform:scaleX(1);} 98% { left:-60px; transform:scaleX(1);} 100% { left:-60px; transform:scaleX(-1);} }
@@ -143,7 +262,7 @@
   @keyframes popFloat { 0% { transform:translateY(0) scale(0.6); opacity:0;} 20% { opacity:1; transform:scale(1.25);} 100% { transform:translateY(-56px) scale(1); opacity:0;} }
   /* ---- Offers / start / recap ---- */
   .offer-strip { display:flex; gap:8px; margin-top:12px; }
-  .offer-btn { flex:1; border:none; cursor:pointer; border-radius:13px; padding:9px 6px; text-align:center;
+  .offer-btn { flex:1; border:none; cursor:pointer; border-radius:13px; padding:9px 6px; text-align:center; min-height:64px;
     background:linear-gradient(180deg,#2a5cb0,#1D4FA1); border:2px solid rgba(255,199,44,0.55);
     color:#fff; font-family:var(--sb-font); box-shadow:0 3px 0 rgba(0,0,0,0.3); }
   .offer-btn:active { transform:translateY(2px); box-shadow:none; }
@@ -174,18 +293,27 @@
     </div>
 
     <div class="scene" id="scene">
+      <div class="wall"></div>
+      <div class="beacon" id="beacon"><i></i></div>
       <div class="belt-wrap">
         <div class="belt" id="belt">
+          <div class="endcap left"></div>
+          <div class="endcap right"></div>
           <div class="zones">
             <div class="zone z-red"><span class="ztag" style="background:var(--sb-red)">RED</span></div>
             <div class="zone z-green"><span class="ztag" style="background:var(--sb-green)">GREEN</span></div>
             <div class="zone z-blue"><span class="ztag" style="background:var(--sb-blue)">BLUE</span></div>
           </div>
         </div>
+        <div class="rollers"></div>
         <div class="belt-edge"></div>
       </div>
-      <div class="slots" id="slots"></div>
+      <div class="rack">
+        <div class="rack-label">HOLDING TRAYS</div>
+        <div class="slots" id="slots"></div>
+      </div>
       <div class="crates" id="crates"></div>
+      <div class="jam-tape"></div>
       <div class="jam-banner" id="jam-banner">🚨 WAREHOUSE JAMMED!<small>Trays full — tap a held parcel to send it to its crate. The clock keeps ticking!</small></div>
       <div class="forklift" id="forklift">🚜</div>
     </div>
@@ -201,7 +329,8 @@
 
   var COLORS = ["red","green","blue"];
   var CRATE_ICO = { red:"🟥", green:"🟩", blue:"🟦" };
-  var CRATE_SIZE = 8, WAVE_PARCELS = 20, WAVE_TIME = 90;
+  var CRATE_SIZE = 8, WAVE_TIME = 90;
+  function waveParcels(w){ return Math.min(20 + (w-1)*4, 40); } // waves escalate: more parcels…
 
   var st = SB.store("sorting-warehouse", {
     endTs: Date.now() + 48*3600*1000,
@@ -217,6 +346,7 @@
   // ---------- DOM refs ----------
   var beltEl = document.getElementById("belt"), slotsEl = document.getElementById("slots"),
       cratesEl = document.getElementById("crates"), jamEl = document.getElementById("jam-banner"),
+      sceneEl = document.getElementById("scene"), beaconEl = document.getElementById("beacon"),
       hudWave = document.getElementById("hud-wave"), hudLeft = document.getElementById("hud-left"),
       hudTimer = document.getElementById("hud-timer"), hudTimerChip = document.getElementById("hud-timer-chip"),
       hudCombo = document.getElementById("hud-combo"), hudComboChip = document.getElementById("hud-combo-chip"),
@@ -228,16 +358,35 @@
     playing:false, jammed:false, toSpawn:0, timeLeft:WAVE_TIME, combo:0,
     sortedThisWave:0, goldenThisWave:0, spawnAcc:0, lastTs:0,
     beltParcels:[], slots:[null,null,null,null], undoStack:[], choosing:null,
-    offerShownThisWave:false, jamCount:0
+    offerShownThisWave:false, jamCount:0, sheetOpen:false
   };
+
+  function updateBeltPause(){
+    beltEl.classList.toggle("paused", !G.playing || G.jammed || !!G.choosing || G.sheetOpen);
+  }
+  function setChoosing(v){ G.choosing = v; updateBeltPause(); }
+
+  // Every IAP sheet freezes the belt AND the wave clock — reading an offer
+  // must never cost the player parcels or time.
+  function openOffer(opts){
+    var os = opts.onSuccess, oc = opts.onCancel;
+    G.sheetOpen = true; updateBeltPause();
+    opts.onSuccess = function(){ G.sheetOpen = false; updateBeltPause(); if (os) os(); };
+    opts.onCancel  = function(){ G.sheetOpen = false; updateBeltPause(); if (oc) oc(); };
+    SB.buyIAP(opts);
+  }
+
+  // ---------- crate payout ----------
+  function crateCoins(ci){ return 250 * S.wave * (S.premium === COLORS[ci] ? 2 : 1); }
 
   // ---------- build crates ----------
   var crateEls = [];
   COLORS.forEach(function(c,i){
     var d = document.createElement("div");
     d.className = "crate c-"+c;
-    d.innerHTML = '<div class="cico">'+CRATE_ICO[c]+'</div><div class="cmeter"><i></i></div>'
-      + '<div class="ccount">0/'+CRATE_SIZE+'</div><div class="seal-flash">SEALED! ✔</div>';
+    d.innerHTML = '<div class="cband cb-'+c+'">'+CRATE_ICO[c]+' '+c.toUpperCase()+'</div>'
+      + '<div class="cmeter"><i></i></div>'
+      + '<div class="ccount">0/'+CRATE_SIZE+'</div><div class="cpay"></div><div class="seal-flash"></div>';
     d.addEventListener("pointerdown", function(){ onCrateTap(i); });
     cratesEl.appendChild(d);
     crateEls.push(d);
@@ -246,6 +395,7 @@
     COLORS.forEach(function(c,i){
       crateEls[i].querySelector(".cmeter i").style.width = Math.min(100, S.fills[i]/CRATE_SIZE*100)+"%";
       crateEls[i].querySelector(".ccount").textContent = S.fills[i]+"/"+CRATE_SIZE;
+      crateEls[i].querySelector(".cpay").textContent = "+"+SB.fmt(crateCoins(i))+" 🪙";
       crateEls[i].classList.toggle("premium", S.premium === c);
     });
   }
@@ -259,8 +409,8 @@
       t.className = "tray";
       if (i===3 && !S.slot4){
         t.classList.add("locked");
-        t.innerHTML = '<span class="tlabel">🔒</span><span class="price-tag">4th slot $0.99</span>';
-        t.addEventListener("pointerdown", offerSlot4);
+        t.innerHTML = '<span class="tlabel">🔒</span><span class="price-tag">4th tray $0.99</span>';
+        t.addEventListener("click", offerSlot4);
       } else {
         t.innerHTML = '<span class="tlabel">TRAY</span>';
       }
@@ -296,16 +446,26 @@
   }
   function center(el){ var r = el.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; }
 
+  // modals that must not be dismissed by a backdrop tap (recap rewards / start)
+  // core.js closes the modal when the backdrop itself is clicked; a transparent
+  // shield child absorbs those clicks so e.target is never the backdrop.
+  function stickyModal(m){
+    var sh = document.createElement("div");
+    sh.style.cssText = "position:absolute;inset:0;";
+    m.el.insertBefore(sh, m.el.firstChild);
+    return m;
+  }
+
   // ---------- parcels ----------
   var CVAR = { red:"var(--sb-red)", green:"var(--sb-green)", blue:"var(--sb-blue)" };
   function makeParcel(color, golden){
     var el = document.createElement("div");
     el.className = "parcel " + (golden ? "p-gold" : "p-"+color);
     var num = 1 + ((Math.random()*12)|0);
-    el.innerHTML = '<span class="pcard">'+(golden ? "★" : num)+'</span>';
+    el.innerHTML = '<i class="ptop"></i><span class="pcard">'+(golden ? "★" : num)+'</span>';
     if (golden) el.querySelector(".pcard").style.color = CVAR[color]; // show target crate color
-    var p = { color:color, golden:!!golden, rainbow:false, el:el, x:0, slot:-1 };
-    el.addEventListener("pointerdown", function(e){ e.stopPropagation(); onParcelTap(p); });
+    var p = { color:color, golden:!!golden, rainbow:false, el:el, x:0, slot:-1, dragging:false };
+    el.addEventListener("pointerdown", function(e){ e.stopPropagation(); onParcelDown(p, e); });
     return p;
   }
   function spawnParcel(){
@@ -322,19 +482,23 @@
     var w = beltEl.clientWidth - 58;
     p.el.style.left = (2 + p.x * w) + "px";
   }
-  function zoneOf(p){
-    var w = beltEl.clientWidth - 58;
-    var cx = (2 + p.x*w + 27) / beltEl.clientWidth;
-    return Math.min(2, Math.max(0, Math.floor(cx*3)));
+  // forgiving hit test: sort succeeds if the parcel overlaps its color zone at all
+  function overZone(p, ci){
+    var W = beltEl.clientWidth;
+    var w = W - 58;
+    var left = 2 + p.x*w, right = left + 54;
+    var zl = ci * W/3, zr = (ci+1) * W/3;
+    return Math.min(right, zr) - Math.max(left, zl) >= 6;
   }
 
   // fly a parcel element from its current screen position to a target element, then run cb
   function flyTo(p, targetEl, cb){
     var from = center(p.el), to = center(targetEl);
     var ghost = p.el;
+    ghost.classList.remove("dragging");
     ghost.classList.add("flying");
     document.body.appendChild(ghost);
-    ghost.style.position = "fixed";
+    ghost.style.position = "fixed"; ghost.style.zIndex = "";
     ghost.style.left = (from.x-27)+"px"; ghost.style.top = (from.y-29)+"px";
     requestAnimationFrame(function(){ requestAnimationFrame(function(){
       ghost.style.left = (to.x-27)+"px"; ghost.style.top = (to.y-29)+"px";
@@ -344,24 +508,26 @@
   }
 
   // ---------- sorting ----------
-  function addFill(ci, pts, originEl){
+  function addFill(ci, pts){
     S.fills[ci] += pts;
-    S.totalSorted++;
+    S.totalSorted += pts;
     if (S.fills[ci] >= CRATE_SIZE){
-      S.fills[ci] = 0;
+      S.fills[ci] -= CRATE_SIZE; // carry overflow, never lose points
       sealCrate(ci);
     }
     renderCrates(); save();
   }
   function sealCrate(ci){
+    var coins = crateCoins(ci); // computed BEFORE anything else so display === grant
     var el = crateEls[ci];
     el.classList.remove("sealed"); void el.offsetWidth; el.classList.add("sealed");
     var flash = el.querySelector(".seal-flash");
+    flash.textContent = "SEALED! +" + SB.fmt(coins) + " 🪙";
     flash.classList.add("show");
-    setTimeout(function(){ flash.classList.remove("show"); }, 900);
+    setTimeout(function(){ flash.classList.remove("show"); }, 1100);
     var c = center(el);
     SB.confetti(c.x, c.y, 50);
-    var coins = 250 * S.wave * (S.premium === COLORS[ci] ? 2 : 1);
+    popText(c.x, c.y-70, "+"+SB.fmt(coins)+" 🪙");
     var rw = [{type:"coins", amount:coins}];
     if (Math.random() < 0.2) rw.push({type:"wild", amount:1});
     SB.grantRewards(rw, el);
@@ -371,6 +537,7 @@
   function directSort(p, ci){
     var i = G.beltParcels.indexOf(p);
     if (i>-1) G.beltParcels.splice(i,1);
+    p.dragging = false;
     var pts = p.golden ? 3 : 1;
     G.sortedThisWave++;
     if (p.golden){ G.goldenThisWave++; SB.grantRewards([{type:"coins",amount:100}], p.el); }
@@ -386,10 +553,11 @@
     renderHud();
   }
 
-  function toSlot(p, silent){
+  function toSlot(p, msg){
     var si = freeSlot();
     var i = G.beltParcels.indexOf(p);
     if (i>-1) G.beltParcels.splice(i,1);
+    p.dragging = false;
     G.combo = 0;
     if (si === -1){ // shouldn't happen (jam pauses first) — safety: direct sort anyway
       directSortHeld(p); return;
@@ -397,13 +565,14 @@
     G.slots[si] = p; p.slot = si;
     flyTo(p, trayEls[si], function(){
       p.el.classList.remove("flying");
+      p.el.classList.remove("sb-shake");
       p.el.style.position = ""; p.el.style.left = ""; p.el.style.top = ""; p.el.style.transform = "";
-      trayEls[si].innerHTML = ""; trayEls[si].appendChild(p.el);
+      if (G.slots[si] === p && trayEls[si]){ trayEls[si].innerHTML = ""; trayEls[si].appendChild(p.el); }
       G.undoStack.push(p);
       if (heldCount() >= slotCap()) startJam();
       checkWaveEnd();
     });
-    if (!silent) SB.toast("Missed! Parcel sent to a holding tray");
+    if (msg) SB.toast(msg);
     renderHud();
   }
 
@@ -414,11 +583,69 @@
     flyTo(p, crateEls[ci], function(){ addFill(ci, p.golden?3:1); checkWaveEnd(); });
   }
 
+  // ---------- input: tap + drag-to-crate ----------
+  var dragSt = null; // {p, sx, sy, moved}
+  function onParcelDown(p, e){
+    if (G.choosing) return;
+    if (p.slot >= 0){ if (G.playing) onParcelTap(p); return; } // held parcels: tap only
+    if (!G.playing) return;
+    dragSt = { p:p, sx:e.clientX, sy:e.clientY, moved:false };
+  }
+  document.addEventListener("pointermove", function(e){
+    if (!dragSt) return;
+    var p = dragSt.p;
+    if (!G.playing || G.beltParcels.indexOf(p) === -1){ dragSt = null; return; }
+    var dx = e.clientX - dragSt.sx, dy = e.clientY - dragSt.sy;
+    if (!dragSt.moved && dx*dx + dy*dy > 144){
+      dragSt.moved = true; p.dragging = true;
+      p.el.classList.add("dragging");
+      document.body.appendChild(p.el);
+      p.el.style.position = "fixed";
+    }
+    if (dragSt.moved){
+      p.el.style.left = (e.clientX - 27) + "px";
+      p.el.style.top = (e.clientY - 72) + "px"; // lift above the finger
+    }
+  });
+  function endDrag(e, cancelled){
+    if (!dragSt) return;
+    var d = dragSt; dragSt = null;
+    var p = d.p;
+    if (!d.moved){ if (!cancelled) onParcelTap(p); return; }
+    p.dragging = false;
+    if (!G.playing || G.beltParcels.indexOf(p) === -1){ p.el.remove(); return; }
+    var ci = -1;
+    if (!cancelled){
+      var px = p.el.getBoundingClientRect();
+      var cx = px.left + px.width/2, cy = px.top + px.height/2;
+      for (var i=0;i<3;i++){
+        var r = crateEls[i].getBoundingClientRect();
+        if ((cx >= r.left-6 && cx <= r.right+6 && cy >= r.top-40 && cy <= r.bottom+10) ||
+            (e.clientX >= r.left-6 && e.clientX <= r.right+6 && e.clientY >= r.top-10 && e.clientY <= r.bottom+10)){ ci = i; break; }
+      }
+    }
+    if (ci === -1){ // no crate: put it back on the belt where it was
+      p.el.classList.remove("dragging");
+      beltEl.appendChild(p.el);
+      p.el.style.position = ""; p.el.style.top = "";
+      positionParcel(p);
+      return;
+    }
+    if (COLORS[ci] === p.color){
+      directSort(p, ci);
+    } else {
+      p.el.classList.add("sb-shake");
+      toSlot(p, "Wrong crate! → holding tray");
+    }
+  }
+  document.addEventListener("pointerup", function(e){ endDrag(e, false); });
+  document.addEventListener("pointercancel", function(e){ endDrag(e, true); });
+
   function onParcelTap(p){
     if (!G.playing || G.choosing) return;
     if (p.slot >= 0){ // held parcel → to crate (rainbow → choose target first)
       if (p.rainbow){
-        G.choosing = { type:"rainbow", parcel:p };
+        setChoosing({ type:"rainbow", parcel:p });
         crateEls.forEach(function(c){ c.classList.add("choosable"); });
         SB.toast("Tap any crate to fill it +2!");
         return;
@@ -433,47 +660,47 @@
       renderHud();
       return;
     }
-    // belt parcel
-    var z = zoneOf(p);
-    if (COLORS[z] === p.color){
-      directSort(p, z);
+    // belt parcel: forgiving — any overlap with its color zone counts
+    var ci = COLORS.indexOf(p.color);
+    if (overZone(p, ci)){
+      directSort(p, ci);
     } else if (S.perfect > 0){
       S.perfect--; save();
       SB.toast("🎯 Auto-sort used! ("+S.perfect+" left)");
-      directSort(p, COLORS.indexOf(p.color));
+      directSort(p, ci);
     } else {
       p.el.classList.add("sb-shake");
-      toSlot(p);
+      toSlot(p, "Missed! → holding tray");
     }
   }
 
   function onCrateTap(ci){
     if (!G.choosing) return;
-    var ch = G.choosing; G.choosing = null;
+    var ch = G.choosing; setChoosing(null);
     crateEls.forEach(function(c){ c.classList.remove("choosable"); });
     if (ch.type === "rainbow"){
       var rp = ch.parcel, rslot = rp.slot;
       rp.slot = -1;
-      flyTo(rp, crateEls[ci], function(){
-        S.fills[ci] += 2; S.totalSorted += 2;
-        if (S.fills[ci] >= CRATE_SIZE){ S.fills[ci] -= CRATE_SIZE; sealCrate(ci); }
-        renderCrates(); save(); checkWaveEnd();
-      });
       if (rslot >= 0){
         G.slots[rslot] = null;
         trayEls[rslot].innerHTML = '<span class="tlabel">TRAY</span>';
       }
+      G.sortedThisWave += 2;
+      flyTo(rp, crateEls[ci], function(){
+        addFill(ci, 2);
+        checkWaveEnd();
+      });
       endJamIfClear();
       renderHud();
       SB.confetti();
     } else if (ch.type === "premium"){
-      S.premium = COLORS[ci]; save(); renderCrates();
+      S.premium = COLORS[ci]; save(); renderCrates(); renderOfferStrip();
       SB.confetti(); SB.toast("👑 " + COLORS[ci].toUpperCase() + " crate now pays 2× all event!");
     }
   }
 
   // ---------- undo ----------
-  undoBtn.addEventListener("pointerdown", function(){
+  undoBtn.addEventListener("click", function(){
     if (!G.playing){ SB.toast("Start a wave first"); return; }
     var p = G.undoStack.pop();
     if (!p){ undoBtn.classList.add("sb-shake"); setTimeout(function(){undoBtn.classList.remove("sb-shake");},450);
@@ -486,6 +713,7 @@
     G.slots[p.slot] = null;
     trayEls[p.slot].innerHTML = '<span class="tlabel">TRAY</span>';
     p.slot = -1; p.x = 0;
+    p.el.classList.remove("sb-shake");
     beltEl.appendChild(p.el);
     p.el.style.position = ""; p.el.style.top = ""; p.el.style.transform = "";
     positionParcel(p);
@@ -499,8 +727,10 @@
   function startJam(){
     if (G.jammed) return;
     G.jammed = true; G.jamCount++;
-    beltEl.classList.add("paused");
+    updateBeltPause();
     jamEl.classList.add("show");
+    beaconEl.classList.add("on");
+    sceneEl.classList.add("jammed");
     SB.haptic(40);
     if (!G.offerShownThisWave){
       G.offerShownThisWave = true;
@@ -510,8 +740,11 @@
   function endJamIfClear(){
     if (G.jammed && heldCount() < slotCap()){
       G.jammed = false;
-      beltEl.classList.remove("paused");
+      G.offerShownThisWave = false; // each new jam is a fresh offer moment
+      updateBeltPause();
       jamEl.classList.remove("show");
+      beaconEl.classList.remove("on");
+      sceneEl.classList.remove("jammed");
       SB.toast("Belt rolling again!");
     }
   }
@@ -519,20 +752,20 @@
   // ---------- IAP offers ----------
   function offerSlot4(){
     if (S.slot4) return;
-    SB.buyIAP({
-      label:"4th Holding Slot", price:"$0.99",
+    openOffer({
+      label:"4th Holding Tray", price:"$0.99",
       sub:"Permanent for this event — one extra tray means far fewer jams!",
       contents:[], grant:false,
       onSuccess:function(){
         S.slot4 = true; save(); buildSlots();
         trayEls[3].classList.add("unlock-pop");
         endJamIfClear();
-        SB.toast("🔓 4th holding slot unlocked!");
+        SB.toast("🔓 4th holding tray unlocked!");
       }
     });
   }
   function offerUndoBundle(){
-    SB.buyIAP({
+    openOffer({
       label:"Undo Bundle", price:"$1.99",
       sub:"3 Undos (send a held parcel back to the belt) + 1 free Auto-Sort!",
       contents:[{type:"undo",amount:3}],
@@ -540,7 +773,7 @@
     });
   }
   function offerConverter(){
-    SB.buyIAP({
+    openOffer({
       label:"Wildcard Converter", price:"$1.99",
       sub:"Fuses ALL held parcels into one 🌈 Rainbow parcel that fills ANY crate +2 — and frees your trays!",
       contents:[], grant:false,
@@ -556,9 +789,9 @@
     }
     var el = document.createElement("div");
     el.className = "parcel p-rainbow";
-    el.innerHTML = '<span class="pcard">?</span>';
-    var p = { color:"rainbow", golden:false, rainbow:true, el:el, x:0, slot:0 };
-    el.addEventListener("pointerdown", function(e){ e.stopPropagation(); onParcelTap(p); });
+    el.innerHTML = '<i class="ptop"></i><span class="pcard">?</span>';
+    var p = { color:"rainbow", golden:false, rainbow:true, el:el, x:0, slot:0, dragging:false };
+    el.addEventListener("pointerdown", function(e){ e.stopPropagation(); onParcelDown(p, e); });
     G.slots[0] = p;
     trayEls[0].innerHTML = ""; trayEls[0].appendChild(el);
     endJamIfClear();
@@ -567,30 +800,35 @@
     renderHud();
   }
   function offerPremiumCrate(){
-    SB.buyIAP({
+    openOffer({
       label:"Premium Crate", price:"$2.99",
       sub:"Pick a color — that crate pays 2× coins for the rest of the event. Gold trim included!",
       contents:[], grant:false,
       onSuccess:function(){
-        G.choosing = { type:"premium" };
+        setChoosing({ type:"premium" });
         crateEls.forEach(function(c){ c.classList.add("choosable"); });
         SB.toast("👑 Tap a crate to make it Premium!");
       }
     });
   }
   function offerPass(){
-    SB.buyIAP({
+    openOffer({
       label:"Warehouse Pass", price:"$4.99",
-      sub:"4th slot + Premium crate + 5 Undos + exclusive forklift 🚜 for your warehouse!",
+      sub:"Permanent for this event: 4th tray + Premium crate + 5 Undos + exclusive forklift 🚜 for your warehouse!",
       contents:[{type:"undo",amount:5}],
       onSuccess:function(){
         S.pass = true; S.slot4 = true; S.forklift = true; save();
         buildSlots(); trayEls[3].classList.add("unlock-pop");
         endJamIfClear();
         document.getElementById("forklift").classList.add("on");
-        G.choosing = { type:"premium" };
-        crateEls.forEach(function(c){ c.classList.add("choosable"); });
-        SB.toast("🚜 Warehouse Pass active! Tap a crate to make it Premium");
+        renderOfferStrip();
+        if (!S.premium){ // don't re-prompt a pick if a premium crate is already owned
+          setChoosing({ type:"premium" });
+          crateEls.forEach(function(c){ c.classList.add("choosable"); });
+          SB.toast("🚜 Pass active! Tap a crate → Premium 2×");
+        } else {
+          SB.toast("🚜 Warehouse Pass active!");
+        }
         renderHud();
       }
     });
@@ -608,19 +846,23 @@
     if (!html) html = '<button class="offer-btn" id="ob-undo"><span class="oico">↩️</span><span class="oname">Undo Bundle</span><span class="oprice">$1.99</span></button>';
     offerStrip.innerHTML = html;
     var b;
-    if ((b=document.getElementById("ob-prem"))) b.addEventListener("pointerdown", offerPremiumCrate);
-    if ((b=document.getElementById("ob-pass"))) b.addEventListener("pointerdown", offerPass);
-    if ((b=document.getElementById("ob-undo"))) b.addEventListener("pointerdown", offerUndoBundle);
+    if ((b=document.getElementById("ob-prem"))) b.addEventListener("click", offerPremiumCrate);
+    if ((b=document.getElementById("ob-pass"))) b.addEventListener("click", offerPass);
+    if ((b=document.getElementById("ob-undo"))) b.addEventListener("click", offerUndoBundle);
   }
 
   // ---------- wave lifecycle ----------
   function startWave(){
-    G.playing = true; G.jammed = false;
-    G.toSpawn = WAVE_PARCELS; G.timeLeft = WAVE_TIME;
+    G.playing = true; G.jammed = false; G.sheetOpen = false;
+    G.toSpawn = waveParcels(S.wave); G.timeLeft = WAVE_TIME;
     G.combo = 0; G.sortedThisWave = 0; G.goldenThisWave = 0;
     G.spawnAcc = 1.2; G.lastTs = 0; G.offerShownThisWave = false; G.jamCount = 0;
-    beltEl.classList.remove("paused");
     jamEl.classList.remove("show");
+    beaconEl.classList.remove("on");
+    sceneEl.classList.remove("jammed");
+    updateBeltPause();
+    // trays may still be full from the previous wave — re-trigger the jam honestly
+    if (heldCount() >= slotCap()) startJam();
     renderHud();
     requestAnimationFrame(loop);
   }
@@ -632,21 +874,24 @@
     if (!G.lastTs) G.lastTs = ts;
     var dt = Math.min(0.05, (ts - G.lastTs)/1000);
     G.lastTs = ts;
-    G.timeLeft -= dt;
-    if (G.timeLeft <= 0){ endWave(); return; }
-    if (!G.jammed){
-      // spawn
-      G.spawnAcc += dt;
-      if (G.toSpawn > 0 && G.spawnAcc >= spawnInterval()){
-        G.spawnAcc = 0; spawnParcel();
-      }
-      // move
-      var sp = beltSpeed();
-      for (var i = G.beltParcels.length-1; i >= 0; i--){
-        var p = G.beltParcels[i];
-        p.x += sp * dt;
-        if (p.x >= 1){ p.x = 1; positionParcel(p); toSlot(p, true); }
-        else positionParcel(p);
+    if (!G.choosing && !G.sheetOpen){ // choosing a crate / reading an offer freezes the clock and the belt
+      G.timeLeft -= dt;
+      if (G.timeLeft <= 0){ endWave(); return; }
+      if (!G.jammed){
+        // spawn
+        G.spawnAcc += dt;
+        if (G.toSpawn > 0 && G.spawnAcc >= spawnInterval()){
+          G.spawnAcc = 0; spawnParcel();
+        }
+        // move
+        var sp = beltSpeed();
+        for (var i = G.beltParcels.length-1; i >= 0; i--){
+          var p = G.beltParcels[i];
+          if (p.dragging) continue;
+          p.x += sp * dt;
+          if (p.x >= 1){ p.x = 1; positionParcel(p); toSlot(p, "Missed! → holding tray"); }
+          else positionParcel(p);
+        }
       }
     }
     renderHud();
@@ -658,8 +903,11 @@
   function endWave(cleared){
     if (!G.playing) return;
     G.playing = false;
-    beltEl.classList.remove("paused");
+    dragSt = null;
     jamEl.classList.remove("show");
+    beaconEl.classList.remove("on");
+    sceneEl.classList.remove("jammed");
+    updateBeltPause();
     // belt leftovers vanish (held parcels stay safe)
     G.beltParcels.forEach(function(p){ p.el.remove(); });
     G.beltParcels = [];
@@ -667,7 +915,7 @@
     var coins = G.sortedThisWave * 10 + bonus;
     var tokens = S.wave * 3;
     var rewards = [{type:"coins",amount:Math.max(coins,10)},{type:"token",amount:tokens}];
-    var m = SB.modal(
+    var m = stickyModal(SB.modal(
       '<h3 style="margin:0">'+(cleared ? "📦 Wave "+S.wave+" cleared!" : "⏱️ Shift over!")+'</h3>' +
       '<div class="recap-stats">' +
         '<div><div class="n">'+G.sortedThisWave+'</div><div class="l">Sorted</div></div>' +
@@ -678,8 +926,8 @@
         rewards.map(SB.rewardChip).join("") + '</div>' +
       '<button class="sb-btn sb-btn-green sb-btn-block" id="rc-collect">Collect &amp; Start Wave '+(S.wave+1)+' ▶</button>' +
       (!S.pass ? '<button class="sb-sheet-cancel" id="rc-pass">🚜 Get the Warehouse Pass · $4.99</button>' : '')
-    );
-    m.el.querySelector("#rc-collect").addEventListener("pointerdown", function(){
+    ));
+    m.el.querySelector("#rc-collect").addEventListener("click", function(){
       SB.grantRewards(rewards, m.el.querySelector("#rc-collect"));
       SB.confetti();
       m.close();
@@ -689,48 +937,73 @@
       setTimeout(startWave, 700);
     });
     var pb = m.el.querySelector("#rc-pass");
-    if (pb) pb.addEventListener("pointerdown", function(){ offerPass(); });
+    if (pb) pb.addEventListener("click", function(){ offerPass(); });
     renderHud();
   }
 
-  // ---------- info ----------
-  document.getElementById("info-btn").addEventListener("pointerdown", function(){
+  // ---------- info (pauses the wave while open) ----------
+  document.getElementById("info-btn").addEventListener("click", function(){
+    G.sheetOpen = true; updateBeltPause();
+    function resume(){ G.sheetOpen = false; updateBeltPause(); }
     var m = SB.modal(
       '<h3 style="margin:0 0 8px">📦 Sorting Warehouse</h3>' +
-      '<p style="font-size:13px;text-align:left;line-height:1.5;color:#3c4a68">' +
-      'Tap parcels while they ride over their matching colored zone to sort them straight into crates; mistimed taps land in scarce holding trays, and full trays jam the belt while the wave timer keeps running. ' +
-      'This borrows the viral color-sort / bus-jam ad format but makes it an honest, fully playable event instead of bait. ' +
-      'Monetization is contextual: jams surface the 4th tray and Wildcard Converter exactly when slot pressure peaks, while wave recaps upsell the Premium Crate and Warehouse Pass. ' +
-      'Crucially, a jam only pauses the run — accumulated crate fill and rewards are never destroyed, so purchases feel like acceleration, not loss-avoidance ransom.</p>' +
+      '<ul style="font-size:13px;text-align:left;line-height:1.55;color:#3c4a68;margin:0 0 12px;padding-left:18px">' +
+      '<li><b>Tap</b> a parcel while it rides over its <b>matching color zone</b> — or <b>drag</b> it onto its crate.</li>' +
+      '<li>Misses land in <b>holding trays</b>. All trays full = <b>belt jam</b>. Tap held parcels to clear it free — your crates and rewards are <b>never lost</b>.</li>' +
+      '<li>Fill a crate of 8 → <b>coin burst</b> (250 × wave · Premium crate pays 2×).</li>' +
+      '<li>Every 3rd sort in a row = <b>+50 combo bonus</b>. ★ Golden parcels pay +100 and count ×3.</li>' +
+      '<li>Undo ↩️ sends the last held parcel back to the belt.</li>' +
+      '<li>Clear waves for coins + Event Tokens. Waves get faster with more parcels. Purchases last for this event (48h).</li>' +
+      '</ul>' +
       '<button class="sb-btn sb-btn-blue sb-btn-block" id="info-ok">Got it</button>'
     );
-    m.el.querySelector("#info-ok").addEventListener("pointerdown", m.close);
+    m.el.addEventListener("click", function(e){ if (e.target === m.el) resume(); });
+    m.el.querySelector("#info-ok").addEventListener("click", function(){ resume(); m.close(); });
   });
 
   // ---------- start screen ----------
   function showStart(){
-    var m = SB.modal(
+    var m = stickyModal(SB.modal(
       '<div class="start-hero">🏭📦</div>' +
       '<h3 style="margin:0 0 6px">Sorting Warehouse</h3>' +
       '<p style="font-size:13px;color:#5a6b8c;margin:0 0 12px;line-height:1.45">' +
-      'Tap parcels when they pass over their <b>matching color zone</b> to sort them into crates. ' +
+      'Tap parcels when they pass over their <b>matching color zone</b> — or <b>drag them onto their crate</b> — to sort them. ' +
       'Miss and they clog your holding trays — <b>3 full trays jam the belt</b> (but never your rewards). ' +
-      'Fill a crate of 8 for a coin burst! Wave '+S.wave+' · '+WAVE_PARCELS+' parcels · '+WAVE_TIME+'s</p>' +
+      'Fill a crate of 8 for a coin burst! Wave '+S.wave+' · '+waveParcels(S.wave)+' parcels · '+WAVE_TIME+'s</p>' +
       '<button class="sb-btn sb-btn-yellow sb-btn-block" id="st-go">▶ Start Shift — Wave '+S.wave+'</button>'
-    );
-    m.el.querySelector("#st-go").addEventListener("pointerdown", function(){
+    ));
+    m.el.querySelector("#st-go").addEventListener("click", function(){
       m.close(); startWave();
     });
   }
 
   // ---------- boot ----------
   save(); // persist endTs on first run
+  G.toSpawn = waveParcels(S.wave); // HUD shows the real upcoming count pre-start
   buildSlots();
   renderCrates();
   renderHud();
   renderOfferStrip();
   if (S.forklift) document.getElementById("forklift").classList.add("on");
+  updateBeltPause();
   showStart();
+
+  // hidden test hook (demo only, not part of the UX)
+  window.__SW = {
+    G:G, S:S, save:save, startWave:startWave, endWave:endWave,
+    renderCrates:renderCrates, renderHud:renderHud, buildSlots:buildSlots,
+    onParcelTap:onParcelTap, convertHeld:convertHeld, COLORS:COLORS,
+    crateCoins:crateCoins, overZone:overZone,
+    debugSpawn:function(color, x, golden){
+      var p = makeParcel(color, !!golden);
+      p.x = (x == null ? 0.1 : x);
+      beltEl.appendChild(p.el);
+      positionParcel(p);
+      G.beltParcels.push(p);
+      renderHud();
+      return G.beltParcels.length - 1;
+    }
+  };
 })();
 </script>
 </body>

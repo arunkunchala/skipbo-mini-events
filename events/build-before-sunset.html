@@ -7,84 +7,184 @@
 <link rel="stylesheet" href="../shared/core.css">
 <style>
   /* ---------- header row ---------- */
-  .bbs-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .bbs-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
   .bbs-info {
-    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer;
-    background:rgba(255,255,255,0.18); color:#fff; font-size:17px; font-weight:900;
+    width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,0.18); color:#fff; font-size:19px; font-weight:900;
+    display:grid; place-items:center;
   }
   .bbs-info:active { transform:scale(0.9); }
 
   /* ---------- scene ---------- */
   .scene {
-    position:relative; height:300px; border-radius:var(--sb-radius);
+    position:relative; height:clamp(200px, 31vh, 300px); border-radius:var(--sb-radius);
     overflow:hidden; box-shadow:var(--sb-shadow); border:2px solid rgba(255,255,255,0.25);
   }
-  .sky { position:absolute; inset:0; background:linear-gradient(180deg,#3E8EDE 0%,#7db8ee 38%,#ffd28a 62%,#ff9e5e 78%,#f2784b 100%); }
-  .dusk { position:absolute; inset:0; background:linear-gradient(180deg,#141c3a 0%,#3a2b52 60%,#7a3d55 100%); opacity:0; transition:opacity 1s linear; }
+  .sky { position:absolute; inset:0; background:linear-gradient(180deg,#2f7fd6 0%,#6fb0ec 42%,#b8dcfa 68%,#e8f4ff 100%); }
+  .sky-golden { position:absolute; inset:0; opacity:0; transition:opacity 1s linear;
+    background:linear-gradient(180deg,#3f5f9e 0%,#a86a9d 34%,#ff9e5e 62%,#ffd28a 84%,#ffe9b0 100%); }
+  .sky-dusk { position:absolute; inset:0; opacity:0; transition:opacity 1s linear;
+    background:linear-gradient(180deg,#0c1430 0%,#231d4d 46%,#4a2450 74%,#7a3d55 100%); }
+  .stars { position:absolute; inset:0 0 40% 0; opacity:0; transition:opacity 1.2s; }
+  .stars i { position:absolute; width:3px; height:3px; border-radius:50%; background:#fff;
+    animation:twinkle 2.2s infinite; }
+  .stars i:nth-child(1){left:12%;top:18%;} .stars i:nth-child(2){left:30%;top:9%;animation-delay:.4s;}
+  .stars i:nth-child(3){left:52%;top:22%;animation-delay:.9s;} .stars i:nth-child(4){left:70%;top:8%;animation-delay:.2s;}
+  .stars i:nth-child(5){left:86%;top:16%;animation-delay:.7s;} .stars i:nth-child(6){left:42%;top:30%;animation-delay:1.2s;}
   .sun {
-    position:absolute; left:68%; top:12%; width:52px; height:52px; border-radius:50%;
-    background:radial-gradient(circle at 35% 35%, #fff3c4, #FFC72C 55%, #ff9e3d);
-    box-shadow:0 0 34px 14px rgba(255,199,44,0.55);
-    transition:top 1s linear;
+    position:absolute; left:0; top:0; width:50px; height:50px; margin:-25px; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #fff6cf, #FFC72C 55%, #ff9440);
+    box-shadow:0 0 36px 14px rgba(255,180,60,0.55);
+    transition:transform 1s linear, opacity .8s;
   }
   .sun.flicker { animation:sunFlick 0.5s 2; }
-  @keyframes sunFlick { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.8) saturate(1.4); transform:scale(1.12);} }
-  .sea {
-    position:absolute; left:0; right:0; bottom:17%; height:22%;
-    background:linear-gradient(180deg,#2e7ec9,#1D4FA1);
-    box-shadow:inset 0 4px 8px rgba(255,255,255,0.35);
-  }
-  .sea::after { content:"🌊 🌊 🌊"; position:absolute; top:-9px; left:0; right:0; text-align:center; font-size:13px; opacity:0.7; letter-spacing:34px; }
-  .sand { position:absolute; left:0; right:0; bottom:0; height:18%; background:linear-gradient(180deg,#f4d58d,#dcb264); }
+  @keyframes sunFlick { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.8) saturate(1.4);} }
+  .moon { position:absolute; right:12%; top:9%; width:34px; height:34px; border-radius:50%;
+    background:radial-gradient(circle at 62% 38%, #fffdf2, #e8e2c8 70%);
+    box-shadow:0 0 22px 6px rgba(255,250,220,0.4), inset -7px -5px 0 rgba(160,155,130,0.35);
+    opacity:0; transition:opacity 1.2s; }
+  .scene.night .stars, .scene.night .moon { opacity:1; }
+  .scene.night .sun { opacity:0; }
+
+  .sea { position:absolute; left:0; right:0; top:57%; bottom:20%;
+    background:linear-gradient(180deg,#7fd0e8 0%, #2e7ec9 30%, #1D4FA1 100%); }
+  .sea::before { content:""; position:absolute; left:0; right:0; top:0; height:3px;
+    background:rgba(255,255,255,0.75); }
+  .sea::after { content:""; position:absolute; inset:6px 0 0 0; opacity:0.16;
+    background:repeating-linear-gradient(180deg, transparent 0 9px, rgba(255,255,255,0.55) 9px 11px);
+    mask-image:linear-gradient(90deg, transparent, #000 25% 75%, transparent); -webkit-mask-image:linear-gradient(90deg, transparent, #000 25% 75%, transparent); }
+  .sand { position:absolute; left:0; right:0; bottom:0; height:23%;
+    background:linear-gradient(180deg,#f7dfa0,#e5bd72 70%,#d8ab5e); border-radius:40% 20% 0 0 / 14px 8px 0 0; }
+
+  /* palm tree (always present) */
+  .palm { position:absolute; left:2%; bottom:13%; width:96px; height:128px; z-index:2; }
+  .palm .trunk { position:absolute; left:44px; bottom:0; width:12px; height:84px;
+    background:linear-gradient(90deg,#7a4c28,#b07b45 55%,#8a5a33);
+    border-radius:45% 45% 5px 5px; transform:rotate(-7deg); transform-origin:50% 100%;
+    background-image:repeating-linear-gradient(180deg, rgba(0,0,0,0.14) 0 3px, transparent 3px 11px); }
+  .palm .frond { position:absolute; left:38px; top:38px; width:52px; height:13px;
+    background:linear-gradient(90deg,#27874a,#37b25c 60%,#2E9E4F);
+    border-radius:8% 100% 90% 100% / 60% 100% 40% 100%;
+    transform-origin:4px 7px; box-shadow:inset 0 -3px 0 rgba(0,0,0,0.14); }
+  .palm .frond.f1 { transform:rotate(-158deg) scaleY(-1); } .palm .frond.f2 { transform:rotate(-118deg) scaleY(-1); }
+  .palm .frond.f3 { transform:rotate(-64deg); }  .palm .frond.f4 { transform:rotate(-24deg); }
+  .palm .frond.f5 { transform:rotate(12deg); }
+  .palm .coco { position:absolute; left:37px; top:40px; width:9px; height:9px; border-radius:50%; background:#6d4623;
+    box-shadow:9px 3px 0 #7a5129; }
 
   /* build layers */
-  .layer { position:absolute; opacity:0; transform:translateY(24px) scale(0.7); transition:all 0.7s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; }
+  .layer { position:absolute; opacity:0; transform:translateY(22px) scale(0.75); transition:opacity .7s, transform .7s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; }
   .layer.on { opacity:1; transform:translateY(0) scale(1); }
-  .posts { left:10%; bottom:14%; font-size:26px; letter-spacing:8px; }
-  .posts::before { content:"🏗️"; position:absolute; top:-34px; left:56px; font-size:32px; }
-  .hut { left:14%; bottom:15%; font-size:58px; }
-  .hut::after { content:"🍹"; position:absolute; right:-18px; bottom:6px; font-size:20px; }
-  .lights { left:6%; right:6%; top:26%; height:36px; border-bottom:2px dashed rgba(255,235,170,0.85); border-radius:0 0 50% 50%; }
-  .lights span { position:absolute; bottom:-9px; font-size:13px; animation:twinkle 1.6s infinite; }
-  @keyframes twinkle { 0%,100%{opacity:1; filter:brightness(1.3);} 50%{opacity:0.45;} }
-  .djbooth { right:8%; bottom:15%; font-size:40px; }
-  .djbooth::after { content:"🎧"; position:absolute; left:12px; bottom:-4px; font-size:22px; }
-  .party { inset:0; }
-  .bunting { position:absolute; top:0; left:0; right:0; height:16px;
-    background:linear-gradient(45deg,transparent 33%,var(--sb-red) 33% 66%,transparent 66%) 0 0/24px 16px,
-               linear-gradient(-45deg,transparent 33%,var(--sb-yellow) 33% 66%,transparent 66%) 12px 0/24px 16px; }
-  .dancers { position:absolute; bottom:2%; left:0; right:0; text-align:center; font-size:26px; }
+
+  /* L0 foundations: piles + deck platform */
+  .deckL { left:27%; right:5%; bottom:17%; height:34px; transform-origin:50% 100%; }
+  .deckL .plat { position:absolute; left:0; right:0; top:0; height:15px; border-radius:4px 4px 0 0;
+    background:repeating-linear-gradient(90deg,#c98d4e 0 17px,#b3763c 17px 19px);
+    box-shadow:0 3px 0 #8a5a33, inset 0 2px 0 rgba(255,255,255,0.35); }
+  .deckL .post { position:absolute; top:15px; width:8px; height:19px; background:linear-gradient(90deg,#8a5a33,#a56938); border-radius:0 0 3px 3px; }
+  .deckL .post.p1{left:6%;} .deckL .post.p2{left:32%;} .deckL .post.p3{left:62%;} .deckL .post.p4{right:5%;}
+
+  /* L1 bar hut with thatched roof */
+  .barL { left:30%; bottom:calc(17% + 14px); width:118px; height:86px; transform-origin:50% 100%; }
+  .barL .roof { position:absolute; left:-8px; right:-8px; top:0; height:34px;
+    background:repeating-linear-gradient(90deg,#e8b45f 0 9px,#cf9a43 9px 18px);
+    clip-path:polygon(50% 0, 100% 100%, 0 100%); }
+  .barL .roof::after { content:""; position:absolute; left:0; right:0; bottom:0; height:7px; background:#a5732c; }
+  .barL .body { position:absolute; left:6px; right:6px; top:34px; bottom:0;
+    background:linear-gradient(180deg,#f2e0b8,#e3c98f); border:2px solid #b98d4e; border-top:none; border-radius:0 0 6px 6px; }
+  .barL .counter { position:absolute; left:0; right:0; bottom:0; height:17px;
+    background:repeating-linear-gradient(90deg,#b3763c 0 14px,#9c6430 14px 16px); border-radius:0 0 5px 5px; box-shadow:inset 0 2px 0 rgba(255,255,255,0.3); }
+  .barL .bottle { position:absolute; bottom:19px; width:8px; height:15px; border-radius:3px 3px 2px 2px; }
+  .barL .bottle::after { content:""; position:absolute; left:2.5px; top:-5px; width:3px; height:6px; background:inherit; border-radius:2px; }
+  .barL .b1 { left:22px; background:var(--sb-red); } .barL .b2 { left:36px; background:var(--sb-green); height:20px; }
+  .barL .b3 { left:50px; background:var(--sb-sky); } .barL .b4 { left:64px; background:var(--sb-yellow); height:15px; }
+  .barL .sign { position:absolute; left:50%; bottom:2px; transform:translateX(-50%); z-index:2;
+    background:var(--sb-blue); color:#fff; font-size:8px; font-weight:900; letter-spacing:1px;
+    padding:1.5px 7px; border-radius:5px; border:1.5px solid rgba(255,255,255,0.6); }
+
+  /* L2 string lights + umbrella */
+  .lightsL { left:5%; right:5%; top:11%; height:64px; }
+  .lightsL .swag { position:absolute; left:0; right:0; height:30px;
+    border-bottom:2px solid rgba(60,50,40,0.55); border-radius:0 0 50% 50%; }
+  .lightsL .swag.s2 { top:26px; left:14%; right:14%; height:24px; border-bottom-color:rgba(60,50,40,0.4); }
+  .lightsL .bulb { position:absolute; width:8px; height:8px; border-radius:50%; background:#ffedb0;
+    box-shadow:0 0 7px 2.5px rgba(255,215,110,0.85); animation:twinkle 1.6s infinite; }
+  .lightsL .s1 .bulb:nth-child(1){left:6%;bottom:-7px;} .lightsL .s1 .bulb:nth-child(2){left:24%;bottom:-11px;animation-delay:.3s;background:#ffc9d2;}
+  .lightsL .s1 .bulb:nth-child(3){left:49%;bottom:-13px;animation-delay:.6s;} .lightsL .s1 .bulb:nth-child(4){left:73%;bottom:-11px;animation-delay:.2s;background:#c9e4ff;}
+  .lightsL .s1 .bulb:nth-child(5){left:92%;bottom:-7px;animation-delay:.8s;}
+  .lightsL .s2 .bulb:nth-child(1){left:12%;bottom:-8px;animation-delay:.5s;background:#c9e4ff;} .lightsL .s2 .bulb:nth-child(2){left:46%;bottom:-12px;animation-delay:.1s;}
+  .lightsL .s2 .bulb:nth-child(3){left:82%;bottom:-8px;animation-delay:.7s;background:#ffc9d2;}
+  @keyframes twinkle { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  .scene.night .lightsL .bulb, .scene.golden .lightsL .bulb { box-shadow:0 0 11px 4px rgba(255,215,110,1); }
+  .umbrella { position:absolute; left:13%; bottom:20%; width:64px; height:58px; }
+  .umbrella .canopy { position:absolute; left:0; top:0; width:64px; height:26px; border-radius:64px 64px 0 0 / 26px 26px 0 0;
+    background:repeating-linear-gradient(90deg,var(--sb-red) 0 12px,#fff 12px 24px); box-shadow:inset 0 -3px 0 rgba(0,0,0,0.15); }
+  .umbrella .pole { position:absolute; left:30px; top:24px; width:4px; height:34px; background:#8a5a33; border-radius:2px; }
+
+  /* L3 stage + DJ booth */
+  .djL { right:6%; bottom:calc(17% + 14px); width:96px; height:64px; transform-origin:50% 100%; }
+  .djL .plat { position:absolute; left:0; right:0; bottom:0; height:12px; border-radius:3px;
+    background:repeating-linear-gradient(90deg,#5a4a8a 0 14px,#4a3c74 14px 16px); box-shadow:inset 0 2px 0 rgba(255,255,255,0.25); }
+  .djL .booth { position:absolute; left:22px; bottom:12px; width:52px; height:30px; border-radius:5px;
+    background:linear-gradient(180deg,#3E8EDE,#1D4FA1); border:2px solid #14396f; }
+  .djL .booth::before, .djL .booth::after { content:""; position:absolute; top:7px; width:15px; height:15px; border-radius:50%;
+    background:radial-gradient(circle, #ddd 0 3px, #222 3px 7px, #444 7px); }
+  .djL .booth::before { left:6px; } .djL .booth::after { right:6px; }
+  .djL .speaker { position:absolute; bottom:12px; width:17px; height:26px; background:#26243a; border-radius:3px; border:1.5px solid #4a4668; }
+  .djL .speaker::after { content:""; position:absolute; left:3.5px; bottom:3px; width:8px; height:8px; border-radius:50%;
+    background:radial-gradient(circle,#777 0 2px,#333 2px); }
+  .djL .speaker.sp1 { left:0; } .djL .speaker.sp2 { right:0; }
+  .djL .note { position:absolute; top:-12px; left:38px; font-size:13px; opacity:0; }
+  .scene.night .djL .note, .scene.golden .djL .note { opacity:1; animation:noteFloat 1.4s infinite; }
+  @keyframes noteFloat { 0%{transform:translateY(4px);opacity:0;} 30%{opacity:1;} 100%{transform:translateY(-10px);opacity:0;} }
+
+  /* L4 grand opening party */
+  .partyL { inset:0; }
+  .bunting { position:absolute; top:0; left:0; right:0; height:15px;
+    background:linear-gradient(45deg,transparent 33%,var(--sb-red) 33% 66%,transparent 66%) 0 0/24px 15px,
+               linear-gradient(-45deg,transparent 33%,var(--sb-yellow) 33% 66%,transparent 66%) 12px 0/24px 15px; }
+  .neon { position:absolute; left:50%; top:20%; transform:translateX(-50%);
+    font-size:15px; font-weight:900; letter-spacing:2.5px; color:#fff05e; white-space:nowrap;
+    text-shadow:0 0 6px #ffb52c, 0 0 16px #ff7a2c, 0 0 28px rgba(255,110,40,0.8);
+    animation:neonFlick 2.6s infinite; }
+  @keyframes neonFlick { 0%,100%{opacity:1;} 88%{opacity:1;} 91%{opacity:0.45;} 94%{opacity:1;} }
+  .dancers { position:absolute; bottom:19%; left:34%; right:8%; text-align:center; font-size:23px; }
   .dancers span { display:inline-block; animation:dance 0.6s infinite alternate; }
   .dancers span:nth-child(2n){ animation-delay:0.3s; }
-  @keyframes dance { from{transform:translateY(0) rotate(-8deg);} to{transform:translateY(-8px) rotate(8deg);} }
-  .fireworks { position:absolute; top:6%; left:0; right:0; text-align:center; font-size:30px; letter-spacing:40px; }
-  .fireworks span { display:inline-block; animation:fw 1.4s infinite; }
-  .fireworks span:nth-child(2){ animation-delay:0.5s; } .fireworks span:nth-child(3){ animation-delay:0.9s; }
-  @keyframes fw { 0%{transform:scale(0.2); opacity:0;} 35%{transform:scale(1.3); opacity:1;} 100%{transform:scale(1.6); opacity:0;} }
+  @keyframes dance { from{transform:translateY(0) rotate(-8deg);} to{transform:translateY(-7px) rotate(8deg);} }
+  /* CSS fireworks: dot bursts via box-shadow, animated with transform/opacity only */
+  .fw { position:absolute; width:5px; height:5px; border-radius:50%; opacity:0; animation:fwBoom 1.8s infinite; }
+  .fw, .fw::after { background:currentColor; }
+  .fw { color:#FFC72C;
+    box-shadow:0 -17px 0 currentColor, 0 17px 0 currentColor, -17px 0 0 currentColor, 17px 0 0 currentColor,
+      -12px -12px 0 currentColor, 12px -12px 0 currentColor, -12px 12px 0 currentColor, 12px 12px 0 currentColor; }
+  .fw1 { left:24%; top:19%; } .fw2 { left:55%; top:11%; color:#ff6e87; animation-delay:.6s; }
+  .fw3 { left:82%; top:22%; color:#7fd0ff; animation-delay:1.15s; }
+  @keyframes fwBoom { 0%{transform:scale(0.1); opacity:0;} 12%{opacity:1;} 45%{transform:scale(1.25); opacity:0.9;} 100%{transform:scale(1.7); opacity:0;} }
 
-  .worker { position:absolute; bottom:16%; left:44%; font-size:30px; animation:bob 0.9s infinite alternate; transition:opacity 0.4s; }
-  .worker.two { left:60%; bottom:15%; }
-  .worker .tool { position:absolute; top:-14px; right:-13px; font-size:17px; animation:hammer 0.45s infinite alternate; }
-  @keyframes bob { from{transform:translateY(0);} to{transform:translateY(-6px);} }
+  .worker { position:absolute; bottom:20%; left:29%; font-size:28px; animation:bob 0.9s infinite alternate; transition:opacity 0.4s; z-index:3; }
+  .worker.two { left:64%; }
+  .worker .tool { position:absolute; top:-13px; right:-12px; font-size:16px; animation:hammer 0.45s infinite alternate; }
+  @keyframes bob { from{transform:translateY(0);} to{transform:translateY(-5px);} }
   @keyframes hammer { from{transform:rotate(-30deg);} to{transform:rotate(25deg);} }
-  .guests { position:absolute; bottom:1%; left:6px; right:6px; height:26px; font-size:19px; overflow:hidden; white-space:nowrap; }
+  .guests { position:absolute; bottom:1%; left:6px; right:6px; height:25px; font-size:18px; overflow:hidden; white-space:nowrap; z-index:3; }
   .guests span { display:inline-block; animation:arrive 0.8s cubic-bezier(0.34,1.56,0.64,1) both; margin-right:2px; }
   @keyframes arrive { from{transform:translateX(90px); opacity:0;} to{transform:translateX(0); opacity:1;} }
-  .scene.dim .sky,.scene.dim .sea,.scene.dim .sand,.scene.dim .layer { filter:grayscale(0.6) brightness(0.55); }
+  .scene.dim .sky,.scene.dim .sea,.scene.dim .sand,.scene.dim .layer,.scene.dim .palm { filter:grayscale(0.45) brightness(0.6); }
 
   /* ---------- stage card ---------- */
-  .stagecard { margin-top:12px; }
-  .stage-dots { display:flex; gap:6px; justify-content:center; margin-bottom:10px; }
+  .stagecard { margin-top:10px; padding:11px 14px; }
+  .stage-dots { display:flex; gap:6px; justify-content:center; margin-bottom:7px; }
   .stage-dots i {
-    width:26px; height:26px; border-radius:50%; font-style:normal; font-size:13px; font-weight:900;
+    width:25px; height:25px; border-radius:50%; font-style:normal; font-size:13px; font-weight:900;
     display:grid; place-items:center; background:rgba(27,42,74,0.12); color:#8b97ad;
   }
   .stage-dots i.done { background:var(--sb-green); color:#fff; }
   .stage-dots i.now { background:var(--sb-yellow); color:var(--sb-ink); box-shadow:0 0 0 3px rgba(255,199,44,0.35); }
-  .stage-name { font-size:17px; font-weight:900; text-align:center; }
-  .bar-wrap { margin:10px 0 4px; }
+  .stage-name { font-size:16px; font-weight:900; text-align:center; }
+  .bar-wrap { margin:8px 0 4px; }
   .bar-label { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#5a6b8c; margin-bottom:3px; }
-  .bar { height:16px; border-radius:999px; background:rgba(27,42,74,0.12); overflow:hidden; }
+  .bar { height:15px; border-radius:999px; background:rgba(27,42,74,0.12); overflow:hidden; }
   .bar .fill {
     height:100%; border-radius:999px; width:0%;
     background:linear-gradient(90deg,var(--sb-yellow),#ff9e3d); transition:width 0.5s linear;
@@ -93,8 +193,9 @@
   .bar .fill.whoosh { animation:whoosh 0.6s; }
   @keyframes whoosh { 0%{filter:brightness(1);} 50%{filter:brightness(1.9); background-position:100% 0;} 100%{filter:brightness(1);} }
   .bar.second .fill { background:linear-gradient(90deg,#5ba0e8,var(--sb-sky)); }
-  .stage-rewards { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:8px 0; }
-  .tapbtn { margin-top:6px; }
+  .stage-rewards { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin:7px 0 0; }
+  .stage-rewards .sb-reward { font-size:12px; padding:4px 8px; }
+  .tapbtn { margin-top:8px; }
   .tapbtn.glow { animation:glowPulse 0.9s infinite; }
   @keyframes glowPulse {
     0%,100%{ box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 0 0 rgba(255,199,44,0.7); }
@@ -102,29 +203,31 @@
   }
 
   /* ---------- offers ---------- */
-  .offers { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+  .offers { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
   .offer {
     background:var(--sb-cream); border-radius:14px; box-shadow:var(--sb-shadow);
-    padding:10px; text-align:center; cursor:pointer; border:2px solid transparent;
-    transition:transform 0.08s;
+    padding:8px 6px; text-align:center; cursor:pointer; border:2px solid transparent;
+    transition:transform 0.08s; min-height:92px;
+    display:flex; flex-direction:column; justify-content:center; gap:1px;
   }
   .offer:active { transform:scale(0.96); }
-  .offer .oi { font-size:26px; }
-  .offer .ot { font-weight:900; font-size:13px; margin:2px 0; }
-  .offer .op { font-weight:800; font-size:12px; color:var(--sb-blue); }
+  .offer .oi { font-size:23px; line-height:1.1; }
+  .offer .ot { font-weight:900; font-size:12px; }
+  .offer .od { font-size:10px; line-height:1.25; color:#5a6b8c; font-weight:700; }
+  .offer .op { font-weight:800; font-size:12px; color:var(--sb-blue); margin-top:2px; }
   .offer.hot { border-color:var(--sb-yellow); background:linear-gradient(180deg,#fff7dd,var(--sb-cream)); }
   .offer.grand {
-    grid-column:1 / -1; border-color:var(--sb-red);
+    grid-column:1 / -1; border-color:var(--sb-red); min-height:0; padding:11px 8px;
     background:linear-gradient(135deg,#2a1a4a,#5b2a6e 60%,#a13d6d); color:#fff;
     animation:grandIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
   }
+  .offer.grand .od { color:rgba(255,255,255,0.85); font-size:11px; }
   .offer.grand .op { color:var(--sb-yellow); font-size:14px; }
-  .offer.grand .osub { font-size:11px; opacity:0.85; }
   @keyframes grandIn { from{transform:scale(0.7); opacity:0;} to{transform:scale(1); opacity:1;} }
   .offer.used { filter:grayscale(0.8); opacity:0.55; pointer-events:none; }
 
-  .earnrow { margin-top:12px; }
-  .endpanel { margin-top:12px; text-align:center; }
+  .earnrow { margin-top:10px; }
+  .endpanel { margin-top:10px; text-align:center; }
   .endpanel h2 { margin:4px 0 8px; }
 </style>
 </head>
@@ -133,27 +236,53 @@
   <div class="sb-main">
 
     <div class="bbs-head">
-      <span class="sb-timer-chip">🌅 Sunset in <span id="sunset-t">--</span></span>
+      <span class="sb-timer-chip" id="sunset-chip">🌅 <span id="sunset-lbl">Sunset in</span> <span id="sunset-t">--</span></span>
       <button class="bbs-info" id="info-btn" aria-label="Info">ⓘ</button>
     </div>
 
     <div class="scene" id="scene">
       <div class="sky"></div>
-      <div class="dusk" id="dusk"></div>
+      <div class="sky-golden" id="sky-golden"></div>
+      <div class="sky-dusk" id="sky-dusk"></div>
+      <div class="stars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="sun" id="sun"></div>
-      <div class="layer lights" id="L2"><span style="left:8%">✨</span><span style="left:26%">✨</span><span style="left:46%">✨</span><span style="left:66%">✨</span><span style="left:86%">✨</span></div>
+      <div class="moon"></div>
+      <div class="layer lightsL" id="L2">
+        <div class="swag s1"><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i></div>
+        <div class="swag s2"><i class="bulb"></i><i class="bulb"></i><i class="bulb"></i></div>
+      </div>
       <div class="sea"></div>
       <div class="sand"></div>
-      <div class="layer posts" id="L0">𝍩 𝍩 𝍩 𝍩</div>
-      <div class="layer hut" id="L1">🛖</div>
-      <div class="layer djbooth" id="L3">🎪</div>
-      <div class="layer party" id="L4">
+      <div class="palm">
+        <div class="trunk"></div>
+        <div class="frond f5"></div><div class="frond f1"></div><div class="frond f4"></div>
+        <div class="frond f3"></div><div class="frond f2"></div>
+        <div class="coco"></div>
+      </div>
+      <div class="layer deckL" id="L0">
+        <div class="plat"></div>
+        <i class="post p1"></i><i class="post p2"></i><i class="post p3"></i><i class="post p4"></i>
+      </div>
+      <div class="layer barL" id="L1">
+        <div class="body"></div>
+        <span class="bottle b1"></span><span class="bottle b2"></span><span class="bottle b3"></span><span class="bottle b4"></span>
+        <div class="roof"></div>
+        <div class="sign">TIKI BAR</div>
+        <div class="counter" style="position:absolute;left:6px;right:6px;bottom:0;height:17px;"></div>
+      </div>
+      <div class="layer djL" id="L3">
+        <div class="plat"></div><div class="booth"></div>
+        <div class="speaker sp1"></div><div class="speaker sp2"></div>
+        <div class="note">🎵</div>
+      </div>
+      <div class="layer partyL" id="L4">
         <div class="bunting"></div>
-        <div class="fireworks"><span>🎆</span><span>🎇</span><span>🎆</span></div>
+        <div class="neon">✦ SUNSET CLUB ✦</div>
+        <div class="fw fw1"></div><div class="fw fw2"></div><div class="fw fw3"></div>
         <div class="dancers"><span>🕺</span><span>💃</span><span>🕺</span><span>💃</span></div>
       </div>
-      <div class="worker" id="worker1">👷<span class="tool">🛠️</span></div>
-      <div class="worker two" id="worker2" style="display:none">👷‍♀️<span class="tool">🔨</span></div>
+      <div class="worker" id="worker1">👷<span class="tool">🔨</span></div>
+      <div class="worker two" id="worker2" style="display:none">👷‍♀️<span class="tool">🛠️</span></div>
       <div class="guests" id="guests"></div>
     </div>
 
@@ -165,7 +294,7 @@
         <div class="bar"><div class="fill" id="fill1"></div></div>
       </div>
       <div class="bar-wrap" id="bar-second" style="display:none">
-        <div class="bar-label"><span>👷‍♀️ Second worker: <span id="bar2-name"></span></span><span id="bar2-time">--:--</span></div>
+        <div class="bar-label"><span>👷‍♀️ <span id="bar2-name"></span></span><span id="bar2-time">--:--</span></div>
         <div class="bar second"><div class="fill" id="fill2"></div></div>
       </div>
       <div class="stage-rewards" id="stage-rewards"></div>
@@ -173,12 +302,12 @@
     </div>
 
     <div class="offers" id="offers">
-      <div class="offer" id="of-speed"><div class="oi">⏩</div><div class="ot">Speed up 30s</div><div class="op">🪙 100</div></div>
-      <div class="offer hot" id="of-foreman"><div class="oi">👷‍♂️📋</div><div class="ot">Foreman Pack</div><div class="op">$1.99</div></div>
-      <div class="offer" id="of-worker"><div class="oi">👷‍♀️</div><div class="ot">Second Worker</div><div class="op">$2.99</div></div>
+      <div class="offer" id="of-speed"><div class="oi">⏩</div><div class="ot">Speed Up</div><div class="od">Cut 30s off this stage</div><div class="op">🪙 100</div></div>
+      <div class="offer hot" id="of-foreman"><div class="oi">👷‍♂️📋</div><div class="ot">Foreman</div><div class="od">Finish this stage now +🪙200</div><div class="op">$1.99</div></div>
+      <div class="offer" id="of-worker"><div class="oi">👷‍♀️</div><div class="ot">2nd Worker</div><div class="od">Builds next stage in parallel</div><div class="op">$2.99</div></div>
       <div class="offer grand" id="of-grand" style="display:none">
-        <div class="oi">🎉🏖️🎆</div><div class="ot">GRAND OPENING PACK</div>
-        <div class="osub">Finish the whole venue now · DOUBLES the grand chest</div>
+        <div class="oi">🎉🏖️</div><div class="ot">GRAND OPENING PACK</div>
+        <div class="od">Finish the whole venue instantly · grand-opening rewards pay DOUBLE</div>
         <div class="op">$4.99</div>
       </div>
     </div>
@@ -196,22 +325,23 @@
   "use strict";
   SB.init({ title:"Build Before Sunset", subtitle:"Sunset Beach Club · Skip-Bo Beach Party", resetKey:"build-before-sunset" });
 
-  var EVENT_MS = 30*60*1000; // demo: 30 min to sunset
+  var EVENT_MS  = 12*60*1000;  // demo: 12 min to sunset
+  var GOLDEN_MS = 2*60*1000;   // golden-hour grace after the deadline
   var STAGES = [
     { name:"Foundations",     emoji:"🏗️", dur: 60*1000, rewards:[{type:"coins",amount:300}] },
-    { name:"Deck & Bar",      emoji:"🛖", dur: 90*1000, rewards:[{type:"wild",amount:1}] },
-    { name:"Lights & Decor",  emoji:"✨", dur:120*1000, rewards:[{type:"coins",amount:600},{type:"energy",amount:2}] },
-    { name:"Stage & DJ Booth",emoji:"🎪", dur:180*1000, rewards:[{type:"undo",amount:1},{type:"draw",amount:1}] },
-    { name:"GRAND OPENING",   emoji:"🎉", dur:240*1000, rewards:[{type:"chest",amount:1},{type:"coins",amount:2500},{type:"wild",amount:2},{type:"gem",amount:5}] }
+    { name:"Deck & Tiki Bar", emoji:"🍹", dur: 75*1000, rewards:[{type:"wild",amount:1}] },
+    { name:"Lights & Decor",  emoji:"✨", dur: 90*1000, rewards:[{type:"coins",amount:600},{type:"energy",amount:2}] },
+    { name:"Stage & DJ Booth",emoji:"🎧", dur:120*1000, rewards:[{type:"undo",amount:1},{type:"draw",amount:1}] },
+    { name:"GRAND OPENING",   emoji:"🎉", dur:150*1000, rewards:[{type:"chest",amount:1},{type:"coins",amount:2500},{type:"wild",amount:2},{type:"gem",amount:5}] }
   ];
-  var GUEST_POOL = ["🧑‍🎤","👩‍🍳","🧔","👩‍🦰","🕶️🧑","👵","🧑‍🦱","👨‍🎨","💁‍♀️","🧜‍♀️","🏄","🧑‍✈️","👯","🦩","🐬"];
+  var GUEST_POOL = ["🧑‍🎤","👩‍🍳","🧔","👩‍🦰","🕶️","👵","🧑‍🦱","👨‍🎨","💁‍♀️","🧜‍♀️","🏄","🧑‍✈️","👯","🦩","🐬"];
 
   var st = SB.store("build-before-sunset", {
     startTs:null, sunsetEnd:null,
     timers:[null,null,null,null,null],   // absolute end timestamps — survive reload
     done:[false,false,false,false,false],
-    bonus:[0,0,0,0,0],                    // foreman bonus coins per stage
-    secondWorker:false, grandPack:false, outcome:null, consoled:false
+    bonus:[0,0,0,0,0],                   // foreman bonus coins per stage
+    secondWorker:false, grandPack:false, goldenHour:false, outcome:null, consoled:false
   });
   var S = st.data;
   if(!S.startTs){ S.startTs = Date.now(); S.sunsetEnd = S.startTs + EVENT_MS; st.save(); }
@@ -229,6 +359,14 @@
   function mmss(ms){ ms=Math.max(0,ms); var m=Math.floor(ms/60000), s=Math.floor(ms%60000/1000);
     return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"); }
   function stageReady(i){ return S.timers[i]!=null && Date.now()>=S.timers[i]; }
+  function stageChips(i){
+    var chips = STAGES[i].rewards.map(function(r){
+      return SB.rewardChip({type:r.type, amount:(i===4 && S.grandPack)? r.amount*2 : r.amount});
+    }).join("");
+    if(i===4 && S.grandPack) chips += '<span class="sb-reward">✖️2 DOUBLED!</span>';
+    if(S.bonus[i]) chips += SB.rewardChip({type:"coins",amount:S.bonus[i]});
+    return chips;
+  }
 
   // ---------- scene ----------
   function renderScene(){
@@ -238,15 +376,33 @@
     while(g.children.length < want){
       var sp=document.createElement("span"); sp.textContent=GUEST_POOL[g.children.length]; g.appendChild(sp);
     }
-    $("worker1").style.display = (S.outcome || activeStage()<0) ? "none" : "";
-    $("worker2").style.display = (S.secondWorker && !S.outcome && activeStage()>=0 && activeStage()<4) ? "" : "none";
-    $("scene").classList.toggle("dim", S.outcome==="fail");
+    var a = activeStage();
+    $("worker1").style.display = (S.outcome || a<0) ? "none" : "";
+    $("worker2").style.display = (S.secondWorker && !S.outcome && a>=0 && a<4) ? "" : "none";
+    var sc = $("scene");
+    sc.classList.toggle("dim", S.outcome==="fail");
+    sc.classList.toggle("night", S.outcome==="win" || S.outcome==="fail");
+    sc.classList.toggle("golden", !S.outcome && (S.goldenHour || sunProgress()>0.7));
+  }
+  function sunProgress(){
+    var p = (Date.now()-S.startTs)/(EVENT_MS);
+    return Math.min(1, Math.max(0, p));
   }
   function renderSun(){
-    var p = Math.min(1, Math.max(0,(Date.now()-S.startTs)/(S.sunsetEnd-S.startTs)));
-    $("sun").style.top = (10 + p*66) + "%";
-    $("dusk").style.opacity = (p*0.55).toFixed(2);
-    if(S.outcome==="fail") $("dusk").style.opacity = 0.75;
+    var p = sunProgress();
+    if(S.goldenHour) p = Math.max(p, 0.92);
+    if(S.outcome) p = 1;
+    var sc = $("scene"), w = sc.clientWidth, h = sc.clientHeight;
+    var x = w*(0.14 + 0.68*p);
+    var y = h*(0.11 + 0.46*p*p);              // accelerating drop; at p=1 the sun kisses the horizon
+    $("sun").style.transform = "translate("+x.toFixed(0)+"px,"+y.toFixed(0)+"px)";
+    // sky shifts: warm golden ramp, then dusk
+    var golden = Math.min(1, Math.max(0,(p-0.45)/0.35));
+    var dusk   = Math.min(1, Math.max(0,(p-0.82)/0.18)) * 0.55;
+    if(S.outcome==="fail") dusk = 0.9;
+    if(S.outcome==="win")  dusk = 0.85;       // lit-up night party
+    $("sky-golden").style.opacity = golden.toFixed(2);
+    $("sky-dusk").style.opacity   = dusk.toFixed(2);
   }
 
   // ---------- stage card ----------
@@ -259,12 +415,10 @@
     renderDots();
     var a = activeStage();
     if(a<0 || S.outcome){ $("stagecard").style.display = S.outcome ? "none" : ""; return; }
+    $("stagecard").style.display = "";
     var sg = STAGES[a];
     $("stage-name").textContent = "Stage "+(a+1)+": "+sg.emoji+" "+sg.name;
-    var chips = sg.rewards.map(SB.rewardChip).join("");
-    if(a===4 && S.grandPack) chips = sg.rewards.map(function(r){ return SB.rewardChip({type:r.type,amount:r.amount*2}); }).join("") + '<span class="sb-reward">✖️2 DOUBLED!</span>';
-    if(S.bonus[a]) chips += SB.rewardChip({type:"coins",amount:S.bonus[a]}) ;
-    $("stage-rewards").innerHTML = chips;
+    $("stage-rewards").innerHTML = stageChips(a);
 
     var now = Date.now(), left = S.timers[a]==null ? sg.dur : S.timers[a]-now;
     var pct = Math.min(100, Math.max(0, 100*(1 - left/sg.dur)));
@@ -278,7 +432,7 @@
       var l2 = S.timers[a+1]-now, p2 = Math.min(100,Math.max(0,100*(1-l2/STAGES[a+1].dur)));
       $("bar2-name").textContent = STAGES[a+1].name;
       $("fill2").style.width = p2+"%";
-      $("bar2-time").textContent = l2<=0 ? "Done — waiting" : mmss(l2);
+      $("bar2-time").textContent = l2<=0 ? "Done ✓" : mmss(l2);
     }
 
     var btn = $("tap-btn");
@@ -291,9 +445,12 @@
     var a = activeStage();
     $("offers").style.display = S.outcome ? "none" : "";
     $("of-worker").classList.toggle("used", S.secondWorker);
-    if(S.secondWorker) $("of-worker").querySelector(".op").textContent = "✓ Hired";
-    var halfLeft = (S.sunsetEnd - Date.now()) <= EVENT_MS/2;
-    $("of-grand").style.display = (!S.grandPack && a>=0 && (a===4 || halfLeft)) ? "" : "none";
+    if(S.secondWorker){
+      $("of-worker").querySelector(".op").textContent = "✓ Hired";
+      $("of-worker").querySelector(".od").textContent = "On the crew for the whole event";
+    }
+    var lateGame = (S.sunsetEnd - Date.now()) <= EVENT_MS*0.4;
+    $("of-grand").style.display = (!S.grandPack && a>=0 && (a>=3 || lateGame || S.goldenHour)) ? "" : "none";
   }
 
   // ---------- stage completion ----------
@@ -319,31 +476,55 @@
     completeStage(a,false);
   });
 
-  // ---------- win / fail ----------
+  // ---------- win / fail / golden hour ----------
   function win(){
     if(S.outcome) return;
     S.outcome = "win"; st.save();
     renderAll();
     SB.confetti(); setTimeout(SB.confetti, 500); setTimeout(SB.confetti, 1000);
-    var all=[]; STAGES.forEach(function(sg,i){ sg.rewards.forEach(function(r){
-      all.push(SB.rewardChip({type:r.type, amount:(i===4&&S.grandPack)?r.amount*2:r.amount})); }); });
+    var all=[]; STAGES.forEach(function(sg,i){
+      sg.rewards.forEach(function(r){ all.push(SB.rewardChip({type:r.type, amount:(i===4&&S.grandPack)?r.amount*2:r.amount})); });
+      if(S.bonus[i]) all.push(SB.rewardChip({type:"coins",amount:S.bonus[i]}));
+    });
     SB.modal(
       '<div style="font-size:44px">🎉🏖️🎆</div><h2 style="margin:6px 0">GRAND OPENING!</h2>'+
       '<p class="sb-muted" style="font-size:14px">The Sunset Beach Club opened before sundown — the whole party showed up! Everything you earned:</p>'+
       '<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0">'+all.join("")+"</div>"+
       '<button class="sb-btn sb-btn-green sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Let\'s party! 🕺</button>'
     );
+    showWinPanel();
+  }
+  function showWinPanel(){
     $("endpanel").style.display="";
     $("endpanel").innerHTML = '<div style="font-size:34px">🎆🏖️🎆</div><h2>The party is ON!</h2><p style="opacity:0.85;font-size:14px">You built the whole venue before sunset. See you at the next beach weekend!</p>';
   }
+  function startGoldenHour(){
+    S.goldenHour = true;
+    S.sunsetEnd = Date.now() + GOLDEN_MS;
+    st.save();
+    var sun=$("sun"); sun.classList.remove("flicker"); void sun.offsetWidth; sun.classList.add("flicker");
+    renderAll();
+    var m = SB.modal(
+      '<div style="font-size:40px">🌇✨</div><h2 style="margin:6px 0">Golden Hour!</h2>'+
+      '<p class="sb-muted" style="font-size:14px">The sun is touching the sea, but the light lingers — you\'ve got <b>2 bonus minutes</b> to open the club. Finish everything instantly with the Grand Opening Pack, or keep building!</p>'+
+      (!S.grandPack ? '<button class="sb-btn sb-btn-red sb-btn-block" id="gh-grand" style="margin-bottom:8px">🎉 Grand Opening Pack · $4.99</button>' : '')+
+      '<button class="sb-btn sb-btn-yellow sb-btn-block" id="gh-keep">🔨 Keep building!</button>'
+    );
+    var g = document.getElementById("gh-grand");
+    if(g) g.addEventListener("click", function(){ m.close(); openGrandSheet(); });
+    document.getElementById("gh-keep").addEventListener("click", function(){ m.close(); });
+  }
   function fail(){
-    if(S.outcome==="win") return;
+    if(S.outcome) return;
     S.outcome = "fail"; st.save();
     renderAll();
     if(!S.consoled){
       S.consoled = true; st.save();
       SB.grantRewards([{type:"coins",amount:400},{type:"energy",amount:1}]);
     }
+    showFailPanel();
+  }
+  function showFailPanel(){
     $("endpanel").style.display="";
     $("endpanel").innerHTML =
       '<div style="font-size:34px">🌙😅</div><h2>The party started without the full venue…</h2>'+
@@ -353,17 +534,30 @@
   }
 
   // ---------- acceleration options ----------
-  $("of-speed").addEventListener("click", function(){
+  function applySpeedUp(){
     var a = activeStage(); if(a<0 || stageReady(a)) return;
-    if(!SB.spend("coins",100)){
-      this.classList.remove("sb-shake"); void this.offsetWidth; this.classList.add("sb-shake");
-      SB.toast("Not enough coins — play a level below! 🪙"); return;
-    }
     S.timers[a] = Math.max(Date.now(), S.timers[a]-30000); st.save();
     var f=$("fill1"); f.classList.remove("whoosh"); void f.offsetWidth; f.classList.add("whoosh");
     var sun=$("sun"); sun.classList.remove("flicker"); void sun.offsetWidth; sun.classList.add("flicker");
     SB.haptic(20); SB.toast("⏩ Whoosh! 30 seconds faster");
     renderStage();
+  }
+  $("of-speed").addEventListener("click", function(){
+    var a = activeStage(); if(a<0) return;
+    if(stageReady(a)){ SB.toast("Stage is ready — tap the big button to complete it! ✨"); return; }
+    if(SB.bal("coins") >= 100){ SB.spend("coins",100); applySpeedUp(); return; }
+    // out of coins → contextual coin offer instead of a silent fail
+    this.classList.remove("sb-shake"); void this.offsetWidth; this.classList.add("sb-shake");
+    SB.buyIAP({
+      label:"Out of coins! 🪙 Beach Coin Booster", price:"$0.99",
+      sub:"Top up 1,200 coins — the speed-up (🪙100) applies right away. Or play a Skip-Bo level below for +150 free coins.",
+      contents:[{type:"coins",amount:1200}],
+      onSuccess:function(){
+        var a2 = activeStage();
+        if(a2<0 || stageReady(a2)){ SB.toast("Stage is already ready — tap to complete! ✨"); return; }
+        if(SB.spend("coins",100)) applySpeedUp();
+      }
+    });
   });
 
   $("of-foreman").addEventListener("click", function(){
@@ -371,7 +565,7 @@
     if(stageReady(a)){ SB.toast("This stage is ready — tap to complete it!"); return; }
     SB.buyIAP({
       label:"Foreman Pack 👷‍♂️📋", price:"$1.99",
-      sub:"The foreman finishes “"+STAGES[a].name+"” instantly, plus a coin bonus",
+      sub:"The foreman finishes “"+STAGES[a].name+"” instantly (skips "+mmss(S.timers[a]-Date.now())+" of build time), plus a 🪙200 bonus on the stage payout",
       contents:[{type:"coins",amount:200}], grant:false,
       onSuccess:function(){
         S.bonus[a] += 200;
@@ -386,7 +580,7 @@
     if(S.secondWorker) return;
     SB.buyIAP({
       label:"Second Worker 👷‍♀️", price:"$2.99",
-      sub:"One-time: the next stage builds in parallel for the rest of the event",
+      sub:"One-time hire: she starts building the NEXT stage in parallel, and keeps working ahead for the rest of the event",
       contents:[], grant:false,
       onSuccess:function(){
         S.secondWorker = true; ensureTimers(); st.save();
@@ -396,25 +590,23 @@
     });
   });
 
-  $("of-grand").addEventListener("click", function(){
+  function openGrandSheet(){
     if(S.grandPack) return;
     SB.buyIAP({
       label:"Grand Opening Pack 🎉🏖️", price:"$4.99",
-      sub:"Finish the entire venue right now — and the grand chest pays DOUBLE",
+      sub:"Finish every remaining stage right now — and the grand-opening rewards pay DOUBLE",
       contents:STAGES[4].rewards.map(function(r){ return {type:r.type,amount:r.amount*2}; }),
       grant:false,
       onSuccess:function(){
-        S.grandPack = true;
-        // cascade-finish everything up to the finale, then leave the big tap
-        var pending=[]; for(var i=0;i<4;i++) if(!S.done[i]) pending.push(i);
-        pending.forEach(function(i,idx){ setTimeout(function(){ completeStage(i,true); }, 350+idx*550); });
-        setTimeout(function(){
-          if(!S.done[4]){ S.timers[4]=Date.now(); st.save(); renderAll();
-            SB.toast("🎉 Everything's built — tap to open the club!"); }
-        }, 400+pending.length*550);
+        S.grandPack = true; st.save();
+        var pending=[]; for(var i=0;i<5;i++) if(!S.done[i]) pending.push(i);
+        pending.forEach(function(i,idx){
+          setTimeout(function(){ completeStage(i, i!==4); }, 400+idx*600);
+        });
       }
     });
-  });
+  }
+  $("of-grand").addEventListener("click", openGrandSheet);
 
   // ---------- earn ----------
   $("earn-btn").addEventListener("click", function(){
@@ -428,28 +620,46 @@
   // ---------- info ----------
   $("info-btn").addEventListener("click", function(){
     SB.modal(
-      '<div style="font-size:34px">🌅🏗️</div><h3 style="margin:6px 0">Build Before Sunset</h3>'+
-      '<p style="font-size:14px;text-align:left;line-height:1.5" class="sb-muted">Timed build events let players keep playing Skip-Bo while the venue constructs itself in the background — the timer creates anticipation, not punishment. Each finished stage visibly transforms the scene and pays an escalating reward, so every return visit has a payoff. Monetization comes from finish-now moments: a soft-currency speed-up sinks coins, the Foreman and Second Worker packs sell time, and the Grand Opening pack captures deadline urgency by doubling the finale chest. The sunset deadline caps the loop with gentle loss aversion while the consolation reward keeps a miss feeling fair.</p>'+
+      '<div style="font-size:34px">🌅🏗️</div><h3 style="margin:6px 0">How it works</h3>'+
+      '<div style="font-size:13px;text-align:left;line-height:1.55" class="sb-muted">'+
+      '<p style="margin:6px 0">Build the Sunset Beach Club in <b>5 stages before the sun sets</b>. Each stage builds on its own timer — tap ✨ when it\'s done to collect the stage reward and watch the venue grow.</p>'+
+      '<p style="margin:6px 0"><b>⏩ Speed Up (🪙100)</b> — cuts 30s off the current stage.<br>'+
+      '<b>👷‍♂️ Foreman ($1.99)</b> — finishes the current stage instantly + 🪙200 bonus.<br>'+
+      '<b>👷‍♀️ Second Worker ($2.99)</b> — builds the next stage in parallel for the rest of the event.<br>'+
+      '<b>🎉 Grand Opening ($4.99)</b> — finishes everything now and doubles the grand-opening rewards.</p>'+
+      '<p style="margin:6px 0">If the sun reaches the sea first you get a <b>2-minute Golden Hour</b> to finish. Miss it and you still keep every stage reward you earned, plus a consolation gift.</p>'+
+      '</div>'+
       '<button class="sb-btn sb-btn-blue sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it</button>'
     );
   });
 
-  // ---------- main loop ----------
-  function renderAll(){ renderScene(); renderStage(); renderOffers(); renderSun(); }
+  // ---------- main loop (single interval drives everything) ----------
+  function renderChip(){
+    var left = Math.max(0, S.sunsetEnd - Date.now());
+    $("sunset-lbl").textContent = S.goldenHour ? "Golden hour!" : "Sunset in";
+    $("sunset-t").textContent = mmss(left);
+    $("sunset-chip").classList.toggle("urgent", !S.outcome && (S.goldenHour || left < 3*60*1000));
+    if(S.outcome){
+      $("sunset-lbl").textContent = "Sunset";
+      $("sunset-t").textContent = S.outcome==="win" ? "— opened in time! 🎉" : "— missed";
+      $("sunset-chip").classList.remove("urgent");
+    }
+  }
+  function renderAll(){ renderScene(); renderStage(); renderOffers(); renderSun(); renderChip(); }
+
   ensureTimers();
   renderAll();
-
-  var sunsetChip = $("sunset-t");
-  SB.countdown(sunsetChip, S.sunsetEnd, function(){
-    if(!S.outcome && activeStage()>=0) fail();
-  });
-  if(S.outcome==="fail") fail();     // re-render fail panel after reload
-  if(S.outcome==="win"){ $("endpanel").style.display=""; $("endpanel").innerHTML='<div style="font-size:34px">🎆🏖️🎆</div><h2>The party is ON!</h2><p style="opacity:0.85;font-size:14px">You built the whole venue before sunset!</p>'; }
+  if(S.outcome==="fail") showFailPanel();
+  if(S.outcome==="win")  showWinPanel();
 
   setInterval(function(){
-    if(S.outcome) { renderSun(); return; }
-    if(Date.now() >= S.sunsetEnd && activeStage()>=0){ fail(); return; }
-    renderStage(); renderSun(); renderOffers();
+    if(S.outcome){ renderSun(); renderChip(); return; }
+    if(Date.now() >= S.sunsetEnd && activeStage()>=0){
+      if(!S.goldenHour) startGoldenHour();
+      else fail();
+      return;
+    }
+    renderStage(); renderSun(); renderOffers(); renderChip(); renderScene();
   }, 500);
 })();
 </script>

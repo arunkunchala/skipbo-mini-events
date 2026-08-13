@@ -13,96 +13,166 @@
   .cs-hud-txt { flex:1; min-width:0; }
   .cs-hud-title { color:#fff; font-weight:900; font-size:15px; text-shadow:0 1px 0 rgba(0,0,0,.3); }
   .cs-hud-sub { color:var(--sb-sky-light); font-size:11px; font-weight:700; margin-top:2px; }
-  .cs-info-btn { width:30px; height:30px; border-radius:50%; border:1.5px solid rgba(255,255,255,.4); background:rgba(255,255,255,.15); color:#fff; font-weight:900; font-size:15px; cursor:pointer; flex:0 0 auto; }
+  .cs-info-btn { width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(255,255,255,.4); background:rgba(255,255,255,.15); color:#fff; font-weight:900; font-size:17px; cursor:pointer; flex:0 0 auto; }
   .cs-lastchance { background:linear-gradient(90deg,var(--sb-red),#ff7043); color:#fff; font-weight:800; font-size:12px; border-radius:12px; padding:8px 12px; text-align:center; margin-bottom:10px; box-shadow:var(--sb-shadow); animation:sbPulse 1.2s infinite; }
+  .cs-timerbar { display:flex; justify-content:center; margin-bottom:10px; }
 
-  /* tabs */
-  .cs-tabs { display:flex; gap:8px; margin-bottom:10px; }
-  .cs-tab { flex:1; border:none; border-radius:12px; padding:9px 6px; font-family:var(--sb-font); font-weight:800; font-size:13px; cursor:pointer; background:rgba(255,255,255,.14); color:var(--sb-sky-light); border:2px solid transparent; }
-  .cs-tab.active { background:var(--sb-cream); color:var(--sb-ink); border-color:var(--sb-yellow); box-shadow:var(--sb-shadow); }
-  .cs-tab .cnt { display:block; font-size:11px; font-weight:700; opacity:.8; }
-  .cs-tab.done .cnt { color:var(--sb-green); }
+  /* ============ leather album ============ */
+  .cs-albumframe { position:relative; border-radius:18px; padding:12px 12px 14px; margin-bottom:12px;
+    background:
+      radial-gradient(120% 90% at 20% 0%, rgba(255,255,255,.14), transparent 55%),
+      repeating-linear-gradient(115deg, rgba(0,0,0,.10) 0 3px, transparent 3px 7px),
+      linear-gradient(150deg,#7c4a27 0%,#5e3316 48%,#6d3c1d 100%);
+    box-shadow: 0 8px 22px rgba(10,20,45,.5), inset 0 1px 0 rgba(255,235,190,.35), inset 0 -2px 4px rgba(0,0,0,.4); }
+  .cs-albumframe::before { content:""; position:absolute; inset:5px; border:1.6px dashed rgba(255,220,150,.42); border-radius:13px; pointer-events:none; }
+  .cs-albumtitle { text-align:center; color:#f5d98b; font-weight:900; font-size:13px; letter-spacing:2.5px; margin:2px 0 9px;
+    text-shadow:0 1px 0 rgba(0,0,0,.75), 0 -1px 0 rgba(255,240,200,.28); }
+  .cs-albumtitle small { display:block; font-size:9px; letter-spacing:3px; color:#d9b871; font-weight:800; margin-top:1px; }
 
-  /* album grid */
-  .cs-album { background:var(--sb-cream); border-radius:var(--sb-radius); box-shadow:var(--sb-shadow); padding:12px; margin-bottom:12px; }
+  /* tabs = index bookmarks */
+  .cs-tabs { display:flex; gap:6px; position:relative; z-index:1; }
+  .cs-tab { flex:1; border:none; border-radius:10px 10px 0 0; min-height:48px; padding:7px 6px 6px; font-family:var(--sb-font); font-weight:800; font-size:13px; cursor:pointer;
+    background:linear-gradient(180deg,#4a2812,#3c1f0d); color:#d9b871; border:1.5px solid rgba(255,220,150,.25); border-bottom:none; opacity:.85; }
+  .cs-tab.active { background:linear-gradient(180deg,#fbf3dd,#f2e8cc); color:var(--sb-ink); opacity:1; box-shadow:0 -2px 6px rgba(0,0,0,.25); }
+  .cs-tab .cnt { display:block; font-size:10.5px; font-weight:800; opacity:.75; margin-top:1px; }
+  .cs-tab.done .cnt { color:var(--sb-green); opacity:1; }
+
+  /* paper page */
+  .cs-page { background:
+      repeating-linear-gradient(0deg, rgba(27,42,74,.03) 0 1px, transparent 1px 4px),
+      linear-gradient(180deg,#f9f1da,#f3e9cd);
+    border-radius:0 8px 8px 8px; padding:9px; box-shadow: inset 0 0 16px rgba(120,90,40,.22), 0 1px 0 rgba(255,255,255,.25); }
+  .cs-pagehdr { display:flex; align-items:center; justify-content:center; gap:6px; text-align:center; font-size:11px; font-weight:800; color:#7a6538; min-height:18px; margin-bottom:7px; }
+  .cs-pagehdr.hot { color:var(--sb-red); }
+  .cs-pagehdr.done { color:#9a7b1d; letter-spacing:.5px; }
   .cs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-  .cs-slot { aspect-ratio:3/4; border-radius:10px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:4px; text-align:center; transition:box-shadow .3s; }
-  .cs-slot.empty { border:2px dashed rgba(27,42,74,.3); background:rgba(27,42,74,.05); }
-  .cs-slot.empty .art { font-size:26px; filter:grayscale(1); opacity:.28; }
-  .cs-slot.owned { border:2px solid rgba(27,42,74,.15); background:#fff; box-shadow:0 2px 6px rgba(27,42,74,.18); }
-  .cs-slot.owned .art { font-size:28px; }
-  .cs-slot.epicown { background:linear-gradient(160deg,#fff8e1,#ffe9a8); border-color:var(--sb-yellow-dark); }
-  .cs-slot .nm { font-size:8.5px; font-weight:800; color:var(--sb-ink); line-height:1.05; }
-  .cs-slot.empty .nm { opacity:.5; }
-  .cs-slot .rar { font-size:8px; letter-spacing:-1px; }
-  .cs-slot.glow { box-shadow:0 0 0 3px var(--sb-yellow), 0 0 18px rgba(255,199,44,.9); }
-  .cs-slot.stamp .inner-stamp { animation:csStamp .45s cubic-bezier(.34,1.7,.64,1); }
+  .cs-slot { aspect-ratio:3/4; position:relative; border-radius:9px; }
+  .cs-slot.glow .pc, .cs-slot.glow .ghostwrap { box-shadow:0 0 0 3px var(--sb-yellow), 0 0 18px rgba(255,199,44,.9); }
+  .cs-slot.stamp .pc { animation:csStamp .45s cubic-bezier(.34,1.7,.64,1); }
   @keyframes csStamp { 0%{transform:scale(2.1) rotate(-9deg);opacity:0;} 60%{transform:scale(.92) rotate(2deg);opacity:1;} 100%{transform:scale(1) rotate(0);} }
+  .cs-slot.owned:nth-child(3n+1) .pc { transform:rotate(-1.3deg); }
+  .cs-slot.owned:nth-child(3n) .pc { transform:rotate(1.1deg); }
 
-  /* wildcard meter */
-  .cs-meter-wrap { background:rgba(20,57,111,.55); border:1.5px solid rgba(255,199,44,.45); border-radius:14px; padding:10px 12px; margin-bottom:12px; }
-  .cs-meter-row { display:flex; align-items:center; gap:8px; }
-  .cs-meter-ico { font-size:22px; flex:0 0 auto; position:relative; }
-  .cs-meter-ico .st { position:absolute; right:-4px; top:-4px; font-size:11px; }
-  .cs-meter-bar { flex:1; height:16px; border-radius:999px; background:rgba(0,0,0,.4); overflow:hidden; border:1px solid rgba(255,255,255,.2); }
-  .cs-meter-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--sb-yellow),#ffe082); border-radius:999px; transition:width .5s cubic-bezier(.22,1,.36,1); box-shadow:0 0 8px rgba(255,199,44,.8); }
-  .cs-meter-num { color:var(--sb-yellow); font-weight:900; font-size:13px; flex:0 0 auto; }
-  .cs-meter-cap { color:var(--sb-sky-light); font-size:10.5px; font-weight:700; margin-top:6px; text-align:center; }
+  /* ============ postcard component ============ */
+  .pc { position:relative; width:100%; height:100%; font-size:10px; display:flex; flex-direction:column; overflow:hidden;
+    background:linear-gradient(160deg,#fffdf6,#f4ecd8); border-radius:7px; padding:5% 5% 0;
+    box-shadow:0 2px 6px rgba(27,42,74,.30), inset 0 0 6px rgba(120,90,40,.20); }
+  .pc-scene { position:relative; flex:1; border-radius:4px; overflow:hidden; box-shadow:inset 0 0 5px rgba(0,0,0,.30); }
+  .pc-motif { position:absolute; left:50%; bottom:5%; transform:translateX(-50%); font-size:2.5em; line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
+  .pc-stamp { position:absolute; top:6%; right:6%; width:25%; aspect-ratio:4/5; background:#fff; border:1px dashed rgba(27,42,74,.5); border-radius:2px;
+    display:grid; place-items:center; font-weight:900; font-size:1.05em; box-shadow:0 1px 2px rgba(0,0,0,.3); }
+  .pc-stamp.r1 { color:var(--sb-blue); } .pc-stamp.r2 { color:var(--sb-green); } .pc-stamp.r3 { color:var(--sb-red); }
+  .pc-mark { position:absolute; top:14%; right:22%; width:24%; aspect-ratio:1; border:1.5px solid rgba(30,30,50,.38); border-radius:50%; pointer-events:none; }
+  .pc-cap { flex:0 0 auto; height:2.4em; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; }
+  .pc-nm { font-size:.85em; font-weight:800; color:var(--sb-ink); white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis; }
+  .pc-rar { font-size:.8em; color:#c99a17; letter-spacing:1px; }
+  /* 3-star gold foil frame + shimmer sweep (transform-only) */
+  .pc.foil { background:linear-gradient(135deg,#f9ecc0 0%,#e7bd45 30%,#fff6d8 52%,#d9a92f 78%,#f3d97e 100%); box-shadow:0 2px 8px rgba(120,80,0,.45), inset 0 0 5px rgba(120,80,10,.35); }
+  .pc.foil .pc-rar { color:#a97c0a; }
+  .pc.foil::after { content:""; position:absolute; top:-30%; bottom:-30%; left:-20%; width:45%; pointer-events:none;
+    background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,.85) 50%,transparent 80%);
+    transform:translateX(-120%) rotate(12deg); animation:csFoil 2.8s ease-in-out infinite; }
+  @keyframes csFoil { 0%{transform:translateX(-120%) rotate(12deg);} 55%,100%{transform:translateX(340%) rotate(12deg);} }
+
+  /* empty slot = embossed outline */
+  .cs-slot.empty .ghostwrap { width:100%; height:100%; border-radius:9px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:6px; text-align:center; cursor:pointer;
+    background:linear-gradient(180deg,#e9dcba,#f2e9cf); box-shadow:inset 0 2px 6px rgba(27,42,74,.26), inset 0 -1px 0 rgba(255,255,255,.85); }
+  .cs-slot.empty .ghostwrap::after { content:""; position:absolute; inset:6px; border:1.6px dashed rgba(27,42,74,.30); border-radius:6px; pointer-events:none; }
+  .g-motif { font-size:26px; filter:grayscale(1) brightness(.45); opacity:.30; }
+  .g-nm { font-size:8.5px; font-weight:800; color:rgba(27,42,74,.5); line-height:1.05; }
+  .g-rar { font-size:8px; color:rgba(160,120,20,.55); letter-spacing:1px; }
+
+  /* assembled scene (page complete) */
+  .cs-scene { position:relative; border-radius:8px; overflow:hidden; height:64px; margin-bottom:8px; box-shadow:inset 0 0 8px rgba(0,0,0,.35), 0 2px 5px rgba(27,42,74,.3); border:3px solid #fffdf6; }
+  .cs-scene span.mo { position:absolute; font-size:15px; transform:translate(-50%,-50%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); animation:csMerge .7s cubic-bezier(.34,1.4,.64,1) backwards; }
+  .cs-scene.big { height:128px; margin:10px 0; }
+  .cs-scene.big span.mo { font-size:24px; }
+  .cs-scene-greet { position:absolute; left:0; right:0; top:5px; text-align:center; font-family:"Brush Script MT","Snell Roundhand",cursive; font-size:15px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.65); pointer-events:none; }
+  .cs-scene.big .cs-scene-greet { font-size:22px; top:8px; }
+  @keyframes csMerge { from{transform:translate(-50%,-50%) translateY(40px) scale(2.2); opacity:0;} to{transform:translate(-50%,-50%); opacity:1;} }
+
+  /* ============ wildcard meter: golden card gauge ============ */
+  .cs-meter { display:flex; align-items:center; gap:9px; width:100%; min-height:52px; border-radius:14px; padding:8px 12px; cursor:pointer; font-family:var(--sb-font); text-align:left;
+    border:2px solid transparent; margin-bottom:4px;
+    background:linear-gradient(180deg,#1b3f77,#14396f) padding-box, linear-gradient(150deg,#f3d97e,#c9922a 45%,#ffe9a8 60%,#b07d1c) border-box;
+    box-shadow:0 3px 10px rgba(10,20,45,.45), inset 0 1px 0 rgba(255,255,255,.12); }
+  .cs-meter.ready { animation:sbPulse 1.1s infinite; box-shadow:0 0 18px rgba(255,199,44,.75), 0 3px 10px rgba(10,20,45,.45); }
+  .cs-wc { flex:0 0 auto; width:30px; height:41px; border-radius:5px; display:grid; place-items:center; font-size:17px;
+    background:linear-gradient(150deg,#f9ecc0,#e0a400 60%,#f3d97e); border:1.5px solid #8a610c; box-shadow:0 2px 4px rgba(0,0,0,.4); }
+  .cs-segs { flex:1; display:grid; grid-template-columns:repeat(8,1fr); gap:3px; }
+  .cs-seg { height:15px; border-radius:4px; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.14); }
+  .cs-seg.on { background:linear-gradient(180deg,#ffe082,var(--sb-yellow) 60%,#e0a400); border-color:#8a610c; box-shadow:0 0 7px rgba(255,199,44,.8); animation:csSegPop .3s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes csSegPop { from{transform:scale(.5);} to{transform:scale(1);} }
+  .cs-meter-num { flex:0 0 auto; color:var(--sb-yellow); font-weight:900; font-size:13px; }
+  .cs-meter.ready .cs-meter-num { color:#fff; }
+  .cs-meter-cap { color:var(--sb-sky-light); font-size:10.5px; font-weight:700; margin-bottom:12px; text-align:center; }
 
   /* pack zone */
   .cs-packzone { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
   .cs-pack-row { display:flex; gap:8px; }
-  .cs-pack-row .sb-btn { flex:1; }
+  .cs-pack-row .sb-btn { flex:1; min-height:44px; }
   .cs-freetimer { text-align:center; color:var(--sb-sky-light); font-size:11px; font-weight:700; }
+  .cs-odds { text-align:center; color:rgba(255,255,255,.55); font-size:10px; font-weight:700; }
   .cs-badge { position:absolute; top:-8px; right:-6px; background:var(--sb-red); color:#fff; font-size:11px; font-weight:900; min-width:20px; height:20px; border-radius:999px; display:grid; place-items:center; padding:0 5px; border:2px solid #fff; }
 
   /* floating almost-there pill */
-  .cs-pill { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom,0px) + 52px); z-index:150; background:linear-gradient(90deg,#7b2ff7,#b465da); color:#fff; font-weight:800; font-size:13px; border:none; border-radius:999px; padding:10px 18px; box-shadow:0 6px 20px rgba(0,0,0,.45); cursor:pointer; animation:csPillIn .4s cubic-bezier(.34,1.56,.64,1), sbPulse 2s 1s infinite; }
+  .cs-pill { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom,0px) + 52px); z-index:150; min-height:44px;
+    background:linear-gradient(180deg,#ffd95e,var(--sb-yellow) 55%,#e0a400); color:var(--sb-ink); font-family:var(--sb-font); font-weight:900; font-size:13px; border:2px solid #fff;
+    border-radius:999px; padding:10px 18px; box-shadow:0 6px 20px rgba(0,0,0,.5); cursor:pointer; animation:csPillIn .4s cubic-bezier(.34,1.56,.64,1), sbPulse 2s 1s infinite; }
   @keyframes csPillIn { from{transform:translateX(-50%) translateY(60px);opacity:0;} to{transform:translateX(-50%) translateY(0);opacity:1;} }
+  /* reserve space so the fixed pill never covers the pack buttons */
+  body.cs-haspill .sb-main { padding-bottom:calc(env(safe-area-inset-bottom,0px) + 150px); }
 
-  /* pack opening overlay */
-  .cs-overlay { position:fixed; inset:0; z-index:260; background:rgba(8,16,36,.92); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:20px; }
+  /* ============ pack opening overlay ============ */
+  .cs-overlay { position:fixed; inset:0; z-index:260; background:rgba(8,16,36,.93); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:20px; }
+  .cs-skip { position:absolute; top:calc(env(safe-area-inset-top,0px) + 12px); right:14px; min-width:64px; min-height:44px; border:1.5px solid rgba(255,255,255,.35); background:rgba(255,255,255,.12); color:#fff; font-family:var(--sb-font); font-weight:800; font-size:13px; border-radius:999px; padding:8px 16px; cursor:pointer; }
   .cs-ov-title { color:#fff; font-weight:900; font-size:18px; text-shadow:0 2px 0 rgba(0,0,0,.4); }
-  .cs-ov-cards { display:flex; gap:12px; }
-  .cs-flip { width:96px; height:132px; perspective:700px; cursor:pointer; }
+  .cs-ov-cards { display:flex; gap:11px; }
+  .cs-flip { width:100px; height:138px; perspective:700px; cursor:pointer; }
   .cs-flip-inner { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.34,1.3,.5,1); }
   .cs-flip.epic .cs-flip-inner { transition-duration:1.15s; }
   .cs-flip.flipped .cs-flip-inner { transform:rotateY(180deg); }
-  .cs-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
-  .cs-face.back { background:linear-gradient(160deg,var(--sb-blue) 0%,var(--sb-sky) 100%); border:3px solid var(--sb-yellow); color:var(--sb-yellow); font-weight:900; }
-  .cs-face.back .logo { font-size:30px; }
-  .cs-face.back .txt { font-size:10px; letter-spacing:1px; }
+  .cs-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:10px; }
+  /* postcard back: airmail border + panel */
+  .cs-face.back { padding:7px; background:repeating-linear-gradient(45deg, var(--sb-red) 0 9px, #fffdf6 9px 18px, var(--sb-blue) 18px 27px); box-shadow:0 4px 10px rgba(0,0,0,.45); }
+  .cs-face.back .panel { width:100%; height:100%; border-radius:5px; background:linear-gradient(160deg,var(--sb-blue) 0%,var(--sb-sky) 100%); color:var(--sb-yellow); font-weight:900;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .cs-face.back .logo { font-size:30px; } .cs-face.back .txt { font-size:9px; letter-spacing:1.5px; }
   .cs-flip.ready .cs-face.back { animation:csWiggle 1.1s infinite; }
   @keyframes csWiggle { 0%,100%{transform:rotate(0);} 25%{transform:rotate(-3deg) scale(1.04);} 75%{transform:rotate(3deg) scale(1.04);} }
-  .cs-face.front { background:#fff; border:3px solid rgba(27,42,74,.25); transform:rotateY(180deg); padding:6px; text-align:center; }
-  .cs-face.front .art { font-size:40px; }
-  .cs-face.front .nm { font-size:11px; font-weight:900; color:var(--sb-ink); line-height:1.1; }
-  .cs-face.front .rar { font-size:10px; }
-  .cs-face.front .tag { font-size:9px; font-weight:900; border-radius:999px; padding:2px 8px; margin-top:2px; }
+  .cs-face.front { transform:rotateY(180deg); }
+  .cs-face.front .pc { font-size:13px; border-radius:10px; }
+  .cs-flip.epic .cs-face.front { filter:drop-shadow(0 0 14px rgba(255,199,44,.9)); }
+  .tag { position:absolute; top:6%; left:-4%; z-index:2; transform:rotate(-8deg); font-size:.72em; font-weight:900; border-radius:999px; padding:3px 8px; box-shadow:0 1px 3px rgba(0,0,0,.35); }
   .tag.new { background:var(--sb-green); color:#fff; }
   .tag.dupe { background:var(--sb-yellow); color:var(--sb-ink); }
-  .cs-flip.epic .cs-face.front { background:linear-gradient(160deg,#fff8e1,#ffe082); border-color:var(--sb-yellow-dark); box-shadow:0 0 24px 6px rgba(255,199,44,.85); }
-  .cs-flip.epic .cs-face.front::after { content:""; position:absolute; inset:0; border-radius:9px; background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.85) 48%,transparent 62%); background-size:250% 100%; animation:csShimmer 1.6s infinite; pointer-events:none; }
-  @keyframes csShimmer { from{background-position:180% 0;} to{background-position:-80% 0;} }
-  .cs-ov-hint { color:var(--sb-sky-light); font-size:12px; font-weight:700; }
-  .cs-stardust { position:fixed; z-index:410; font-size:16px; pointer-events:none; transition:all .8s cubic-bezier(.4,-.1,.5,1); }
+  .cs-ov-hint { color:var(--sb-sky-light); font-size:12px; font-weight:700; min-height:48px; display:flex; align-items:center; }
+  .cs-stardust { position:fixed; z-index:410; font-size:16px; pointer-events:none; transition:transform .8s cubic-bezier(.4,-.1,.5,1), opacity .8s; }
 
-  /* picker + panorama */
-  .cs-pick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0; }
-  .cs-pick { border:2px solid rgba(27,42,74,.2); border-radius:10px; background:#fff; padding:8px 4px; cursor:pointer; font-family:var(--sb-font); }
-  .cs-pick .art { font-size:26px; } .cs-pick .nm { font-size:9px; font-weight:800; color:var(--sb-ink); } .cs-pick .rar { font-size:8px; }
+  /* picker + shop */
+  .sb-modal { max-height:88dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .cs-pick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0; max-height:46dvh; overflow-y:auto; padding:2px; border-radius:8px; }
+  .cs-pick { position:relative; aspect-ratio:3/4; border:none; border-radius:9px; background:none; padding:0; cursor:pointer; font-family:var(--sb-font); }
+  .cs-pick .pc { font-size:9px; }
   .cs-pick:active { transform:scale(.94); }
-  .cs-pano { display:flex; justify-content:center; margin:10px 0; background:linear-gradient(180deg,#3E8EDE,#9cc8f5); border-radius:12px; padding:12px 4px; overflow:hidden; }
-  .cs-pano span { font-size:22px; animation:csMerge .8s cubic-bezier(.34,1.4,.64,1) backwards; }
-  @keyframes csMerge { from{transform:translateY(40px) scale(2.2); opacity:0;} to{transform:none; opacity:1;} }
-  .cs-shop-grid { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-  .cs-shop-item { display:flex; align-items:center; gap:10px; background:#fff; border:2px solid rgba(27,42,74,.12); border-radius:12px; padding:10px; cursor:pointer; text-align:left; font-family:var(--sb-font); position:relative; }
+  .cs-later { display:block; width:100%; margin-top:4px; background:none; border:none; color:#7a89a8; font-weight:700; font-size:13px; padding:13px 10px; min-height:44px; cursor:pointer; font-family:var(--sb-font); }
+  .cs-shop-grid { display:flex; flex-direction:column; gap:9px; margin-top:12px; }
+  .cs-shop-item { display:flex; align-items:center; gap:10px; background:#fff; border:2px solid rgba(27,42,74,.12); border-radius:12px; padding:10px; min-height:56px; cursor:pointer; text-align:left; font-family:var(--sb-font); position:relative; }
+  .cs-shop-item:disabled { opacity:.55; filter:grayscale(.6); }
   .cs-shop-item .big { font-size:26px; }
   .cs-shop-item .t { font-weight:900; font-size:13px; color:var(--sb-ink); }
-  .cs-shop-item .d { font-size:10.5px; color:#5a6b8c; font-weight:700; }
+  .cs-shop-item .d { font-size:10px; color:#5a6b8c; font-weight:700; }
   .cs-shop-item .p { margin-left:auto; background:var(--sb-green); color:#fff; font-weight:900; font-size:13px; border-radius:999px; padding:6px 10px; flex:0 0 auto; }
-  .cs-shop-item .gbadge { position:absolute; top:-7px; left:8px; background:var(--sb-blue); color:#fff; font-size:8.5px; font-weight:900; border-radius:999px; padding:2px 7px; }
-  .cs-timerbar { display:flex; justify-content:center; margin-bottom:10px; }
+  .cs-shop-item.hot { border-color:var(--sb-yellow); background:linear-gradient(160deg,#fff8e1,#fff); }
+  .cs-shop-item .gbadge { position:absolute; top:-8px; left:8px; background:var(--sb-blue); color:#fff; font-size:8.5px; font-weight:900; border-radius:999px; padding:2px 7px; }
+  .cs-shop-item .gbadge.gold { background:var(--sb-yellow-dark); }
+  .cs-shop-odds { font-size:9.5px; color:#8a97b0; font-weight:700; text-align:center; margin-top:8px; }
+
+  @media (max-width:374px){
+    .cs-flip { width:88px; height:122px; }
+    .cs-ov-cards { gap:8px; }
+    .g-motif { font-size:22px; }
+  }
 </style>
 </head>
 <body>
@@ -121,30 +191,35 @@
       <div class="cs-ring-pct" id="cs-pct">0%</div>
     </div>
     <div class="cs-hud-txt">
-      <div class="cs-hud-title">📮 Skip-Bo Summer Postcards</div>
+      <div class="cs-hud-title">📮 Summer Postcards</div>
       <div class="cs-hud-sub">Collect all 18 postcards for the grand prize!</div>
     </div>
-    <button class="cs-info-btn" id="cs-info">ⓘ</button>
+    <button class="cs-info-btn" id="cs-info" aria-label="Event info">ⓘ</button>
   </div>
 
-  <div class="cs-tabs">
-    <button class="cs-tab" data-page="beach">🏖️ Beach Days<span class="cnt" id="cs-cnt-beach">0/9</span></button>
-    <button class="cs-tab" data-page="carnival">🎡 Carnival Nights<span class="cnt" id="cs-cnt-carnival">0/9</span></button>
-  </div>
-
-  <div class="cs-album"><div class="cs-grid" id="cs-grid"></div></div>
-
-  <div class="cs-meter-wrap">
-    <div class="cs-meter-row">
-      <span class="cs-meter-ico">🃏<span class="st">★</span></span>
-      <div class="cs-meter-bar"><div class="cs-meter-fill" id="cs-meter-fill"></div></div>
-      <span class="cs-meter-num" id="cs-meter-num">0/8</span>
+  <div class="cs-albumframe">
+    <div class="cs-albumtitle">✈ SUMMER POSTCARDS ✈<small>SEASON 1 · COLLECTOR'S ALBUM</small></div>
+    <div class="cs-tabs">
+      <button class="cs-tab" data-page="beach">🏖️ Beach Days<span class="cnt" id="cs-cnt-beach">0/9</span></button>
+      <button class="cs-tab" data-page="carnival">🎡 Carnival Nights<span class="cnt" id="cs-cnt-carnival">0/9</span></button>
     </div>
-    <div class="cs-meter-cap">Duplicates are never wasted — every dupe adds +1 to the Wildcard Meter. Fill it to pick ANY missing postcard!</div>
+    <div class="cs-page">
+      <div class="cs-pagehdr" id="cs-pagehdr"></div>
+      <div id="cs-scenebar"></div>
+      <div class="cs-grid" id="cs-grid"></div>
+    </div>
   </div>
+
+  <button class="cs-meter" id="cs-meterbtn" aria-label="Wildcard meter">
+    <span class="cs-wc">🃏</span>
+    <span class="cs-segs" id="cs-segs"></span>
+    <span class="cs-meter-num" id="cs-meter-num">0/8</span>
+  </button>
+  <div class="cs-meter-cap" id="cs-meter-cap">Duplicates are never wasted — every dupe adds +1. Fill all 8 to pick ANY missing postcard!</div>
 
   <div class="cs-packzone">
     <button class="sb-btn sb-btn-yellow sb-btn-block" id="cs-open" style="position:relative">🎴 Open Pack<span class="cs-badge" id="cs-packbadge">2</span></button>
+    <div class="cs-odds">Pack of 3 · odds per card: 70% ★ · 25% ★★ · 5% ★★★</div>
     <div class="cs-freetimer" id="cs-freetimer"></div>
     <div class="cs-pack-row">
       <button class="sb-btn sb-btn-green sb-btn-sm" id="cs-play">▶️ Play a level (+1 pack)</button>
@@ -158,31 +233,45 @@
 <script>
 (function(){
 "use strict";
-SB.init({ title:"Collector's Showcase", subtitle:"Summer Postcards Album · Season 1", resetKey:"collectors-showcase" });
+SB.init({ title:"Collector's Showcase", subtitle:"Summer Postcards · Season 1", resetKey:"collectors-showcase" });
 
-// ---------- catalog ----------
+// ---------- catalog (bg = layered CSS scene art) ----------
 var CARDS=[
- {id:"b1",p:"beach",n:"Sunny Shore",e:"🏖️",r:1},{id:"b2",p:"beach",n:"Ice Cream",e:"🍦",r:1},
- {id:"b3",p:"beach",n:"Beach Ball",e:"🏐",r:1},{id:"b4",p:"beach",n:"Flip Flops",e:"🩴",r:1},
- {id:"b5",p:"beach",n:"Seashell",e:"🐚",r:1},{id:"b6",p:"beach",n:"Surf's Up",e:"🏄",r:2},
- {id:"b7",p:"beach",n:"Tiki Sunset",e:"🍹",r:2},{id:"b8",p:"beach",n:"Sandcastle",e:"🏰",r:2},
- {id:"b9",p:"beach",n:"Golden Sunset",e:"🌅",r:3},
- {id:"c1",p:"carnival",n:"Cotton Candy",e:"🍭",r:1},{id:"c2",p:"carnival",n:"Balloon Pop",e:"🎈",r:1},
- {id:"c3",p:"carnival",n:"Popcorn Cart",e:"🍿",r:1},{id:"c4",p:"carnival",n:"Carousel",e:"🎠",r:1},
- {id:"c5",p:"carnival",n:"Ring Toss",e:"🎯",r:1},{id:"c6",p:"carnival",n:"Ferris Wheel",e:"🎡",r:2},
- {id:"c7",p:"carnival",n:"Circus Tent",e:"🎪",r:2},{id:"c8",p:"carnival",n:"Fireworks",e:"🎆",r:2},
- {id:"c9",p:"carnival",n:"Neon Midway",e:"🌃",r:3}
+ {id:"b1",p:"beach",n:"Sunny Shore",e:"🏖️",r:1,bg:"radial-gradient(circle at 76% 20%, #fff3b0 0 9%, rgba(255,243,176,0) 30%), linear-gradient(180deg,#79c4f2 0%,#bfe4fb 42%,#2fa8c4 42% 64%,#f2dda2 64%)"},
+ {id:"b2",p:"beach",n:"Ice Cream",e:"🍦",r:1,bg:"linear-gradient(180deg,#ffd3e0 0%,#ffeef4 45%,#67cbde 45% 66%,#fbe7b5 66%)"},
+ {id:"b3",p:"beach",n:"Beach Ball",e:"🏐",r:1,bg:"radial-gradient(circle at 24% 18%, #ffffff 0 6%, rgba(255,255,255,0) 20%), linear-gradient(180deg,#5fb8ee 0%,#a8dcf7 48%,#31a3bf 48% 66%,#f4d992 66%)"},
+ {id:"b4",p:"beach",n:"Flip Flops",e:"🩴",r:1,bg:"linear-gradient(180deg,#8ed4ef 0%,#d2f0fb 48%,#f7e3ac 48%)"},
+ {id:"b5",p:"beach",n:"Seashell",e:"🐚",r:1,bg:"linear-gradient(180deg,#c3b2e8 0%,#ecd9f2 45%,#4fb0c9 45% 62%,#efd9a8 62%)"},
+ {id:"b6",p:"beach",n:"Surf's Up",e:"🏄",r:2,bg:"linear-gradient(180deg,#4aa8d8 0%,#7cc5e8 32%,#1c86b8 32% 78%,#eed9a0 78%)"},
+ {id:"b7",p:"beach",n:"Tiki Sunset",e:"🍹",r:2,bg:"radial-gradient(circle at 50% 40%, #ffd166 0 10%, rgba(255,180,80,.5) 26%, transparent 48%), linear-gradient(180deg,#ff9e5e 0%,#ff6f61 42%,#c74e79 58%,#2e6b8a 58% 78%,#e8cf9a 78%)"},
+ {id:"b8",p:"beach",n:"Sandcastle",e:"🏰",r:2,bg:"linear-gradient(180deg,#9dd8f0 0%,#cfeefb 36%,#37a8c2 36% 50%,#f3d795 50%)"},
+ {id:"b9",p:"beach",n:"Golden Sunset",e:"🌅",r:3,bg:"radial-gradient(circle at 50% 52%, #ffe27a 0 10%, rgba(255,160,64,.65) 28%, transparent 55%), linear-gradient(180deg,#6a2c8e 0%,#d84f56 38%,#ff9a3d 55%,#2e77b8 55% 80%,#e9d09b 80%)"},
+ {id:"c1",p:"carnival",n:"Cotton Candy",e:"🍭",r:1,bg:"linear-gradient(180deg,#292a5e 0%,#5b3f8f 55%,#e58bd0 100%)"},
+ {id:"c2",p:"carnival",n:"Balloon Pop",e:"🎈",r:1,bg:"linear-gradient(180deg,#1f2a5c 0%,#41498f 60%,#7f6ac2 100%)"},
+ {id:"c3",p:"carnival",n:"Popcorn Cart",e:"🍿",r:1,bg:"linear-gradient(180deg,#2a2150 0%,#634a9e 62%,#f0b45c 100%)"},
+ {id:"c4",p:"carnival",n:"Carousel",e:"🎠",r:1,bg:"radial-gradient(circle at 50% 72%, rgba(255,214,110,.55) 0 18%, transparent 45%), linear-gradient(180deg,#241d4e 0%,#4c3585 60%,#8a5fb8 100%)"},
+ {id:"c5",p:"carnival",n:"Ring Toss",e:"🎯",r:1,bg:"linear-gradient(180deg,#20305e 0%,#3d5296 60%,#d1774f 100%)"},
+ {id:"c6",p:"carnival",n:"Ferris Wheel",e:"🎡",r:2,bg:"radial-gradient(circle at 50% 36%, rgba(140,220,255,.4) 0 16%, transparent 42%), linear-gradient(180deg,#141b45 0%,#31418c 55%,#5a74c4 100%)"},
+ {id:"c7",p:"carnival",n:"Circus Tent",e:"🎪",r:2,bg:"linear-gradient(180deg,#251a4a 0%,#57307e 52%,#d7263d 86%,#a31527 100%)"},
+ {id:"c8",p:"carnival",n:"Fireworks",e:"🎆",r:2,bg:"radial-gradient(circle at 30% 24%, rgba(255,120,150,.5) 0 8%, transparent 22%), radial-gradient(circle at 72% 18%, rgba(120,220,255,.5) 0 8%, transparent 22%), linear-gradient(180deg,#0d1233 0%,#232a63 60%,#3c3f8f 100%)"},
+ {id:"c9",p:"carnival",n:"Neon Midway",e:"🌃",r:3,bg:"radial-gradient(circle at 50% 78%, rgba(255,70,180,.55) 0 20%, transparent 46%), linear-gradient(180deg,#0b1030 0%,#28175c 45%,#7b2ff7 78%,#ff4fa3 100%)"}
 ];
 var byId={}; CARDS.forEach(function(c){byId[c.id]=c;});
-var PAGES={beach:{label:"Beach Days",reward:[{type:"coins",amount:1500},{type:"wild",amount:2}],rtxt:"1500 coins + 2 Wilds"},
-           carnival:{label:"Carnival Nights",reward:[{type:"coins",amount:2500},{type:"gem",amount:5}],rtxt:"2500 coins + 5 gems + exclusive Card Back"}};
-var METER_MAX=8, FREE_MS=90000, FREE_CAP=2;
+var PAGES={
+  beach:{label:"Beach Days",emo:"🏖️",reward:[{type:"coins",amount:1500},{type:"wild",amount:2}],rtxt:"1,500 coins + 2 Wilds",
+    bg:"radial-gradient(circle at 74% 22%, #fff0a8 0 7%, transparent 22%), linear-gradient(180deg,#7cc4f0 0%,#bfe6fb 44%,#2fa6c2 44% 66%,#f2dc9f 66%)"},
+  carnival:{label:"Carnival Nights",emo:"🎡",reward:[{type:"coins",amount:2500},{type:"gem",amount:5}],rtxt:"2,500 coins + 5 gems + exclusive Card Back",
+    bg:"radial-gradient(circle at 50% 82%, rgba(255,90,180,.45) 0 22%, transparent 50%), linear-gradient(180deg,#0d1233 0%,#2b1f63 55%,#7b2ff7 92%)"}
+};
+var SCENE_POS=[[11,26],[43,18],[76,26],[16,56],[49,48],[82,56],[12,80],[45,78],[79,82]];
+var METER_MAX=8, FREE_MS=60000, FREE_CAP=2;
+var ODDS_TXT="Odds per card: 70% ★ · 25% ★★ · 5% ★★★ (uniform within rarity)";
 
 // ---------- state ----------
 var st=SB.store("collectors-showcase",{end:0,owned:{},meter:0,packs:2,nextFree:0,pageDone:{},albumDone:false,cardBack:false,trophy:false});
 var s=st.data;
 if(!s.end){ s.end=Date.now()+72*3600000; s.nextFree=Date.now()+FREE_MS; st.save(); }
-var curPage="beach", busy=false, pillEl=null;
+var curPage="beach", busy=false, pillEl=null, pending={};
 
 // ---------- countdown ----------
 SB.countdown(document.getElementById("cs-cd"), s.end, function(){ SB.toast("Season ended! Reset demo to replay."); });
@@ -191,20 +280,60 @@ setInterval(function(){ document.getElementById("cs-lastchance").style.display =
 // ---------- helpers ----------
 function ownedCount(p){ return CARDS.filter(function(c){return c.p===p && s.owned[c.id];}).length; }
 function missing(p){ return CARDS.filter(function(c){return (!p||c.p===p) && !s.owned[c.id];}); }
-function stars(r){ return "⭐".repeat(r); }
+function stars(r){ return "★★★".slice(0,r); }
 function totalOwned(){ return Object.keys(s.owned).length; }
+function meterReady(){ return s.meter>=METER_MAX; }
+function urgent(){ return s.end-Date.now()<3600000; }
+// modal that can NOT be dismissed by backdrop tap (reward-safe)
+function hardModal(html){
+  var bd=document.createElement("div"); bd.className="sb-modal-backdrop open";
+  bd.innerHTML='<div class="sb-modal">'+html+'</div>';
+  document.body.appendChild(bd);
+  return { el:bd, close:function(){ bd.remove(); } };
+}
+// postcard renderer (album slots, reveal fronts, picker)
+function pcHTML(c){
+  return '<div class="pc'+(c.r===3?' foil':'')+'">'+
+    '<div class="pc-scene" style="background:'+c.bg+'"><span class="pc-motif">'+c.e+'</span><span class="pc-mark"></span></div>'+
+    '<span class="pc-stamp r'+c.r+'">'+c.r+'</span>'+
+    '<div class="pc-cap"><span class="pc-nm">'+c.n+'</span><span class="pc-rar">'+stars(c.r)+'</span></div></div>';
+}
+function ghostHTML(c){
+  return '<div class="ghostwrap"><span class="g-motif">'+c.e+'</span><span class="g-nm">'+c.n+'</span><span class="g-rar">'+stars(c.r)+'</span></div>';
+}
+function sceneHTML(p,big){
+  return '<div class="cs-scene'+(big?' big':'')+'" style="background:'+PAGES[p].bg+'">'+
+    '<span class="cs-scene-greet">Greetings from '+PAGES[p].label+'!</span>'+
+    CARDS.filter(function(c){return c.p===p;}).map(function(c,i){
+      return '<span class="mo" style="left:'+SCENE_POS[i][0]+'%;top:'+SCENE_POS[i][1]+'%;animation-delay:'+(i*0.11)+'s">'+c.e+'</span>';
+    }).join("")+'</div>';
+}
 
 // ---------- render ----------
+function isOwnedShown(id){ return !!s.owned[id] && !pending[id]; }
 function render(){
   var g=document.getElementById("cs-grid"); g.innerHTML="";
   CARDS.filter(function(c){return c.p===curPage;}).forEach(function(c){
     var d=document.createElement("div");
-    var own=!!s.owned[c.id];
-    d.className="cs-slot "+(own?"owned":"empty")+(own&&c.r===3?" epicown":"");
+    var own=isOwnedShown(c.id);
+    d.className="cs-slot "+(own?"owned":"empty");
     d.id="slot-"+c.id;
-    d.innerHTML='<div class="inner-stamp"><div class="art">'+c.e+'</div><div class="nm">'+c.n+'</div><div class="rar">'+stars(c.r)+'</div></div>';
+    d.innerHTML=own?pcHTML(c):ghostHTML(c);
+    if(!own) d.addEventListener("click",function(){
+      SB.haptic(); SB.toast("Find "+c.n+" in Postcard Packs ("+Math.round([70,25,5][c.r-1])+"% "+stars(c.r)+" odds)");
+    });
     g.appendChild(d);
   });
+  // page header + scene bar
+  var hdr=document.getElementById("cs-pagehdr"), n=ownedCount(curPage);
+  hdr.className="cs-pagehdr";
+  if(s.pageDone[curPage]){ hdr.classList.add("done"); hdr.textContent="PAGE COMPLETE ✓ — reward claimed"; }
+  else if(n===9){ hdr.classList.add("done"); hdr.textContent="✨ PAGE COMPLETE!"; }
+  else if(n===8){ hdr.classList.add("hot"); hdr.textContent="🔥 8/9 — one postcard left!"; }
+  else if(n===7){ hdr.classList.add("hot"); hdr.textContent="7/9 — just 2 to find!"; }
+  else hdr.textContent=(9-n)+" to find · page reward: "+PAGES[curPage].rtxt;
+  document.getElementById("cs-scenebar").innerHTML = ownedCount(curPage)===9 ? sceneHTML(curPage) : "";
+  // tabs / ring
   ["beach","carnival"].forEach(function(p){
     var el=document.getElementById("cs-cnt-"+p);
     el.textContent=ownedCount(p)+"/9"+(ownedCount(p)===9?" ✓":"");
@@ -214,8 +343,14 @@ function render(){
   var pct=Math.round(totalOwned()/18*100);
   document.getElementById("cs-pct").textContent=pct+"%";
   document.getElementById("cs-ring").style.strokeDashoffset=150.8*(1-pct/100);
-  document.getElementById("cs-meter-fill").style.width=Math.min(100,s.meter/METER_MAX*100)+"%";
-  document.getElementById("cs-meter-num").textContent=s.meter+"/"+METER_MAX;
+  // meter (8 segments)
+  var segs=document.getElementById("cs-segs"); segs.innerHTML="";
+  for(var i=0;i<METER_MAX;i++){ var sp=document.createElement("span"); sp.className="cs-seg"+(i<Math.min(s.meter,METER_MAX)?" on":""); segs.appendChild(sp); }
+  document.getElementById("cs-meter-num").textContent = meterReady() ? "READY!" : (s.meter+"/"+METER_MAX);
+  document.getElementById("cs-meterbtn").classList.toggle("ready",meterReady());
+  document.getElementById("cs-meter-cap").textContent = meterReady()
+    ? "🃏★ Wildcard ready — tap the meter to claim ANY missing postcard!"+(s.meter>METER_MAX?" (+"+(s.meter-METER_MAX)+" saved for the next one)":"")
+    : "Duplicates are never wasted — every dupe adds +1. Fill all 8 to pick ANY missing postcard!";
   document.getElementById("cs-packbadge").textContent=s.packs;
   document.getElementById("cs-open").disabled=busy||s.packs<=0;
   updatePill();
@@ -224,69 +359,94 @@ document.querySelectorAll(".cs-tab").forEach(function(t){
   t.addEventListener("click",function(){ curPage=t.dataset.page; SB.haptic(); render(); });
 });
 
-// ---------- free pack timer ----------
-setInterval(function(){
+// ---------- free pack timer (persists via s.nextFree) ----------
+function tickFree(){
   var ft=document.getElementById("cs-freetimer");
-  if(s.packs>=FREE_CAP){ ft.textContent="Free pack timer paused (max "+FREE_CAP+" free packs held)"; s.nextFree=Date.now()+FREE_MS; st.save(); return; }
+  if(s.packs>=FREE_CAP){
+    ft.textContent="Pack shelf full ("+FREE_CAP+") — free-pack timer paused";
+    if(s.nextFree-Date.now()<FREE_MS-2000){ s.nextFree=Date.now()+FREE_MS; st.save(); }
+    return;
+  }
   var left=s.nextFree-Date.now();
   if(left<=0){ s.packs++; s.nextFree=Date.now()+FREE_MS; st.save(); render(); SB.toast("🎴 Free pack arrived!"); SB.haptic(); }
   else ft.textContent="Next free pack in "+Math.ceil(left/1000)+"s";
-},500);
+}
+setInterval(tickFree,500); tickFree();
 
-// ---------- pack opening ----------
-function pullCard(forceNew){
-  var pool;
-  if(forceNew && missing().length){ pool=missing(); }
-  else{
-    var roll=Math.random(), r=roll<0.70?1:(roll<0.95?2:3);
-    pool=CARDS.filter(function(c){return c.r===r;});
-  }
+// ---------- pulls ----------
+function rollRarity(){ var r=Math.random(); return r<0.70?1:(r<0.95?2:3); }
+function pullRandom(){ var pool=CARDS.filter(function(c){return c.r===rollRarity();}); return pool[(Math.random()*pool.length)|0]; }
+function pullMissing(lowOnly){
+  var pool=missing().filter(function(c){return !lowOnly||c.r===1;});
+  if(!pool.length) pool=missing();
+  if(!pool.length) return null;
   return pool[(Math.random()*pool.length)|0];
 }
+
+// ---------- pack opening ----------
+// State is committed the moment the pack opens, so abandoning/reloading
+// mid-reveal never loses cards or meter progress. `pending` only hides
+// new cards in the album until their reveal animation lands.
 function openPack(opts){
   opts=opts||{};
   if(busy) return;
   if(!opts.free){
     if(s.packs<=0){ var b=document.getElementById("cs-open"); b.classList.remove("sb-shake"); void b.offsetWidth; b.classList.add("sb-shake"); SB.toast("No packs! Play a level or visit the shop."); return; }
-    s.packs--; st.save();
+    s.packs--;
   }
-  busy=true; render();
-  var pulls=[pullCard(false),pullCard(false),pullCard(false)];
-  if(opts.guaranteeNew && missing().length && !pulls.some(function(c){return !s.owned[c.id];})) pulls[(Math.random()*3)|0]=pullCard(true);
-  var ownedSnapshot={}; for(var k in s.owned) ownedSnapshot[k]=true;
+  busy=true;
+  var pulls=[pullRandom(),pullRandom(),pullRandom()];
+  if(opts.guaranteeNew && missing().length && !pulls.some(function(c){return !s.owned[c.id];})){
+    var repl=pullMissing(opts.guaranteeNew==="low");
+    if(repl) pulls[(Math.random()*3)|0]=repl;
+  }
+  // commit now (crash/abandon-safe); remember per-pull dupe status
+  var results=pulls.map(function(c){
+    var dupe=!!s.owned[c.id];
+    if(dupe) s.meter++; else { s.owned[c.id]=true; pending[c.id]=true; }
+    return {c:c,dupe:dupe};
+  });
+  st.save(); render();
   var ov=document.createElement("div"); ov.className="cs-overlay";
-  ov.innerHTML='<div class="cs-ov-title">'+(opts.title||"📬 Postcard Pack")+'</div><div class="cs-ov-cards" id="cs-ovc"></div><div class="cs-ov-hint" id="cs-ovh">Tap the glowing card to reveal!</div>';
+  ov.innerHTML='<button class="cs-skip" id="cs-skip">Skip ›</button><div class="cs-ov-title">'+(opts.title||"📬 Postcard Pack")+'</div><div class="cs-ov-cards" id="cs-ovc"></div><div class="cs-ov-hint" id="cs-ovh">Tap the glowing card to reveal!</div>';
   document.body.appendChild(ov);
-  var wrap=ov.querySelector("#cs-ovc"), flipped=0, seen={};
-  pulls.forEach(function(c,i){
-    var dupe=!!ownedSnapshot[c.id]||!!seen[c.id]; seen[c.id]=true;
+  var wrap=ov.querySelector("#cs-ovc"), flipped=0, collectShown=false;
+  function showCollect(){
+    if(collectShown) return; collectShown=true;
+    ov.querySelector("#cs-ovh").innerHTML='<button class="sb-btn sb-btn-green" id="cs-collect">Collect ✓</button>';
+    ov.querySelector("#cs-collect").addEventListener("click",function(){ this.disabled=true; collect(ov,results,opts); });
+  }
+  results.forEach(function(rs,i){
+    var c=rs.c;
     var f=document.createElement("div");
     f.className="cs-flip"+(c.r===3?" epic":"")+(i===0?" ready":"");
-    f.innerHTML='<div class="cs-flip-inner"><div class="cs-face back"><div class="logo">📮</div><div class="txt">SKIP-BO</div></div>'+
-      '<div class="cs-face front"><div class="art">'+c.e+'</div><div class="nm">'+c.n+'</div><div class="rar">'+stars(c.r)+'</div>'+
-      '<div class="tag '+(dupe?"dupe":"new")+'">'+(dupe?"DUPE → 🃏★ +1":"NEW!")+'</div></div></div>';
+    f.innerHTML='<div class="cs-flip-inner"><div class="cs-face back"><div class="panel"><div class="logo">📮</div><div class="txt">SKIP-BO</div><div class="txt">PAR AVION</div></div></div>'+
+      '<div class="cs-face front">'+pcHTML(c)+'<span class="tag '+(rs.dupe?"dupe":"new")+'">'+(rs.dupe?"DUPE → 🃏 +1":"NEW!")+'</span></div></div>';
     f.addEventListener("click",function(){
       if(!f.classList.contains("ready")||f.classList.contains("flipped")) return;
       f.classList.add("flipped"); f.classList.remove("ready"); SB.haptic(c.r===3?45:15);
       if(c.r===3) setTimeout(function(){var r=f.getBoundingClientRect(); SB.confetti(r.left+r.width/2,r.top,50);},600);
       flipped++;
       if(flipped<3) wrap.children[flipped].classList.add("ready");
-      else setTimeout(function(){
-        ov.querySelector("#cs-ovh").innerHTML='<button class="sb-btn sb-btn-green" id="cs-collect">Collect ✓</button>';
-        ov.querySelector("#cs-collect").addEventListener("click",function(){ collect(ov,pulls,opts); });
-      }, c.r===3?900:400);
+      else setTimeout(showCollect, c.r===3?900:400);
     });
     wrap.appendChild(f);
   });
+  ov.querySelector("#cs-skip").addEventListener("click",function(){
+    Array.prototype.forEach.call(wrap.children,function(f,i){
+      f.classList.remove("ready");
+      setTimeout(function(){ f.classList.add("flipped"); },i*130);
+    });
+    setTimeout(showCollect,450);
+  });
 }
-function collect(ov,pulls,opts){
-  var flips=ov.querySelectorAll(".cs-flip"), delay=0, gotNew=false;
-  pulls.forEach(function(c,i){
+function collect(ov,results,opts){
+  var flips=ov.querySelectorAll(".cs-flip"), delay=0;
+  results.forEach(function(rs,i){
+    var c=rs.c;
     var rect=flips[i].getBoundingClientRect(), cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
-    var dupe=!!s.owned[c.id];
-    if(!dupe){ s.owned[c.id]=true; gotNew=true; }
     setTimeout(function(){
-      if(dupe){ stardustToMeter(cx,cy); s.meter++; st.save(); render(); }
+      if(rs.dupe){ stardustToMeter(cx,cy); render(); }
       else{
         if(c.p!==curPage){ curPage=c.p; render(); }
         var slot=document.getElementById("slot-"+c.id);
@@ -294,67 +454,83 @@ function collect(ov,pulls,opts){
         fly.style.left=cx+"px"; fly.style.top=cy+"px"; document.body.appendChild(fly);
         var sr=slot.getBoundingClientRect();
         requestAnimationFrame(function(){requestAnimationFrame(function(){ fly.style.left=(sr.left+sr.width/2)+"px"; fly.style.top=(sr.top+sr.height/2)+"px"; fly.style.transform="scale(1.6)"; });});
-        setTimeout(function(){ fly.remove(); st.save(); render();
+        setTimeout(function(){ fly.remove(); delete pending[c.id]; render();
           var sl=document.getElementById("slot-"+c.id);
           if(sl){ sl.classList.add("glow","stamp"); SB.haptic(20); setTimeout(function(){sl.classList.remove("glow","stamp");},900); }
         },720);
       }
-    },delay); delay+=dupe?350:850;
+    },delay); delay+=rs.dupe?350:850;
   });
   ov.remove();
+  if(results.some(function(r){return !r.dupe;})) SB.confetti();
   setTimeout(function(){
-    busy=false; render();
-    checkMeter(function(){ checkPages(function(){ if(opts.after) opts.after(); }); });
+    busy=false; pending={}; render();
+    openPicker(function(){ checkPages(function(){ if(opts.after) opts.after(); }); });
   },delay+900);
-  if(gotNew) SB.confetti();
 }
 function stardustToMeter(x,y){
-  var m=document.querySelector(".cs-meter-ico").getBoundingClientRect();
+  var m=document.getElementById("cs-meterbtn").getBoundingClientRect();
   for(var j=0;j<6;j++)(function(j){
     var d=document.createElement("div"); d.className="cs-stardust"; d.textContent="✨";
-    d.style.left=(x+Math.random()*50-25)+"px"; d.style.top=(y+Math.random()*40-20)+"px";
+    var sx=x+Math.random()*50-25, sy=y+Math.random()*40-20;
+    d.style.left=sx+"px"; d.style.top=sy+"px";
     document.body.appendChild(d);
-    setTimeout(function(){ d.style.left=(m.left+8)+"px"; d.style.top=(m.top+8)+"px"; d.style.opacity="0.2"; d.style.transform="scale(.5)"; },30+j*60);
+    setTimeout(function(){ d.style.transform="translate("+(m.left+30-sx)+"px,"+(m.top+14-sy)+"px) scale(.5)"; d.style.opacity="0.2"; },30+j*60);
     setTimeout(function(){ d.remove(); },950+j*60);
   })(j);
   SB.toast("Duplicate → +1 Wildcard Meter 🃏★");
 }
 
-// ---------- wildcard meter ----------
-function checkMeter(done){
-  if(s.meter<METER_MAX){ if(done)done(); return; }
-  s.meter-=METER_MAX; st.save(); render();
+// ---------- wildcard picker ----------
+// Meter cost is deducted only when a card is actually chosen, so closing
+// the picker ("choose later") or reloading never loses a full meter.
+var pickerOpen=false;
+function openPicker(done){
+  if(!meterReady()||pickerOpen){ if(done)done(); return; }
   var miss=missing();
-  if(!miss.length){ SB.grantRewards([{type:"coins",amount:800}]); SB.toast("Album full — meter converted to 800 coins!"); if(done)done(); return; }
+  if(!miss.length){
+    s.meter-=METER_MAX; st.save(); render();
+    SB.grantRewards([{type:"coins",amount:800}]); SB.toast("Album full — meter converted to 800 coins!");
+    openPicker(done); return;
+  }
+  pickerOpen=true;
   SB.confetti(); SB.haptic(40);
   var html='<h3 style="margin:0">🃏★ Wildcard Ready!</h3><div class="sb-muted" style="font-size:13px;font-weight:700">Choose ANY missing postcard — it\'s yours.</div><div class="cs-pick-grid">'+
-    miss.map(function(c){return '<button class="cs-pick" data-id="'+c.id+'"><div class="art">'+c.e+'</div><div class="nm">'+c.n+'</div><div class="rar">'+stars(c.r)+'</div></button>';}).join("")+'</div>';
-  var m=SB.modal(html);
+    miss.map(function(c){return '<button class="cs-pick" data-id="'+c.id+'">'+pcHTML(c)+'</button>';}).join("")+
+    '</div><button class="cs-later" id="cs-later">Choose later (meter stays full)</button>';
+  var m=hardModal(html);
+  m.el.querySelector("#cs-later").addEventListener("click",function(){ pickerOpen=false; m.close(); render(); if(done)done(); });
   m.el.querySelectorAll(".cs-pick").forEach(function(b){
     b.addEventListener("click",function(){
-      var c=byId[b.dataset.id]; s.owned[c.id]=true; st.save(); m.close();
+      var c=byId[b.dataset.id];
+      s.meter-=METER_MAX; s.owned[c.id]=true; st.save();
+      pickerOpen=false; m.close();
       curPage=c.p; render();
       var sl=document.getElementById("slot-"+c.id);
       if(sl){ sl.classList.add("glow","stamp"); setTimeout(function(){sl.classList.remove("glow","stamp");},900); }
       SB.confetti(); SB.toast("🃏★ "+c.n+" stamped into the album!");
-      setTimeout(function(){ checkMeter(function(){ checkPages(done); }); },700);
+      setTimeout(function(){ checkPages(function(){ openPicker(done); }); },700);
     });
   });
 }
+document.getElementById("cs-meterbtn").addEventListener("click",function(){
+  if(meterReady()) openPicker();
+  else SB.toast(s.meter+"/8 — duplicates from packs fill this meter");
+});
 
-// ---------- page & album completion ----------
-function panorama(p){ return '<div class="cs-pano">'+CARDS.filter(function(c){return c.p===p;}).map(function(c,i){return '<span style="animation-delay:'+(i*0.09)+'s">'+c.e+'</span>';}).join("")+'</div>'; }
+// ---------- page & album completion (grant exactly once, non-dismissable claim) ----------
 function checkPages(done){
   var next=["beach","carnival"].find(function(p){ return ownedCount(p)===9 && !s.pageDone[p]; });
   if(!next){ checkAlbum(done); return; }
   s.pageDone[next]=true; if(next==="carnival") s.cardBack=true; st.save(); render();
   SB.confetti(); SB.haptic(50);
   var pg=PAGES[next];
-  var m=SB.modal('<h3 style="margin:0">🎉 '+pg.label+' Complete!</h3><div class="sb-muted" style="font-size:12px;font-weight:700">Your 9 postcards assemble into a scene…</div>'+panorama(next)+
+  var m=hardModal('<h3 style="margin:0">🎉 '+pg.label+' Complete!</h3><div class="sb-muted" style="font-size:12px;font-weight:700">Your 9 postcards assemble into one scene…</div>'+sceneHTML(next,true)+
     '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+pg.reward.map(SB.rewardChip).join("")+(next==="carnival"?'<span class="sb-reward"><span class="ico">🎴</span>Exclusive Card Back</span>':"")+'</div>'+
     '<button class="sb-btn sb-btn-yellow sb-btn-block" id="cs-claim" style="margin-top:12px">Claim!</button>');
   m.el.querySelector("#cs-claim").addEventListener("click",function(){
-    SB.grantRewards(pg.reward,m.el.querySelector("#cs-claim")); m.close(); SB.confetti();
+    this.disabled=true;
+    SB.grantRewards(pg.reward,this); m.close(); SB.confetti();
     setTimeout(function(){ checkPages(done); },600);
   });
 }
@@ -362,12 +538,13 @@ function checkAlbum(done){
   if(totalOwned()<18||s.albumDone){ if(done)done(); return; }
   s.albumDone=true; s.trophy=true; st.save(); render();
   SB.confetti(); setTimeout(SB.confetti,400); setTimeout(SB.confetti,800); SB.haptic(80);
-  var m=SB.modal('<h3 style="margin:0">🏆 ALBUM COMPLETE!</h3><div style="font-size:44px;margin:6px 0">🏆</div>'+
-    '<div class="sb-muted" style="font-size:13px;font-weight:700">Season 1 Collector — all 18 Summer Postcards!</div>'+panorama("beach")+panorama("carnival")+
+  var m=hardModal('<h3 style="margin:0">🏆 ALBUM COMPLETE!</h3><div style="font-size:44px;margin:6px 0">🏆</div>'+
+    '<div class="sb-muted" style="font-size:13px;font-weight:700">Season 1 Collector — all 18 Summer Postcards!</div>'+sceneHTML("beach")+sceneHTML("carnival")+
     '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+[{type:"coins",amount:5000},{type:"gem",amount:10}].map(SB.rewardChip).join("")+'<span class="sb-reward"><span class="ico">🏆</span>Collector Trophy</span></div>'+
     '<button class="sb-btn sb-btn-yellow sb-btn-block" id="cs-grand" style="margin-top:12px">Claim Grand Prize!</button>');
   m.el.querySelector("#cs-grand").addEventListener("click",function(){
-    SB.grantRewards([{type:"coins",amount:5000},{type:"gem",amount:10}],m.el.querySelector("#cs-grand"));
+    this.disabled=true;
+    SB.grantRewards([{type:"coins",amount:5000},{type:"gem",amount:10}],this);
     m.close(); SB.confetti(); if(done)done();
   });
 }
@@ -383,16 +560,21 @@ document.getElementById("cs-play").addEventListener("click",function(){
   },1200);
 });
 
-// ---------- shop ----------
-function urgent(){ return s.end-Date.now()<3600000; }
+// ---------- shop (honest guarantees, disabled when a guarantee can't hold) ----------
+function whenIdle(fn){ if(!busy) fn(); else setTimeout(function(){ whenIdle(fn); },400); }
+function completeTarget(){ return ["beach","carnival"].find(function(p){ var n=ownedCount(p); return n>=7 && n<9 && !s.pageDone[p]; }); }
 function shopHtml(){
+  var missLow=missing().filter(function(c){return c.r===1;}).length;
+  var missAny=missing().length;
+  var tgt=completeTarget();
   return '<h3 style="margin:0">🛍️ Postcard Shop</h3>'+
   (urgent()?'<div style="background:var(--sb-red);color:#fff;font-size:11px;font-weight:800;border-radius:8px;padding:5px;margin-top:6px">🔥 FINAL HOUR — last chance before the album resets!</div>':'<div class="sb-muted" style="font-size:12px;font-weight:700">Every duplicate feeds the Wildcard Meter.</div>')+
   '<div class="cs-shop-grid">'+
-  '<button class="cs-shop-item" data-buy="pack3"><span class="big">📬</span><span><span class="t">Postcard Pack ×3</span><br><span class="d">9 cards · dupes fill your meter</span></span><span class="p">$1.99</span></button>'+
-  '<button class="cs-shop-item" data-buy="gnew"><span class="gbadge">✔ GUARANTEED NEW</span><span class="big">🌟</span><span><span class="t">Guaranteed-New Pack</span><br><span class="d">3 cards — at least 1 you\'re missing</span></span><span class="p">$4.99</span></button>'+
-  '<button class="cs-shop-item" data-buy="wcb"><span class="big">🃏</span><span><span class="t">Wildcard Bundle</span><br><span class="d">+4 meter progress + 1 pack</span></span><span class="p">$2.99</span></button>'+
-  '</div>';
+  '<button class="cs-shop-item" data-buy="mpp"'+(missLow?"":" disabled")+'><span class="gbadge">✔ GUARANTEED NEW ★</span><span class="big">📦</span><span><span class="t">Missing-Piece Pack</span><br><span class="d">'+(missLow?"3 cards — at least 1 missing ★ postcard":"All ★ postcards found — try Premium")+'</span></span><span class="p">$1.99</span></button>'+
+  '<button class="cs-shop-item" data-buy="prem"'+(missAny?"":" disabled")+'><span class="gbadge gold">✔ GUARANTEED NEW · ANY ★</span><span class="big">🌟</span><span><span class="t">Premium Pack</span><br><span class="d">'+(missAny?"3 cards — at least 1 you\'re missing, any rarity":"Album complete — nothing left to find!")+'</span></span><span class="p">$4.99</span></button>'+
+  '<button class="cs-shop-item" data-buy="wcb"><span class="big">🃏</span><span><span class="t">Wildcard Bundle</span><br><span class="d">+4 Wildcard Meter + 1 Postcard Pack</span></span><span class="p">$2.99</span></button>'+
+  (tgt?'<button class="cs-shop-item hot" data-buy="cpage"><span class="gbadge gold">'+ownedCount(tgt)+'/9 — SO CLOSE!</span><span class="big">'+PAGES[tgt].emo+'</span><span><span class="t">Complete '+PAGES[tgt].label+'</span><br><span class="d">Instantly stamps your last '+missing(tgt).length+' + page reward</span></span><span class="p">$9.99</span></button>':"")+
+  '</div><div class="cs-shop-odds">'+ODDS_TXT+'</div>';
 }
 function openShop(){
   var m=SB.modal(shopHtml());
@@ -402,51 +584,63 @@ function openShop(){
 }
 document.getElementById("cs-shop").addEventListener("click",openShop);
 function buy(which){
-  if(which==="pack3") SB.buyIAP({label:"Postcard Pack ×3",price:"$1.99",sub:"9 postcards · duplicates always fill the Wildcard Meter",grant:false,
-    contents:[{type:"chest",amount:3}],onSuccess:function(){ s.packs+=2; st.save(); render(); SB.toast("+3 packs! Opening one now…");
-      setTimeout(function(){ openPack({free:true,title:"📬 Purchased Pack 1 of 3"}); },500); }});
-  if(which==="gnew") SB.buyIAP({label:"Guaranteed-New Pack",price:"$4.99",sub:"3 cards · at least 1 postcard you don't own yet",grant:false,
-    contents:[{type:"star",amount:1},{type:"chest",amount:1}],onSuccess:function(){
-      setTimeout(function(){ openPack({free:true,guaranteeNew:true,title:"🌟 Guaranteed-New Pack"}); },500); }});
-  if(which==="wcb") SB.buyIAP({label:"Wildcard Bundle",price:"$2.99",sub:"+4 Wildcard Meter progress + 1 Postcard Pack",grant:false,
-    contents:[{type:"star",amount:4},{type:"chest",amount:1}],onSuccess:function(){
+  if(which==="mpp") SB.buyIAP({label:"Missing-Piece Pack",price:"$1.99",sub:"📬 3 postcards · guaranteed at least 1 missing ★ (1-star) postcard · dupes fill the Wildcard Meter",grant:false,
+    onSuccess:function(){
+      whenIdle(function(){ openPack({free:true,guaranteeNew:"low",title:"📦 Missing-Piece Pack"}); }); }});
+  if(which==="prem") SB.buyIAP({label:"Premium Pack",price:"$4.99",sub:"📬 3 postcards · guaranteed at least 1 you don't own — any rarity, ★★★ possible",grant:false,
+    onSuccess:function(){
+      whenIdle(function(){ openPack({free:true,guaranteeNew:"any",title:"🌟 Premium Pack"}); }); }});
+  if(which==="wcb") SB.buyIAP({label:"Wildcard Bundle",price:"$2.99",sub:"🃏 +4 Wildcard Meter progress + 1 Postcard Pack",grant:false,
+    onSuccess:function(){
       stardustToMeter(window.innerWidth/2,window.innerHeight/2);
       s.meter+=4; s.packs++; st.save(); render(); SB.toast("+4 Wildcard Meter · +1 pack!");
-      setTimeout(function(){ checkMeter(function(){ setTimeout(function(){ openPack({free:true,title:"🃏 Bundle Pack"}); },400); }); },900); }});
+      setTimeout(function(){ openPicker(); },900); }});
+  if(which==="cpage"){ var tgt=completeTarget(); if(tgt) offerCompletePage(tgt); }
 }
 
-// ---------- almost-there pill / complete-page offer ----------
+// ---------- almost-there pill / complete-page offer (shows at 7/9+) ----------
 function updatePill(){
-  var target=["beach","carnival"].find(function(p){ var n=ownedCount(p); return (n===7||n===8)&&!s.pageDone[p]; });
+  var target=completeTarget();
+  document.body.classList.toggle("cs-haspill",!!target);
   if(!target){ if(pillEl){pillEl.remove();pillEl=null;} return; }
   var n=ownedCount(target);
   if(!pillEl){ pillEl=document.createElement("button"); pillEl.className="cs-pill"; document.body.appendChild(pillEl);
     pillEl.addEventListener("click",function(){ offerCompletePage(pillEl.dataset.p); }); }
   pillEl.dataset.p=target;
-  pillEl.textContent=(urgent()?"🔥 ":"")+"Almost there! "+n+"/9 "+PAGES[target].label+" →";
+  pillEl.textContent=(urgent()?"🔥 ":"")+(n===8?"8/9 — one postcard left! ":"Almost there! "+n+"/9 ")+PAGES[target].label+" →";
 }
 function offerCompletePage(p){
   var miss=missing(p);
+  if(!miss.length) return;
   SB.buyIAP({label:"Complete "+PAGES[p].label+" Page",price:"$9.99",
-    sub:(urgent()?"🔥 FINAL HOUR! ":"")+"Instantly grants your "+miss.length+" missing postcard"+(miss.length>1?"s":"")+" + page reward ("+PAGES[p].rtxt+")",
-    grant:false,contents:miss.map(function(c){return {type:"star",amount:c.r};}),
+    sub:(urgent()?"🔥 FINAL HOUR! ":"")+"Instantly stamps "+miss.map(function(c){return c.e+" "+c.n+" "+stars(c.r);}).join(" + ")+" — then claim the page reward ("+PAGES[p].rtxt+")",
+    grant:false,
     onSuccess:function(){
-      curPage=p; miss.forEach(function(c){ s.owned[c.id]=true; }); st.save(); render();
-      miss.forEach(function(c,i){ setTimeout(function(){ var sl=document.getElementById("slot-"+c.id);
+      var miss2=missing(p); // recompute in case anything changed
+      curPage=p; miss2.forEach(function(c){ s.owned[c.id]=true; }); st.save(); render();
+      miss2.forEach(function(c,i){ setTimeout(function(){ var sl=document.getElementById("slot-"+c.id);
         if(sl){ sl.classList.add("glow","stamp"); SB.haptic(15); setTimeout(function(){sl.classList.remove("glow","stamp");},800); } },i*280); });
-      setTimeout(function(){ checkPages(); },miss.length*280+600);
+      setTimeout(function(){ checkPages(); },miss2.length*280+600);
     }});
 }
 
-// ---------- info ----------
+// ---------- info (player-facing, accurate) ----------
 document.getElementById("cs-info").addEventListener("click",function(){
-  SB.modal('<h3 style="margin:0">ⓘ Collector\'s Showcase</h3><div style="text-align:left;font-size:13px;line-height:1.5;color:var(--sb-ink);margin-top:8px;font-weight:600">'+
-  '<p>A sticker-album event: open packs of Summer Postcards and stamp them into two 9-slot pages, with rarity odds of 70/25/5. Duplicates are never dead pulls — each one adds +1 to the Wildcard Meter, and a full meter lets you claim ANY missing postcard.</p>'+
-  '<p>Monetization leans on album-completion compulsion: empty slots with visible silhouettes generate want, and the "Almost there! 8/9" offer appears exactly when one missing card blocks a page reward. As the 72-hour deadline nears, wildcard and complete-the-page upsells intensify because the album resets at season end.</p>'+
-  '<p>Every purchase is followed by a pack-opening or stamping celebration, so spending always pays off with a moment of delight.</p></div>');
+  SB.modal('<h3 style="margin:0">ⓘ Summer Postcards</h3><div style="text-align:left;font-size:12.5px;line-height:1.55;color:var(--sb-ink);margin-top:8px;font-weight:600">'+
+  '<p style="margin:6px 0"><b>Collect all 18 postcards</b> across 2 album pages before the 72-hour season ends (the album then resets).</p>'+
+  '<p style="margin:6px 0"><b>Packs</b> contain 3 postcards. '+ODDS_TXT+'. A free pack arrives every 60 seconds (demo timing; holds up to 2), and every level you play earns +1 pack.</p>'+
+  '<p style="margin:6px 0"><b>Duplicates are never wasted:</b> each dupe adds +1 to the 8-segment Wildcard Meter. A full meter lets you choose ANY missing postcard; extra progress carries over.</p>'+
+  '<p style="margin:6px 0"><b>Shop guarantees:</b> Missing-Piece Pack $1.99 (≥1 new ★ postcard) · Premium Pack $4.99 (≥1 new, any rarity) · Wildcard Bundle $2.99 (+4 meter, +1 pack) · Complete-a-Page $9.99 (offered once a page reaches 7/9).</p>'+
+  '<p style="margin:6px 0"><b>Rewards:</b> Beach Days page — 1,500 coins + 2 Wilds. Carnival Nights page — 2,500 coins + 5 gems + exclusive Card Back. Full album — 5,000 coins + 10 gems + Collector Trophy.</p>'+
+  '</div>');
 });
 
 render();
+if(meterReady()) SB.toast("🃏★ Wildcard ready — tap the golden meter!");
+
+// test/demo hooks
+window.__cs={s:s,st:st,render:render,openPack:openPack,openPicker:openPicker,checkPages:checkPages,missing:missing,ownedCount:ownedCount,CARDS:CARDS,PAGES:PAGES,
+  isBusy:function(){return busy;},setBusy:function(v){busy=v;}};
 })();
 </script>
 </body>

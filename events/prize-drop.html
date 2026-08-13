@@ -6,51 +6,110 @@
 <title>Prize Drop — Skip-Bo Event</title>
 <link rel="stylesheet" href="../shared/core.css">
 <style>
-  .pd-statusrow { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .sb-main { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); }
+  .pd-statusrow { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
   .pd-info-btn {
-    margin-left:auto; width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;
-    background:rgba(255,255,255,0.18); color:#fff; font-weight:900; font-size:15px;
+    margin-left:auto; width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,0.18); color:#fff; font-weight:900; font-size:18px;
     display:grid; place-items:center;
   }
   .pd-hud {
-    display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;
+    display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; flex-wrap:wrap;
   }
   .pd-balls {
-    display:inline-flex; align-items:center; gap:7px;
+    display:inline-flex; align-items:center; gap:7px; min-height:44px;
     background:linear-gradient(180deg,#2a5cb0,#1D4FA1);
     border:2px solid rgba(255,199,44,0.7); border-radius:999px;
-    padding:6px 16px; color:#fff; font-weight:900; font-size:19px;
+    padding:6px 14px; color:#fff; font-weight:900; font-size:19px;
     box-shadow:var(--sb-shadow);
   }
   .pd-balls .num { color:var(--sb-yellow); min-width:20px; text-align:center; }
   .pd-golden {
-    display:none; align-items:center; gap:4px; font-size:11px; font-weight:800;
+    display:none; align-items:center; gap:3px; font-size:11px; font-weight:900;
     color:var(--sb-ink); background:linear-gradient(180deg,#ffe28a,#FFC72C);
-    border-radius:999px; padding:4px 10px; box-shadow:var(--sb-shadow);
+    border-radius:999px; padding:5px 9px; box-shadow:var(--sb-shadow);
     animation:sbPulse 1.4s infinite;
   }
   .pd-golden.on { display:inline-flex; }
   .pd-mults { display:flex; gap:6px; }
   .pd-mult {
     border:2px solid rgba(255,255,255,0.35); background:rgba(255,255,255,0.12);
-    color:#fff; font-weight:900; font-size:14px; border-radius:11px;
-    padding:7px 13px; cursor:pointer; transition:transform 0.08s;
+    color:#fff; font-weight:900; font-size:15px; border-radius:12px;
+    min-width:48px; min-height:44px; padding:0 12px; cursor:pointer; transition:transform 0.08s;
   }
   .pd-mult.sel {
     background:linear-gradient(180deg,#ffd95e,#FFC72C); color:var(--sb-ink);
     border-color:#fff; transform:scale(1.08); box-shadow:0 0 12px rgba(255,199,44,0.6);
   }
   .pd-mult:disabled { opacity:0.35; filter:grayscale(0.7); pointer-events:none; }
-  .pd-arrows { display:flex; gap:5px; margin-bottom:5px; }
+
+  /* ===== Arcade cabinet ===== */
+  .pd-cabinet {
+    position:relative; border-radius:20px; padding:0 7px 9px;
+    background:linear-gradient(180deg,#0d2547 0%,#14396f 30%,#0b1f3e 100%);
+    border:2px solid rgba(255,199,44,0.55);
+    box-shadow:0 10px 26px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .pd-cabinet::before, .pd-cabinet::after { /* side rail gold trims */
+    content:""; position:absolute; top:64px; bottom:9px; width:3px; border-radius:3px;
+    background:linear-gradient(180deg,#ffe28a,#e0a400 40%,#ffe28a 70%,#b98700);
+    opacity:0.85; pointer-events:none;
+  }
+  .pd-cabinet::before { left:3px; } .pd-cabinet::after { right:3px; }
+  .pd-marquee {
+    position:relative; margin:0 -7px; padding:8px 10px 7px; border-radius:18px 18px 0 0;
+    background:linear-gradient(180deg,#ef5468 0%,#D7263D 45%,#8f1223 100%);
+    border-bottom:2px solid rgba(255,199,44,0.8);
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    box-shadow:inset 0 -3px 8px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.25);
+    overflow:hidden;
+  }
+  .pd-bulbs {
+    position:absolute; left:0; right:0; top:2px; height:6px; pointer-events:none;
+    background:radial-gradient(circle at 3px 3px, #ffe28a 2px, transparent 2.6px);
+    background-size:14px 6px; background-repeat:repeat-x;
+    animation:pdBulbs 1s steps(2) infinite;
+  }
+  @keyframes pdBulbs { 0%{opacity:1;} 50%{opacity:0.35;} 100%{opacity:1;} }
+  .pd-mq-title {
+    font-weight:900; font-size:16px; letter-spacing:1.5px; color:var(--sb-yellow);
+    text-shadow:0 2px 0 rgba(0,0,0,0.45), 0 0 12px rgba(255,199,44,0.6);
+    white-space:nowrap;
+  }
+  .pd-mq-jp {
+    display:flex; flex-direction:column; align-items:flex-end; line-height:1.05;
+  }
+  .pd-mq-jp .lbl { font-size:9px; font-weight:900; letter-spacing:1px; color:#ffd9de; }
+  .pd-mq-jp .amt {
+    font-size:17px; font-weight:900; color:#fff;
+    text-shadow:0 0 10px rgba(255,199,44,0.9), 0 2px 0 rgba(0,0,0,0.4);
+    animation:sbPulse 1.8s infinite;
+  }
+  .pd-arrows { display:flex; gap:4px; padding:6px 2px 4px; }
   .pd-arrow {
-    flex:1; border:none; cursor:pointer; border-radius:10px 10px 4px 4px;
+    flex:1; border:none; cursor:pointer; border-radius:9px 9px 4px 4px; min-height:44px;
     background:linear-gradient(180deg,#5ba0e8,#1D4FA1);
-    color:var(--sb-yellow); font-size:19px; font-weight:900; padding:8px 0;
+    border:1px solid rgba(255,255,255,0.25); border-bottom:none;
+    color:var(--sb-yellow); font-size:19px; font-weight:900; padding:9px 0;
     box-shadow:0 3px 0 rgba(0,0,0,0.3);
   }
   .pd-arrow:active { transform:translateY(2px); box-shadow:none; }
-  .pd-boardwrap { position:relative; border-radius:14px; overflow:hidden; box-shadow:var(--sb-shadow); }
+  .pd-boardwrap { position:relative; border-radius:10px; overflow:hidden; box-shadow:inset 0 0 18px rgba(0,0,0,0.55); }
+  .pd-boardwrap::after { /* glass sheen */
+    content:""; position:absolute; inset:0; pointer-events:none; border-radius:10px;
+    background:
+      linear-gradient(115deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 26%, transparent 42%),
+      linear-gradient(295deg, rgba(255,255,255,0.06) 0%, transparent 30%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.25);
+  }
   #pd-canvas { display:block; width:100%; touch-action:none; }
+  .pd-shakecab { animation:pdCabShake 0.55s; }
+  @keyframes pdCabShake {
+    0%,100%{transform:translate(0,0);} 15%{transform:translate(-4px,2px);} 30%{transform:translate(4px,-2px);}
+    45%{transform:translate(-3px,-2px);} 60%{transform:translate(3px,2px);} 75%{transform:translate(-2px,1px);} 90%{transform:translate(2px,-1px);}
+  }
+
+  /* ===== Milestone track ===== */
   .pd-track { margin-top:12px; }
   .pd-track-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:38px; }
   .pd-track-head .t { font-weight:900; color:#fff; font-size:14px; text-shadow:0 1px 0 rgba(0,0,0,0.3); }
@@ -62,11 +121,11 @@
     transition:width 0.6s cubic-bezier(0.22,1,0.36,1);
   }
   .pd-node {
-    position:absolute; top:50%; transform:translate(-50%,-50%);
+    position:absolute; top:50%; margin:-17px 0 0 -17px; /* center via margins so animations can't displace it */
     width:34px; height:34px; border-radius:50%;
     background:#14396f; border:2.5px solid rgba(255,255,255,0.45);
     display:grid; place-items:center; font-size:15px;
-    transition:all 0.3s;
+    transition:background 0.3s, border-color 0.3s;
   }
   .pd-node .pts {
     position:absolute; top:-19px; left:50%; transform:translateX(-50%);
@@ -75,7 +134,7 @@
   .pd-node.done { background:linear-gradient(180deg,#3fc167,#2E9E4F); border-color:#fff; }
   .pd-node.next { border-color:var(--sb-yellow); box-shadow:0 0 10px rgba(255,199,44,0.7); animation:sbPulse 1.6s infinite; }
   .pd-earnrow { display:flex; gap:8px; margin-top:14px; }
-  .pd-earnrow .sb-btn { flex:1; }
+  .pd-earnrow .sb-btn { flex:1; min-height:44px; }
   .pd-offer-pack {
     display:flex; align-items:center; gap:10px; width:100%;
     background:#fff; border:2px solid rgba(27,42,74,0.15); border-radius:14px;
@@ -106,12 +165,12 @@
   <div class="sb-main">
     <div class="pd-statusrow">
       <span class="sb-timer-chip">⏱ <span id="pd-timer">--</span></span>
-      <button class="pd-info-btn" id="pd-info">ⓘ</button>
+      <button class="pd-info-btn" id="pd-info" aria-label="How to play">ⓘ</button>
     </div>
 
     <div class="pd-hud">
       <span class="pd-balls">🔮 <span class="num" id="pd-ballnum">0</span></span>
-      <span class="pd-golden" id="pd-golden">⭐ Golden Ball ready!</span>
+      <span class="pd-golden" id="pd-golden">⭐ 2× pts ball ready!</span>
       <span class="pd-mults">
         <button class="pd-mult sel" data-m="1">×1</button>
         <button class="pd-mult" data-m="2">×2</button>
@@ -119,10 +178,17 @@
       </span>
     </div>
 
-    <div class="pd-arrows" id="pd-arrows">
-      <button class="pd-arrow">▼</button><button class="pd-arrow">▼</button><button class="pd-arrow">▼</button><button class="pd-arrow">▼</button><button class="pd-arrow">▼</button>
+    <div class="pd-cabinet" id="pd-cabinet">
+      <div class="pd-marquee">
+        <div class="pd-bulbs"></div>
+        <span class="pd-mq-title">🎪 PRIZE DROP</span>
+        <span class="pd-mq-jp"><span class="lbl">JACKPOT</span><span class="amt">🪙 <span id="pd-jpamt">2,000</span></span></span>
+      </div>
+      <div class="pd-arrows" id="pd-arrows">
+        <button class="pd-arrow" aria-label="Drop column 1">▼</button><button class="pd-arrow" aria-label="Drop column 2">▼</button><button class="pd-arrow" aria-label="Drop column 3">▼</button><button class="pd-arrow" aria-label="Drop column 4">▼</button><button class="pd-arrow" aria-label="Drop column 5">▼</button>
+      </div>
+      <div class="pd-boardwrap"><canvas id="pd-canvas"></canvas></div>
     </div>
-    <div class="pd-boardwrap"><canvas id="pd-canvas"></canvas></div>
 
     <div class="pd-track">
       <div class="pd-track-head">
@@ -152,9 +218,10 @@
     { pts:700, rewards:[{type:"coins",amount:1500},{type:"wild",amount:2}] }
   ];
   var MAX_PTS = TIERS[TIERS.length-1].pts;
+  var JP_BASE = 2000;
 
   var st = SB.store("prize-drop", {
-    balls:6, golden:0, jackpot:2000, points:0, tiers:0, endTs:0
+    balls:6, golden:0, jackpot:JP_BASE, points:0, tiers:0, endTs:0
   });
   if (!st.data.endTs) { st.data.endTs = Date.now() + 72*3600*1000; st.save(); }
 
@@ -166,26 +233,31 @@
   var mult = 1, offerOpen = false;
   var ballNumEl = document.getElementById("pd-ballnum");
   var goldenEl = document.getElementById("pd-golden");
+  var jpAmtEl = document.getElementById("pd-jpamt");
+  var cabinetEl = document.getElementById("pd-cabinet");
   var multBtns = [].slice.call(document.querySelectorAll(".pd-mult"));
 
+  function updateJackpotHud(){
+    // marquee shows the amount the NEXT drop would win at the selected multiplier
+    jpAmtEl.textContent = SB.fmt(st.data.jackpot * mult);
+  }
   function updateHud(){
     ballNumEl.textContent = st.data.balls;
     goldenEl.classList.toggle("on", st.data.golden > 0);
+    if (st.data.balls > 0 && st.data.balls < mult) mult = st.data.balls; // graceful downgrade
     multBtns.forEach(function(b){
       var m = +b.dataset.m;
-      b.disabled = st.data.balls < m;
+      b.disabled = st.data.balls > 0 && st.data.balls < m;
       b.classList.toggle("sel", m === mult);
     });
-    if (st.data.balls < mult) {
-      mult = st.data.balls >= 1 ? st.data.balls : 1;
-      multBtns.forEach(function(b){ b.classList.toggle("sel", +b.dataset.m === mult); });
-    }
+    updateJackpotHud();
     updateTrack();
   }
   multBtns.forEach(function(b){
     b.addEventListener("click", function(){
       mult = +b.dataset.m; SB.haptic();
       multBtns.forEach(function(x){ x.classList.toggle("sel", x===b); });
+      updateJackpotHud();
     });
   });
 
@@ -223,42 +295,45 @@
 
   // ============ Board / physics ============
   var canvas = document.getElementById("pd-canvas"), ctx = canvas.getContext("2d");
-  var W=0, H=0, DPR=1, BR=0, pegs=[], balls=[], effects=[];
-  var POCKETS = 5, divTop=0, multY=0, multX=0, gapW=0, multDir=1;
-  var PAYOUT_LABEL = ["🪙100","🎟️2","JACKPOT","🃏?","🪙100"];
+  var W=0, H=0, DPR=1, BR=0, railW=0, innerW=0, pw=0, pegs=[], balls=[], effects=[];
+  var POCKETS = 5, divTop=0, multY=0, multX=0, gapW=0;
 
   function layout(){
     var w = canvas.parentElement.clientWidth;
+    if (!w) return;
     DPR = Math.min(2, window.devicePixelRatio||1);
-    W = w; H = Math.round(w*1.25);
-    canvas.width = W*DPR; canvas.height = H*DPR;
+    W = w; H = Math.round(w*1.26);
+    canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
     canvas.style.height = H+"px";
     ctx.setTransform(DPR,0,0,DPR,0,0);
     BR = W*0.030;
-    divTop = H*0.78; multY = H*0.695; gapW = W*0.21;
+    railW = Math.max(9, W*0.032);
+    innerW = W - 2*railW; pw = innerW/POCKETS;
+    divTop = H*0.775; multY = H*0.685; gapW = W*0.21;
     pegs = [];
-    var rows = 7, y0 = H*0.14, dy = H*0.066, pr = W*0.014;
+    var rows = 8, y0 = H*0.115, dy = H*0.066, pr = W*0.015;
     for (var r=0; r<rows; r++){
       var y = y0 + r*dy;
-      if (r%2===0) for (var i=0;i<6;i++) pegs.push({x:(i+0.5)*W/6, y:y, r:pr, f:0});
-      else for (var j=0;j<7;j++) pegs.push({x:j*W/6, y:y, r:pr, f:0});
+      if (r%2===0) for (var i=0;i<6;i++) pegs.push({x:railW+(i+0.5)*innerW/6, y:y, r:pr, f:0});
+      else for (var j=0;j<7;j++) pegs.push({x:railW+j*innerW/6, y:y, r:pr, f:0});
     }
-    for (var d=1; d<POCKETS; d++) pegs.push({x:d*W/5, y:divTop, r:pr*1.25, f:0, div:true});
+    for (var d=1; d<POCKETS; d++) pegs.push({x:railW+d*pw, y:divTop, r:pr*1.3, f:0, div:true});
   }
   layout();
   window.addEventListener("resize", layout);
 
-  function colX(i){ return (i+0.5)*W/POCKETS; }
+  function colX(i){ return railW + (i+0.5)*pw; }
 
   function spawnBall(x){
     var golden = st.data.golden > 0;
     if (golden) { st.data.golden--; st.save(); }
     var bias = null;
-    if (!golden && Math.random() < 0.30) bias = colX(Math.random()<0.5 ? 1 : 3);
+    if (!golden && Math.random() < 0.30) bias = colX(Math.random()<0.5 ? 1 : 3); // near-miss drift toward jackpot neighbors
     balls.push({
-      x: Math.max(BR+2, Math.min(W-BR-2, x)), y: BR+2,
+      x: Math.max(railW+BR+2, Math.min(W-railW-BR-2, x)), y: BR+2,
       vx:(Math.random()-0.5)*W*0.12, vy:0,
-      mult: mult, golden: golden, multHit:false, bias: bias, spin:0
+      mult: mult, golden: golden, multHit:false, bias: bias, spin:0,
+      trail: [], slow:0
     });
     SB.haptic();
   }
@@ -266,11 +341,11 @@
   function tryDrop(x){
     if (balls.length >= 3) { SB.toast("Max 3 balls at once!"); return; }
     if (st.data.balls < mult) {
-      document.querySelector(".pd-balls").classList.remove("sb-shake");
-      void document.querySelector(".pd-balls").offsetWidth;
-      document.querySelector(".pd-balls").classList.add("sb-shake");
-      SB.toast("Not enough balls!"); SB.haptic(30);
-      openOffer();
+      var chip = document.querySelector(".pd-balls");
+      chip.classList.remove("sb-shake"); void chip.offsetWidth; chip.classList.add("sb-shake");
+      SB.toast(st.data.balls > 0 ? "Need "+mult+" balls for ×"+mult+"!" : "Not enough balls!");
+      SB.haptic(30);
+      openOffer(true);
       return;
     }
     st.data.balls -= mult; st.save();
@@ -299,18 +374,25 @@
     var x2 = b.multHit ? 2 : 1;
     if (pocket === 2) {
       var amt = st.data.jackpot * b.mult * x2;
-      st.data.jackpot = 2000; st.save();
+      st.data.jackpot = JP_BASE; st.save();
+      effects.push({x:W/2, y:H/2, t:0, kind:"flash"});
+      cabinetEl.classList.remove("pd-shakecab"); void cabinetEl.offsetWidth;
+      cabinetEl.classList.add("pd-shakecab");
+      SB.haptic(60);
       SB.confetti(); SB.confetti(window.innerWidth*0.25, window.innerHeight*0.5);
       SB.confetti(window.innerWidth*0.75, window.innerHeight*0.5);
       SB.grantRewards([{type:"coins",amount:amt}], org);
-      var m = SB.modal(
-        '<div style="font-size:48px">🎰</div><h2 style="margin:6px 0;color:var(--sb-red)">JACKPOT!!</h2>'+
-        '<p style="font-weight:800;font-size:20px;margin:4px 0">🪙 '+SB.fmt(amt)+' coins!</p>'+
-        (x2>1?'<p class="sb-gold-text" style="font-weight:900">×2 multiplier pocket bonus!</p>':'')+
-        '<button class="sb-btn sb-btn-yellow sb-btn-block" id="pd-jp-ok">Collect!</button>');
-      m.el.querySelector("#pd-jp-ok").addEventListener("click", m.close);
+      setTimeout(function(){
+        var m = SB.modal(
+          '<div style="font-size:48px">🎰</div><h2 style="margin:6px 0;color:var(--sb-red)">JACKPOT!!</h2>'+
+          '<p style="font-weight:800;font-size:20px;margin:4px 0">🪙 '+SB.fmt(amt)+' coins!</p>'+
+          (b.mult>1?'<p style="font-weight:800;margin:2px 0;color:var(--sb-green)">×'+b.mult+' ball multiplier applied!</p>':'')+
+          (x2>1?'<p style="font-weight:900;margin:2px 0;color:var(--sb-yellow-dark)">×2 gate bonus — doubled!</p>':'')+
+          '<button class="sb-btn sb-btn-yellow sb-btn-block" id="pd-jp-ok">Collect!</button>');
+        m.el.querySelector("#pd-jp-ok").addEventListener("click", m.close);
+      }, 550);
     } else {
-      st.data.jackpot += 50; st.save();
+      st.data.jackpot += 50*b.mult; st.save(); // pot grows with every miss, scaled by ball cost
       if (pocket === 1) SB.grantRewards([{type:"token",amount:2*b.mult*x2}], org);
       else if (pocket === 3) {
         var boosters = ["wild","undo","draw"];
@@ -318,11 +400,15 @@
       } else SB.grantRewards([{type:"coins",amount:100*b.mult*x2}], org);
       if (b.multHit) SB.confetti(canvas.getBoundingClientRect().left+colX(pocket), canvas.getBoundingClientRect().top+H-40, 40);
     }
-    st.data.points += 10*b.mult + (b.multHit?25:0);
+    var gained = (10*b.mult + (b.multHit?25:0)) * (b.golden?2:1);
+    st.data.points += gained;
     st.save();
+    effects.push({x:colX(pocket), y:divTop-6, t:0, kind:"pts",
+      txt:"+"+gained+" pts"+(b.golden?" (⭐×2)":""), gold:b.golden});
+    updateJackpotHud();
     checkTiers();
     updateHud();
-    if (st.data.balls === 0 && balls.length === 0) setTimeout(openOffer, 700);
+    if (st.data.balls === 0 && balls.length === 0) setTimeout(function(){ openOffer(); }, 700);
   }
 
   // ============ Physics loop ============
@@ -330,13 +416,15 @@
   function step(now){
     var dt = Math.min(0.032, (now-last)/1000); last = now;
     var t = (now-t0)/1000;
-    multX = W/2 + Math.sin(t*1.15)*W*0.30;
+    multX = W/2 + Math.sin(t*1.15)*(innerW/2 - gapW/2 - 4);
     var g = H*3.2, e = 0.52;
 
     for (var bi=balls.length-1; bi>=0; bi--){
       var b = balls[bi];
+      b.trail.push({x:b.x, y:b.y});
+      if (b.trail.length > 9) b.trail.shift();
       b.vy += g*dt;
-      // steering: golden ball glides into the moving multiplier pocket
+      // golden ball glides into the moving ×2 gate
       if (b.golden && !b.multHit && b.y > multY-H*0.26 && b.y < multY){
         b.x += (multX - b.x)*Math.min(1, dt*9);
         b.vx *= 0.8;
@@ -348,9 +436,10 @@
       b.x += b.vx*dt; b.y += b.vy*dt;
       b.spin += b.vx*dt*0.05;
 
-      // walls
-      if (b.x < BR) { b.x = BR; b.vx = Math.abs(b.vx)*e; }
-      if (b.x > W-BR) { b.x = W-BR; b.vx = -Math.abs(b.vx)*e; }
+      // walls (side rails) + ceiling
+      if (b.x < railW+BR) { b.x = railW+BR; b.vx = Math.abs(b.vx)*e; }
+      if (b.x > W-railW-BR) { b.x = W-railW-BR; b.vx = -Math.abs(b.vx)*e; }
+      if (b.y < BR) { b.y = BR; b.vy = Math.abs(b.vy)*e; }
 
       // pegs
       for (var pi=0; pi<pegs.length; pi++){
@@ -368,7 +457,13 @@
         }
       }
 
-      // multiplier pocket pass
+      // anti-stuck: if nearly motionless above the pockets, nudge
+      if (b.y < divTop && Math.abs(b.vx) < W*0.02 && Math.abs(b.vy) < H*0.02){
+        b.slow += dt;
+        if (b.slow > 0.8){ b.vx += (Math.random()<0.5?-1:1)*W*0.18; b.vy -= H*0.05; b.slow = 0; }
+      } else b.slow = 0;
+
+      // ×2 gate pass
       if (!b.multHit && b.y > multY-BR && b.y < multY+BR && Math.abs(b.x-multX) < gapW/2){
         b.multHit = true;
         effects.push({x:b.x, y:multY, t:0, kind:"x2"});
@@ -378,7 +473,7 @@
       // pocket dividers (vertical walls)
       if (b.y+BR > divTop){
         for (var d=1; d<POCKETS; d++){
-          var wx = d*W/5;
+          var wx = railW + d*pw;
           if (Math.abs(b.x-wx) < BR+2 && b.y-BR > divTop){
             b.x = b.x < wx ? wx-BR-2 : wx+BR+2;
             b.vx = -b.vx*e;
@@ -387,8 +482,8 @@
       }
 
       // landed
-      if (b.y > H-BR-4){
-        var pocket = Math.max(0, Math.min(4, Math.floor(b.x/(W/5))));
+      if (b.y > H-BR-5){
+        var pocket = Math.max(0, Math.min(4, Math.floor((b.x-railW)/pw)));
         effects.push({x:colX(pocket), y:H-BR*2, t:0, kind:"land"});
         balls.splice(bi,1);
         resolve(b, pocket);
@@ -399,62 +494,145 @@
   }
 
   // ============ Drawing ============
+  function rr(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+
   function draw(t, dt){
     ctx.clearRect(0,0,W,H);
+    // playfield
     var bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,"#0e2a54"); bg.addColorStop(1,"#1D4FA1");
+    bg.addColorStop(0,"#0a1f42"); bg.addColorStop(0.6,"#153d7d"); bg.addColorStop(1,"#0e2a54");
     ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+    // ambient glow behind jackpot pocket
+    var jgl = 0.5+0.5*Math.sin(t*3.2);
+    var jg = ctx.createRadialGradient(W/2, H*0.92, 4, W/2, H*0.92, W*0.35);
+    jg.addColorStop(0,"rgba(255,199,44,"+(0.16+0.14*jgl)+")"); jg.addColorStop(1,"rgba(255,199,44,0)");
+    ctx.fillStyle = jg; ctx.fillRect(0,H*0.55,W,H*0.45);
 
-    // pockets
+    // ===== pocket bins =====
+    var binTop = divTop, binH = H-binTop;
     for (var i=0;i<POCKETS;i++){
-      var x0 = i*W/5;
-      ctx.fillStyle = i===2 ? "rgba(215,38,61,0.35)" : "rgba(0,0,0,0.28)";
-      ctx.fillRect(x0+2, divTop, W/5-4, H-divTop);
-      ctx.textAlign = "center";
+      var x0 = railW + i*pw;
+      var lit = ctx.createLinearGradient(0,binTop,0,H);
       if (i===2){
-        ctx.fillStyle = "#FFC72C";
-        ctx.font = "900 "+(W*0.032)+"px Trebuchet MS";
-        ctx.fillText("JACKPOT", colX(i), divTop+H*0.05);
-        ctx.font = "900 "+(W*0.043)+"px Trebuchet MS";
-        ctx.fillText("🪙"+SB.fmt(st.data.jackpot), colX(i), divTop+H*0.10);
-        var gl = 0.5+0.5*Math.sin(t*4);
-        ctx.strokeStyle = "rgba(255,199,44,"+(0.4+0.5*gl)+")";
-        ctx.lineWidth = 2.5;
-        ctx.strokeRect(x0+3, divTop+1, W/5-6, H-divTop-3);
+        lit.addColorStop(0,"rgba(215,38,61,0.30)"); lit.addColorStop(1,"rgba(255,199,44,"+(0.30+0.25*jgl)+")");
+      } else if (i===1){
+        lit.addColorStop(0,"rgba(0,0,0,0.30)"); lit.addColorStop(1,"rgba(46,158,79,0.40)");
+      } else if (i===3){
+        lit.addColorStop(0,"rgba(0,0,0,0.30)"); lit.addColorStop(1,"rgba(62,142,222,0.45)");
       } else {
+        lit.addColorStop(0,"rgba(0,0,0,0.30)"); lit.addColorStop(1,"rgba(255,199,44,0.28)");
+      }
+      ctx.fillStyle = lit;
+      ctx.fillRect(x0+2, binTop, pw-4, binH);
+      // floor glow strip
+      ctx.fillStyle = i===2 ? "rgba(255,199,44,"+(0.55+0.35*jgl)+")" :
+        (i===1 ? "rgba(63,193,103,0.75)" : i===3 ? "rgba(91,160,232,0.75)" : "rgba(255,199,44,0.55)");
+      ctx.fillRect(x0+3, H-4, pw-6, 4);
+    }
+
+    // ===== pocket labels / plates =====
+    ctx.textAlign = "center";
+    for (var k=0;k<POCKETS;k++){
+      var cx = colX(k), plateY = binTop + binH*0.16, plateW = pw*0.86, plateH = binH*0.56;
+      if (k===2){
+        plateW = pw*0.97;
+        // JACKPOT — dramatic pulsing gold
+        ctx.save();
+        ctx.shadowColor = "rgba(255,199,44,"+(0.5+0.5*jgl)+")"; ctx.shadowBlur = 12+10*jgl;
+        rr(cx-plateW/2, plateY-2, plateW, plateH+6, 7);
+        var jpg = ctx.createLinearGradient(0,plateY,0,plateY+plateH);
+        jpg.addColorStop(0,"#8f1223"); jpg.addColorStop(1,"#D7263D");
+        ctx.fillStyle = jpg; ctx.fill();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = "rgba(255,199,44,"+(0.6+0.4*jgl)+")"; ctx.stroke();
+        ctx.restore();
+        ctx.fillStyle = "#FFC72C";
+        ctx.font = "900 "+Math.round(W*0.030)+"px Trebuchet MS";
+        ctx.fillText("JACKPOT", cx, plateY + plateH*0.34);
         ctx.fillStyle = "#fff";
-        ctx.font = "800 "+(W*0.037)+"px Trebuchet MS";
-        ctx.fillText(PAYOUT_LABEL[i], colX(i), divTop+H*0.075);
+        ctx.font = "900 "+Math.round(W*0.05)+"px Trebuchet MS";
+        ctx.fillText("🪙"+SB.fmt(st.data.jackpot*mult), cx, plateY + plateH*0.82);
+      } else {
+        rr(cx-plateW/2, plateY, plateW, plateH, 6);
+        ctx.fillStyle = "rgba(9,22,48,0.72)"; ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = k===1 ? "rgba(63,193,103,0.8)" : k===3 ? "rgba(91,160,232,0.85)" : "rgba(255,199,44,0.7)";
+        ctx.stroke();
+        ctx.font = "900 "+Math.round(W*0.042)+"px Trebuchet MS";
+        ctx.fillStyle = "#fff";
+        var main = k===1 ? "🎟️"+(2*mult) : k===3 ? "🃏×"+mult : "🪙"+(100*mult);
+        ctx.fillText(main, cx, plateY + plateH*0.46);
+        ctx.font = "800 "+Math.round(W*0.026)+"px Trebuchet MS";
+        ctx.fillStyle = k===1 ? "#8fe3ab" : k===3 ? "#b7d7f8" : "#ffe28a";
+        ctx.fillText(k===1 ? "TOKENS" : k===3 ? "BOOSTER" : "COINS", cx, plateY + plateH*0.82);
       }
     }
-    // dividers
-    ctx.fillStyle = "#3E8EDE";
-    for (var d=1; d<POCKETS; d++) ctx.fillRect(d*W/5-2, divTop, 4, H-divTop);
 
-    // pegs
+    // dividers with gold caps
+    for (var d=1; d<POCKETS; d++){
+      var wx = railW + d*pw;
+      var dg = ctx.createLinearGradient(wx-2,0,wx+2,0);
+      dg.addColorStop(0,"#1D4FA1"); dg.addColorStop(0.5,"#5ba0e8"); dg.addColorStop(1,"#1D4FA1");
+      ctx.fillStyle = dg; ctx.fillRect(wx-2, divTop, 4, H-divTop);
+    }
+
+    // ===== side rails =====
+    var rlg = ctx.createLinearGradient(0,0,railW,0);
+    rlg.addColorStop(0,"#0a1c3a"); rlg.addColorStop(0.55,"#2a5cb0"); rlg.addColorStop(1,"#14396f");
+    ctx.fillStyle = rlg; ctx.fillRect(0,0,railW,H);
+    var rrg = ctx.createLinearGradient(W-railW,0,W,0);
+    rrg.addColorStop(0,"#14396f"); rrg.addColorStop(0.45,"#2a5cb0"); rrg.addColorStop(1,"#0a1c3a");
+    ctx.fillStyle = rrg; ctx.fillRect(W-railW,0,railW,H);
+    ctx.fillStyle = "rgba(255,199,44,0.5)";
+    ctx.fillRect(railW-1.5,0,1.5,H); ctx.fillRect(W-railW,0,1.5,H);
+
+    // ===== pegs (dimensional) =====
     pegs.forEach(function(p){
       if (p.f>0) p.f = Math.max(0, p.f-dt*4);
+      // hit glow halo
+      if (p.f>0){
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 3 + p.f*5, 0, 7);
+        ctx.fillStyle = "rgba(255,199,44,"+(p.f*0.45)+")"; ctx.fill();
+      }
+      // shadow
+      ctx.beginPath(); ctx.arc(p.x+1, p.y+1.5, p.r + p.f*2, 0, 7);
+      ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fill();
+      // body
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r + p.f*2, 0, 7);
-      ctx.fillStyle = p.f>0 ? "#FFC72C" : "rgba(255,255,255,0.85)";
-      ctx.fill();
-      if (p.f>0){ ctx.strokeStyle="rgba(255,199,44,"+p.f+")"; ctx.lineWidth=2; ctx.stroke(); }
+      var pg = ctx.createRadialGradient(p.x-p.r*0.4, p.y-p.r*0.4, p.r*0.15, p.x, p.y, p.r+p.f*2);
+      if (p.f>0){ pg.addColorStop(0,"#fff3c4"); pg.addColorStop(1,"#FFC72C"); }
+      else if (p.div){ pg.addColorStop(0,"#ffe28a"); pg.addColorStop(1,"#e0a400"); }
+      else { pg.addColorStop(0,"#ffffff"); pg.addColorStop(1,"#9cc8f5"); }
+      ctx.fillStyle = pg; ctx.fill();
     });
 
-    // moving ×2 multiplier pocket
+    // ===== moving ×2 gate =====
     ctx.save();
     ctx.translate(multX, multY);
+    var ggl = 0.6+0.4*Math.sin(t*6);
+    ctx.shadowColor = "rgba(255,199,44,"+ggl+")"; ctx.shadowBlur = 10;
     ctx.strokeStyle = "#FFC72C"; ctx.lineWidth = 3.5; ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(-gapW/2, -BR*1.1); ctx.lineTo(-gapW/2, BR*1.1);
     ctx.moveTo(gapW/2, -BR*1.1); ctx.lineTo(gapW/2, BR*1.1);
     ctx.stroke();
+    ctx.shadowBlur = 0;
+    rr(-gapW*0.26, -BR*0.85, gapW*0.52, BR*1.7, BR*0.6);
+    ctx.fillStyle = "rgba(9,22,48,0.75)"; ctx.fill();
+    ctx.strokeStyle = "rgba(255,199,44,"+ggl+")"; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.fillStyle = "#FFC72C"; ctx.textAlign = "center";
-    ctx.font = "900 "+(W*0.045)+"px Trebuchet MS";
-    ctx.fillText("×2", 0, W*0.016);
+    ctx.font = "900 "+Math.round(W*0.042)+"px Trebuchet MS";
+    ctx.fillText("×2", 0, W*0.015);
     ctx.restore();
 
-    // balls (Skip-Bo card-back styled discs)
+    // ===== balls (Skip-Bo discs) with trails =====
     balls.forEach(function(b){
+      // trail
+      for (var ti=0; ti<b.trail.length; ti++){
+        var tp = b.trail[ti], ta = (ti+1)/b.trail.length*0.30;
+        ctx.beginPath(); ctx.arc(tp.x, tp.y, BR*(0.35+0.55*ti/b.trail.length), 0, 7);
+        ctx.fillStyle = b.golden ? "rgba(255,199,44,"+ta+")" : "rgba(156,200,245,"+ta+")";
+        ctx.fill();
+      }
       ctx.save();
       ctx.translate(b.x, b.y); ctx.rotate(b.spin);
       ctx.shadowColor = b.golden ? "rgba(255,199,44,0.9)" : "rgba(0,0,0,0.4)";
@@ -480,17 +658,28 @@
       }
     });
 
-    // effects
+    // ===== effects =====
     for (var ei=effects.length-1; ei>=0; ei--){
       var fx = effects[ei]; fx.t += dt;
-      var a = 1 - fx.t/0.6;
+      var dur = fx.kind==="pts" ? 1.0 : 0.6;
+      var a = 1 - fx.t/dur;
       if (a <= 0){ effects.splice(ei,1); continue; }
       if (fx.kind === "x2"){
         ctx.strokeStyle = "rgba(255,199,44,"+a+")"; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.arc(fx.x, fx.y, BR + fx.t*90, 0, 7); ctx.stroke();
         ctx.fillStyle = "rgba(255,199,44,"+a+")"; ctx.textAlign="center";
-        ctx.font = "900 "+(W*0.06)+"px Trebuchet MS";
+        ctx.font = "900 "+Math.round(W*0.06)+"px Trebuchet MS";
         ctx.fillText("×2!", fx.x, fx.y - fx.t*60);
+      } else if (fx.kind === "pts"){
+        ctx.textAlign="center";
+        ctx.font = "900 "+Math.round(W*0.045)+"px Trebuchet MS";
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(9,22,48,"+a*0.8+")";
+        ctx.strokeText(fx.txt, fx.x, fx.y - fx.t*46);
+        ctx.fillStyle = fx.gold ? "rgba(255,199,44,"+a+")" : "rgba(255,255,255,"+a+")";
+        ctx.fillText(fx.txt, fx.x, fx.y - fx.t*46);
+      } else if (fx.kind === "flash"){
+        ctx.fillStyle = "rgba(255,220,90,"+(a*0.55)+")";
+        ctx.fillRect(0,0,W,H);
       } else {
         ctx.strokeStyle = "rgba(255,255,255,"+a+")"; ctx.lineWidth = 2.5;
         ctx.beginPath(); ctx.arc(fx.x, fx.y, fx.t*70, 0, 7); ctx.stroke();
@@ -508,7 +697,7 @@
       '<h3 style="margin:4px 0">'+(st.data.balls>0 ? "Stock up on Drop Balls!" : "Out of Drop Balls!")+'</h3>'+
       '<p class="sb-muted" style="font-size:13px;margin:4px 0 6px">The Jackpot is at <b style="color:var(--sb-red)">🪙'+SB.fmt(st.data.jackpot)+'</b> and climbing…</p>'+
       '<button class="pd-offer-pack" id="pd-p1"><span class="big">🔮</span><span><span class="nm">5 Balls</span><br><span class="ds">Keep the streak going</span></span><span class="pr">$0.99</span></button>'+
-      '<button class="pd-offer-pack hot" id="pd-p2"><span class="pd-best">BEST VALUE</span><span class="big">⭐</span><span><span class="nm">15 Balls + Golden Ball</span><br><span class="ds">Golden Ball = guaranteed ×2 pass!</span></span><span class="pr">$4.99</span></button>'+
+      '<button class="pd-offer-pack hot" id="pd-p2"><span class="pd-best">BEST VALUE</span><span class="big">⭐</span><span><span class="nm">15 Balls + Golden Ball</span><br><span class="ds">Golden Ball scores 2× points!</span></span><span class="pr">$4.99</span></button>'+
       '<button class="sb-sheet-cancel" id="pd-free">▶ No thanks — play a level for +2 balls</button>');
     function done(){ offerOpen = false; m.close(); }
     m.el.addEventListener("click", function(e){ if (e.target === m.el) offerOpen = false; });
@@ -523,7 +712,7 @@
     });
     m.el.querySelector("#pd-p2").addEventListener("click", function(){
       done();
-      SB.buyIAP({ label:"15 Balls + Golden Ball", price:"$4.99", sub:"Golden Ball guarantees the ×2 pocket!",
+      SB.buyIAP({ label:"15 Balls + Golden Ball", price:"$4.99", sub:"Golden Ball scores 2× milestone points!",
         contents:[{type:"ball",amount:15},{type:"star",amount:1}], grant:false,
         onSuccess:function(){
           st.data.balls += 15; st.data.golden += 1; st.save(); updateHud();
@@ -555,16 +744,23 @@
   document.getElementById("pd-info").addEventListener("click", function(){
     var m = SB.modal(
       '<div style="font-size:40px">🎯</div><h3 style="margin:6px 0">How Prize Drop works</h3>'+
-      '<p style="font-size:13px;text-align:left;line-height:1.5;color:#3a4a6b">'+
-      'Spend Drop Balls to release Skip-Bo discs down the peg board — pick your column and a ×1/×2/×3 multiplier, then watch physics decide your prize. '+
-      'The center JACKPOT grows with every miss, and the moving ×2 pocket doubles any drop that slips through it. '+
-      'Every drop also earns points toward five escalating milestone rewards, so no ball is ever wasted. '+
-      'Balls come free from playing Skip-Bo levels, while ball packs and the guaranteed-×2 Golden Ball create contextual purchase moments exactly when excitement peaks.</p>'+
+      '<p style="font-size:13px;text-align:left;line-height:1.55;color:#3a4a6b;margin:6px 0 10px">'+
+      '🔮 Pick a column (or tap the board) to drop a ball.<br>'+
+      '✖️ ×1 / ×2 / ×3 multiplies the ball cost <b>and</b> every prize.<br>'+
+      '🎰 Land in the center to win the whole <b>JACKPOT</b> — it grows every time a ball misses it.<br>'+
+      '✨ Slip through the moving <b>×2 gate</b> to double your prize (+25 pts).<br>'+
+      '🏆 Every drop earns points toward 5 milestone rewards.<br>'+
+      '⭐ The <b>Golden Ball</b> scores 2× points.<br>'+
+      '▶ Out of balls? Play a Skip-Bo level for +2 free, any time.</p>'+
       '<button class="sb-btn sb-btn-blue sb-btn-block" id="pd-info-ok">Got it!</button>');
     m.el.querySelector("#pd-info-ok").addEventListener("click", m.close);
   });
 
   updateHud();
+
+  // hidden hook for automated QA (no gameplay effect)
+  window.__pd = { st: st, balls: balls, resolve: resolve, tryDrop: tryDrop,
+    setMult: function(m){ mult = m; updateHud(); }, getMult: function(){ return mult; } };
 })();
 </script>
 </body>

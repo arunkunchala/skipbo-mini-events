@@ -4,12 +4,48 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Treasure Elevator · Skip-Bo Mini-Event</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../shared/core.css">
 <style>
+  /* ---------- dusk sky backdrop ---------- */
+  body {
+    background:
+      radial-gradient(130% 55% at 50% 112%, rgba(255,199,44,0.20), transparent 62%),
+      linear-gradient(180deg, #081633 0%, #14396f 34%, #1D4FA1 64%, #3E8EDE 100%);
+    background-attachment: fixed;
+  }
+  .sb-app { z-index: 1; }
+  .sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .stars {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle 1.2px at 12% 8%,  #fff 0 1.2px, transparent 2px),
+      radial-gradient(circle 1px   at 32% 15%, #ffe9b0 0 1px, transparent 2px),
+      radial-gradient(circle 1.4px at 58% 6%,  #fff 0 1.4px, transparent 2px),
+      radial-gradient(circle 1px   at 76% 12%, #cfe2ff 0 1px, transparent 2px),
+      radial-gradient(circle 1.2px at 90% 5%,  #fff 0 1.2px, transparent 2px),
+      radial-gradient(circle 1px   at 22% 24%, #fff 0 1px, transparent 2px),
+      radial-gradient(circle 1.3px at 68% 22%, #ffe9b0 0 1.3px, transparent 2px),
+      radial-gradient(circle 1px   at 45% 11%, #fff 0 1px, transparent 2px);
+    mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+    opacity: 0.9;
+  }
+  .cloud {
+    position: absolute; width: 150px; height: 34px; border-radius: 30px;
+    background: rgba(255,255,255,0.10);
+    box-shadow: 34px -14px 0 4px rgba(255,255,255,0.08), -36px -8px 0 0 rgba(255,255,255,0.07);
+    animation: drift linear infinite;
+  }
+  .cloud.c1 { top: 9%;  animation-duration: 95s;  animation-delay: -20s; }
+  .cloud.c2 { top: 20%; animation-duration: 140s; animation-delay: -75s; transform-origin: center; scale: 0.7; }
+  .cloud.c3 { top: 33%; animation-duration: 120s; animation-delay: -40s; scale: 1.25; opacity: 0.6; }
+  @keyframes drift { from { transform: translateX(-40vw); } to { transform: translateX(115vw); } }
+
   /* ---------- header strip ---------- */
   .hotel-hero {
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .hotel-name {
     color: #fff; font-weight: 900; font-size: 15px; line-height: 1.15;
@@ -17,94 +53,156 @@
   }
   .hotel-name small { display: block; font-size: 10.5px; color: var(--sb-sky-light); font-weight: 700; }
   .info-btn {
-    width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.12); color: #fff; font-weight: 900; font-size: 15px;
+    width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.12); color: #fff; font-weight: 900; font-size: 17px;
     cursor: pointer; flex: 0 0 auto;
   }
   .value-strip {
+    position: sticky; top: calc(var(--topbar-h, 60px) + 4px); z-index: 40;
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   .value-chip {
     display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(0,0,0,0.3); border: 1.5px solid rgba(255,199,44,0.5);
+    background: rgba(8,18,40,0.85); border: 1.5px solid rgba(255,199,44,0.55);
     color: var(--sb-yellow); font-weight: 800; font-size: 12px;
-    border-radius: 999px; padding: 3px 11px;
-  }
-
-  /* ---------- tower ---------- */
-  .tower {
-    position: relative;
-    background: linear-gradient(180deg, #172f5c 0%, #1c3c78 100%);
-    border: 3px solid #0f2246;
-    border-radius: 18px;
-    padding: 0 10px 0 84px;   /* left space = elevator shaft */
-    overflow: hidden;
+    border-radius: 999px; padding: 4px 11px;
     box-shadow: var(--sb-shadow);
   }
-  .roof-cap {
-    margin: 0 -10px 0 -84px;
-    text-align: center; font-size: 22px; letter-spacing: 6px;
-    padding: 10px 0 6px;
-    background: linear-gradient(180deg, #0f2246, #172f5c);
-    color: var(--sb-yellow);
-    border-bottom: 2px dashed rgba(255,199,44,0.35);
+  .sb-timer-chip { padding: 4px 11px; }
+
+  /* ---------- rooftop marquee (sits on top of the tower) ---------- */
+  .roof {
+    position: relative; z-index: 2;
+    margin: 14px 22px -3px;
+    padding: 10px 8px 12px;
+    text-align: center;
+    background: linear-gradient(180deg, #0b1a3a, #16294f);
+    border: 3px solid #0f2246; border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.07);
   }
-  .lobby-base {
-    margin: 0 -10px 0 -84px;
-    height: 54px;
-    background: linear-gradient(180deg, #7a1f2e, #5c1622);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    color: #ffd9a0; font-weight: 900; font-size: 12px; letter-spacing: 2px;
-    border-top: 3px solid #d7a24a;
+  .roof::before { /* flag pole */
+    content: "🚩"; position: absolute; top: -20px; right: 16px; font-size: 17px;
+  }
+  .marquee {
+    display: inline-block; position: relative;
+    background: linear-gradient(180deg, #17274b, #0c1834);
+    border: 2px solid #caa64f; border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--sb-yellow); font-weight: 900; font-size: 12.5px; letter-spacing: 1.6px;
+    text-shadow: 0 0 10px rgba(255,199,44,0.9);
+    box-shadow: 0 0 20px rgba(255,199,44,0.28), inset 0 0 12px rgba(255,199,44,0.12);
+    white-space: nowrap;
+  }
+  .marquee::before, .marquee::after {
+    content: ""; position: absolute; left: 5px; right: 5px; height: 4px;
+    background-image: radial-gradient(circle 2px at 2px 2px, #ffe08a 0 1.5px, transparent 2px);
+    background-size: 9px 4px; background-repeat: repeat-x;
+    animation: bulbBlink 1.1s ease-in-out infinite;
+  }
+  .marquee::before { top: 2px; }
+  .marquee::after { bottom: 2px; animation-delay: 0.55s; }
+  @keyframes bulbBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+  /* ---------- tower facade ---------- */
+  .tower {
+    position: relative;
+    background: linear-gradient(180deg, #22417d 0%, #1a3263 100%);
+    border: 3px solid #0f2246;
+    border-radius: 14px 14px 10px 10px;
+    padding: 6px 10px 0 88px;   /* left space = elevator shaft */
+    overflow: hidden;
+    box-shadow:
+      0 22px 44px rgba(3,10,26,0.6),
+      inset 0 0 0 2px rgba(255,255,255,0.05),
+      inset -12px 0 22px rgba(0,0,0,0.35),
+      inset 12px 0 22px rgba(0,0,0,0.25);
   }
 
-  /* ---------- shaft ---------- */
+  /* ---------- elevator shaft ---------- */
   .shaft {
-    position: absolute; left: 10px; top: 0; bottom: 0; width: 64px;
-    background: linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.45));
-    border-left: 2px solid rgba(255,199,44,0.25);
-    border-right: 2px solid rgba(255,199,44,0.25);
+    position: absolute; left: 10px; top: 0; bottom: 0; width: 66px;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 44px, rgba(255,255,255,0.05) 44px 47px),
+      linear-gradient(90deg, rgba(0,0,0,0.55), rgba(8,16,36,0.32) 50%, rgba(0,0,0,0.55));
+    border-left: 2px solid rgba(202,166,79,0.5);
+    border-right: 2px solid rgba(202,166,79,0.5);
   }
-  .shaft .rail { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.14); }
-  .shaft .rail.l { left: 9px; } .shaft .rail.r { right: 9px; }
+  .shaft .rail { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.13); }
+  .shaft .rail.l { left: 8px; } .shaft .rail.r { right: 8px; }
+  .shaft .pulley {
+    position: absolute; top: 5px; left: 50%; width: 18px; height: 18px; margin-left: -9px;
+    border-radius: 50%; z-index: 6;
+    background: radial-gradient(circle at 35% 30%, #ecd490, #b8934a 55%, #6b501c);
+    border: 2px solid #4d3a14;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
   .cable {
-    position: absolute; left: 50%; top: 0; width: 3px; margin-left: -1.5px;
+    position: absolute; left: 50%; top: 12px; width: 3px; margin-left: -1.5px;
     background: repeating-linear-gradient(180deg, #b8934a 0 6px, #8a6a2e 6px 12px);
-    transition: height 0.8s cubic-bezier(0.34, 1.2, 0.5, 1);
+    transition: height 0.9s cubic-bezier(0.34, 1.15, 0.45, 1);
   }
+
+  /* ---------- elevator car ---------- */
   .car {
-    position: absolute; left: 50%; width: 48px; height: 66px;
-    margin-left: -24px; bottom: 0;
-    transition: transform 0.8s cubic-bezier(0.34, 1.2, 0.5, 1);
+    position: absolute; left: 50%; width: 54px; height: 74px;
+    margin-left: -27px; bottom: 0;
+    transition: transform 0.9s cubic-bezier(0.34, 1.15, 0.45, 1);
     z-index: 5;
   }
   .car.no-anim, .cable.no-anim { transition: none; }
-  .car .cage {
-    width: 100%; height: 100%;
-    background: linear-gradient(180deg, #ffe08a 0%, #f2b93b 45%, #c98d18 100%);
-    border: 2.5px solid #8a6a2e;
+  .car::before { /* crossbar to cable */
+    content: ""; position: absolute; top: -5px; left: 10px; right: 10px; height: 5px;
+    background: linear-gradient(180deg, #a37f38, #6b501c); border-radius: 3px;
+  }
+  .cage {
+    width: 100%; height: 100%; position: relative;
+    background: linear-gradient(180deg, #ffe08a 0%, #eeb339 45%, #b8860b 100%);
+    border: 2px solid #6b501c;
     border-radius: 9px 9px 6px 6px;
-    display: grid; place-items: center;
-    font-size: 24px;
-    position: relative;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.55);
+    box-shadow: 0 7px 14px rgba(0,0,0,0.55), inset 0 2px 0 rgba(255,255,255,0.55);
     animation: carIdle 3s ease-in-out infinite;
   }
   @keyframes carIdle { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-  .car .cage::before {   /* cage bars */
-    content: ""; position: absolute; inset: 7px 6px 5px;
-    background: repeating-linear-gradient(90deg, rgba(122,90,28,0.55) 0 2px, transparent 2px 9px);
-    border-radius: 4px; pointer-events: none;
+  .cab-led {
+    position: absolute; top: 3px; left: 50%; transform: translateX(-50%);
+    min-width: 20px; text-align: center;
+    background: #180e02; color: #ffd23e;
+    font-weight: 900; font-size: 9.5px; line-height: 13px;
+    border-radius: 3px; padding: 0 4px;
+    box-shadow: inset 0 0 3px #000, 0 0 6px rgba(255,210,62,0.5);
+    font-variant-numeric: tabular-nums;
   }
-  .car .lamp {
-    position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
-    width: 10px; height: 10px; border-radius: 50%;
+  .cab-glass {
+    position: absolute; left: 6px; right: 6px; top: 19px; bottom: 6px;
+    border-radius: 4px; overflow: hidden;
+    background: linear-gradient(160deg, #d5e9ff 0%, #8db6e8 45%, #5e88c4 100%);
+    border: 1.5px solid #6b501c;
+    display: grid; place-items: center; font-size: 17px;
+  }
+  .cab-glass .sheen {
+    position: absolute; top: -30%; left: -65%; width: 55%; height: 170%;
+    transform: rotate(20deg); background: rgba(255,255,255,0.35); pointer-events: none;
+  }
+  .door {
+    position: absolute; top: 0; bottom: 0; width: 51%;
+    background: linear-gradient(180deg, #f7cf6d, #d99b22);
+    box-shadow: inset 0 0 0 1px #8a6a2e;
+    transition: transform 0.35s ease;
+  }
+  .door.l { left: 0; border-right: 1px solid #6b501c; }
+  .door.r { right: 0; border-left: 1px solid #6b501c; }
+  .car.doors-open .door.l { transform: translateX(-102%); }
+  .car.doors-open .door.r { transform: translateX(102%); }
+  .lamp {
+    position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+    width: 10px; height: 10px; border-radius: 50%; z-index: 2;
     background: radial-gradient(circle at 35% 30%, #fff6cc, #ffc72c 60%, #b8860b);
     box-shadow: 0 0 8px 2px rgba(255,199,44,0.8);
   }
   .ding {
-    position: absolute; top: -26px; left: 50%; transform: translateX(-50%);
+    position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
     color: var(--sb-yellow); font-weight: 900; font-size: 13px;
     text-shadow: 0 1px 0 rgba(0,0,0,0.5);
     opacity: 0; pointer-events: none; white-space: nowrap;
@@ -118,96 +216,326 @@
   }
 
   /* ---------- floors ---------- */
-  .floor {
-    height: 94px;
-    display: flex; align-items: center; gap: 10px;
-    border-bottom: 2px dashed rgba(255,255,255,0.12);
-    position: relative;
-    padding: 6px 0;
+  .floor { height: 96px; position: relative; padding: 5px 2px 12px; }
+  .floor::after { /* concrete slab between floors */
+    content: ""; position: absolute; left: -88px; right: -10px; bottom: 0; height: 9px;
+    background: linear-gradient(180deg, #4a679f 0%, #2c477e 45%, #142a52 100%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
-  .floor:last-of-type { border-bottom: none; }
-  .fl-num {
-    flex: 0 0 34px; text-align: center;
-    color: rgba(255,255,255,0.5); font-weight: 900; font-size: 15px;
-    background: rgba(0,0,0,0.25); border-radius: 8px; padding: 5px 0;
+  .room {
+    position: relative; height: 100%;
+    display: flex; align-items: center; gap: 8px;
+    border-radius: 10px;
+    padding: 15px 8px 5px 8px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #fff8e0 0%, #f6e2ac 72%, #e8cd8a 100%);
+    border: 2px solid rgba(122, 90, 28, 0.55);
+    box-shadow: inset 0 -10px 16px rgba(122,90,28,0.16);
   }
-  .fl-room { flex: 1 1 auto; min-width: 0; }
-  .fl-name { color: #fff; font-weight: 800; font-size: 12.5px; margin-bottom: 3px; }
+  .awning {
+    position: absolute; top: 0; left: 0; right: 0; height: 11px; z-index: 1;
+    background: repeating-linear-gradient(90deg, var(--sb-red) 0 15px, #fff2d9 15px 30px);
+    border-bottom: 1.5px solid rgba(0,0,0,0.22);
+  }
+  .awning::after {
+    content: ""; position: absolute; top: 11px; left: 0; right: 0; height: 5px;
+    background: radial-gradient(circle 5px at 7.5px 0px, var(--sb-red) 0 4.3px, transparent 5px);
+    background-size: 15px 5px; background-repeat: repeat-x;
+  }
+  .plaque {
+    flex: 0 0 34px; height: 34px; margin-top: 6px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: radial-gradient(circle at 32% 28%, #ffe9a8, #f2c14e 55%, #b8860b);
+    border: 2px solid #8a6a2e;
+    color: #4a3410; font-weight: 900; font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .fl-room { flex: 1 1 auto; min-width: 0; margin-top: 5px; }
+  .fl-name { color: #5a4210; font-weight: 900; font-size: 12px; margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .fl-rewards { display: flex; flex-wrap: wrap; gap: 4px; }
-  .fl-rewards .sb-reward { font-size: 11px; padding: 3px 7px; gap: 3px; }
+  .fl-rewards .sb-reward { font-size: 11px; padding: 3px 7px; gap: 3px; border-color: rgba(122,90,28,0.35); white-space: nowrap; }
   .fl-rewards .sb-reward .ico { font-size: 13px; }
-  .fl-action { flex: 0 0 auto; display: grid; place-items: center; min-width: 64px; }
+  .fl-action { flex: 0 0 auto; display: grid; place-items: center; min-width: 44px; margin-top: 5px;
+    position: relative; z-index: 3; }
+  .claim-btn, .paywall-btn { min-height: 44px; min-width: 64px; }
+  .claim-btn { padding-left: 10px; padding-right: 10px; }
 
-  .floor.locked { opacity: 0.55; }
-  .floor.locked .sb-reward { filter: grayscale(1) brightness(0.75); background: rgba(255,255,255,0.55); }
-  .floor.locked .fl-name { color: rgba(255,255,255,0.55); }
-  .q-mark { font-size: 22px; color: rgba(255,255,255,0.4); font-weight: 900; }
-  .lock-tag {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: rgba(0,0,0,0.4); border: 1.5px solid rgba(255,255,255,0.25);
-    color: #fff; font-weight: 800; font-size: 12px;
-    border-radius: 999px; padding: 4px 10px;
+  /* ---------- tier wallpapers (art progression up the tower) ---------- */
+  /* tier 1 · lobby floors 1–3: cream + candy-stripe wallpaper, red awning */
+  .floor.tier1 .room {
+    background:
+      repeating-linear-gradient(90deg, rgba(215,38,61,0.06) 0 9px, transparent 9px 22px),
+      linear-gradient(180deg, #fff8e0 0%, #f6e2ac 72%, #e8cd8a 100%);
+  }
+  /* tier 2 · guest floors 5–8: sky-blue wallpaper pinstripes, blue awning */
+  .floor.tier2 .room {
+    background:
+      repeating-linear-gradient(90deg, rgba(29,79,161,0.10) 0 2px, transparent 2px 15px),
+      linear-gradient(180deg, #f2f7ff 0%, #dcE9fb 68%, #bed5f1 100%);
+    border-color: rgba(29,79,161,0.45);
+    box-shadow: inset 0 -10px 16px rgba(29,79,161,0.14);
+  }
+  .floor.tier2 .fl-name { color: #23406e; }
+  .floor.tier2 .awning {
+    background: repeating-linear-gradient(90deg, var(--sb-blue) 0 15px, #eaf2ff 15px 30px);
+  }
+  .floor.tier2 .awning::after {
+    background: radial-gradient(circle 5px at 7.5px 0px, var(--sb-blue) 0 4.3px, transparent 5px);
+    background-size: 15px 5px;
+  }
+  .floor.tier2 .plaque {
+    background: radial-gradient(circle at 32% 28%, #dceaff, #8fb6e8 55%, #3d69ac);
+    border-color: #2c4f86; color: #16305c;
+  }
+  /* tier 3 · penthouse floors 10–13: champagne-gold damask, gold awning */
+  .floor.tier3 .room {
+    background:
+      radial-gradient(circle 3px at 11px 11px, rgba(184,134,11,0.16) 0 2.4px, transparent 3px),
+      linear-gradient(180deg, #fff6d6 0%, #f6e0a2 66%, #e6c67c 100%);
+    background-size: 22px 22px, 100% 100%;
+    border-color: #caa64f;
+    box-shadow: inset 0 -10px 16px rgba(184,134,11,0.22), inset 0 0 0 1px rgba(202,166,79,0.35);
+  }
+  .floor.tier3 .fl-name { color: #7a5410; }
+  .floor.tier3 .awning {
+    background: repeating-linear-gradient(90deg, #b8860b 0 15px, #ffe9a8 15px 30px);
+  }
+  .floor.tier3 .awning::after {
+    background: radial-gradient(circle 5px at 7.5px 0px, #b8860b 0 4.3px, transparent 5px);
+    background-size: 15px 5px;
   }
 
-  .floor.current {
-    background: linear-gradient(90deg, rgba(255,199,44,0.16), rgba(255,199,44,0.04));
-    animation: floorGlow 1.6s ease-in-out infinite;
-    border-radius: 12px;
+  /* current floor — gold glow (opacity-only pulse) */
+  .floor.current .room { border-color: var(--sb-yellow); }
+  .floor.current .room::before {
+    content: ""; position: absolute; inset: 0; border-radius: 8px; pointer-events: none; z-index: 2;
+    box-shadow: inset 0 0 0 2.5px rgba(255,199,44,0.95), inset 0 0 22px rgba(255,199,44,0.4);
+    animation: glowPulse 1.5s ease-in-out infinite;
   }
-  @keyframes floorGlow {
-    0%,100% { box-shadow: inset 0 0 0 2px rgba(255,199,44,0.45); }
-    50% { box-shadow: inset 0 0 0 2px rgba(255,199,44,0.95), 0 0 16px rgba(255,199,44,0.35); }
-  }
-  .floor.current .fl-num { color: var(--sb-yellow); background: rgba(255,199,44,0.15); }
-  .claim-btn { min-height: 44px; min-width: 74px; }
-  .paywall-btn { min-height: 44px; min-width: 74px; }
+  @keyframes glowPulse { 0%,100% { opacity: 0.45; } 50% { opacity: 1; } }
+  .floor.current .plaque { box-shadow: 0 0 10px 2px rgba(255,199,44,0.75), inset 0 1px 0 rgba(255,255,255,0.6); }
 
-  .floor.claimed { filter: saturate(0.35); opacity: 0.7; }
+  /* claimed floors */
+  .floor.claimed .room { filter: saturate(0.55) brightness(0.94); opacity: 0.88; }
   .check-tag {
     width: 34px; height: 34px; border-radius: 50%;
-    background: var(--sb-green); color: #fff;
-    display: grid; place-items: center; font-size: 17px; font-weight: 900;
-    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25);
+    background: linear-gradient(180deg, #3fc167, var(--sb-green-dark));
+    color: #fff; display: grid; place-items: center; font-size: 16px; font-weight: 900;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.25);
   }
 
-  .floor.rooftop {
-    height: 120px;
-    background: linear-gradient(180deg, rgba(255,199,44,0.22), rgba(255,199,44,0.05));
-    border-radius: 12px;
+  /* locked floors — dark room + fog, silhouette chips */
+  .floor.locked .room {
+    background: linear-gradient(180deg, #24406f 0%, #182c52 100%);
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: inset 0 -12px 18px rgba(0,0,0,0.3);
+  }
+  .floor.locked .room .fog {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background:
+      radial-gradient(120% 70% at 30% 110%, rgba(148,168,208,0.30), transparent 60%),
+      linear-gradient(180deg, rgba(148,168,208,0.02), rgba(148,168,208,0.22));
+  }
+  .floor.locked .awning { filter: brightness(0.45) saturate(0.35); }
+  .floor.locked .plaque {
+    background: linear-gradient(180deg, #31456f, #22335a);
+    color: #93a9d4; border-color: #45597f; box-shadow: none;
+  }
+  .floor.locked .fl-name { color: #a9bde4; }
+  .floor.locked .sb-reward {
+    background: rgba(10,22,48,0.55); border-color: rgba(255,255,255,0.14);
+    color: #b9cdf0; filter: grayscale(0.85);
+  }
+  .floor.locked .sb-reward .ico { filter: brightness(0) opacity(0.6); } /* silhouetted prize */
+  .lock-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(0,0,0,0.45); border: 1.5px solid rgba(255,199,44,0.4);
+    color: #ffd97a; font-weight: 800; font-size: 12px;
+    border-radius: 999px; padding: 5px 10px;
+  }
+  .q-mark { font-size: 20px; color: rgba(180,200,235,0.5); font-weight: 900; }
+
+  /* paywall floors — velvet + gold, two-row offer layout */
+  .floor.paywall { height: 150px; }
+  .floor.paywall .room, .floor.rooftop .room { display: block; padding: 17px 8px 6px; }
+  .pay-head { display: flex; align-items: center; gap: 8px; margin: 2px 0 5px; }
+  .pay-head .plaque { margin-top: 0; }
+  .pay-title { flex: 1 1 auto; min-width: 0; }
+  .pay-title .fl-name { margin-bottom: 0; }
+  .pay-row { display: flex; align-items: center; gap: 8px; }
+  .pay-row .fl-rewards { flex: 1 1 auto; min-width: 0; }
+  .pay-row .fl-action { margin-top: 0; }
+  .floor.paywall .fl-rewards .sb-reward, .floor.rooftop .fl-rewards .sb-reward { font-size: 10.5px; padding: 2px 6px; }
+  .floor.paywall .fl-rewards .sb-reward .ico, .floor.rooftop .fl-rewards .sb-reward .ico { font-size: 12px; }
+  .pay-note {
+    margin-top: 2px; font-size: 10px; font-weight: 800; letter-spacing: 0.2px;
+    color: #ffbf5e;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .floor.paywall.claimed .pay-note { color: #d9a97e; }
+  .floor.paywall .room {
+    background: linear-gradient(180deg, #5d1524 0%, #430f1c 100%);
+    border-color: #caa64f;
+    box-shadow: inset 0 -12px 18px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(202,166,79,0.25);
+  }
+  .floor.paywall .awning {
+    background: repeating-linear-gradient(90deg, #1B2A4A 0 15px, var(--sb-yellow) 15px 30px);
+    filter: none;
+  }
+  .floor.paywall .awning::after {
+    background: radial-gradient(circle 5px at 7.5px 0px, #1B2A4A 0 4.3px, transparent 5px);
+    background-size: 15px 5px;
+  }
+  .floor.paywall .fl-name { color: #ffd9a0; }
+  .floor.paywall .sb-reward { background: rgba(255,246,220,0.94); filter: none; color: var(--sb-ink); }
+  .floor.paywall.locked .sb-reward { background: rgba(20,10,14,0.55); color: #d9b9be; filter: grayscale(0.7); }
+  .floor.paywall.locked .room .fog {
+    background: linear-gradient(180deg, rgba(148,168,208,0.02), rgba(148,168,208,0.16));
+  }
+  .floor.paywall .plaque {
+    background: radial-gradient(circle at 32% 28%, #ffe9a8, #f2c14e 55%, #b8860b);
+    color: #4a3410; border-color: #8a6a2e;
+  }
+  .floor.paywall.claimed .room { filter: saturate(0.7) brightness(0.9); }
+
+  /* rooftop */
+  .floor.rooftop { height: 158px; }
+  .floor.rooftop .room {
+    background:
+      radial-gradient(90% 90% at 50% 115%, rgba(255,199,44,0.4), transparent 62%),
+      linear-gradient(180deg, #2a4a86 0%, #1b3462 100%);
+    border-color: var(--sb-yellow);
+  }
+  .floor.rooftop .room::after { /* spotlights */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(105deg, transparent 12%, rgba(255,236,170,0.16) 18%, transparent 30%),
+      linear-gradient(75deg, transparent 68%, rgba(255,236,170,0.16) 78%, transparent 88%);
   }
   .floor.rooftop .fl-name { color: var(--sb-yellow); font-size: 13.5px; }
-  .floor.paywall .fl-name { color: #ffd9a0; }
+  .floor.rooftop .awning {
+    background: repeating-linear-gradient(90deg, #b8860b 0 15px, var(--sb-yellow) 15px 30px);
+    filter: none;
+  }
+  .floor.rooftop .awning::after {
+    background: radial-gradient(circle 5px at 7.5px 0px, #b8860b 0 4.3px, transparent 5px);
+    background-size: 15px 5px;
+  }
+  .floor.rooftop .plaque { font-size: 17px; }
+  .floor.rooftop.locked .sb-reward { filter: grayscale(0.5); background: rgba(10,22,48,0.6); color: #d5c58e; }
+  .floor.rooftop.locked .room .fog {
+    background: linear-gradient(180deg, transparent, rgba(148,168,208,0.10));
+  }
+  /* rooftop finale — night-sky party + looping CSS fireworks */
+  .floor.rooftop.claimed .room {
+    filter: none; opacity: 1;
+    background:
+      radial-gradient(90% 90% at 50% 118%, rgba(255,199,44,0.5), transparent 62%),
+      radial-gradient(circle 1px at 18% 22%, #fff 0 1px, transparent 2px),
+      radial-gradient(circle 1px at 72% 14%, #ffe9b0 0 1px, transparent 2px),
+      radial-gradient(circle 1.2px at 88% 34%, #fff 0 1.2px, transparent 2px),
+      linear-gradient(180deg, #101f42 0%, #1b3462 100%);
+  }
+  .fw-layer { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .fw {
+    position: absolute; width: 58px; height: 58px; border-radius: 50%;
+    background:
+      radial-gradient(circle 2.5px at 50% 6%,  #ffd95e 0 2.5px, transparent 3.5px),
+      radial-gradient(circle 2.5px at 81% 19%, #ff8a5e 0 2.5px, transparent 3.5px),
+      radial-gradient(circle 2.5px at 94% 50%, #ffd95e 0 2.5px, transparent 3.5px),
+      radial-gradient(circle 2.5px at 81% 81%, #7ec8ff 0 2.5px, transparent 3.5px),
+      radial-gradient(circle 2.5px at 50% 94%, #ff8a5e 0 2.5px, transparent 3.5px),
+      radial-gradient(circle 2.5px at 19% 81%, #ffd95e 0 2.5px, transparent 3.5px),
+      radial-gradient(circle 2.5px at 6% 50%,  #7ec8ff 0 2.5px, transparent 3.5px),
+      radial-gradient(circle 2.5px at 19% 19%, #ffd95e 0 2.5px, transparent 3.5px);
+    opacity: 0; transform: scale(0.15);
+    animation: fwBurst 2.4s ease-out infinite;
+  }
+  .fw.a { left: 4%;  top: 4%; }
+  .fw.b { right: 26%; top: 12%; animation-delay: 0.8s; }
+  .fw.c { left: 30%; top: 26%; animation-delay: 1.6s; width: 44px; height: 44px; }
+  @keyframes fwBurst {
+    0%   { opacity: 0; transform: scale(0.15); }
+    12%  { opacity: 1; }
+    45%  { opacity: 0.9; transform: scale(1); }
+    70%  { opacity: 0; transform: scale(1.18); }
+    100% { opacity: 0; transform: scale(1.18); }
+  }
+
+  /* ---------- lobby ---------- */
+  .lobby-base {
+    margin: 0 -10px 0 -88px;
+    height: 64px; position: relative;
+    background:
+      radial-gradient(60% 120% at 50% 0%, rgba(255,199,44,0.12), transparent 60%),
+      linear-gradient(180deg, #6d1b2a, #45101d);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: #ffd9a0; font-weight: 900; font-size: 12px; letter-spacing: 2.5px;
+    border-top: 3px solid #caa64f;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+  }
+  .lobby-base::after { /* red carpet */
+    content: ""; position: absolute; left: 50%; bottom: 0; width: 120px; height: 8px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #a3182c, #7a1220);
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 0 10px rgba(215,38,61,0.6);
+  }
 
   /* ---------- docked CTA bar ---------- */
   .dock {
     position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
     width: 100%; max-width: 480px; z-index: 90;
-    background: rgba(15, 34, 70, 0.96);
-    border-top: 2px solid rgba(255,199,44,0.4);
-    padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+    background: rgba(11, 26, 56, 0.97);
+    border-top: 2px solid rgba(255,199,44,0.45);
+    padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 10px);
     backdrop-filter: blur(6px);
   }
-  .dock .sb-btn { width: 100%; min-height: 50px; }
-  .dock-hint { text-align: center; color: rgba(255,255,255,0.55); font-size: 10.5px; font-weight: 700; margin-top: 6px; }
-  .sb-main { padding-bottom: 130px; }
-  .sb-demo-reset { bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
+  .dock-top { display: flex; gap: 8px; }
+  .dock-top #cta { flex: 1 1 auto; min-height: 50px; font-size: 15px; padding: 10px 12px; }
+  .dock-top #play-level {
+    flex: 0 0 auto; min-height: 50px; font-size: 12px; padding: 8px 12px; line-height: 1.2;
+  }
+  .dock-hint { text-align: center; color: rgba(255,255,255,0.6); font-size: 10.5px; font-weight: 700; margin-top: 6px; }
+  .sb-main { padding-bottom: 150px; }
+  .sb-demo-reset { bottom: calc(env(safe-area-inset-bottom, 0px) + 118px); }
 
-  /* ---------- recap ---------- */
-  .recap-list { max-height: 44vh; overflow-y: auto; margin: 10px 0; text-align: left; }
+  /* ---------- recap / level modals ---------- */
+  .recap-list { max-height: 40vh; overflow-y: auto; margin: 10px 0; text-align: left; }
   .recap-row {
     display: flex; align-items: center; gap: 8px;
     padding: 6px 4px; border-bottom: 1px dashed rgba(27,42,74,0.15);
     font-size: 12.5px; font-weight: 700;
   }
-  .recap-row .rf { flex: 0 0 52px; color: #5a6b8c; font-size: 11px; }
-  .recap-row .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .recap-row .rf { flex: 0 0 44px; color: #5a6b8c; font-size: 11px; }
+  .recap-row .chips { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
   .recap-row .chips .sb-reward { font-size: 10.5px; padding: 2px 6px; }
+  .paid-tag {
+    flex: 0 0 auto;
+    background: linear-gradient(180deg, #ffd95e, var(--sb-yellow-dark));
+    color: var(--sb-ink); font-weight: 900; font-size: 10px;
+    border-radius: 999px; padding: 2px 7px;
+  }
+  .lvl-cards { display: flex; justify-content: center; gap: 10px; margin: 14px 0; }
+  .lvl-cards .sb-card { width: 44px; height: 60px; font-size: 22px; opacity: 0; transform: translateY(10px) scale(0.8); transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  .lvl-cards .sb-card.in { opacity: 1; transform: translateY(0) scale(1); }
 
   .rise-pop { animation: risePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  @keyframes risePop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @keyframes risePop { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+  @media (max-width: 380px) {
+    .value-chip, .sb-timer-chip { font-size: 11px; padding: 4px 9px; }
+    .hotel-name { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
+<div class="sky" aria-hidden="true">
+  <div class="stars"></div>
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+</div>
 <div class="sb-app">
   <div class="sb-main">
     <div class="hotel-hero">
@@ -216,25 +544,37 @@
     </div>
     <div class="value-strip">
       <span class="sb-timer-chip">⏳ <span id="evt-timer">--</span></span>
-      <span class="value-chip">💰 Collected: <span id="total-val">0</span></span>
+      <span class="value-chip">💰 Value collected: <span id="total-val">0</span></span>
+    </div>
+    <div class="roof">
+      <div class="marquee">★ GRAND SKIP-BO HOTEL ★</div>
     </div>
     <div class="tower" id="tower">
-      <div class="roof-cap">✦ ✦ ✦</div>
       <div id="floors"></div>
-      <div class="lobby-base">🛎️ LOBBY · GRAND SKIP-BO HOTEL</div>
+      <div class="lobby-base">🛎️ LOBBY · CHECK-IN</div>
       <div class="shaft">
         <div class="rail l"></div><div class="rail r"></div>
+        <div class="pulley"></div>
         <div class="cable no-anim" id="cable"></div>
         <div class="car no-anim" id="car">
           <div class="ding" id="ding">🔔 DING!</div>
-          <div class="cage"><span class="lamp"></span>🛎️</div>
+          <div class="cage">
+            <span class="lamp"></span>
+            <span class="cab-led" id="cab-led">1</span>
+            <div class="cab-glass">🛎️<span class="sheen"></span>
+              <div class="door l"></div><div class="door r"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 <div class="dock">
-  <button class="sb-btn sb-btn-green" id="cta"></button>
+  <div class="dock-top">
+    <button class="sb-btn sb-btn-green" id="cta"></button>
+    <button class="sb-btn sb-btn-blue" id="play-level">▶ Play<br>a level</button>
+  </div>
   <div class="dock-hint" id="dock-hint"></div>
 </div>
 <script src="../shared/core.js"></script>
@@ -257,24 +597,33 @@
     { f: 9,  name: "Concierge Pack",  paywall: { price: "$4.99", label: "Concierge Pack" },
       rewards: [{ type: "coins", amount: 1500 }, { type: "wild", amount: 2 }, { type: "energy", amount: 5 }] },
     { f: 10, name: "Royal Suite",     rewards: [{ type: "coins", amount: 1200 }] },
-    { f: 11, name: "Butler Service",  rewards: [{ type: "undo", amount: 2 }, { type: "draw", amount: 2 }] },
+    { f: 11, name: "Butler Suite",    rewards: [{ type: "undo", amount: 2 }, { type: "draw", amount: 2 }] },
     { f: 12, name: "Vault Suite",     chest: [1500, 2500], rewards: [{ type: "chest", amount: 1 }] },
     { f: 13, name: "Gem Gallery",     rewards: [{ type: "gem", amount: 3 }] },
     { f: 14, name: "Rooftop Grand Prize", rooftop: true,
       rewards: [{ type: "coins", amount: 5000 }, { type: "wild", amount: 3 }, { type: "gem", amount: 10 }] }
   ];
-  var FH = 94, ROOF_FH = 120, LOBBY_H = 54, CAR_H = 66;
+  var CAR_H = 74;
   var COIN_VALUE = { coins: 1, energy: 60, wild: 250, undo: 120, draw: 120, gem: 180, chest: 0 };
 
   // ---------- persistent state ----------
   var st = SB.store("treasure-elevator", {
     floor: 1,                 // next claimable floor
-    endTs: Date.now() + 36 * 3600 * 1000,
+    endTs: Date.now() + 48 * 3600 * 1000,
     total: 0,
-    claims: [],               // [{f, rewards:[{type,amount}]}]
+    claims: [],               // [{f, name, rewards:[{type,amount}], paid}]
     complete: false
   });
   var S = st.data;
+  st.save(); // persist endTs immediately so the countdown survives reloads before the first claim
+
+  // ---------- sticky value strip sits just under the (variable-height) topbar ----------
+  function syncTopbarH() {
+    var bar = document.querySelector(".sb-topbar");
+    if (bar) document.documentElement.style.setProperty("--topbar-h", bar.offsetHeight + "px");
+  }
+  syncTopbarH();
+  window.addEventListener("resize", syncTopbarH);
 
   // ---------- countdown ----------
   var timerEl = document.getElementById("evt-timer");
@@ -282,8 +631,13 @@
 
   // ---------- build floors (DOM top = floor 14) ----------
   var floorsEl = document.getElementById("floors");
-  function rewardsHtml(fl, silhouette) {
-    if (fl.chest && !silhouette) {
+  function rewardsHtml(fl, state) {
+    if (state === "claimed") { // show exactly what was granted (chest rolls resolve to real coins)
+      var rec = null;
+      for (var i = 0; i < S.claims.length; i++) if (S.claims[i].f === fl.f) { rec = S.claims[i]; break; }
+      if (rec) return rec.rewards.map(SB.rewardChip).join("");
+    }
+    if (fl.chest && state !== "locked") {
       return '<span class="sb-reward"><span class="ico">🎁</span>' +
         SB.fmt(fl.chest[0]) + "–" + SB.fmt(fl.chest[1]) + " Coins</span>";
     }
@@ -295,7 +649,8 @@
       var fl = FLOORS[i];
       var state = fl.f < S.floor ? "claimed" : (fl.f === S.floor && !S.complete ? "current" : "locked");
       if (S.complete) state = "claimed";
-      var cls = "floor " + state + (fl.paywall ? " paywall" : "") + (fl.rooftop ? " rooftop" : "");
+      var tier = fl.paywall || fl.rooftop ? "" : (fl.f <= 3 ? " tier1" : fl.f <= 8 ? " tier2" : " tier3");
+      var cls = "floor " + state + tier + (fl.paywall ? " paywall" : "") + (fl.rooftop ? " rooftop" : "");
       var action = "";
       if (state === "claimed") {
         action = '<span class="check-tag">✓</span>';
@@ -306,13 +661,33 @@
       } else {
         action = fl.paywall
           ? '<span class="lock-tag">🔒 ' + fl.paywall.price + "</span>"
-          : '<span class="q-mark">?</span>';
+          : (fl.rooftop ? '<span class="lock-tag">🔒 🏆</span>' : '<span class="q-mark">?</span>');
+      }
+      var note = "";
+      if (fl.paywall && state !== "claimed") {
+        note = '<div class="pay-note">' + (fl.f === 4 ? "Opens floors 5–8 free" : "Opens floors 10–13 + roof") + "</div>";
+      }
+      var fw = fl.rooftop && state === "claimed"
+        ? '<div class="fw-layer"><i class="fw a"></i><i class="fw b"></i><i class="fw c"></i></div>' : "";
+      var fog = state === "locked" ? '<div class="fog"></div>' : "";
+      var inner;
+      if (fl.paywall || fl.rooftop) {
+        inner =
+          '<div class="awning"></div>' +
+          '<div class="pay-head"><div class="plaque">' + (fl.rooftop ? "🏆" : fl.f) + "</div>" +
+          '<div class="pay-title"><div class="fl-name">' + fl.name + "</div>" + note + "</div></div>" +
+          '<div class="pay-row"><div class="fl-rewards">' + rewardsHtml(fl, state) + "</div>" +
+          '<div class="fl-action">' + action + "</div></div>";
+      } else {
+        inner =
+          '<div class="awning"></div>' +
+          '<div class="plaque">' + (fl.rooftop ? "🏆" : fl.f) + "</div>" +
+          '<div class="fl-room"><div class="fl-name">' + fl.name + "</div>" +
+          '<div class="fl-rewards">' + rewardsHtml(fl, state) + "</div></div>" +
+          '<div class="fl-action">' + action + "</div>";
       }
       html += '<div class="' + cls + '" id="fl-' + fl.f + '" data-f="' + fl.f + '">' +
-        '<div class="fl-num">' + (fl.rooftop ? "🏆" : fl.f) + "</div>" +
-        '<div class="fl-room"><div class="fl-name">' + (fl.paywall ? "🛎️ " : "") + fl.name + "</div>" +
-        '<div class="fl-rewards">' + rewardsHtml(fl, state === "locked") + "</div></div>" +
-        '<div class="fl-action">' + action + "</div></div>";
+        '<div class="room">' + inner + fog + fw + "</div></div>";
     }
     floorsEl.innerHTML = html;
     document.getElementById("total-val").textContent = SB.fmt(S.total);
@@ -325,7 +700,7 @@
   function renderCta() {
     if (S.complete) {
       ctaEl.className = "sb-btn sb-btn-blue";
-      ctaEl.innerHTML = "🎉 Event Complete — View Recap";
+      ctaEl.innerHTML = "🎉 View Event Recap";
       hintEl.textContent = "You reached the rooftop! Every reward is yours.";
       return;
     }
@@ -333,38 +708,53 @@
     if (fl.paywall) {
       ctaEl.className = "sb-btn sb-btn-yellow";
       ctaEl.innerHTML = "🔓 Unlock Floor " + fl.f + " · " + fl.paywall.price;
-      hintEl.textContent = "Everything you've earned so far is yours to keep — no purchase required.";
+      hintEl.textContent = "Everything earned so far is yours to keep — or play levels while you decide.";
+    } else if (fl.rooftop) {
+      ctaEl.className = "sb-btn sb-btn-green";
+      ctaEl.innerHTML = "🏆 Claim Grand Prize";
+      hintEl.textContent = "The rooftop party is waiting!";
     } else {
       ctaEl.className = "sb-btn sb-btn-green";
-      ctaEl.innerHTML = "Claim Floor " + fl.f + (fl.rooftop ? " · 🏆 GRAND PRIZE" : "");
-      hintEl.textContent = fl.rooftop ? "The rooftop party is waiting!" : "Free claim — the elevator rides up after.";
+      ctaEl.innerHTML = "Claim Floor " + fl.f + " · FREE";
+      hintEl.textContent = "Free claim — the elevator rides up after.";
     }
   }
 
   // ---------- elevator car ----------
   var carEl = document.getElementById("car");
   var cableEl = document.getElementById("cable");
+  var ledEl = document.getElementById("cab-led");
   function carOffset(floor) {
-    // translateY (negative = up) from lobby resting position, car centered on floor
-    var f = Math.min(floor, 14);
-    return -(LOBBY_H + (f - 1) * FH + (FH - CAR_H) / 2);
+    // measure the rendered floor row so heights can vary per floor type
+    var flEl = document.getElementById("fl-" + Math.min(floor, 14));
+    var towerH = document.getElementById("tower").clientHeight;
+    if (!flEl) return 0;
+    var mid = flEl.offsetTop + flEl.offsetHeight / 2; // .floor's offsetParent is #tower
+    return -(towerH - mid - CAR_H / 2);
   }
   function positionCar(animate) {
-    var y = carOffset(S.complete ? 14 : S.floor);
+    var floor = S.complete ? 14 : S.floor;
+    var y = carOffset(floor);
     if (!animate) { carEl.classList.add("no-anim"); cableEl.classList.add("no-anim"); }
+    else carEl.classList.remove("doors-open");
     carEl.style.transform = "translateY(" + y + "px)";
-    var towerH = document.getElementById("tower").offsetHeight;
-    cableEl.style.height = Math.max(0, towerH + y - CAR_H) + "px";
+    var towerH = document.getElementById("tower").clientHeight;
+    cableEl.style.height = Math.max(0, towerH + y - CAR_H - 12) + "px";
+    ledEl.textContent = floor;
     if (!animate) {
+      carEl.classList.add("doors-open");
       requestAnimationFrame(function () {
-        carEl.classList.remove("no-anim"); cableEl.classList.remove("no-anim");
+        requestAnimationFrame(function () {
+          carEl.classList.remove("no-anim"); cableEl.classList.remove("no-anim");
+        });
       });
     } else {
       setTimeout(function () {
         var d = document.getElementById("ding");
         d.classList.remove("play"); void d.offsetWidth; d.classList.add("play");
+        carEl.classList.add("doors-open");
         SB.haptic(25);
-      }, 650);
+      }, 780);
     }
   }
   function scrollToCurrent() {
@@ -377,7 +767,7 @@
     return rewards.reduce(function (t, r) { return t + (COIN_VALUE[r.type] || 100) * r.amount; }, 0);
   }
   function recordClaim(fl, rewards) {
-    S.claims.push({ f: fl.f, name: fl.name, rewards: rewards });
+    S.claims.push({ f: fl.f, name: fl.name, rewards: rewards, paid: fl.paywall ? fl.paywall.price : null });
     S.total += coinValue(rewards);
     if (fl.f >= 14) S.complete = true;
     else S.floor = fl.f + 1;
@@ -395,16 +785,16 @@
     render();
     positionCar(true);
     setTimeout(scrollToCurrent, 350);
-    if (fl.rooftop) setTimeout(grandFinale, 900);
-    else if (originEl) {
-      var row = document.getElementById("fl-" + fl.f);
-      if (row) { row.classList.add("rise-pop"); }
+    if (fl.rooftop) setTimeout(grandFinale, 1000);
+    else {
+      var row = document.getElementById("fl-" + (fl.f + 1));
+      if (row) row.classList.add("rise-pop");
     }
   }
   function openPaywall(fl) {
     SB.buyIAP({
       label: "🛎️ " + fl.paywall.label + " — Floor " + fl.f,
-      sub: "Unlocks floors " + (fl.f + 1) + "–" + Math.min(fl.f + 4, 14) + " of FREE claims above!",
+      sub: "Instant rewards below + re-opens FREE claiming on floors " + (fl.f + 1) + "–" + Math.min(fl.f + 4, 14) + "!",
       price: fl.paywall.price,
       contents: fl.rewards,
       onSuccess: function () {
@@ -412,7 +802,7 @@
         render();
         positionCar(true);
         setTimeout(scrollToCurrent, 350);
-        SB.toast("Floors unlocked — ride up and claim them!");
+        SB.toast("🔓 Floors unlocked — claim them free!");
       },
       onCancel: function () {
         var row = document.getElementById("fl-" + fl.f);
@@ -423,11 +813,12 @@
   }
   function act(f, originEl) {
     if (S.complete) { showRecap(); return; }
+    if (Date.now() >= S.endTs) { SB.toast("⏳ This event has ended — check back for the next tower!"); return; }
     if (f !== S.floor) {
-      var row = document.getElementById("fl-" + f);
-      if (row && f > S.floor) {
-        row.classList.remove("sb-shake"); void row.offsetWidth; row.classList.add("sb-shake");
-        SB.toast(f > S.floor ? "The elevator hasn't reached floor " + f + " yet!" : "");
+      if (f > S.floor) {
+        var row = document.getElementById("fl-" + f);
+        if (row) { row.classList.remove("sb-shake"); void row.offsetWidth; row.classList.add("sb-shake"); }
+        SB.toast("The elevator hasn't reached floor " + f + " yet!");
       }
       return;
     }
@@ -447,17 +838,53 @@
     act(S.floor, document.getElementById("fl-" + S.floor));
   });
 
+  // ---------- escape hatch: play a level ----------
+  var levelBusy = false;
+  document.getElementById("play-level").addEventListener("click", function () {
+    if (levelBusy) return;
+    levelBusy = true;
+    var m = SB.modal(
+      '<div style="font-size:30px">🎴</div>' +
+      "<h3 style='margin:6px 0 2px'>Quick Level</h3>" +
+      '<p class="sb-muted" style="margin:0;font-size:12.5px;font-weight:700">Clear the stock pile to earn coins!</p>' +
+      '<div class="lvl-cards"><span class="sb-card blue" id="lc1">3</span><span class="sb-card green" id="lc2">4</span><span class="sb-card red" id="lc3">5</span></div>' +
+      '<div id="lvl-status" class="sb-muted" style="font-weight:800;font-size:13px;min-height:20px">Playing…</div>' +
+      '<button class="sb-btn sb-btn-green sb-btn-block" id="lvl-close" style="margin-top:12px" disabled>Collect</button>'
+    );
+    ["lc1", "lc2", "lc3"].forEach(function (id, i) {
+      setTimeout(function () {
+        var c = m.el.querySelector("#" + id);
+        if (c) c.classList.add("in");
+        SB.haptic(10);
+      }, 300 + i * 350);
+    });
+    var amt = 100 + 25 * Math.floor(Math.random() * 5); // 100–200
+    setTimeout(function () {
+      levelBusy = false;
+      var s = m.el.querySelector("#lvl-status");
+      if (!document.body.contains(m.el)) { SB.grantRewards([{ type: "coins", amount: amt }]); return; }
+      s.textContent = "Level complete! +" + amt + " coins";
+      var b = m.el.querySelector("#lvl-close");
+      b.disabled = false;
+      b.addEventListener("click", function () {
+        m.close();
+        SB.grantRewards([{ type: "coins", amount: amt }]);
+      });
+    }, 1600);
+  });
+
   // ---------- grand finale + recap ----------
   function grandFinale() {
     SB.confetti(window.innerWidth / 2, window.innerHeight / 3, 120);
     setTimeout(function () { SB.confetti(window.innerWidth * 0.25, window.innerHeight * 0.25, 80); }, 400);
     setTimeout(function () { SB.confetti(window.innerWidth * 0.75, window.innerHeight * 0.3, 80); }, 800);
-    setTimeout(showRecap, 1100);
+    setTimeout(showRecap, 1200);
   }
   function showRecap() {
     var rows = S.claims.map(function (c) {
       return '<div class="recap-row"><span class="rf">Fl. ' + c.f + '</span><span class="chips">' +
-        c.rewards.map(SB.rewardChip).join("") + "</span></div>";
+        c.rewards.map(SB.rewardChip).join("") + "</span>" +
+        (c.paid ? '<span class="paid-tag">' + c.paid + "</span>" : "") + "</div>";
     }).join("");
     var m = SB.modal(
       '<div style="font-size:44px">🎆🏆🎆</div>' +
@@ -479,10 +906,11 @@
       '<div style="font-size:36px">🏨🛗</div>' +
       "<h3 style='margin:6px 0 8px'>How Treasure Elevator works</h3>" +
       '<p style="font-size:13px;line-height:1.55;text-align:left;font-weight:600;color:#3a4a6b">' +
-      "Players ride an elevator up 14 hotel floors, claiming a free reward on every floor. " +
-      "Two paywall floors ($1.99 at floor 4, $4.99 at floor 9) gate access to the richer free floors above — the purchase buys continued free claiming, so the celebration always lands after checkout, not at it. " +
-      "Upcoming rewards are visible as silhouettes, so the rooftop grand prize (5,000 coins + wilds + gems) pulls players through both price points. " +
-      "This is a progressive offer-chain pattern (ref: Royal Match's Endless Treasure, +20% revenue in its first 30 days) with escalating price tiers and a hard event timer for urgency.</p>" +
+      "Players ride an elevator up 14 hotel floors over a 48-hour event, claiming a free reward on every floor. " +
+      "Two paywall floors ($1.99 at floor 4, $4.99 at floor 9) gate the richer free floors above — each purchase re-opens free claiming, so the celebration always lands after checkout, never a dead end. " +
+      "Locked floors tease their rewards as silhouettes, and the rooftop grand prize (5,000 coins + wilds + gems) pulls players through both price points. " +
+      "A persistent “Play a level” button is the no-spend escape hatch. " +
+      "Pattern reference: Royal Match's Endless Treasure (+20% revenue in its first 30 days), with escalating price tiers and a hard event timer for urgency.</p>" +
       '<button class="sb-btn sb-btn-blue sb-btn-block" id="info-close">Got it</button>'
     );
     m.el.querySelector("#info-close").addEventListener("click", m.close);
@@ -491,7 +919,15 @@
   // ---------- boot ----------
   render();
   positionCar(false);
-  setTimeout(scrollToCurrent, 120);
+  syncTopbarH();
+  if (S.floor === 1 && !S.complete && S.claims.length === 0) {
+    // first visit: hold on the rooftop grand prize for a beat, then glide down to floor 1
+    window.scrollTo(0, 0);
+    SB.toast("🏆 Grand Prize on the rooftop — ride up!", 2400);
+    setTimeout(scrollToCurrent, 1700);
+  } else {
+    setTimeout(scrollToCurrent, 120);
+  }
 })();
 </script>
 </body>

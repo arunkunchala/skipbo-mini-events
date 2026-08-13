@@ -4,131 +4,281 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Reward Workshop</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../shared/core.css">
 <style>
   .sb-main { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
   .ws-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-  .ws-info { width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:#fff;font-weight:900;font-size:15px;cursor:pointer; }
+  .ws-info { width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:#fff;font-weight:900;font-size:17px;cursor:pointer; }
   .ws-head .spacer { flex:1; }
 
-  /* target panel */
+  /* ============ poker chips (dimensional, notched edge) ============ */
+  .pchip { position:relative; width:34px; height:34px; border-radius:50%; display:inline-block; flex:0 0 auto;
+    background: radial-gradient(circle at 32% 28%, var(--hi), var(--base) 58%, var(--lo) 100%);
+    box-shadow: 0 3px 0 var(--edge), 0 5px 5px rgba(0,0,0,0.35); }
+  .pchip::before { content:""; position:absolute; inset:0; border-radius:50%;
+    background: repeating-conic-gradient(rgba(255,255,255,0.9) 0 16deg, transparent 16deg 45deg);
+    -webkit-mask: radial-gradient(circle, transparent 61%, #000 62%);
+    mask: radial-gradient(circle, transparent 61%, #000 62%); }
+  .pchip i { position:absolute; inset:6px; border-radius:50%; border:2px dashed rgba(255,255,255,0.5);
+    display:grid; place-items:center; font-style:normal; font-size:11px; font-weight:900;
+    color:rgba(255,255,255,0.92); text-shadow:0 1px 1px rgba(0,0,0,0.3);
+    background: radial-gradient(circle at 35% 28%, rgba(255,255,255,0.3), transparent 62%); }
+  .pchip i::after { content:"★"; }
+  .pchip.blue  { --hi:#7db4ec; --base:#3E8EDE; --lo:#1D4FA1; --edge:#12315e; }
+  .pchip.green { --hi:#6fd490; --base:#2E9E4F; --lo:#1f7038; --edge:#123f1f; }
+  .pchip.red   { --hi:#f2798a; --base:#D7263D; --lo:#a31527; --edge:#640d17; }
+  .pchip.gold  { --hi:#ffe9a0; --base:#FFC72C; --lo:#e0a400; --edge:#8a6400; }
+  .pchip.gold::before { background: repeating-conic-gradient(rgba(120,80,0,0.55) 0 16deg, transparent 16deg 45deg);
+    -webkit-mask: radial-gradient(circle, transparent 61%, #000 62%); mask: radial-gradient(circle, transparent 61%, #000 62%); }
+  .pchip.gold i { color:rgba(100,66,0,0.85); border-color:rgba(120,80,0,0.4); text-shadow:none; }
+  .pchip.sm { width:24px; height:24px; box-shadow:0 2px 0 var(--edge), 0 3px 3px rgba(0,0,0,0.3); }
+  .pchip.sm i { inset:4px; font-size:8px; border-width:1.5px; }
+  .pchip.xs { width:15px; height:15px; box-shadow:0 1.5px 0 var(--edge), 0 2px 2px rgba(0,0,0,0.3); }
+  .pchip.xs i { inset:2.5px; border-width:1px; }
+  .pchip.xs i::after { content:""; }
+  .pchip.lg { width:52px; height:52px; }
+  .pchip.lg i { inset:9px; font-size:16px; }
+  .pstack { position:relative; width:40px; height:44px; display:inline-block; }
+  .pstack .pchip { position:absolute; left:3px; }
+  .pstack .pchip:nth-child(1) { bottom:0; }
+  .pstack .pchip:nth-child(2) { bottom:5px; }
+  .pstack .pchip:nth-child(3) { bottom:10px; }
+  .art { font-size:26px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.35)); line-height:1; }
+
+  /* ============ target panel: pedestal + spotlight stage ============ */
   .tgt { margin-bottom:12px; }
   .tgt h4 { margin:0 0 6px; font-size:14px; }
-  .tgt-big { font-size:34px; float:right; margin:-4px 0 0 8px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+  .tgt-wrap { display:flex; gap:12px; align-items:stretch; }
+  .tgt-r { flex:1; min-width:0; }
+  .stage { position:relative; flex:0 0 104px; min-height:132px; border-radius:12px; overflow:hidden;
+    background: linear-gradient(180deg,#0b1730 0%,#142643 60%,#1B2A4A 100%);
+    box-shadow: inset 0 0 18px rgba(0,0,0,0.6); }
+  .stage .beam { position:absolute; left:50%; top:-6px; width:112px; height:104px; transform:translateX(-50%);
+    background: linear-gradient(180deg, rgba(255,236,170,0.55), rgba(255,236,170,0.10) 72%, transparent);
+    clip-path: polygon(41% 0, 59% 0, 100% 100%, 0 100%); }
+  .stage .floorglow { position:absolute; left:50%; bottom:0; width:100px; height:34px; transform:translateX(-50%);
+    background: radial-gradient(ellipse at center bottom, rgba(255,225,140,0.45), transparent 70%); }
+  .stage .ped-base { position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:82px; height:9px;
+    background: linear-gradient(180deg,#c9ad78,#8a6d3f); border-radius:3px 3px 0 0; }
+  .stage .ped { position:absolute; left:50%; bottom:8px; transform:translateX(-50%); width:52px; height:26px;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.16) 0 3px, transparent 3px 10px),
+      linear-gradient(180deg,#e6cf9a 0%,#c9ad78 55%,#a3874e 100%); }
+  .stage .ped-top { position:absolute; left:50%; bottom:33px; transform:translateX(-50%); width:66px; height:9px;
+    background: linear-gradient(180deg,#f4e3b6,#c9ad78); border-radius:3px; box-shadow:0 2px 3px rgba(0,0,0,0.45); }
+  .stage .pitem { position:absolute; left:50%; bottom:42px; transform:translateX(-50%); font-size:37px; line-height:1;
+    filter: drop-shadow(0 5px 7px rgba(0,0,0,0.55)); }
+  .stage.lit .pitem { animation: sbBounce 0.7s; filter: drop-shadow(0 0 10px rgba(255,220,120,0.95)) drop-shadow(0 5px 7px rgba(0,0,0,0.55)); }
+  .stage .stw { position:absolute; font-size:13px; opacity:0; }
+  .stage.lit .stw { animation: twk 1.6s infinite; opacity:1; }
+  .stage .stw.s1 { left:14%; top:26%; } .stage .stw.s2 { right:12%; top:44%; animation-delay:0.8s !important; }
+  @keyframes twk { 0%,100%{opacity:0; transform:scale(0.5) rotate(0);} 50%{opacity:1; transform:scale(1.15) rotate(30deg);} }
   .chk { list-style:none; margin:0; padding:0; }
-  .chk li { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding:3px 0; }
+  .chk li { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:3px 0; }
   .chk .mk { width:18px; text-align:center; font-weight:900; }
-  .chk .ok .mk, .chk li.ok { color:var(--sb-green); }
+  .chk li.ok { color:var(--sb-green); }
   .chk li.no .mk { color:var(--sb-red); }
   .chk .cnt { margin-left:auto; font-size:12px; color:#5a6b8c; }
   .chk li.ok .cnt { color:var(--sb-green); }
 
-  /* workbench */
-  .bench-zone { position:relative; border-radius:18px; padding:12px 12px 14px; margin-bottom:12px;
-    background: repeating-linear-gradient(0deg,#6b4423 0 14px,#7a4f2a 14px 28px), #6b4423;
-    border:3px solid #4a2e14; box-shadow: inset 0 2px 8px rgba(0,0,0,0.45), var(--sb-shadow); overflow:hidden; }
-  .bench-zone.gold-trim { border-color: var(--sb-yellow); box-shadow: 0 0 14px rgba(255,199,44,0.55), inset 0 2px 8px rgba(0,0,0,0.45); }
-  .bench-zone::before { content:""; position:absolute; top:-40px; left:50%; transform:translateX(-50%);
-    width:220px; height:130px; background:radial-gradient(ellipse at center, rgba(255,220,120,0.35), transparent 70%); pointer-events:none; }
-  .lamp { position:absolute; top:2px; left:50%; transform:translateX(-50%); font-size:20px; }
-  .rack { display:flex; justify-content:center; gap:14px; font-size:18px; margin-bottom:6px;
-    text-shadow:0 2px 2px rgba(0,0,0,0.4); }
-  .rack span { display:inline-block; }
-  .dance .rack span { animation: dance 0.5s infinite alternate; }
-  .dance .rack span:nth-child(2n){ animation-delay:0.12s; }
+  /* ============ workshop: tool wall + worktop + shelf ============ */
+  .bench-zone { position:relative; border-radius:16px; margin-bottom:12px; overflow:hidden;
+    border:3px solid #3d2410; box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+  .bench-zone.gold-trim { border-color:var(--sb-yellow); box-shadow: 0 0 16px rgba(255,199,44,0.6), 0 6px 16px rgba(0,0,0,0.4); }
+  .toolwall { position:relative; padding:9px 10px 7px; display:flex; justify-content:center; align-items:center; gap:20px;
+    background:
+      radial-gradient(circle, rgba(0,0,0,0.4) 1.3px, transparent 2px) 4px 4px / 14px 14px,
+      linear-gradient(180deg,#8a5a33,#754826);
+    border-bottom:5px solid #43270f; box-shadow: inset 0 -4px 7px rgba(0,0,0,0.35); }
+  .toolwall .tool { font-size:19px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5)); display:inline-block; }
+  .toolwall .tool:nth-child(odd) { transform:rotate(-9deg); }
+  .toolwall .tool:nth-child(even) { transform:rotate(7deg); }
+  .toolwall .lamp { position:absolute; right:8px; top:4px; font-size:18px; transform:none; }
+  .dance .toolwall .tool { animation: dance 0.5s infinite alternate; }
+  .dance .toolwall .tool:nth-child(2n) { animation-delay:0.12s; }
   @keyframes dance { from{transform:rotate(-18deg) translateY(0);} to{transform:rotate(18deg) translateY(-5px);} }
 
-  .bench { margin-top:6px; }
-  .bench + .bench { margin-top:12px; border-top:2px dashed rgba(255,255,255,0.2); padding-top:12px; }
+  .worktop { position:relative; padding:14px 10px 14px;
+    background:
+      repeating-linear-gradient(180deg, rgba(0,0,0,0.14) 0 2px, transparent 2px 30px),
+      repeating-linear-gradient(90deg, rgba(255,235,190,0.05) 0 2px, transparent 2px 47px),
+      linear-gradient(180deg,#9a6a3a 0,#7f5229 40%,#6b4423 100%); }
+  .worktop::before { content:""; position:absolute; top:-30px; left:50%; transform:translateX(-50%);
+    width:240px; height:120px; background:radial-gradient(ellipse at center, rgba(255,220,120,0.32), transparent 70%); pointer-events:none; }
+
+  .bench + .bench { margin-top:12px; border-top:2px dashed rgba(255,235,190,0.25); padding-top:12px; }
+  .bench { position:relative; }
   .bench-row { display:flex; align-items:center; justify-content:center; gap:6px; }
-  .slot { width:52px; height:52px; border-radius:12px; border:2px dashed rgba(255,255,255,0.45);
-    background:rgba(0,0,0,0.25); display:grid; place-items:center; font-size:26px; cursor:pointer;
-    transition:transform 0.1s; position:relative; }
+  .slot { width:52px; height:52px; border-radius:12px; border:2px dashed rgba(255,235,190,0.5);
+    background:rgba(0,0,0,0.28); display:grid; place-items:center; cursor:pointer;
+    transition:transform 0.1s; position:relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.4); }
   .slot:active { transform:scale(0.93); }
-  .slot.filled { border-style:solid; border-color:var(--sb-yellow); background:rgba(255,199,44,0.15); }
-  .slot.result { border-color:rgba(255,255,255,0.7); background:rgba(255,255,255,0.12); cursor:default; }
-  .arrow { color:#fff; font-size:20px; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
-  .bench-foot { display:flex; align-items:center; gap:8px; margin-top:10px; }
-  .bench-foot .sb-btn { flex:1; }
+  .slot:empty::after { content:"+"; color:rgba(255,235,190,0.4); font-size:22px; font-weight:900; }
+  .slot.filled { border-style:solid; border-color:var(--sb-yellow); background:rgba(255,199,44,0.14); }
+  .slot.used { border-style:solid; border-color:rgba(255,235,190,0.22); cursor:default; }
+  .slot.used:empty::after { content:""; }
+  .slot.result { border-color:rgba(255,255,255,0.65); background:rgba(255,255,255,0.1); cursor:default; }
+  .slot.result:empty::after { content:"?"; font-size:18px; }
+  .slot.result .art { font-size:30px; }
+  .ghost { opacity:0.35; }
+  .arrow { color:#ffe9b8; font-size:20px; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
+  .bench-foot { display:flex; align-items:center; gap:8px; margin-top:10px; min-height:44px; }
+  .bench-foot .sb-btn { flex:1; min-height:44px; }
   .pop { animation: popIn 0.6s cubic-bezier(0.34,1.8,0.64,1); filter:drop-shadow(0 0 8px rgba(255,220,120,0.95)); }
   @keyframes popIn { 0%{transform:scale(0);} 60%{transform:scale(1.5);} 100%{transform:scale(1);} }
 
-  .craftfx { position:absolute; inset:0; display:none; place-items:center; z-index:5; pointer-events:none; }
+  /* combine animation: chips converge → hammer + sparks → flash → pop */
+  .crafting .slot.filled.in0 { animation: convL 0.55s 0.05s ease-in forwards; }
+  .crafting .slot.filled.in1 { animation: convM 0.55s 0.05s ease-in forwards; }
+  .crafting .slot.filled.in2 { animation: convR 0.55s 0.05s ease-in forwards; }
+  @keyframes convL { 70%{opacity:1;} 100%{transform:translateX(58px) scale(0.4); opacity:0;} }
+  @keyframes convM { 70%{opacity:1;} 100%{transform:scale(0.4); opacity:0;} }
+  @keyframes convR { 70%{opacity:1;} 100%{transform:translateX(-58px) scale(0.4); opacity:0;} }
+  .craftfx { position:absolute; inset:-6px 0; display:none; place-items:center; z-index:5; pointer-events:none; }
   .bench.crafting .craftfx { display:grid; }
-  .craftfx .ham { font-size:42px; animation: swing 0.3s infinite alternate; transform-origin:80% 90%; }
+  .craftfx .ham { font-size:40px; animation: swing 0.3s infinite alternate; transform-origin:80% 90%;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
   @keyframes swing { from{transform:rotate(-45deg);} to{transform:rotate(20deg);} }
-  .craftfx .spk { position:absolute; font-size:20px; animation: spark 0.5s infinite; }
-  .craftfx .spk:nth-child(2){ left:32%; top:38%; animation-delay:0.15s; }
-  .craftfx .spk:nth-child(3){ right:30%; top:52%; animation-delay:0.3s; }
-  .craftfx .spk:nth-child(4){ left:44%; bottom:18%; animation-delay:0.45s; }
+  .craftfx .spk { position:absolute; font-size:18px; animation: spark 0.5s infinite; }
+  .craftfx .spk:nth-child(2){ left:30%; top:30%; animation-delay:0.15s; }
+  .craftfx .spk:nth-child(3){ right:28%; top:48%; animation-delay:0.3s; }
+  .craftfx .spk:nth-child(4){ left:42%; bottom:12%; animation-delay:0.45s; }
   @keyframes spark { 0%{opacity:0; transform:scale(0.4);} 50%{opacity:1; transform:scale(1.3);} 100%{opacity:0; transform:scale(0.4);} }
-  .bench.crafting .bench-row { filter:brightness(0.55); }
+  .fburst { position:absolute; left:50%; top:36%; width:10px; height:10px; margin:-5px; border-radius:50%;
+    background:radial-gradient(circle,#fff,rgba(255,230,150,0.9) 40%,transparent 70%);
+    opacity:0; pointer-events:none; z-index:6; }
+  .bench.flash .fburst { animation: fburst 0.45s ease-out; }
+  @keyframes fburst { 0%{opacity:1; transform:scale(1);} 100%{opacity:0; transform:scale(16);} }
+  .cwrap { flex:1; display:flex; align-items:center; gap:8px; }
+  .cbar { flex:1; height:12px; border-radius:999px; background:rgba(0,0,0,0.4); overflow:hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+  .cbar i { display:block; height:100%; border-radius:999px; transform-origin:left; transform:scaleX(0);
+    background:linear-gradient(90deg,#ffd95e,var(--sb-yellow)); }
+  .ctime { color:#ffe9b8; font-weight:900; font-size:13px; min-width:30px; text-align:right;
+    text-shadow:0 1px 2px rgba(0,0,0,0.5); }
 
   .fin-pill { display:block; margin:10px auto 0; border:none; cursor:pointer; border-radius:999px;
-    padding:8px 16px; font-weight:800; font-size:13px; color:var(--sb-ink);
+    padding:11px 16px; min-height:44px; font-weight:800; font-size:13px; color:var(--sb-ink); font-family:var(--sb-font);
     background: linear-gradient(180deg,#ffe08a,var(--sb-yellow)); box-shadow:0 3px 0 var(--sb-yellow-dark), var(--sb-shadow);
     animation: sbPulse 1.4s infinite; }
 
-  /* inventory */
+  /* showcase shelf */
+  .shelf { padding:8px 12px 12px; background:linear-gradient(180deg,#5a3517,#472809); border-top:4px solid #3a2008; }
+  .shelf-title { font-size:10px; font-weight:900; letter-spacing:1px; color:#d9b98c; margin:0 0 6px; }
+  .shelf-row { display:flex; gap:16px; align-items:flex-end; justify-content:center; min-height:44px;
+    padding:0 8px 6px; border-bottom:7px solid #8a5a33; border-radius:0 0 3px 3px;
+    box-shadow: 0 8px 0 -3px #331c06; }
+  .sh-item { position:relative; font-size:26px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
+  .sh-item .ct { position:absolute; top:-8px; right:-10px; background:var(--sb-red); color:#fff; font-size:10px;
+    font-weight:900; border-radius:999px; min-width:17px; padding:1px 4px; text-align:center; }
+  .sh-item.win { animation:sbBounce 0.6s; }
+  .sh-item.win::before { content:""; position:absolute; inset:-8px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,220,120,0.55), transparent 70%); z-index:-1; }
+  .sh-empty { font-size:11px; color:#b08d5e; font-weight:700; padding-bottom:8px; }
+
+  /* ============ inventory ============ */
   .inv-title { color:#fff; font-weight:800; font-size:13px; margin:0 0 6px; text-shadow:0 1px 0 rgba(0,0,0,0.3); }
-  .inv { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin-bottom:12px; }
+  .inv { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
   .inv button { position:relative; border:none; border-radius:12px; background:rgba(253,246,227,0.95);
-    padding:8px 2px 6px; font-size:24px; cursor:pointer; box-shadow:var(--sb-shadow); transition:transform 0.1s; }
+    padding:8px 2px 5px; min-height:44px; cursor:pointer; box-shadow:var(--sb-shadow); transition:transform 0.1s;
+    display:flex; flex-direction:column; align-items:center; gap:2px; font-family:var(--sb-font); }
   .inv button:active { transform:scale(0.9); }
-  .inv button.zero { opacity:0.4; filter:grayscale(0.7); }
+  .inv button.zero { opacity:0.45; filter:grayscale(0.7); }
   .inv .ct { position:absolute; top:-6px; right:-4px; background:var(--sb-red); color:#fff; font-size:11px;
     font-weight:900; border-radius:999px; min-width:19px; padding:2px 4px; box-shadow:0 1px 3px rgba(0,0,0,0.4); }
-  .inv .lbl { display:block; font-size:9px; font-weight:800; color:var(--sb-ink); margin-top:1px; }
+  .inv .lbl { display:block; font-size:9px; font-weight:800; color:var(--sb-ink); }
+  .inv .art { font-size:30px; height:44px; display:grid; place-items:center; }
 
-  /* recipes */
-  .recipes { margin-bottom:12px; }
-  .recipes h4 { margin:0 0 8px; font-size:14px; }
-  .rec { display:flex; align-items:center; gap:6px; font-size:15px; padding:5px 6px; border-radius:10px; }
-  .rec.hot { background:rgba(255,199,44,0.3); outline:2px solid var(--sb-yellow); }
-  .rec .nm { margin-left:auto; font-size:11px; font-weight:800; color:#5a6b8c; text-align:right; }
-  .tier { font-size:10px; font-weight:900; color:#8a6d1f; margin:6px 0 2px; letter-spacing:0.5px; }
+  /* ============ recipe tree: node graph with connectors ============ */
+  .recipes { margin-bottom:12px; background:linear-gradient(180deg,#2a5cb0,#1D4FA1);
+    border:2px solid rgba(255,255,255,0.18); border-radius:var(--sb-radius); box-shadow:var(--sb-shadow);
+    padding:12px; color:#fff; }
+  .recipes h4 { margin:0 0 10px; font-size:14px; }
+  .rgraph { position:relative; }
+  #rlinks { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+  .rrow { position:relative; z-index:1; display:flex; gap:8px; justify-content:center; align-items:stretch; }
+  .rrow + .rrow { margin-top:30px; }
+  .rtier { position:relative; z-index:1; font-size:9px; font-weight:900; color:var(--sb-sky-light);
+    letter-spacing:1px; margin:0 0 5px; }
+  .rrow + .rtier { margin-top:14px; }
+  .rnode { position:relative; flex:1 1 0; min-width:0; max-width:150px; text-align:center;
+    border-radius:12px; padding:8px 4px 6px;
+    background: linear-gradient(160deg,#f9efd6 0,#efdfb4 100%);
+    border:2px solid #d9c48e; box-shadow: 0 3px 6px rgba(0,0,0,0.3), inset 0 0 12px rgba(160,120,50,0.16);
+    color:var(--sb-ink); }
+  .rnode.hot { border-color:var(--sb-yellow); box-shadow: 0 0 12px rgba(255,199,44,0.65), 0 3px 6px rgba(0,0,0,0.3); }
+  .rnode.hot::before { content:"◆ PATH"; position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+    font-size:7px; font-weight:900; letter-spacing:0.5px; background:var(--sb-yellow); color:var(--sb-ink);
+    border-radius:999px; padding:2px 6px; white-space:nowrap; }
+  .rnode.locked { filter:grayscale(0.8); opacity:0.72; }
+  .rn-lock { position:absolute; top:-7px; right:-5px; font-size:13px; filter:none;
+    background:#3a4a6b; border-radius:50%; width:22px; height:22px; display:grid; place-items:center;
+    box-shadow:0 2px 4px rgba(0,0,0,0.4); }
+  .rn-done { position:absolute; top:-7px; right:-5px; background:var(--sb-green); color:#fff; font-size:9px;
+    font-weight:900; border-radius:999px; padding:3px 6px; box-shadow:0 2px 4px rgba(0,0,0,0.4); }
+  .rn-out { font-size:25px; line-height:1.15; display:block; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+  .rn-socks { display:flex; justify-content:center; gap:3px; margin:5px 0 4px; flex-wrap:wrap; }
+  .rn-name { font-size:9.5px; font-weight:900; color:#7a6330; line-height:1.15; }
+  .rn-pay { font-size:10px; font-weight:800; color:var(--sb-green); margin-top:1px; line-height:1.35; }
+  .rnode.grand .rn-pay { color:#1f7038; }
+  .rnode.grand { background: linear-gradient(160deg,#ffe9ad 0,#f5cf6b 100%); border-color:var(--sb-yellow-dark); }
+  .sock { width:22px; height:22px; border-radius:50%; border:1.5px dashed #b99b5e; background:rgba(120,90,40,0.1);
+    display:grid; place-items:center; flex:0 0 auto; box-shadow: inset 0 1px 3px rgba(120,90,40,0.3); }
+  .sock .ph { font-size:11px; opacity:0.35; filter:grayscale(1); }
+  .sock.fill { border-style:solid; border-color:#8a6d1f; background:rgba(255,214,110,0.4); }
+  .sock.fill .art { font-size:13px; }
+  .rec-note { font-size:11px; color:var(--sb-sky-light); margin-top:10px; }
 
-  .earn { margin-bottom:12px; }
+  .earn { margin-bottom:12px; min-height:52px; }
 
   /* card flip overlay */
   .flipwrap { display:flex; justify-content:center; gap:18px; margin:14px 0 6px; perspective:600px; }
-  .fcard { width:74px; height:102px; position:relative; transform-style:preserve-3d; transition:transform 0.55s cubic-bezier(0.34,1.3,0.64,1); }
+  .fcard { width:78px; height:106px; position:relative; transform-style:preserve-3d; transition:transform 0.55s cubic-bezier(0.34,1.3,0.64,1); }
   .fcard.flipped { transform:rotateY(180deg); }
   .fcard .face { position:absolute; inset:0; border-radius:10px; backface-visibility:hidden;
     display:grid; place-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.35); }
   .fcard .back { background:repeating-linear-gradient(45deg,var(--sb-blue) 0 8px,var(--sb-blue-dark) 8px 16px);
     border:3px solid #fff; color:var(--sb-yellow); font-size:26px; font-weight:900; }
-  .fcard .front { background:#fff; border:3px solid var(--sb-yellow); transform:rotateY(180deg); font-size:38px; }
-  .fcard .front small { position:absolute; bottom:6px; font-size:10px; font-weight:800; color:var(--sb-ink); }
+  .fcard .front { background:#fff; border:3px solid var(--sb-yellow); transform:rotateY(180deg); }
+  .fcard .front small { position:absolute; bottom:6px; left:0; right:0; text-align:center; font-size:10px; font-weight:800; color:var(--sb-ink); }
 
-  /* shop drawer */
-  .shop-tab { position:fixed; left:50%; transform:translateX(-50%);
+  /* shop drawer (left-anchored so the core Reset button stays visible) */
+  .shop-tab { position:fixed; left:14px;
     bottom:calc(env(safe-area-inset-bottom,0px) + 10px); z-index:120;
-    border:none; cursor:pointer; border-radius:999px; padding:11px 26px; font-weight:900; font-size:15px;
+    border:none; cursor:pointer; border-radius:999px; padding:12px 26px; min-height:46px; font-weight:900; font-size:15px;
+    font-family:var(--sb-font);
     color:var(--sb-ink); background:linear-gradient(180deg,#ffd95e,var(--sb-yellow));
     box-shadow:0 4px 0 var(--sb-yellow-dark), 0 6px 18px rgba(0,0,0,0.4); }
   .drawer-bd { position:fixed; inset:0; z-index:150; background:rgba(10,20,40,0.6); display:none;
     align-items:flex-end; justify-content:center; }
   .drawer-bd.open { display:flex; }
   .drawer { width:100%; max-width:480px; background:var(--sb-cream); border-radius:22px 22px 0 0;
-    padding:16px 16px calc(env(safe-area-inset-bottom,0px)+18px); max-height:70dvh; overflow-y:auto;
+    padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 18px); max-height:72dvh; overflow-y:auto;
     animation: up 0.3s cubic-bezier(0.22,1,0.36,1); }
   @keyframes up { from{transform:translateY(100%);} to{transform:translateY(0);} }
   .offer { display:flex; align-items:center; gap:10px; padding:10px 8px; border-bottom:1px solid rgba(27,42,74,0.1); }
-  .offer .ic { font-size:28px; }
+  .offer.ctx { background:rgba(255,199,44,0.18); border:1.5px solid var(--sb-yellow); border-radius:12px; margin-bottom:4px; }
+  .offer .ic { font-size:28px; min-width:34px; text-align:center; }
   .offer .tx { flex:1; min-width:0; }
   .offer .tx b { font-size:14px; display:block; }
   .offer .tx span { font-size:11px; color:#5a6b8c; }
-  .offer .sb-btn-sm { min-width:74px; }
-  .owned { font-size:12px; font-weight:900; color:var(--sb-green); min-width:74px; text-align:center; }
+  .offer .sb-btn-sm { min-width:78px; min-height:44px; }
+  .owned { font-size:12px; font-weight:900; color:var(--sb-green); min-width:78px; text-align:center; }
 
   /* target chooser */
   .choose-opt { display:flex; align-items:center; gap:12px; width:100%; margin-top:10px; border:2px solid rgba(27,42,74,0.15);
-    border-radius:14px; background:#fff; padding:12px; cursor:pointer; text-align:left; font-family:var(--sb-font); }
+    border-radius:14px; background:#fff; padding:12px; min-height:56px; cursor:pointer; text-align:left; font-family:var(--sb-font); }
   .choose-opt:active { transform:scale(0.97); }
   .choose-opt .em { font-size:30px; }
   .choose-opt b { display:block; font-size:15px; color:var(--sb-ink); }
   .choose-opt span { font-size:11px; color:#5a6b8c; }
+
+  @media (max-width: 374px) {
+    .slot { width:46px; height:46px; }
+    .pchip { width:30px; height:30px; }
+    .toolwall { gap:12px; }
+  }
 </style>
 </head>
 <body>
@@ -137,16 +287,15 @@
     <div class="ws-head">
       <span class="sb-timer-chip">⏳ <span id="timer"></span></span>
       <span class="spacer"></span>
-      <button class="ws-info" id="infoBtn">ⓘ</button>
+      <button class="ws-info" id="infoBtn" aria-label="How it works">ⓘ</button>
     </div>
 
     <div class="sb-panel tgt" id="tgtPanel"></div>
 
     <div class="bench-zone" id="benchZone">
-      <span class="lamp">💡</span>
-      <div class="rack"><span>🔨</span><span>🪚</span><span>🔧</span><span>✂️</span><span>📏</span></div>
-      <div id="benches"></div>
-      <div id="pillWrap"></div>
+      <div class="toolwall"><span class="tool">🔨</span><span class="tool">🪚</span><span class="tool">🔧</span><span class="tool">✂️</span><span class="tool">📏</span><span class="tool lamp">💡</span></div>
+      <div class="worktop"><div id="benches"></div><div id="pillWrap"></div></div>
+      <div class="shelf"><p class="shelf-title">🏆 SHOWCASE — YOUR CRAFTED MASTERPIECES</p><div class="shelf-row" id="shelf"></div></div>
     </div>
 
     <p class="inv-title">🧰 Your materials — tap to place on bench</p>
@@ -154,7 +303,7 @@
 
     <button class="sb-btn sb-btn-green sb-btn-block earn" id="playBtn">🎴 Play a level · earn 2 chips</button>
 
-    <div class="sb-panel recipes" id="recipes"></div>
+    <div class="recipes" id="recipes"></div>
   </div>
 </div>
 <button class="shop-tab" id="shopTab">🛒 Workshop Shop</button>
@@ -170,22 +319,30 @@ var st = SB.store("reward-workshop", {
   endTs:0, target:null, done:false, celebrated:false,
   inv:{ blue:2, green:1, red:0, gold:0, rocket:0, shield:0, hammer:0, wildcard:0 },
   crafts:{ rocket:0, shield:0, hammer:0, wildcard:0, chest:0 },
-  bench2:false, instant:false, dbl:false, levels:0, chipsEarned:0
+  benches:[ {slots:[], rid:null, end:0, total:0} ],
+  bench2:false, instant:false, dbl:false, levels:0, chipsEarned:0, pity:0
 });
 var S = st.data, inv = S.inv, C = S.crafts;
 if(!S.endTs){ S.endTs = Date.now() + 72*3600*1000; st.save(); }
+// migration from older saves + transient cleanup
+if(!S.benches) S.benches = [ {slots:[], rid:null, end:0, total:0} ];
+if(S.pity == null) S.pity = 0;
+if(S.bench2 && S.benches.length < 2) S.benches.push({slots:[], rid:null, end:0, total:0});
+var benches = S.benches;
+benches.forEach(function(b){ b.result = null; });
 
 var ITEMS = {
   blue:{e:"🔵",n:"Blue Chip"}, green:{e:"🟢",n:"Green Chip"}, red:{e:"🔴",n:"Red Chip"}, gold:{e:"🟡",n:"Gold Chip"},
   rocket:{e:"🚀",n:"Rocket"}, shield:{e:"🛡️",n:"Shield"}, hammer:{e:"🔨",n:"Hammer"}, wildcard:{e:"🃏",n:"Wild Card"}
 };
+var CHIPS = ["blue","green","red","gold"];
 var BOOSTERS = ["rocket","shield","hammer"];
 var RECIPES = {
-  rocket:{ need:{blue:3}, out:"rocket", grant:[{type:"draw",amount:1}], n:"Rocket booster" },
-  shield:{ need:{green:3}, out:"shield", grant:[{type:"undo",amount:1}], n:"Shield booster" },
-  hammer:{ need:{red:3}, out:"hammer", grant:[{type:"reverse",amount:1}], n:"Hammer booster" },
-  wildcard:{ need:{booster:2, gold:1}, out:"wildcard", grant:[{type:"wild",amount:1}], n:"Wild Card" },
-  chest:{ need:{wildcard:2}, out:null, grant:[{type:"coins",amount:3000},{type:"wild",amount:3},{type:"gem",amount:10}], n:"PREMIUM CHEST" }
+  rocket:{ need:{blue:3}, out:"rocket", grant:[{type:"draw",amount:1}], n:"Rocket booster", dur:6000 },
+  shield:{ need:{green:3}, out:"shield", grant:[{type:"undo",amount:1}], n:"Shield booster", dur:6000 },
+  hammer:{ need:{red:3}, out:"hammer", grant:[{type:"reverse",amount:1}], n:"Hammer booster", dur:6000 },
+  wildcard:{ need:{booster:2, gold:1}, out:"wildcard", grant:[{type:"wild",amount:1}], n:"Wild Card", dur:9000 },
+  chest:{ need:{wildcard:2}, out:null, grant:[{type:"coins",amount:3000},{type:"wild",amount:3},{type:"gem",amount:10}], n:"PREMIUM CHEST", dur:12000 }
 };
 var PRICE = { blue:"$0.99", green:"$0.99", red:"$0.99", gold:"$1.99", rocket:"$1.49", shield:"$1.49", hammer:"$1.49", wildcard:"$2.99" };
 var TGT = {
@@ -194,13 +351,24 @@ var TGT = {
   boosters:{ e:"🚀", n:"Booster Bundle", d:"Craft one of each booster" }
 };
 
-var benches = [ {slots:[],busy:false,result:null} ];
-if(S.bench2) benches.push({slots:[],busy:false,result:null});
-
 // ---------- helpers ----------
 function el(id){ return document.getElementById(id); }
-function boosterCount(){ return inv.rocket + inv.shield + inv.hammer; }
-function have(k){ return k==="booster" ? boosterCount() : (inv[k]||0); }
+function chipHTML(k, cls){
+  if(CHIPS.indexOf(k) >= 0) return '<span class="pchip '+k+(cls?" "+cls:"")+'"><i></i></span>';
+  return '<span class="art">'+ITEMS[k].e+"</span>";
+}
+function stagedCount(k){
+  var n = 0;
+  benches.forEach(function(b){
+    if(b.end) return; // items inside an active craft are already committed
+    b.slots.forEach(function(s){ if(k==="booster" ? BOOSTERS.indexOf(s)>=0 : s===k) n++; });
+  });
+  return n;
+}
+function invCount(k){
+  return k==="booster" ? (inv.rocket + inv.shield + inv.hammer) : (inv[k]||0);
+}
+function have(k){ return invCount(k) + stagedCount(k); }
 function targetDone(){
   if(S.target==="boosters") return C.rocket>=1 && C.shield>=1 && C.hammer>=1;
   if(S.target==="wild3") return C.wildcard>=3;
@@ -209,9 +377,19 @@ function targetDone(){
 }
 function pathRecipes(){
   if(!S.target) return [];
-  if(S.target==="boosters") return ["hammer","shield","rocket"].filter(function(r){ return !C[r]; });
-  if(S.target==="wild3") return C.wildcard>=3 ? [] : ["wildcard","hammer","shield","rocket"];
-  return C.chest ? [] : ["chest","wildcard","hammer","shield","rocket"];
+  var bc = have("booster");
+  if(S.target==="boosters") return ["rocket","shield","hammer"].filter(function(r){ return !C[r]; });
+  if(S.target==="wild3"){
+    if(C.wildcard>=3) return [];
+    return ["wildcard"].concat(bc<2 ? ["rocket","shield","hammer"] : []);
+  }
+  if(C.chest) return [];
+  var arr = ["chest"];
+  if(have("wildcard")<2){
+    arr.push("wildcard");
+    if(bc<2) arr = arr.concat(["rocket","shield","hammer"]);
+  }
+  return arr;
 }
 function missingFor(rid){
   var need = RECIPES[rid].need, miss = [];
@@ -235,58 +413,90 @@ function matchRecipe(slots){
   }
   return null;
 }
+// chip types the player's current path is actually short on (pity + contextual pack)
+function neededChipTypes(){
+  var set = {};
+  pathRecipes().forEach(function(rid){
+    missingFor(rid).forEach(function(k){
+      if(k==="booster"){ set.blue = set.green = set.red = true; }
+      else if(CHIPS.indexOf(k)>=0) set[k] = true;
+    });
+  });
+  return Object.keys(set);
+}
 
 // ---------- rendering ----------
+function stageHTML(emoji, lit){
+  return '<div class="stage'+(lit?" lit":"")+'"><span class="beam"></span><span class="floorglow"></span>'+
+    '<span class="ped-base"></span><span class="ped"></span><span class="ped-top"></span>'+
+    '<span class="pitem">'+emoji+'</span>'+
+    '<span class="stw s1">✨</span><span class="stw s2">✨</span></div>';
+}
 function renderTarget(){
   var p = el("tgtPanel");
   if(!S.target){
-    p.innerHTML = '<h4>🎯 Choose your masterpiece</h4><div class="sb-muted" style="font-size:12px">Pick the reward you want to build toward.</div>' +
-      '<button class="sb-btn sb-btn-blue sb-btn-block sb-btn-sm" style="margin-top:8px" id="pickBtn">Choose target</button>';
+    p.innerHTML = '<div class="tgt-wrap">'+stageHTML("❔",false)+'<div class="tgt-r">'+
+      '<h4>🎯 Choose your masterpiece</h4><div class="sb-muted" style="font-size:12px">Pick the reward to place on the pedestal — then craft your way up to it.</div>' +
+      '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:8px" id="pickBtn">Choose target</button></div></div>';
     el("pickBtn").addEventListener("click", showChooser);
     return;
   }
-  var t = TGT[S.target], rows = [], bc = boosterCount();
+  var t = TGT[S.target], rows = [], bc = have("booster");
   function row(e,l,h,n){ rows.push({e:e,l:l,h:h,n:n}); }
   if(S.target==="boosters"){
     row("🚀","Rocket crafted",Math.min(1,C.rocket),1);
     row("🛡️","Shield crafted",Math.min(1,C.shield),1);
     row("🔨","Hammer crafted",Math.min(1,C.hammer),1);
-    if(!C.rocket) row("🔵","Blue Chips",inv.blue,3);
-    else if(!C.shield) row("🟢","Green Chips",inv.green,3);
-    else if(!C.hammer) row("🔴","Red Chips",inv.red,3);
+    if(!C.rocket) row("🔵","Blue Chips",have("blue"),3);
+    else if(!C.shield) row("🟢","Green Chips",have("green"),3);
+    else if(!C.hammer) row("🔴","Red Chips",have("red"),3);
   } else if(S.target==="wild3"){
     row("🃏","Wild Cards crafted",C.wildcard,3);
-    if(C.wildcard<3){ row("⚙️","Boosters ready",bc,2); row("🟡","Gold Chip",inv.gold,1); }
+    if(C.wildcard<3){ row("⚙️","Boosters ready",bc,2); row("🟡","Gold Chip",have("gold"),1); }
   } else {
     row("🎁","Premium Chest",C.chest,1);
     if(!C.chest){
-      row("🃏","Wild Cards ready",inv.wildcard,2);
-      if(inv.wildcard<2){ row("⚙️","Boosters ready",bc,2); row("🟡","Gold Chip",inv.gold,1); }
+      row("🃏","Wild Cards ready",have("wildcard"),2);
+      if(have("wildcard")<2){ row("⚙️","Boosters ready",bc,2); row("🟡","Gold Chip",have("gold"),1); }
     }
   }
-  p.innerHTML = '<span class="tgt-big">'+t.e+'</span><h4>🎯 '+t.n+'</h4><ul class="chk">' +
+  p.innerHTML = '<div class="tgt-wrap">'+stageHTML(t.e, targetDone())+'<div class="tgt-r"><h4>🎯 '+t.n+'</h4><ul class="chk">' +
     rows.map(function(r){
       var ok = r.h>=r.n;
       return '<li class="'+(ok?"ok":"no")+'"><span class="mk">'+(ok?"✓":"✗")+'</span><span>'+r.e+' '+r.l+
         '</span><span class="cnt">'+Math.min(r.h,r.n)+'/'+r.n+'</span></li>';
     }).join("") + "</ul>" +
-    (targetDone() ? '<div style="font-weight:900;color:var(--sb-green);font-size:13px">🏆 Masterpiece complete!</div>' : "");
+    (targetDone() ? '<div style="font-weight:900;color:var(--sb-green);font-size:13px">🏆 Masterpiece complete!</div>' : "")+
+    "</div></div>";
 }
 
 function renderBenches(){
   el("benches").innerHTML = benches.map(function(b,bi){
-    var rid = matchRecipe(b.slots);
+    var busy = !!b.end;
+    // once the converge animation has played (or after a reload), show slots as emptied molds
+    var consumed = busy && (Date.now() > b.end - b.total + 700);
+    var rid = busy ? b.rid : matchRecipe(b.slots);
     var slots = "";
     for(var i=0;i<3;i++){
-      var it = b.slots[i];
-      slots += '<div class="slot'+(it?" filled":"")+'" data-b="'+bi+'" data-i="'+i+'">'+(it?ITEMS[it].e:"")+"</div>";
+      var it = consumed ? null : b.slots[i];
+      slots += '<div class="slot in'+i+(it?" filled":"")+(consumed?" used":"")+'" data-b="'+bi+'" data-i="'+i+'">'+(it?chipHTML(it):"")+"</div>";
     }
-    var res = b.result ? '<span class="pop">'+b.result+"</span>" : (rid ? '<span style="opacity:0.35">'+(RECIPES[rid].out?ITEMS[RECIPES[rid].out].e:"🎁")+"</span>" : "");
-    return '<div class="bench'+(b.busy?" crafting":"")+'" data-bench="'+bi+'">' +
+    var res;
+    if(b.result) res = '<span class="pop art" style="font-size:30px">'+b.result+"</span>";
+    else if(rid) res = '<span class="ghost art" style="font-size:30px">'+(RECIPES[rid].out?ITEMS[RECIPES[rid].out].e:"🎁")+"</span>";
+    else res = "";
+    var foot;
+    if(busy){
+      foot = '<div class="cwrap"><div class="cbar"><i data-bar="'+bi+'"></i></div><span class="ctime" data-time="'+bi+'"></span></div>';
+    } else {
+      foot = '<button class="sb-btn sb-btn-yellow sb-btn-sm" data-craft="'+bi+'"'+(rid?"":" disabled")+">⚒️ CRAFT"+
+        (rid?" "+(RECIPES[rid].out?ITEMS[RECIPES[rid].out].e:"🎁"):"")+(S.dbl?" ×2":"")+"</button>";
+    }
+    return '<div class="bench'+(busy?" crafting":"")+'" data-bench="'+bi+'">' +
       '<div class="craftfx"><span class="ham">🔨</span><span class="spk">✨</span><span class="spk">✨</span><span class="spk">💥</span></div>' +
+      '<div class="fburst"></div>' +
       '<div class="bench-row">'+slots+'<span class="arrow">→</span><div class="slot result">'+res+"</div></div>" +
-      '<div class="bench-foot"><button class="sb-btn sb-btn-yellow sb-btn-sm" data-craft="'+bi+'"'+((rid&&!b.busy)?"":" disabled")+">⚒️ CRAFT"+
-      (S.dbl?" ×2":"")+"</button></div></div>";
+      '<div class="bench-foot">'+foot+"</div></div>";
   }).join("");
   el("benches").querySelectorAll(".slot[data-b]").forEach(function(s){
     s.addEventListener("click", function(){ unplace(+s.dataset.b, +s.dataset.i); });
@@ -296,6 +506,18 @@ function renderBenches(){
   });
   el("benchZone").classList.toggle("gold-trim", S.dbl);
   renderPill();
+  renderShelf();
+}
+
+function renderShelf(){
+  var order = ["chest","wildcard","rocket","shield","hammer"];
+  var html = order.filter(function(k){ return C[k]>0; }).map(function(k){
+    var win = targetDone() && ((S.target==="chest"&&k==="chest") || (S.target==="wild3"&&k==="wildcard") ||
+      (S.target==="boosters"&&BOOSTERS.indexOf(k)>=0));
+    return '<span class="sh-item'+(win?" win":"")+'">'+(k==="chest"?"🎁":ITEMS[k].e)+
+      (C[k]>1?'<span class="ct">×'+C[k]+"</span>":"")+"</span>";
+  }).join("");
+  el("shelf").innerHTML = html || '<span class="sh-empty">Craft something to fill your shelf…</span>';
 }
 
 function renderPill(){
@@ -307,8 +529,8 @@ function renderPill(){
       var m = miss[0]==="booster" ? "rocket" : miss[0];
       var b = document.createElement("button");
       b.className = "fin-pill";
-      b.innerHTML = "✨ Finish "+RECIPES[rid].n+" — get 1 "+ITEMS[m].n+" "+ITEMS[m].e+" · "+PRICE[m];
-      (function(rid,m){ b.addEventListener("click", function(){ sellMissing(rid,m); }); })(rid,m);
+      b.innerHTML = "✨ 1 short! Finish "+RECIPES[rid].n+" — get 1 "+ITEMS[m].n+" "+ITEMS[m].e+" · "+PRICE[m];
+      (function(rid){ b.addEventListener("click", function(){ sellMissing(rid); }); })(rid);
       w.appendChild(b);
       return;
     }
@@ -318,7 +540,16 @@ function renderPill(){
 function renderInv(){
   var keys = ["blue","green","red","gold","rocket","shield","hammer","wildcard"];
   el("inv").innerHTML = keys.map(function(k){
-    return '<button data-it="'+k+'" class="'+(inv[k]?"":"zero")+'">'+ITEMS[k].e+
+    var vis;
+    if(CHIPS.indexOf(k)>=0){
+      var n = Math.max(1, Math.min(3, inv[k]));
+      vis = '<span class="pstack">';
+      for(var i=0;i<n;i++) vis += chipHTML(k);
+      vis += "</span>";
+    } else {
+      vis = chipHTML(k);
+    }
+    return '<button data-it="'+k+'" class="'+(inv[k]?"":"zero")+'">'+vis+
       '<span class="lbl">'+ITEMS[k].n.split(" ")[0]+'</span><span class="ct">'+inv[k]+"</span></button>";
   }).join("");
   el("inv").querySelectorAll("[data-it]").forEach(function(b){
@@ -326,20 +557,73 @@ function renderInv(){
   });
 }
 
+function sockRow(rid){
+  var need = RECIPES[rid].need, out = "";
+  for(var k in need){
+    var got = Math.min(have(k), need[k]);
+    for(var i=0;i<need[k];i++){
+      var filled = i < got;
+      var inner;
+      if(k==="booster") inner = filled ? '<span class="art" style="font-size:12px">⚙️</span>' : '<span class="ph">⚙️</span>';
+      else if(CHIPS.indexOf(k)>=0) inner = filled ? chipHTML(k,"xs") : '<span class="ph">'+ITEMS[k].e+"</span>";
+      else inner = filled ? '<span class="art">'+ITEMS[k].e+"</span>" : '<span class="ph">'+ITEMS[k].e+"</span>";
+      out += '<span class="sock'+(filled?" fill":"")+'">'+inner+"</span>";
+    }
+  }
+  return out;
+}
+function nodeLocked(id){
+  var inFlight = benches.some(function(b){ return b.end && b.rid===id; });
+  if(inFlight) return false;
+  if(id==="wildcard") return !(have("booster")>0 || have("gold")>0 || C.wildcard>0);
+  if(id==="chest") return !(have("wildcard")>0 || C.chest>0);
+  return false;
+}
 function renderRecipes(){
   var path = pathRecipes();
-  function line(id, ing){
-    return '<div class="rec'+(path.indexOf(id)>=0?" hot":"")+'">'+ing+' <span class="arrow" style="color:var(--sb-ink)">→</span> '+
-      (RECIPES[id].out?ITEMS[RECIPES[id].out].e:"🎁")+'<span class="nm">'+RECIPES[id].n+"<br>+"+
-      RECIPES[id].grant.map(function(g){ return g.amount+" "+SB.icon(g.type); }).join(" ")+"</span></div>";
+  function node(id){
+    var R = RECIPES[id], locked = nodeLocked(id), hot = !locked && path.indexOf(id)>=0;
+    return '<div class="rnode'+(hot?" hot":"")+(locked?" locked":"")+(id==="chest"?" grand":"")+'" data-n="'+id+'">'+
+      (locked ? '<span class="rn-lock">🔒</span>' : (C[id]>0 ? '<span class="rn-done">✓'+(C[id]>1?"×"+C[id]:"")+"</span>" : ""))+
+      '<span class="rn-out">'+(R.out?ITEMS[R.out].e:"🎁")+"</span>"+
+      '<div class="rn-socks">'+sockRow(id)+"</div>"+
+      '<div class="rn-name">'+R.n+'</div>'+
+      '<div class="rn-pay">pays '+R.grant.map(function(g){ return "+"+g.amount+" "+SB.icon(g.type); }).join(" ")+"</div></div>";
   }
   el("recipes").innerHTML = "<h4>📜 Recipe tree</h4>" +
-    '<div class="tier">TIER 1 · BOOSTERS</div>' +
-    line("rocket","🔵🔵🔵") + line("shield","🟢🟢🟢") + line("hammer","🔴🔴🔴") +
-    '<div class="tier">TIER 2</div>' + line("wildcard","⚙️⚙️ + 🟡") +
-    '<div class="tier">TIER 3 · GRAND GOAL</div>' + line("chest","🃏🃏") +
-    '<div class="sb-muted" style="font-size:11px;margin-top:6px">⚙️ = any crafted booster. Crafted items also pay out real boosters instantly.</div>';
+    '<div class="rgraph" id="rgraph"><svg id="rlinks" aria-hidden="true"></svg>'+
+    '<div class="rtier">TIER 1 · BOOSTERS</div>'+
+    '<div class="rrow">'+node("rocket")+node("shield")+node("hammer")+"</div>"+
+    '<div class="rrow">'+node("wildcard")+"</div>"+
+    '<div class="rrow">'+node("chest")+"</div>"+
+    "</div>"+
+    '<div class="rec-note">⚙️ = any crafted booster. 🔒 unlocks as you gather ingredients · gold path = your masterpiece route. Every craft also pays out its real reward instantly.</div>';
+  requestAnimationFrame(drawLinks);
 }
+function drawLinks(){
+  var g = el("rgraph"), svg = el("rlinks");
+  if(!g || !svg) return;
+  var gr = g.getBoundingClientRect();
+  if(!gr.width) return;
+  svg.setAttribute("viewBox", "0 0 "+gr.width+" "+gr.height);
+  var path = pathRecipes();
+  var pairs = [["rocket","wildcard"],["shield","wildcard"],["hammer","wildcard"],["wildcard","chest"]];
+  svg.innerHTML = pairs.map(function(pr){
+    var na = g.querySelector('[data-n="'+pr[0]+'"]'), nb = g.querySelector('[data-n="'+pr[1]+'"]');
+    if(!na || !nb) return "";
+    var a = na.getBoundingClientRect(), b = nb.getBoundingClientRect();
+    var x1 = a.left + a.width/2 - gr.left, y1 = a.bottom - gr.top - 1;
+    var x2 = b.left + b.width/2 - gr.left, y2 = b.top - gr.top - 1;
+    var d = "M"+x1+" "+y1+" C "+x1+" "+(y1+18)+", "+x2+" "+(y2-18)+", "+x2+" "+y2;
+    var locked = nodeLocked(pr[1]);
+    var hot = !locked && path.indexOf(pr[1])>=0;
+    var col = locked ? "rgba(255,255,255,0.35)" : hot ? "#FFC72C" : "rgba(253,246,227,0.7)";
+    return '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+(hot?3:2)+'"'+
+      (locked?' stroke-dasharray="4 5"':"")+' stroke-linecap="round"/>'+
+      '<circle cx="'+x2+'" cy="'+(y2+1)+'" r="3" fill="'+col+'"/>';
+  }).join("");
+}
+window.addEventListener("resize", drawLinks);
 
 function renderAll(){ renderTarget(); renderBenches(); renderInv(); renderRecipes(); st.save(); }
 
@@ -348,7 +632,7 @@ function place(item, srcEl){
   if(!inv[item]){ srcEl.classList.remove("sb-shake"); void srcEl.offsetWidth; srcEl.classList.add("sb-shake"); return; }
   for(var i=0;i<benches.length;i++){
     var b = benches[i];
-    if(!b.busy && b.slots.length<3){
+    if(!b.end && b.slots.length<3){
       inv[item]--; b.slots.push(item); b.result=null;
       SB.haptic(10); renderAll(); return;
     }
@@ -358,36 +642,61 @@ function place(item, srcEl){
 }
 function unplace(bi, si){
   var b = benches[bi];
-  if(b.busy || !b.slots[si]) return;
+  if(b.end || !b.slots[si]) return;
   inv[b.slots[si]]++; b.slots.splice(si,1);
   SB.haptic(8); renderAll();
 }
 
+// ---------- crafting (single interval, persisted end timestamps) ----------
 function startCraft(b){
+  if(b.end) return;
   var rid = matchRecipe(b.slots);
-  if(!rid || b.busy) return;
-  b.busy = true; b.result = null;
+  if(!rid) return;
+  b.rid = rid; b.result = null;
+  b.total = S.instant ? 700 : RECIPES[rid].dur;
+  b.end = Date.now() + b.total;
   SB.haptic(15); renderAll();
-  setTimeout(function(){ finishCraft(b, rid); }, S.instant ? 180 : 1200);
 }
-function finishCraft(b, rid){
-  var R = RECIPES[rid], mult = S.dbl ? 2 : 1;
-  b.slots = []; b.busy = false;
+function finishCraft(b){
+  var rid = b.rid, R = RECIPES[rid], mult = S.dbl ? 2 : 1;
+  b.slots = []; b.end = 0; b.rid = null; b.total = 0;
   b.result = R.out ? ITEMS[R.out].e : "🎁";
   C[rid] += mult;
   if(R.out) inv[R.out] += mult;
   var zone = el("benchZone"), r = zone.getBoundingClientRect();
   SB.grantRewards(R.grant.map(function(g){ return {type:g.type, amount:g.amount*mult}; }), zone);
-  SB.confetti(r.left + r.width/2, r.top + r.height/2, 45);
+  SB.confetti(r.left + r.width/2, Math.max(60, r.top + r.height/3), 45);
   SB.toast("⚒️ Crafted "+(mult>1?"2× ":"")+R.n+"!");
   renderAll();
-  setTimeout(function(){ b.result=null; renderBenches(); }, 2200);
-  if(rid==="chest") setTimeout(grandCelebration, 600);
+  var bi = benches.indexOf(b);
+  var bel = el("benches").querySelector('[data-bench="'+bi+'"]');
+  if(bel){ bel.classList.add("flash"); setTimeout(function(){ bel.classList.remove("flash"); }, 500); }
+  setTimeout(function(){ if(!b.end){ b.result=null; renderBenches(); } }, 2400);
+  if(rid==="chest"){
+    if(targetDone()) { S.celebrated = true; st.save(); } // grand modal doubles as the target celebration
+    setTimeout(grandCelebration, 600);
+  }
   else if(targetDone() && !S.celebrated){ S.celebrated = true; st.save(); setTimeout(targetCelebration, 700); }
 }
+// ONE interval drives every bench timer (and resumes them after reload)
+setInterval(function(){
+  var now = Date.now();
+  for(var i=0;i<benches.length;i++){
+    var b = benches[i];
+    if(!b.end) continue;
+    if(now >= b.end){ finishCraft(b); continue; }
+    var bar = document.querySelector('[data-bar="'+i+'"]');
+    var tm = document.querySelector('[data-time="'+i+'"]');
+    if(bar) bar.style.transform = "scaleX("+(1-(b.end-now)/b.total)+")";
+    if(tm) tm.textContent = Math.ceil((b.end-now)/1000)+"s";
+  }
+}, 200);
 
 // ---------- contextual monetization ----------
-function sellMissing(rid, item){
+function sellMissing(rid){
+  var miss = missingFor(rid); // recompute at open — state may have changed
+  if(miss.length!==1){ renderAll(); return; }
+  var item = miss[0]==="booster" ? "rocket" : miss[0];
   SB.buyIAP({
     label:"1 "+ITEMS[item].n+" "+ITEMS[item].e,
     price:PRICE[item],
@@ -402,14 +711,18 @@ function sellMissing(rid, item){
 }
 function autoCraft(rid){
   var free = null;
-  for(var i=0;i<benches.length;i++) if(!benches[i].busy){ free = benches[i]; break; }
-  var miss = missingFor(rid);
-  if(!free || miss.length){ renderAll(); return; }
-  // return any staged items on that bench, then pull the recipe from inventory
-  free.slots.forEach(function(it){ inv[it]++; });
-  free.slots = [];
-  var need = RECIPES[rid].need;
-  for(var k in need){
+  for(var i=0;i<benches.length;i++) if(!benches[i].end){ free = benches[i]; break; }
+  if(!free){ renderAll(); return; }
+  // return everything staged on idle benches, then pull the recipe from inventory
+  benches.forEach(function(b){
+    if(b.end) return;
+    b.slots.forEach(function(it){ inv[it]++; });
+    b.slots = []; b.result = null;
+  });
+  var need = RECIPES[rid].need, k, ok = true;
+  for(k in need) if(invCount(k) < need[k]) ok = false;
+  if(!ok){ renderAll(); return; } // purchased piece stays safely in inventory
+  for(k in need){
     for(var j=0;j<need[k];j++){
       if(k==="booster"){
         for(var x=0;x<BOOSTERS.length;x++) if(inv[BOOSTERS[x]]>0){ inv[BOOSTERS[x]]--; free.slots.push(BOOSTERS[x]); break; }
@@ -421,19 +734,44 @@ function autoCraft(rid){
 }
 
 // ---------- shop drawer ----------
-function offerRow(ic, name, sub, price, key, fn){
+function ctxShortfall(){
+  // smallest pure-chip shortfall on the player's current path — recomputed every open
+  var best = null;
+  pathRecipes().forEach(function(rid){
+    var miss = missingFor(rid);
+    if(!miss.length) return;
+    var chipsOnly = miss.every(function(k){ return CHIPS.indexOf(k)>=0; });
+    if(!chipsOnly) return;
+    if(!best || miss.length < best.miss.length) best = { rid:rid, miss:miss };
+  });
+  return best;
+}
+function ctxPrice(miss){
+  return (miss.length>1 || miss.indexOf("gold")>=0) ? "$1.99" : "$0.99";
+}
+function offerRow(ic, name, sub, price, key, fn, cls){
   var owned = key && S[key];
-  return '<div class="offer"><span class="ic">'+ic+'</span><div class="tx"><b>'+name+"</b><span>"+sub+"</span></div>"+
+  return '<div class="offer'+(cls?" "+cls:"")+'"><span class="ic">'+ic+'</span><div class="tx"><b>'+name+"</b><span>"+sub+"</span></div>"+
     (owned ? '<span class="owned">✓ Owned</span>' : '<button class="sb-btn sb-btn-green sb-btn-sm" data-of="'+fn+'">'+price+"</button>")+"</div>";
 }
+function hLeft(){ return Math.max(1, Math.ceil((S.endTs-Date.now())/3600000)); }
 function renderDrawer(){
+  var ctx = ctxShortfall(), ctxRow = "";
+  if(ctx){
+    var counts = {};
+    ctx.miss.forEach(function(k){ counts[k] = (counts[k]||0)+1; });
+    var desc = Object.keys(counts).map(function(k){ return counts[k]+"× "+ITEMS[k].e; }).join(" + ");
+    ctxRow = offerRow("🎯","Missing Ingredients",
+      "Exactly what your "+RECIPES[ctx.rid].n+" is short: "+desc, ctxPrice(ctx.miss), null, "ctx", "ctx");
+  }
   el("drawer").innerHTML = '<h3 style="margin:0 0 2px">🛒 Workshop Shop</h3>'+
-    '<div class="sb-muted" style="font-size:12px;margin-bottom:6px">Stock the bench, upgrade the workshop</div>'+
+    '<div class="sb-muted" style="font-size:12px;margin-bottom:8px">Stock the bench, upgrade the workshop</div>'+
+    ctxRow+
     offerRow("🎨","Chip Variety Pack","2× Blue 🔵, Green 🟢 & Red 🔴 chips","$1.99",null,"pack")+
     offerRow("🟡","Gold Chip","The rare one — needed for Wild Cards","$1.99",null,"gold")+
     offerRow("🪑","Second Bench","Craft two recipes in parallel","$2.99","bench2","bench")+
-    offerRow("⚡","Instant Craft","Skip crafting time on every bench","$0.99","instant","instant")+
-    offerRow("✨","Double Output Pass","Every craft outputs ×2 for the whole event","$4.99","dbl","dbl")+
+    offerRow("⚡","Instant Craft","Skip crafting time on every bench, all event","$0.99","instant","instant")+
+    offerRow("✨","Double Output Pass","Every craft ×2 for the next "+hLeft()+"h of the event","$4.99","dbl","dbl")+
     '<button class="sb-sheet-cancel" id="drawerClose">Close</button>';
   el("drawer").querySelectorAll("[data-of]").forEach(function(b){
     b.addEventListener("click", function(){ buyOffer(b.dataset.of); });
@@ -442,18 +780,34 @@ function renderDrawer(){
 }
 function buyOffer(id){
   el("drawerBd").classList.remove("open");
-  var o = {
-    pack:{ label:"Chip Variety Pack 🎨", price:"$1.99", sub:"2× 🔵 + 2× 🟢 + 2× 🔴 straight to your bench",
-      fn:function(){ inv.blue+=2; inv.green+=2; inv.red+=2; SB.toast("+2 🔵 +2 🟢 +2 🔴"); } },
-    gold:{ label:"Gold Chip 🟡", price:"$1.99", sub:"The rare chip that unlocks Wild Cards",
-      fn:function(){ inv.gold++; SB.toast("+1 Gold Chip 🟡"); } },
-    bench:{ label:"Second Bench 🪑", price:"$2.99", sub:"One-time upgrade · craft two recipes at once",
-      fn:function(){ S.bench2=true; benches.push({slots:[],busy:false,result:null}); SB.toast("🪑 Second bench installed!"); } },
-    instant:{ label:"Instant Craft ⚡", price:"$0.99", sub:"One-time upgrade · no more waiting at the bench",
-      fn:function(){ S.instant=true; SB.toast("⚡ Instant Craft enabled!"); } },
-    dbl:{ label:"Double Output Pass ✨", price:"$4.99", sub:"Event-long · every craft outputs ×2 (gold-trim bench!)",
-      fn:function(){ S.dbl=true; SB.toast("✨ Double Output active!"); } }
-  }[id];
+  var o;
+  if(id==="ctx"){
+    var ctx = ctxShortfall(); // recompute at purchase-sheet open
+    if(!ctx){ SB.toast("You already have every ingredient!"); renderAll(); return; }
+    var miss = ctx.miss.slice(), rid = ctx.rid;
+    o = { label:"Missing Ingredients 🎯", price:ctxPrice(miss),
+      sub:"Exactly what your "+RECIPES[rid].n+" is short — nothing you don't need",
+      contents:null,
+      fn:function(){
+        var msg = [];
+        miss.forEach(function(k){ inv[k]++; msg.push("+1 "+ITEMS[k].e); });
+        SB.toast(msg.join("  "));
+        autoCraft(rid);
+      } };
+  } else {
+    o = {
+      pack:{ label:"Chip Variety Pack 🎨", price:"$1.99", sub:"2× 🔵 + 2× 🟢 + 2× 🔴 straight to your bench",
+        fn:function(){ inv.blue+=2; inv.green+=2; inv.red+=2; SB.toast("+2 🔵 +2 🟢 +2 🔴"); } },
+      gold:{ label:"Gold Chip 🟡", price:"$1.99", sub:"The rare chip that unlocks Wild Cards",
+        fn:function(){ inv.gold++; SB.toast("+1 Gold Chip 🟡"); } },
+      bench:{ label:"Second Bench 🪑", price:"$2.99", sub:"One-time upgrade · craft two recipes at once",
+        fn:function(){ S.bench2=true; benches.push({slots:[],rid:null,end:0,total:0}); SB.toast("🪑 Second bench installed!"); } },
+      instant:{ label:"Instant Craft ⚡", price:"$0.99", sub:"One-time upgrade · no more waiting at the bench",
+        fn:function(){ S.instant=true; SB.toast("⚡ Instant Craft enabled!"); } },
+      dbl:{ label:"Double Output Pass ✨", price:"$4.99", sub:"Every craft ×2 for the next "+hLeft()+"h (gold-trim bench!)",
+        fn:function(){ S.dbl=true; SB.toast("✨ Double Output active!"); } }
+    }[id];
+  }
   SB.buyIAP({ label:o.label, price:o.price, sub:o.sub, grant:false,
     onSuccess:function(){ o.fn(); renderAll(); renderDrawer(); },
     onCancel:function(){ el("drawerBd").classList.add("open"); } });
@@ -461,19 +815,28 @@ function buyOffer(id){
 el("shopTab").addEventListener("click", function(){ renderDrawer(); el("drawerBd").classList.add("open"); });
 el("drawerBd").addEventListener("click", function(e){ if(e.target===el("drawerBd")) el("drawerBd").classList.remove("open"); });
 
-// ---------- play a level (faucet) ----------
+// ---------- play a level (faucet with pity) ----------
 function rollChip(){
+  var needed = neededChipTypes();
+  // pity: after 3 dry drops in a row, force a chip your path is short on
+  if(needed.length && S.pity >= 3){
+    S.pity = 0;
+    return needed[(Math.random()*needed.length)|0];
+  }
   var r = Math.random();
-  return r<0.40 ? "blue" : r<0.70 ? "green" : r<0.95 ? "red" : "gold";
+  var c = r<0.40 ? "blue" : r<0.70 ? "green" : r<0.95 ? "red" : "gold";
+  if(needed.length){ if(needed.indexOf(c)>=0) S.pity = 0; else S.pity++; }
+  return c;
 }
 el("playBtn").addEventListener("click", function(){
   var a = rollChip(), b = rollChip();
   S.levels++; S.chipsEarned += 2;
+  st.save();
   var m = SB.modal(
     '<h3 style="margin:0">Level complete! 🎉</h3><div class="sb-muted" style="font-size:12px">Your material haul…</div>'+
     '<div class="flipwrap">'+
-    '<div class="fcard" id="fc0"><div class="face back">SB</div><div class="face front">'+ITEMS[a].e+"<small>"+ITEMS[a].n+"</small></div></div>"+
-    '<div class="fcard" id="fc1"><div class="face back">SB</div><div class="face front">'+ITEMS[b].e+"<small>"+ITEMS[b].n+"</small></div></div>"+
+    '<div class="fcard" id="fc0"><div class="face back">SB</div><div class="face front">'+chipHTML(a,"lg")+"<small>"+ITEMS[a].n+"</small></div></div>"+
+    '<div class="fcard" id="fc1"><div class="face back">SB</div><div class="face front">'+chipHTML(b,"lg")+"<small>"+ITEMS[b].n+"</small></div></div>"+
     "</div>"+'<button class="sb-btn sb-btn-blue sb-btn-block" id="fcOk" disabled>Collect</button>');
   setTimeout(function(){ el("fc0").classList.add("flipped"); SB.haptic(10); }, 350);
   setTimeout(function(){ el("fc1").classList.add("flipped"); SB.haptic(10);
@@ -486,11 +849,18 @@ el("playBtn").addEventListener("click", function(){
 });
 
 // ---------- celebrations ----------
+// if the level-complete modal is still open when a celebration fires, auto-collect it
+// first so the two modals never stack (chips are granted by the Collect handler)
+function collectPendingLevel(){
+  var ok = document.getElementById("fcOk");
+  if(ok){ ok.disabled = false; ok.click(); }
+}
 function targetCelebration(){
+  collectPendingLevel();
   SB.confetti();
   var t = TGT[S.target];
   var m = SB.modal('<div style="font-size:52px">'+t.e+'</div><h3 style="margin:6px 0">Masterpiece complete!</h3>'+
-    '<p class="sb-muted" style="font-size:13px">You finished the <b>'+t.n+'</b> path. The workshop stays open — pick a new goal!</p>'+
+    '<p class="sb-muted" style="font-size:13px">You finished the <b>'+t.n+'</b> path — it\'s on your showcase shelf. The workshop stays open!</p>'+
     '<button class="sb-btn sb-btn-yellow sb-btn-block" id="newTgt">🎯 New masterpiece?</button>'+
     '<button class="sb-sheet-cancel" id="keepGo">Keep crafting</button>');
   m.el.querySelector("#newTgt").addEventListener("click", function(){ m.close(); newMasterpiece(); });
@@ -503,6 +873,7 @@ function grandCelebration(){
   setTimeout(function(){ SB.confetti(window.innerWidth*0.25, window.innerHeight*0.4, 70); }, 350);
   setTimeout(function(){ SB.confetti(window.innerWidth*0.75, window.innerHeight*0.4, 70); }, 700);
   setTimeout(function(){
+    collectPendingLevel();
     var m = SB.modal('<div style="font-size:56px" class="sb-bounce">🎁</div><h3 style="margin:6px 0">PREMIUM CHEST CRAFTED!</h3>'+
       '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0">'+
       SB.rewardChip({type:"coins",amount:3000*(S.dbl?2:1)})+SB.rewardChip({type:"wild",amount:3*(S.dbl?2:1)})+SB.rewardChip({type:"gem",amount:10*(S.dbl?2:1)})+"</div>"+
@@ -540,10 +911,11 @@ function showChooser(){
 // ---------- info ----------
 el("infoBtn").addEventListener("click", function(){
   var m = SB.modal('<h3 style="margin:0 0 8px">🛠️ Reward Workshop</h3>'+
-    '<p style="font-size:13px;text-align:left;line-height:1.5;margin:0">Players pick a masterpiece to build, then combine chips earned from levels into boosters, Wild Cards and finally the Premium Chest. '+
-    'The target checklist constantly shows exactly which ingredient is missing, turning vague desire into a specific, nameable want. '+
-    'Monetization sells precisely that missing piece — "1 Gold Chip · $1.99" converts far better than abstract bundles because the purchase visibly completes a craft the player already started. '+
-    'Upgrades (second bench, instant craft, double output) monetize engaged players on convenience instead of content.</p>'+
+    '<p style="font-size:13px;text-align:left;line-height:1.5;margin:0">Players pick a masterpiece to build, then combine chips earned from levels into boosters, Wild Cards and finally the Premium Chest. Every completed craft pays out its real reward instantly. '+
+    'The target checklist and recipe sockets constantly show exactly which ingredient is missing, turning vague desire into a specific, nameable want. '+
+    'Monetization sells precisely that missing piece — the Finish Recipe pill appears only when a craft is exactly one component short, and the shop\'s Missing Ingredients pack is rebuilt from your live shortfall each time it opens. '+
+    'A pity system guarantees a needed chip after 3 dry drops, so free play always progresses — purchases buy speed, never possibility. '+
+    'Upgrades (second bench, instant craft, event-long double-output pass) monetize engaged players on convenience instead of content.</p>'+
     '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" id="infoOk">Got it</button>');
   m.el.querySelector("#infoOk").addEventListener("click", m.close);
 });

@@ -85,6 +85,14 @@
       });
       document.body.appendChild(r);
     }
+    if (!document.querySelector('link[rel="icon"]')) {
+      var fav = document.createElement("link");
+      fav.rel = "icon";
+      fav.href = "data:image/svg+xml," + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="%231D4FA1"/><rect x="7" y="5" width="18" height="22" rx="3" fill="%23FDF6E3" stroke="%23FFC72C" stroke-width="2"/><text x="16" y="21" font-size="12" font-weight="bold" text-anchor="middle" fill="%23D7263D" font-family="Arial">SB</text></svg>'.replace(/%23/g, "#")
+      );
+      document.head.appendChild(fav);
+    }
     ensureFxLayers();
     renderWallet();
     return bar;
@@ -208,10 +216,14 @@
     document.body.appendChild(bd);
     sheetEl = bd;
     requestAnimationFrame(function () { requestAnimationFrame(function () { bd.classList.add("open"); }); });
-    bd.addEventListener("click", function (e) { if (e.target === bd) dismiss(); });
-    bd.querySelector("#sb-sheet-cancel").addEventListener("click", dismiss);
+    var processing = false;
+    bd.addEventListener("click", function (e) { if (e.target === bd && !processing) dismiss(); });
+    bd.querySelector("#sb-sheet-cancel").addEventListener("click", function () { if (!processing) dismiss(); });
     bd.querySelector("#sb-sheet-buy").addEventListener("click", function () {
       var btn = bd.querySelector("#sb-sheet-buy");
+      processing = true;
+      var cancelBtn = bd.querySelector("#sb-sheet-cancel");
+      if (cancelBtn) cancelBtn.style.visibility = "hidden";
       btn.disabled = true;
       btn.innerHTML = "<span>Processing…</span>";
       haptic(10);
@@ -237,15 +249,17 @@
   }
 
   // ---------- centered modal ----------
-  function modal(html) {
+  function modal(html, onClose) {
     var bd = document.createElement("div");
     bd.className = "sb-modal-backdrop open";
     bd.innerHTML = '<div class="sb-modal">' + html + "</div>";
     document.body.appendChild(bd);
-    bd.addEventListener("click", function (e) { if (e.target === bd) bd.remove(); });
+    bd.addEventListener("click", function (e) {
+      if (e.target === bd) { bd.remove(); if (onClose) onClose(); }
+    });
     return {
       el: bd,
-      close: function () { bd.remove(); }
+      close: function (silent) { bd.remove(); if (!silent && onClose) onClose(); }
     };
   }
 
