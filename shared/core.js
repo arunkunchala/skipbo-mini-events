@@ -49,6 +49,11 @@
     var el = document.getElementById("sb-wallet-amt");
     if (el) el.textContent = fmt(wallet.coins);
   }
+  // single source of truth for reward-label pluralisation (chips + toasts agree)
+  function plural(label, amount) {
+    if (amount === 1) return (/s$/.test(label) && !/ss$/.test(label)) ? label.replace(/s$/, "") : label;
+    return /s$/.test(label) ? label : label + "s";
+  }
   function fmt(n) {
     n = Math.floor(n);
     if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -180,10 +185,7 @@
     var names = [];
     (rewards || []).forEach(function (rw, i) {
       wallet[rw.type] = (wallet[rw.type] || 0) + rw.amount;
-      var lb = rw.label || LABELS[rw.type] || rw.type;
-      if (rw.amount === 1 && /s$/.test(lb) && !/ss$/.test(lb)) lb = lb.replace(/s$/, "");
-      else if (rw.amount !== 1 && !/s$/.test(lb)) lb = lb + "s";
-      names.push("+" + fmt(rw.amount) + " " + lb);
+      names.push("+" + fmt(rw.amount) + " " + plural(rw.label || LABELS[rw.type] || rw.type, rw.amount));
       var n = Math.min(rw.type === "coins" ? 6 : 2, 6);
       for (var j = 0; j < n; j++) {
         (function (d) {
@@ -210,10 +212,8 @@
   // rw: {type, amount} or {icon, label, amount} for event-local currencies
   function rewardChip(rw) {
     var ic = rw.icon || ICONS[rw.type] || "🎁";
-    var lb = rw.label || LABELS[rw.type] || rw.type;
-    if (rw.amount === 1 && /s$/.test(lb) && !/ss$/.test(lb)) lb = lb.replace(/s$/, "");
     return '<span class="sb-reward"><span class="ico">' + ic + "</span>" +
-      fmt(rw.amount) + " " + lb + "</span>";
+      fmt(rw.amount) + " " + plural(rw.label || LABELS[rw.type] || rw.type, rw.amount) + "</span>";
   }
   function icon(type) { return ICONS[type] || "🎁"; }
 
