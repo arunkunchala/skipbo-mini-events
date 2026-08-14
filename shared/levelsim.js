@@ -74,7 +74,7 @@
       bd.innerHTML =
         '<div class="sb-lvl' + (hard ? " hard" : "") + '">' +
         '<div class="sb-lvl-head">' + (opts.title || "Skip-Bo Adventure Level") + "</div>" +
-        '<div class="sb-lvl-tag">' + (hard ? "🔥 HARD LEVEL · 2× EVENT REWARDS" : "CLASSIC LEVEL") + "</div>" +
+        '<div class="sb-lvl-tag">' + (opts.rewardTag || (hard ? "🔥 HARD LEVEL · 2× EVENT REWARDS" : "CLASSIC LEVEL")) + "</div>" +
         '<div class="sb-lvl-table">' +
         '<div class="sb-lvl-stockrow">' +
         '<div class="sb-lvl-stack" id="sb-lvl-stack"></div>' +

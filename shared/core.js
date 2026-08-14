@@ -98,6 +98,13 @@
         location.reload();
       });
       document.body.appendChild(r);
+      // fade the FAB while the page is scrolling so it never sits on top of content
+      var sT;
+      window.addEventListener("scroll", function () {
+        r.style.opacity = "0.12";
+        clearTimeout(sT);
+        sT = setTimeout(function () { r.style.opacity = ""; }, 450);
+      }, { passive: true });
     }
     if (!document.querySelector('link[rel="icon"]')) {
       var fav = document.createElement("link");
