@@ -123,9 +123,13 @@
 
   // ---------- toast ----------
   var toastEl, toastTimer;
+  // toast(msg, ms) or toast(msg, {ms, top:true})
   function toast(msg, ms) {
+    var top = false;
+    if (ms && typeof ms === "object") { top = !!ms.top; ms = ms.ms; }
     if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "sb-toast"; document.body.appendChild(toastEl); }
     toastEl.textContent = msg;
+    toastEl.classList.toggle("top", top);
     toastEl.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, ms || 1800);
@@ -176,7 +180,10 @@
     var names = [];
     (rewards || []).forEach(function (rw, i) {
       wallet[rw.type] = (wallet[rw.type] || 0) + rw.amount;
-      names.push("+" + fmt(rw.amount) + " " + (LABELS[rw.type] || rw.type));
+      var lb = rw.label || LABELS[rw.type] || rw.type;
+      if (rw.amount === 1 && /s$/.test(lb) && !/ss$/.test(lb)) lb = lb.replace(/s$/, "");
+      else if (rw.amount !== 1 && !/s$/.test(lb)) lb = lb + "s";
+      names.push("+" + fmt(rw.amount) + " " + lb);
       var n = Math.min(rw.type === "coins" ? 6 : 2, 6);
       for (var j = 0; j < n; j++) {
         (function (d) {
@@ -214,6 +221,8 @@
   var sheetEl = null;
   function buyIAP(opts) {
     // opts: {label, price, sub, contents:[rewards], onSuccess, grant:true|false}
+    // re-entrancy guard: a second open while a purchase is mid-flight is ignored
+    if (sheetEl && sheetEl.__processing) return;
     closeSheet();
     var bd = document.createElement("div");
     bd.className = "sb-sheet-backdrop";
@@ -234,7 +243,9 @@
     bd.querySelector("#sb-sheet-cancel").addEventListener("click", function () { if (!processing) dismiss(); });
     bd.querySelector("#sb-sheet-buy").addEventListener("click", function () {
       var btn = bd.querySelector("#sb-sheet-buy");
+      if (processing) return;
       processing = true;
+      bd.__processing = true;
       var cancelBtn = bd.querySelector("#sb-sheet-cancel");
       if (cancelBtn) cancelBtn.style.visibility = "hidden";
       btn.disabled = true;

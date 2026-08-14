@@ -53,7 +53,14 @@
     var hard = !!opts.hard;
     var winRate = opts.winRate != null ? opts.winRate : (hard ? 0.55 : 0.78);
     var stock = opts.stock || (hard ? 14 : 10);
-    var won = Math.random() < winRate;
+    // Shared demo/test hooks so every event behaves identically under automation:
+    //   window.__forceWin = true|false  → force the outcome
+    //   window.__forceInstant = true    → skip the animation
+    var won;
+    if (window.__forceWin === true) won = true;
+    else if (window.__forceWin === false) won = false;
+    else won = Math.random() < winRate;
+    if (window.__forceInstant) opts = Object.assign({}, opts, { instant: true });
     // near-miss: losses stop with 1-3 cards left; wins shed all
     var stopAt = won ? 0 : (1 + Math.floor(Math.random() * 3));
     var result = { won: won, firstTry: won, hard: hard, cardsLeft: stopAt };
