@@ -48,6 +48,8 @@
   .ww-stub.mini::before, .ww-stub.mini::after { width:5px; height:5px; }
   .ww-stub.mini::before { left:-3px; } .ww-stub.mini::after { right:-3px; }
   .ww-stub.mini i { right:5px; border-left-width:1.5px; }
+  .ww-stub.flat::before, .ww-stub.flat::after { display:none; }
+  .ww-stub.flat { vertical-align:-3px; margin-right:2px; }
   .ww-stub.ghost { opacity:.28; filter:grayscale(1); }
   .ww-stub.short { filter:saturate(.35); border-color:var(--sb-red); box-shadow:0 0 0 2px rgba(215,38,61,.4); }
 
@@ -65,6 +67,8 @@
   .ww-rate.hard .fill { background:linear-gradient(90deg,#ef5468,#ffb3bd); }
   .ww-rate .pc { font-size:12.5px; font-weight:900; width:34px; text-align:right; flex:0 0 auto; }
   .ww-rate .rec { font-size:9.5px; font-weight:700; color:var(--sb-sky-light); width:46px; text-align:right; flex:0 0 auto; }
+  .ww-odds .seed { margin-top:6px; font-size:9px; font-weight:700; line-height:1.35; color:rgba(255,255,255,.66); }
+  .ww-odds .seed b { color:var(--sb-sky-light); }
 
   /* ---------- the arena table ---------- */
   .ww-rail {
@@ -84,16 +88,16 @@
   }
 
   /* dealer card fan */
-  .ww-fan { position:absolute; top:0; left:50%; transform:translateX(-50%); height:48px; width:170px; }
+  .ww-fan { position:absolute; top:5px; left:50%; transform:translateX(-50%); height:44px; width:170px; }
   .ww-fan .sb-card {
-    position:absolute; left:50%; top:3px; width:30px; height:40px; font-size:15px;
-    transform-origin:50% 135%; margin-left:-15px;
+    position:absolute; left:50%; top:2px; width:28px; height:38px; font-size:14px;
+    transform-origin:50% 128%; margin-left:-14px;
     box-shadow:0 3px 5px rgba(0,0,0,.35);
   }
   .ww-dealer {
-    position:absolute; top:48px; left:50%; transform:translateX(-50%);
-    font-size:8.5px; font-weight:900; letter-spacing:1.5px; color:rgba(255,255,255,.62);
-    text-shadow:0 1px 2px rgba(0,0,0,.5);
+    position:absolute; top:12px; left:14px;
+    font-size:8px; font-weight:900; letter-spacing:1.4px; color:rgba(255,255,255,.5);
+    text-shadow:0 1px 2px rgba(0,0,0,.6); white-space:nowrap; line-height:1.3;
   }
 
   /* your stack (left) */
@@ -117,6 +121,15 @@
   .ww-pot .pstubs { display:flex; gap:2px; justify-content:center; min-height:16px; margin:3px 0 2px; }
   .ww-pot .pamt { font-size:17px; font-weight:900; color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.45); line-height:1; }
   .ww-pot .psub { font-size:9px; font-weight:800; color:var(--sb-sky-light); text-align:center; margin-top:2px; line-height:1.2; }
+
+  /* honesty chip on the felt */
+  .ww-house {
+    position:absolute; right:9px; bottom:9px; width:96px;
+    font-size:7.5px; font-weight:900; letter-spacing:.6px; line-height:1.35; text-align:right;
+    color:rgba(255,255,255,.55); text-shadow:0 1px 2px rgba(0,0,0,.5);
+  }
+  .ww-house b { color:rgba(255,199,44,.8); display:block; font-size:8.5px; letter-spacing:1px; }
+  @media (max-height:790px) { .ww-house .sub { display:none; } }
 
   /* multiplier ladder */
   .ww-mlad { position:absolute; right:9px; top:52px; width:74px; }
@@ -175,6 +188,11 @@
 
   .ww-play { margin-top:9px; flex-direction:column; gap:1px; min-height:60px; }
   .ww-play small { font-size:10.5px; font-weight:800; opacity:.9; text-shadow:none; }
+  /* short on tickets: the free option sits beside the blocked wager, same view */
+  .ww-cta.split { display:flex; gap:8px; margin-top:9px; }
+  .ww-cta.split .ww-play { margin-top:0; flex:1 1 0; min-width:0; font-size:13.5px; padding:8px 8px; }
+  .ww-cta.split #ww-playfree { flex:1.1 1 0; }
+  .ww-cta.split .ww-play small { font-size:9.5px; line-height:1.2; }
 
   /* ---------- free path ---------- */
   .ww-free {
@@ -227,10 +245,6 @@
   .ww-fly.anim { transition:left .6s cubic-bezier(.4,0,.5,1), top .6s cubic-bezier(.4,0,.5,1), transform .6s ease, opacity .6s ease; }
   .ww-rain { position:fixed; z-index:229; pointer-events:none; --notch:transparent; transition:top .55s cubic-bezier(.5,0,.8,1), opacity .3s ease .35s, transform .55s linear; }
 
-  /* local patch: core.css puts the IAP sheet (z200) BEHIND .sb-modal-backdrop (z220),
-     so an offer opened from the loss modal is unreachable. Lift it above the modal. */
-  .sb-sheet-backdrop { z-index:280; }
-
   /* ---------- modals ---------- */
   .ww-rules { text-align:left; font-size:13px; line-height:1.55; color:var(--sb-ink); }
   .ww-rules li { margin-bottom:7px; }
@@ -253,7 +267,9 @@
   }
   .ww-offer b { color:var(--sb-yellow); font-size:12px; }
   .ww-offer .sb-btn { flex:0 0 auto; margin-left:auto; }
-  .ww-winamt { font-size:34px; font-weight:900; color:var(--sb-green); text-shadow:0 2px 0 rgba(0,0,0,.15); margin:4px 0; }
+  .ww-winamt { font-size:34px; font-weight:900; color:var(--sb-green); text-shadow:0 2px 0 rgba(0,0,0,.15); margin:4px 0; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .ww-stub.hero { width:52px; height:33px; font-size:10px; border-width:2px; border-radius:6px; }
+  .ww-stub.hero i { right:11px; }
 
   @media (max-width:374px) {
     .ww-felt { height:196px; }
@@ -262,6 +278,31 @@
     .ww-pot { width:112px; }
     .ww-step button { width:46px; height:46px; font-size:24px; }
     .ww-stub.big { width:52px; height:34px; font-size:9px; }
+  }
+  /* short viewports: keep the odds, the wager control AND the play CTA above the fold */
+  @media (max-height:790px) {
+    .sb-main { padding-top:10px; }
+    .ww-hero { margin-bottom:6px; }
+    .ww-odds { padding:6px 9px 7px; margin-bottom:6px; }
+    .ww-odds .hd { margin-bottom:3px; }
+    .ww-rate { margin-top:3px; }
+    .ww-odds .seed { margin-top:4px; }
+    .ww-rail { padding:5px; }
+    .ww-felt { height:172px; }
+    .ww-fan { height:38px; }
+    .ww-fan .sb-card { width:25px; height:34px; font-size:13px; margin-left:-12.5px; }
+    .ww-pot { top:54px; min-height:72px; }
+    .ww-pot .pamt { font-size:16px; }
+    .ww-mlad { top:44px; }
+    .ww-stack .pile { height:60px; }
+    .ww-ctl { margin-top:7px; padding:7px 12px 8px; }
+    .ww-step { margin:5px 0 6px; }
+    .ww-step button { width:48px; height:48px; font-size:25px; }
+    .ww-step .slot { height:48px; }
+    .ww-ev { margin-top:4px; font-size:10px; }
+    .ww-modes { margin-top:6px; }
+    .ww-mode { min-height:46px; }
+    .ww-play { margin-top:6px; min-height:56px; }
   }
 </style>
 </head>
@@ -289,29 +330,32 @@
       <span class="pc" id="ww-pc-h">55%</span>
       <span class="rec" id="ww-rec-h">6/11</span>
     </div>
+    <div class="seed" id="ww-seed"></div>
   </div>
 
   <div class="ww-rail">
     <div class="ww-felt" id="ww-felt">
       <div class="ww-fan" id="ww-fan"></div>
-      <div class="ww-dealer">DEALER · SKIP·BO ARENA</div>
+      <div class="ww-dealer">SKIP·BO<br>ARENA</div>
 
       <div class="ww-stack">
         <div class="lbl">YOUR TICKETS</div>
         <div class="pile" id="ww-pile"></div>
-        <div class="cnt" id="ww-stackcnt">🎟️ 5</div>
+        <div class="cnt" id="ww-stackcnt"></div>
       </div>
 
       <div class="ww-pot" id="ww-pot">
         <div class="plbl">THE POT</div>
         <div class="pstubs" id="ww-potstubs"></div>
-        <div class="pamt" id="ww-potamt">🎟️ 2</div>
+        <div class="pamt" id="ww-potamt"></div>
         <div class="psub" id="ww-potsub">if you clear the level</div>
       </div>
 
       <div class="ww-mlad" id="ww-mlad">
         <div class="lbl">PAYOUT LADDER</div>
       </div>
+
+      <div class="ww-house"><b>NO HOUSE EDGE</b><span class="sub">the odds are your own clear rate</span></div>
     </div>
   </div>
 
@@ -334,10 +378,17 @@
     <button class="ww-mode hard" id="ww-mode-h">🔥 Hard level<small id="ww-mode-h-sub">you clear 55% · bigger ×</small></button>
   </div>
 
-  <button class="sb-btn sb-btn-green sb-btn-block ww-play" id="ww-play">
-    <span id="ww-play-main">▶ Play level · wager 1 🎟️</span>
-    <small id="ww-play-sub"></small>
-  </button>
+  <div class="ww-cta" id="ww-cta">
+    <button class="sb-btn sb-btn-green sb-btn-block ww-play" id="ww-play">
+      <span id="ww-play-main">▶ Play level</span>
+      <small id="ww-play-sub"></small>
+    </button>
+
+    <button class="sb-btn sb-btn-green sb-btn-block ww-play" id="ww-playfree" style="display:none">
+      <span>▶ Play free</span>
+      <small id="ww-playfree-sub">no wager · +1 🎟️ if you clear</small>
+    </button>
+  </div>
 
   <div class="ww-free" id="ww-free">
     <div class="txt" id="ww-free-txt"></div>
@@ -376,8 +427,14 @@
   // ---------- constants ----------
   var CAP = 5;                    // free regen ceiling
   var REGEN_MS = 40 * 1000;       // demo-compressed from 30 min
-  var MULT = { 0: { 1: 2, 2: 2.5, 3: 3 }, 1: { 1: 2.5, 2: 3.25, 3: 4 } };
-  var PTS = { 0: 10, 1: 22 };     // points per ticket wagered
+  // Every multiplier must produce a WHOLE ticket payout for its stake, or the
+  // displayed "×" would be a lie once rounding kicks in:
+  //   classic 1×2=2  2×2.5=5  3×3=9      hard 1×3=3  2×3.5=7  3×4=12
+  var MULT = { 0: { 1: 2, 2: 2.5, 3: 3 }, 1: { 1: 3, 2: 3.5, 3: 4 } };
+  var PTS = { 0: 10, 1: 20 };     // points per ticket wagered (hard = exactly 2×)
+  var FREE_PTS = 4;               // points for clearing a no-wager level
+  // FX pacing: collapses when the shared demo hook window.__forceInstant is on.
+  var FXQ = 1;
   var MILES = [
     { p: 40,  rw: [{ type: "coins", amount: 300 }] },
     { p: 100, rw: [{ type: "wild", amount: 1 }] },
@@ -390,46 +447,63 @@
   // ---------- state ----------
   var S = SB.store("wild-card-wager", {
     tickets: 5, wager: 1, hard: false, points: 0, claimed: 0,
-    boost: false, regenTs: 0,
-    cw: 14, cp: 18, hw: 6, hp: 11,          // seeded clear-rate record (78% / 55%)
+    boost: false, regenTs: 0, pending: null,
+    // Demo seed: a plausible recent history so the odds panel has something to
+    // show on the first load. Labelled as a seed in the UI (see #ww-seed).
+    cw: 14, cp: 18, hw: 6, hp: 11,          // 78% classic / 55% hard
+    seedCp: 18, seedHp: 11,
     won: 0, lost: 0, big: 0, streak: 0, best: 0,
     endTs: Date.now() + 48 * 3600 * 1000
   });
-  var st = S.data, busy = false;
+  var st = S.data, busy = false, ended = false;
 
   // ---------- helpers ----------
   function mult(w, hard) { return MULT[hard ? 1 : 0][Math.min(3, Math.max(1, w))]; }
-  function payout(w, hard) { return Math.round(w * mult(w, hard)); }
+  function payout(w, hard) { var w2 = Math.min(3, Math.max(1, w)); return w2 * mult(w2, hard); }
+  // Confidence Boost: half the losing stake back, rounded DOWN to whole tickets.
+  // Never rounds up — rounding up would make a 1-ticket loss free and mint tickets.
+  function refund(w) { return st.boost ? Math.floor(w / 2) : 0; }
   function points(w, hard) { return w * PTS[hard ? 1 : 0]; }
   function rate(hard) {
     var w = hard ? st.hw : st.cw, p = hard ? st.hp : st.cp;
     return { w: w, p: p, pct: p ? Math.round((w / p) * 100) : 0 };
   }
   function stub(cls) { return '<span class="ww-stub ' + (cls || "") + '"><i></i>' + (cls === "big" ? "WAGER" : "") + "</span>"; }
-  function inWords(n) { return ["never", "1 time", "2 times", "3 times", "4 times"][n] || n + " times"; }
 
-  // deterministic demo hook
+  // levelsim owns the shared demo hooks (window.__forceWin / __forceInstant),
+  // so this only supplies the level identity.
   function simOpts(hard) {
-    var o = { hard: hard, title: "Adventure Level " + (307 + st.cp + st.hp) };
-    if (window.__forceWin === true) o.winRate = 1;
-    else if (window.__forceWin === false) o.winRate = 0;
-    else o.winRate = hard ? 0.55 : 0.78;
-    if (window.__forceInstant) o.instant = true;
-    return o;
+    return { hard: hard, title: "Adventure Level " + (307 + st.cp + st.hp) };
+  }
+
+  // ---------- single-modal guard (rapid double-taps must not stack modals) ----------
+  var openModal = null;
+  function uiModal(html, onClose, force) {
+    if (openModal && !openModal.closed) {
+      if (!force) return null;
+      openModal.close(true);
+    }
+    var m = SB.modal(html, function () { openModal = null; if (onClose) onClose(); });
+    openModal = m;
+    var raw = m.close;
+    m.close = function (silent) { raw(silent); openModal = null; };
+    return m;
   }
 
   // ---------- ticket regen ----------
   function regenTick() {
-    var changed = false;
+    var changed = false, gained = 0;
     if (st.tickets >= CAP) { if (st.regenTs) { st.regenTs = 0; changed = true; } }
     else {
       if (!st.regenTs) { st.regenTs = Date.now() + REGEN_MS; changed = true; }
+      // advance by whole periods so a reload / backgrounded tab resumes on the
+      // same clock — it never restarts the wait and never grants free time.
       while (st.tickets < CAP && Date.now() >= st.regenTs) {
-        st.tickets++; st.regenTs = Date.now() + REGEN_MS; changed = true;
-        SB.toast("🎟️ +1 free ticket — regenerated!");
+        st.tickets++; gained++; st.regenTs += REGEN_MS; changed = true;
       }
       if (st.tickets >= CAP) st.regenTs = 0;
     }
+    if (gained) SB.toast("🎟️ +" + gained + " free ticket" + (gained > 1 ? "s" : "") + " — regenerated, no purchase.", { top: true });
     if (changed) { S.save(); render(); }
     updateRegenLabels();
   }
@@ -439,12 +513,17 @@
   }
   function regenText() {
     var s = regenSecs();
-    if (s == null) return "Free regen tops you up to <b>" + CAP + " 🎟️</b> — you hold <b>" + st.tickets + "</b>, so it restarts the moment you drop below " + CAP + ".";
+    if (s == null) return "Free regen tops you up to <b>" + CAP + "</b>" + stub("mini flat") + "— you hold <b>" + st.tickets + "</b>, so it restarts the moment you drop below " + CAP + ".";
     return "Next free ticket in <b>" + s + "s</b> · 1 every 30 min, up to " + CAP + " (you hold " + st.tickets + ").";
   }
   function updateRegenLabels() {
     var els = document.querySelectorAll("[data-regen]");
     for (var i = 0; i < els.length; i++) els[i].innerHTML = regenText();
+    var s = regenSecs();
+    var sh = document.querySelectorAll("[data-regenshort]");
+    for (var j = 0; j < sh.length; j++) {
+      sh[j].textContent = s == null ? "free tickets are full (" + CAP + ")" : "next free 🎟️ in " + s + "s";
+    }
   }
 
   // ---------- static art ----------
@@ -498,12 +577,16 @@
     document.getElementById("ww-pc-h").textContent = rh.pct + "%";
     document.getElementById("ww-rec-c").textContent = rc.w + "/" + rc.p;
     document.getElementById("ww-rec-h").textContent = rh.w + "/" + rh.p;
-    document.getElementById("ww-mode-c-sub").textContent = "you clear " + rc.pct + "%";
-    document.getElementById("ww-mode-h-sub").textContent = "you clear " + rh.pct + "% · bigger ×";
+    document.getElementById("ww-mode-c-sub").textContent = "you clear " + rc.pct + "% · ×2–×3";
+    document.getElementById("ww-mode-h-sub").textContent = "you clear " + rh.pct + "% · ×3–×4";
+    var played = (rc.p - st.seedCp) + (rh.p - st.seedHp);
+    document.getElementById("ww-seed").innerHTML =
+      "Every level you finish counts — wagered or free. Demo seed: <b>" + st.seedCp + " classic / " + st.seedHp + " hard</b>" +
+      (played > 0 ? " + <b>" + played + " played here</b>." : "; levels you play are added live.");
 
     // tickets
     document.getElementById("ww-tixnum").textContent = st.tickets;
-    document.getElementById("ww-stackcnt").textContent = "🎟️ " + st.tickets;
+    document.getElementById("ww-stackcnt").innerHTML = stub("mini flat") + st.tickets;
     var pile = document.getElementById("ww-pile"), ph = "";
     var shown = Math.min(5, st.tickets);
     for (var i = 0; i < 5; i++) {
@@ -516,7 +599,7 @@
     var potStubs = "";
     for (var j = 0; j < w; j++) potStubs += stub("mini");
     document.getElementById("ww-potstubs").innerHTML = potStubs;
-    document.getElementById("ww-potamt").textContent = "🎟️ " + pay;
+    document.getElementById("ww-potamt").innerHTML = stub("mini flat") + pay;
     document.getElementById("ww-potsub").innerHTML = "if you clear it<br>+" + pts + " pts";
     document.getElementById("ww-pot").classList.toggle("lit", w >= 2);
 
@@ -524,13 +607,16 @@
     for (var k = 1; k <= 3; k++) {
       var el = document.getElementById("ww-mrung-" + k);
       el.classList.toggle("on", k <= w);
-      el.innerHTML = '<span>' + k + "🎟️</span><span class='mx'>×" + MULT[hard ? 1 : 0][k] + "</span>";
+      el.innerHTML = "<span>" + k + '<span class="ww-stub mini flat" style="margin:0 0 0 3px"><i></i></span></span>' +
+        "<span class='mx'>×" + MULT[hard ? 1 : 0][k] + "</span>";
     }
 
-    // stepper slot
+    // stepper slot — while a wager is in flight the stake is escrowed, so count
+    // it as still held (otherwise the slot flashes "short" mid-level).
+    var held = st.tickets + (busy && st.pending ? st.pending.w : 0);
     var slot = "";
     for (var q = 0; q < 3; q++) {
-      var cls = q < w ? (q < st.tickets ? "" : " short") : " ghost";
+      var cls = q < w ? (q < held ? "" : " short") : " ghost";
       slot += '<span class="ww-stub big' + cls + '"><i></i>WAGER</span>';
     }
     document.getElementById("ww-slot").innerHTML = slot;
@@ -539,15 +625,16 @@
 
     // payout readout
     document.getElementById("ww-win-txt").innerHTML =
-      "🎟️ <b>" + pay + " back</b> (×" + m + ") &nbsp;+&nbsp; 🏅 <b>" + pts + " pts</b>";
+      stub("mini flat") + "<b>" + pay + " back</b> (" + w + " × " + m + ") &nbsp;+&nbsp; 🏅 <b>" + pts + " pts</b>";
+    var rf = refund(w);
     document.getElementById("ww-lose-txt").innerHTML = st.boost
-      ? "🎟️ " + (w - Math.floor(w / 2)) + " gone · <b>" + Math.floor(w / 2) + " refunded</b> by 🛡️ Boost"
-      : "🎟️ <b>" + w + " gone</b> · 0 points";
+      ? stub("mini flat") + "<b>" + (w - rf) + " gone</b> · " + (rf ? rf + " refunded by 🛡️ Boost" : "🛡️ Boost can't halve a 1-ticket stake") + " · 0 pts"
+      : stub("mini flat") + "<b>" + w + " gone</b> · 0 points";
     var winsIn5 = Math.round(r.pct / 20);
     document.getElementById("ww-ev").innerHTML =
       "Based on your real record (<b>" + r.w + "/" + r.p + "</b> " + (hard ? "hard" : "classic") +
-      " levels cleared), you win this wager about <b>" + inWords(winsIn5) + " in 5</b>. " +
-      "Average return: <b>" + (r.pct / 100 * pay).toFixed(1) + " 🎟️</b> per " + w + " wagered.";
+      " levels cleared), you win this wager about <b>" + winsIn5 + " in every 5</b> tries. " +
+      "That averages <b>" + (r.pct / 100 * pay).toFixed(1) + "</b>" + stub("mini flat") + "<b>back</b> per " + w + " staked.";
 
     // modes
     document.getElementById("ww-mode-c").classList.toggle("on", !hard);
@@ -555,28 +642,37 @@
 
     // play button
     var play = document.getElementById("ww-play");
-    var enough = st.tickets >= w;
+    var enough = held >= w;
     play.disabled = busy || !enough;
     var need = w - st.tickets;
-    document.getElementById("ww-play-main").textContent = enough
-      ? "▶ Play level · wager " + w + " 🎟️"
-      : "🎟️ Need " + need + " more ticket" + (need > 1 ? "s" : "");
-    document.getElementById("ww-play-sub").textContent = enough
-      ? "clear it → 🎟️ " + pay + " + " + pts + " pts · " + r.pct + "% of your " + (hard ? "hard " : "") + "levels clear"
-      : "lower your wager, or take the free path below — no purchase needed";
+    document.getElementById("ww-play-main").innerHTML = busy
+      ? "⏳ Level in progress…"
+      : (enough ? "▶ Play level · wager " + w + " " + stub("mini flat")
+                : "Need " + need + " more " + stub("mini flat"));
+    document.getElementById("ww-play-sub").innerHTML = busy
+      ? "your stake is in the pot — settling on the result"
+      : (enough ? "clear it → " + pay + stub("mini flat") + "+ " + pts + " pts · you clear " + r.pct + "%"
+                : "lower your wager, or play free →");
+    // short on tickets: the free option must sit in the same view, unscrolled
+    var pf = document.getElementById("ww-playfree");
+    pf.style.display = enough ? "none" : "";
+    pf.disabled = busy;
+    document.getElementById("ww-cta").classList.toggle("split", !enough);
+    document.getElementById("ww-playfree-sub").innerHTML =
+      "no wager · +1" + stub("mini flat") + "+" + FREE_PTS + " pts";
 
     // free path
     document.getElementById("ww-free-txt").innerHTML =
       "<b>🆓 FREE PATH — always open</b><br>" +
       '<span data-regen>' + regenText() + "</span><br>" +
-      "Or play a level with <b>no wager</b>: win it and earn <b>+1 🎟️</b> (nothing at risk).";
+      "Or play a classic level with <b>no wager</b>: clear it for <b>+1</b>" + stub("mini flat") + "<b>and +" + FREE_PTS + " pts</b>, risking nothing.";
 
     // boost card
     var bx = document.getElementById("ww-boost");
     bx.classList.toggle("owned", st.boost);
     document.getElementById("ww-boost-txt").innerHTML = st.boost
-      ? "<b>🛡️ Confidence Boost — ACTIVE</b><br>Every losing wager refunds 50% of your stake for the rest of the event. It does <b>not</b> change your odds."
-      : "<b>🛡️ Confidence Boost</b> — insurance, not luck.<br>Refunds <b>50% of your stake on every loss</b> for the whole event. Your clear rate is unchanged.";
+      ? "<b>🛡️ Confidence Boost — ACTIVE</b><br>Losing stakes refund <b>half your tickets, rounded down</b> (3 tickets → 1 back · 2 → 1 · 1 → 0) for the rest of the event. It does <b>not</b> change your odds."
+      : "<b>🛡️ Confidence Boost — $2.99</b> · insurance, not luck.<br>Every losing stake refunds <b>half your tickets, rounded down</b>: 3 tickets → 1 back · 2 → 1 · 1 → 0. Your clear rate is unchanged.";
     document.getElementById("ww-boost-buy").style.display = st.boost ? "none" : "";
 
     // points track
@@ -595,15 +691,16 @@
     cb.style.display = ready >= 0 ? "" : "none";
     if (ready >= 0) cb.innerHTML = "🎁 Claim milestone " + (ready + 1) + " — " + MILES[ready].rw.map(function (x) { return SB.icon(x.type) + " " + SB.fmt(x.amount); }).join(" + ");
     var nextM = MILES[st.claimed];
-    document.getElementById("ww-track-foot").innerHTML = nextM
+    document.getElementById("ww-track-foot").innerHTML = (nextM
       ? "Next: <b>" + nextM.p + " pts</b> → " + nextM.rw.map(function (x) { return SB.icon(x.type) + SB.fmt(x.amount); }).join(" + ") +
         " · <b>" + Math.max(0, nextM.p - st.points) + "</b> to go. Milestones are permanent — even a losing run keeps every one you reach."
-      : "🏆 All 5 milestones claimed — every wagered win still pays tickets and points.";
+      : "🏆 All 5 milestones claimed — every wagered win still pays tickets and points.") +
+      (ended ? "<br>⏳ The event window has closed; this demo stays playable." : "");
 
     // stats
     document.getElementById("ww-st-won").textContent = st.won;
     document.getElementById("ww-st-lost").textContent = st.lost;
-    document.getElementById("ww-st-big").textContent = st.big ? "🎟️ " + st.big : "—";
+    document.getElementById("ww-st-big").innerHTML = st.big ? st.big + stub("mini flat") : "—";
     document.getElementById("ww-st-streak").textContent = st.streak + (st.best > st.streak ? " (best " + st.best + ")" : "");
     document.getElementById("ww-freeplay").disabled = busy;
     document.getElementById("ww-mode-c").disabled = busy;
@@ -616,6 +713,7 @@
     return e ? e.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
   }
   function flyStub(fromR, toR, delay, cls) {
+    if (!FXQ) return;
     var el = document.createElement("span");
     el.className = "ww-stub " + (cls || "") + " ww-fly";
     el.innerHTML = "<i></i>";
@@ -632,6 +730,7 @@
   }
   function rainIntoPot(n, done) {
     var pot = rectOf("ww-pot");
+    if (!FXQ) { done(); return; }
     for (var i = 0; i < n; i++) {
       (function (i) {
         setTimeout(function () {
@@ -655,9 +754,12 @@
     setTimeout(done, n * 55 + 500);
   }
   function payoutToPlayer(n) {
+    if (!FXQ) return 0;
     var pot = rectOf("ww-pot"), chip = rectOf("ww-tixchip");
-    for (var i = 0; i < Math.min(n, 12); i++) flyStub(pot, chip, i * 60);
+    var k = Math.min(n, 12);
+    for (var i = 0; i < k; i++) flyStub(pot, chip, i * 60);
     SB.haptic(30);
+    return k * 60 + 420;
   }
 
   // ---------- play ----------
@@ -669,9 +771,12 @@
   function wagerPlay() {
     if (busy) return;
     var w = st.wager, hard = !!st.hard;
-    if (st.tickets < w) return;
+    if (st.tickets < w) return;   // wagering more than you hold is impossible
     busy = true;
     st.tickets -= w;
+    // the stake is escrowed, not destroyed: if the page dies mid-level the
+    // boot handler returns it (see "interrupted wager" below).
+    st.pending = { w: w, hard: hard };
     S.save(); render();
     // stake flies into the pot
     flyStub(rectOf("ww-pile"), rectOf("ww-pot"), 0, "");
@@ -681,11 +786,12 @@
 
     setTimeout(function () {
       SB.playLevel(simOpts(hard)).then(function (res) {
+        st.pending = null;
         recordResult(hard, res.won);
         if (res.won) onWin(w, hard);
         else onLoss(w, hard, res);
       });
-    }, 640);
+    }, 640 * FXQ);
   }
 
   function onWin(w, hard) {
@@ -698,29 +804,33 @@
     S.save();
     SB.haptic(25);
     rainIntoPot(Math.min(pay, 9), function () {
-      payoutToPlayer(pay);
+      var flight = payoutToPlayer(pay);
       render();
-      SB.confetti(window.innerWidth / 2, window.innerHeight * 0.42, 70);
-      var m = SB.modal(
-        '<h3 style="margin:0">💰 WAGER WON!</h3>' +
-        '<div class="sb-muted" style="font-size:12.5px;font-weight:700">' + w + " 🎟️ at ×" + mult(w, hard) + (hard ? " (hard level)" : "") + "</div>" +
-        '<div class="ww-winamt">🎟️ +' + pay + "</div>" +
-        '<div class="sb-row" style="justify-content:center;flex-wrap:wrap;gap:6px">' +
-        SB.rewardChip({ type: "star", amount: pts }).replace("Stars", "Event Points") +
-        (st.streak > 1 ? '<span class="sb-reward"><span class="ico">🔥</span>' + st.streak + " win streak</span>" : "") +
-        "</div>" +
-        '<div class="sb-muted" style="font-size:11.5px;font-weight:700;margin-top:9px">Your clear record is now <b>' +
-        (hard ? st.hw + "/" + st.hp + " hard" : st.cw + "/" + st.cp + " classic") + "</b> — the arena odds updated with it.</div>" +
-        '<button class="sb-btn sb-btn-green sb-btn-block" id="ww-win-ok" style="margin-top:12px">Wager again</button>',
-        function () { busy = false; render(); checkMilestone(); }
-      );
-      m.el.querySelector("#ww-win-ok").addEventListener("click", function () { m.close(); });
+      if (FXQ) SB.confetti(window.innerWidth / 2, window.innerHeight * 0.42, 70);
+      setTimeout(function () {
+        var m = uiModal(
+          '<h3 style="margin:0">💰 WAGER WON!</h3>' +
+          '<div class="sb-muted" style="font-size:12.5px;font-weight:700">' + w + " ticket" + (w > 1 ? "s" : "") + " staked at ×" + mult(w, hard) + (hard ? " · hard level" : " · classic level") + "</div>" +
+          '<div class="ww-winamt">' + stub("hero flat") + "+" + pay + "</div>" +
+          '<div class="sb-muted" style="font-size:11.5px;font-weight:800;margin-top:-2px">your ' + w + "-ticket stake returned + " + (pay - w) + stub("mini flat") + "profit</div>" +
+          '<div class="sb-row" style="justify-content:center;flex-wrap:wrap;gap:6px;margin-top:8px">' +
+          SB.rewardChip({ icon: "🏅", label: "Event Points", amount: pts }) +
+          (st.streak > 1 ? '<span class="sb-reward"><span class="ico">🔥</span>' + st.streak + " win streak</span>" : "") +
+          "</div>" +
+          '<div class="sb-muted" style="font-size:11.5px;font-weight:700;margin-top:9px">Your clear record is now <b>' +
+          (hard ? st.hw + "/" + st.hp + " hard" : st.cw + "/" + st.cp + " classic") + "</b> — the arena odds updated with it.</div>" +
+          '<button class="sb-btn sb-btn-green sb-btn-block" id="ww-win-ok" style="margin-top:12px">Wager again</button>',
+          function () { busy = false; render(); checkMilestone(); },
+          true
+        );
+        m.el.querySelector("#ww-win-ok").addEventListener("click", function () { m.close(); });
+      }, flight);
     });
   }
 
   function onLoss(w, hard, res) {
-    var refund = st.boost ? Math.floor(w / 2) : 0;
-    if (refund) st.tickets += refund;
+    var rf = refund(w);
+    if (rf) st.tickets += rf;
     st.lost++; st.streak = 0;
     if (!st.regenTs && st.tickets < CAP) st.regenTs = Date.now() + REGEN_MS;
     S.save(); render();
@@ -729,27 +839,31 @@
     var cards = "";
     for (var i = 0; i < cl; i++) cards += '<span class="sb-card wild">SKIP·BO</span>';
 
-    var m = SB.modal(
+    var wouldRefund = Math.floor(w / 2);
+    var m = uiModal(
       '<div class="ww-lossbox">' +
       '<h3 style="margin:0">😤 So close!</h3>' +
       '<div class="ww-nearmiss">' + cards +
       '<div style="font-size:12.5px;font-weight:800;text-align:left">You were <b>' + cl + " card" + (cl > 1 ? "s" : "") + "</b><br>away from clearing it.</div></div>" +
       '<div class="sb-muted" style="font-size:12.5px;font-weight:700">' +
-      (refund
-        ? "🛡️ Confidence Boost refunded <b>" + refund + " 🎟️</b> of your " + w + "-ticket stake."
-        : "Your " + w + " 🎟️ stake stays in the house pot.") +
+      (st.boost
+        ? (rf
+          ? "🛡️ Confidence Boost refunded <b>" + rf + "</b>" + stub("mini flat") + "of your " + w + "-ticket stake — the other " + (w - rf) + " stays in the house pot."
+          : "🛡️ Confidence Boost halves losing stakes and rounds down, so a 1-ticket stake returns nothing. Wager 2+ to see it work.")
+        : "Your " + w + "-ticket stake stays in the house pot.") +
       " Your record: <b>" + (hard ? st.hw + "/" + st.hp + " hard" : st.cw + "/" + st.cp + " classic") + "</b> (" + rate(hard).pct + "%).</div>" +
 
       '<div class="ww-freebox">' +
       "🆓 <b>Free ways to keep going — no purchase needed:</b><br>" +
       '<span data-regen>' + regenText() + "</span>" +
-      '<div class="rowb"><span style="flex:1 1 auto">Or play a level with <b>no wager</b> — win it and take <b>+1 🎟️</b>.</span>' +
+      '<div class="rowb"><span style="flex:1 1 auto">Or play a level with <b>no wager</b> — clear it for <b>+1</b>' + stub("mini flat") + '<b>and +' + FREE_PTS + " pts</b>.</span>" +
       '<button class="sb-btn sb-btn-green sb-btn-sm" id="ww-loss-free">▶ Free play</button></div>' +
       "</div>" +
 
       (st.boost ? "" :
-        '<div class="ww-offer"><div><b>🛡️ Confidence Boost — $2.99</b><br>50% of every future losing stake comes back. Would have returned <b>' +
-        Math.floor(w / 2) + " 🎟️</b> just now. Odds unchanged.</div>" +
+        '<div class="ww-offer"><div><b>🛡️ Confidence Boost — $2.99</b><br>Every future losing stake refunds half your tickets, rounded down (3 tickets → 1 back · 2 → 1 · 1 → 0). ' +
+        (wouldRefund ? "Would have returned <b>" + wouldRefund + "</b>" + stub("mini flat") + "just now." : "A 1-ticket stake is too small to halve — it pays off from 2 tickets up.") +
+        " Odds unchanged.</div>" +
         '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="ww-loss-boost">Get it</button></div>') +
 
       '<div class="ww-offer"><div><b>🎟️ Ticket Pack — $0.99</b><br>10 wager tickets, instantly. The free regen above keeps running either way.</div>' +
@@ -757,7 +871,8 @@
 
       '<button class="sb-sheet-cancel" id="ww-loss-close">Keep playing free</button>' +
       "</div>",
-      function () { busy = false; render(); }
+      function () { busy = false; render(); },
+      true
     );
     m.el.querySelector("#ww-loss-close").addEventListener("click", function () { m.close(); });
     m.el.querySelector("#ww-loss-free").addEventListener("click", function () {
@@ -776,15 +891,16 @@
       recordResult(false, res.won);
       if (res.won) {
         st.tickets++;
+        st.points += FREE_PTS;
         S.save(); render();
         flyStub(rectOf("ww-pot"), rectOf("ww-tixchip"), 0);
-        SB.toast("🎟️ +1 ticket earned — nothing was at risk.");
-        SB.confetti(window.innerWidth / 2, window.innerHeight * 0.4, 40);
+        SB.toast("🎟️ +1 ticket · 🏅 +" + FREE_PTS + " pts — nothing was at risk.", { top: true });
+        if (FXQ) SB.confetti(window.innerWidth / 2, window.innerHeight * 0.4, 40);
       } else {
         S.save(); render();
-        SB.toast("No ticket this time — but you risked nothing. Try again free.");
+        SB.toast("No ticket this time — but you risked nothing. Try again free.", { top: true });
       }
-      busy = false; render();
+      busy = false; render(); checkMilestone();
     });
   }
 
@@ -798,6 +914,8 @@
   }
   document.getElementById("ww-claim").addEventListener("click", function (e) {
     var i = st.claimed;
+    // st.claimed advances BEFORE the grant and every read goes through it, so a
+    // double-tap can only ever claim the next *earned* rung — never the same one twice.
     if (i >= MILES.length || st.points < MILES[i].p) return;
     st.claimed++;
     S.save();
@@ -807,14 +925,17 @@
   });
 
   // ---------- IAPs ----------
+  function tixChip(n) { return { icon: "🎟️", label: "Wager Tickets", amount: n }; }
   function buyBoost(after) {
+    if (st.boost) { SB.toast("🛡️ Confidence Boost is already active — nothing to buy.", { top: true }); if (after) after(); return; }
     SB.buyIAP({
       label: "🛡️ Confidence Boost", price: "$2.99",
-      sub: "Event-long insurance: 50% of every losing stake refunded. Does not change your clear rate.",
+      sub: "Event-long insurance: every losing stake refunds half your tickets, rounded down (3 tickets → 1 back · 2 → 1 · 1 → 0). It does not change your clear rate.",
       contents: [], grant: false,
       onSuccess: function () {
+        if (st.boost) return;                   // belt-and-braces: never buy twice
         st.boost = true; S.save(); render();
-        SB.toast("🛡️ Confidence Boost active — half of every losing stake comes back.");
+        SB.toast("🛡️ Confidence Boost active — half of every losing stake comes back.", { top: true });
         SB.confetti();
         if (after) after();
       }
@@ -823,24 +944,24 @@
   function buyPack(after) {
     SB.buyIAP({
       label: "🎟️ Ticket Pack", price: "$0.99",
-      sub: "10 wager tickets. Free regen (1 per 30 min) keeps running either way.",
-      contents: [{ type: "token", amount: 10 }], grant: false,
+      sub: "10 wager tickets. Free regen (1 per 30 min, up to " + CAP + ") keeps running either way.",
+      contents: [tixChip(10)], grant: false,
       onSuccess: function () {
         st.tickets += 10; S.save(); render();
         flyStub(rectOf("ww-pot"), rectOf("ww-tixchip"), 0);
-        SB.toast("🎟️ +10 wager tickets!");
+        SB.toast("🎟️ +10 wager tickets!", { top: true });
         if (after) after();
       }
     });
   }
   function buyBigPack(after) {
     SB.buyIAP({
-      label: "🎟️ High Roller Pack", price: "$4.99",
-      sub: "30 wager tickets + Confidence Boost for the whole event.",
-      contents: [{ type: "token", amount: 30 }], grant: false,
+      label: "👑 High Roller Pack", price: "$4.99",
+      sub: "30 wager tickets + the Confidence Boost for the whole event. Neither changes your clear rate.",
+      contents: [tixChip(30)], grant: false,
       onSuccess: function () {
         st.tickets += 30; st.boost = true; S.save(); render();
-        SB.toast("🎟️ +30 tickets · 🛡️ Confidence Boost active!");
+        SB.toast("🎟️ +30 tickets · 🛡️ Confidence Boost active!", { top: true });
         SB.confetti();
         if (after) after();
       }
@@ -850,18 +971,21 @@
   document.getElementById("ww-tixchip").addEventListener("click", function () { storeSheet(); });
 
   function storeSheet() {
-    var m = SB.modal(
+    var m = uiModal(
       '<h3 style="margin:0 0 2px">🎟️ Wager Shop</h3>' +
-      '<div class="sb-muted" style="font-size:12px;font-weight:700">Everything here is optional. The free path below never closes.</div>' +
-      '<div class="ww-offer"><div><b>🛡️ Confidence Boost — $2.99</b><br>50% of every losing stake refunded, all event. Odds unchanged.</div>' +
+      '<div class="sb-muted" style="font-size:12px;font-weight:700">You hold <b>' + st.tickets + " tickets</b>. Everything here is optional — nothing on this screen changes your clear rate.</div>" +
+      '<div class="ww-offer"><div><b>🛡️ Confidence Boost — $2.99</b><br>' +
+      (st.boost ? "Already active for this event." : "Every losing stake refunds half your tickets, rounded down (3 tickets → 1 back · 2 → 1 · 1 → 0). Odds unchanged.") + "</div>" +
       '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="ww-sh-boost">' + (st.boost ? "Owned" : "$2.99") + "</button></div>" +
       '<div class="ww-offer"><div><b>🎟️ Ticket Pack — $0.99</b><br>10 wager tickets.</div>' +
       '<button class="sb-btn sb-btn-blue sb-btn-sm" id="ww-sh-pack">$0.99</button></div>' +
-      '<div class="ww-offer"><div><b>👑 High Roller — $4.99</b><br>30 tickets <i>and</i> the Confidence Boost. Best value.</div>' +
+      '<div class="ww-offer"><div><b>👑 High Roller — $4.99</b><br>30 tickets' +
+      (st.boost ? " (you already own the Boost, so this is tickets only)." : " <i>and</i> the Confidence Boost.") + "</div>" +
       '<button class="sb-btn sb-btn-green sb-btn-sm" id="ww-sh-big">$4.99</button></div>' +
-      '<div class="ww-freebox">🆓 <b>Free path:</b> <span data-regen>' + regenText() + "</span><br>Plus <b>+1 🎟️</b> for every no-wager level you clear — unlimited.</div>" +
+      '<div class="ww-freebox">🆓 <b>Free path — never closes:</b> <span data-regen>' + regenText() + "</span><br>Plus <b>+1 🎟️ and +" + FREE_PTS + " pts</b> for every no-wager level you clear — unlimited.</div>" +
       '<button class="sb-sheet-cancel" id="ww-sh-close">Close</button>'
     );
+    if (!m) return;
     m.el.querySelector("#ww-sh-close").addEventListener("click", function () { m.close(); });
     var b = m.el.querySelector("#ww-sh-boost");
     b.disabled = st.boost;
@@ -873,49 +997,72 @@
   // ---------- controls ----------
   document.getElementById("ww-minus").addEventListener("click", function () { st.wager = Math.max(1, st.wager - 1); S.save(); SB.haptic(8); render(); });
   document.getElementById("ww-plus").addEventListener("click", function () {
-    if (st.wager >= 3) { SB.toast("3 tickets is the maximum wager."); return; }
+    if (st.wager >= 3) { SB.toast("3 tickets is the maximum wager.", { top: true }); return; }
     st.wager++; S.save(); SB.haptic(8); render();
-    if (st.wager > st.tickets) SB.toast("You hold " + st.tickets + " 🎟️ — earn more free below, no purchase needed.");
+    if (st.wager > st.tickets) SB.toast("You hold " + st.tickets + " 🎟️ — earn more free below, no purchase needed.", { top: true });
   });
   document.getElementById("ww-mode-c").addEventListener("click", function () { st.hard = false; S.save(); render(); });
   document.getElementById("ww-mode-h").addEventListener("click", function () { st.hard = true; S.save(); render(); });
   document.getElementById("ww-play").addEventListener("click", wagerPlay);
   document.getElementById("ww-freeplay").addEventListener("click", freePlay);
+  document.getElementById("ww-playfree").addEventListener("click", freePlay);
 
   // ---------- rules ----------
   document.getElementById("ww-info").addEventListener("click", function () {
-    SB.modal(
+    var m = uiModal(
       '<h3 style="margin:0 0 8px">📜 Wild Card Wager</h3>' +
       '<ul class="ww-rules">' +
       "<li>🎮 <b>Every wager is settled by a real Adventure level.</b> Level completion is the only fuel — nothing here resolves on a hidden roll.</li>" +
       "<li>🎟️ You hold <b>Wager Tickets</b>. Before a level, stake <b>1–3</b> of them on yourself.</li>" +
-      "<li>📊 <b>Visible odds:</b> the arena shows <i>your own</i> clear rate, counted live from the levels you actually play (classic and hard tracked separately). That percentage <b>is</b> the wager's odds — there is no house edge on top.</li>" +
-      "<li>📈 <b>Payout ladder:</b> classic ×2 / ×2.5 / ×3 for 1 / 2 / 3 tickets. Hard levels pay ×2.5 / ×3.25 / <b>×4</b> — at a lower clear rate that we show you before you commit.</li>" +
-      "<li>💥 Lose and the stake goes to the pot. Wins pay tickets <b>and</b> event points.</li>" +
+      "<li>📊 <b>Visible odds:</b> the arena shows <i>your own</i> clear rate, counted live from the levels you actually finish — classic and hard tracked separately, wagered and free levels both counted. That percentage <b>is</b> the wager's odds; there is no house edge on top. <i>(This demo seeds a starting record of " + st.seedCp + " classic / " + st.seedHp + " hard levels so the bars aren't empty on load; everything after that is yours.)</i></li>" +
+      "<li>📈 <b>Payout ladder:</b> classic ×2 / ×2.5 / ×3 for 1 / 2 / 3 tickets (2 / 5 / 9 🎟️ back). Hard levels pay ×3 / ×3.5 / <b>×4</b> (3 / 7 / 12 🎟️ back) — at a lower clear rate we show you before you commit. Every payout is a whole number of tickets; nothing is rounded away.</li>" +
+      "<li>💥 Lose and the stake stays in the pot. Wins pay tickets <b>and</b> event points (hard levels pay exactly 2× the points).</li>" +
       "<li>🏅 <b>Event points</b> fill a 5-stop milestone track. Milestones are permanent — an unlucky player still walks away with coins, wilds, gems and a chest.</li>" +
-      "<li>🆓 <b>Free path, always visible:</b> 1 free ticket every 30 min (up to " + CAP + "), and <b>+1 ticket for any no-wager level you clear</b> — unlimited.</li>" +
-      "<li>🛡️ <b>Confidence Boost ($2.99)</b> is insurance, not luck: it refunds 50% of losing stakes. It <b>never</b> changes your clear rate. Ticket packs only refill the stake you'd otherwise wait for.</li>" +
-      "<li>⏳ Runs <b>2 days, twice a month</b> (timer compressed for this demo).</li>" +
+      "<li>🆓 <b>Free path, always visible:</b> 1 free ticket every 30 min (up to " + CAP + "), and <b>+1 ticket and +" + FREE_PTS + " points for any no-wager level you clear</b> — unlimited, so the milestone track is reachable without wagering or paying.</li>" +
+      "<li>🛡️ <b>Confidence Boost ($2.99)</b> is insurance, not luck: a losing stake refunds <b>half your tickets, rounded down</b> (3 tickets → 1 back · 2 → 1 · 1 → 0). It <b>never</b> changes your clear rate. Ticket packs only refill the stake you'd otherwise wait for.</li>" +
+      "<li>⏳ Runs <b>2 days, twice a month</b> (timer and regen compressed for this demo).</li>" +
       "</ul>" +
       '<div style="text-align:left;font-size:11.5px;line-height:1.5;color:#5a6b8c;font-weight:700;border-top:1px solid rgba(27,42,74,.15);padding-top:8px">' +
       "<b>Why it works (design note):</b> engagement — the wager turns an ordinary level into a self-set stakes decision, and the ticket meter creates a return loop every 30 min. " +
       "Monetization — the loss moment is the only sell, and it is honest: insurance and refills, never odds. " +
       "The milestone track guarantees a payoff for unlucky players, which is what keeps a wager event from feeling punitive.</div>" +
-      '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>'
+      '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" id="ww-rules-ok">Got it!</button>'
     );
+    if (!m) return;
+    m.el.querySelector("#ww-rules-ok").addEventListener("click", function () { m.close(); });
   });
 
   // ---------- boot ----------
+  if (window.__forceInstant) FXQ = 0;           // shared demo/test hook: collapse FX too
+  // interrupted wager (reload during the level): the escrowed stake goes back.
+  // The level never resolved, so it is NOT recorded in the clear-rate history.
+  if (st.pending && st.pending.w > 0) {
+    var pw = Math.min(3, st.pending.w | 0);
+    st.tickets += pw;
+    st.pending = null;
+    setTimeout(function () {
+      SB.toast("↩️ Level interrupted — your " + pw + " 🎟️ stake was returned.", { top: true, ms: 2800 });
+    }, 500);
+  }
   if (!st.regenTs && st.tickets < CAP) st.regenTs = Date.now() + REGEN_MS;
+  if (typeof st.seedCp !== "number") { st.seedCp = st.cp; st.seedHp = st.hp; }
   S.save();
-  SB.countdown(document.getElementById("ww-timer"), st.endTs, function () { SB.toast("⏳ Event ended — thanks for playing!"); });
+  var timerEl = document.getElementById("ww-timer");
+  function onEnd() {
+    ended = true;
+    timerEl.textContent = "Event ended";
+    timerEl.parentElement.classList.remove("urgent");
+    SB.toast("⏳ Event ended — milestones you claimed are yours to keep.", { top: true, ms: 2600 });
+  }
+  if (st.endTs <= Date.now()) onEnd();
+  else SB.countdown(timerEl, st.endTs, onEnd);
   setInterval(regenTick, 1000);
   regenTick();
   render();
   window.__ww = {
     state: st, save: S.save, render: render,
-    payout: payout, mult: mult, points: points, rate: rate,
-    shop: storeSheet
+    payout: payout, mult: mult, points: points, rate: rate, refund: refund,
+    shop: storeSheet, miles: MILES, cap: CAP, freePts: FREE_PTS
   };
 })();
 </script>
