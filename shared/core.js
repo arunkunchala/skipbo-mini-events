@@ -267,12 +267,18 @@
     bd.className = "sb-modal-backdrop open";
     bd.innerHTML = '<div class="sb-modal">' + html + "</div>";
     document.body.appendChild(bd);
-    bd.addEventListener("click", function (e) {
-      if (e.target === bd) { bd.remove(); if (onClose) onClose(); }
-    });
+    var closed = false;
+    function shut(silent) {
+      if (closed) return;          // idempotent: onClose can never fire twice
+      closed = true;
+      bd.remove();
+      if (!silent && onClose) onClose();
+    }
+    bd.addEventListener("click", function (e) { if (e.target === bd) shut(false); });
     return {
       el: bd,
-      close: function (silent) { bd.remove(); if (!silent && onClose) onClose(); }
+      close: shut,
+      get closed() { return closed; }
     };
   }
 

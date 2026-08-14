@@ -7,155 +7,295 @@
 <link rel="stylesheet" href="../shared/core.css">
 <style>
   /* ---------- hero ---------- */
-  .ss-hero { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .ss-hero { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
   .ss-hero .sb-timer-chip { flex:0 0 auto; }
   .ss-info-btn {
     width:44px; height:44px; flex:0 0 auto; margin-left:auto;
     border-radius:12px; border:1.5px solid rgba(255,255,255,.35);
     background:rgba(255,255,255,.14); color:#fff; font-size:19px; font-weight:900; cursor:pointer;
   }
+  .ss-info-btn:active { transform:scale(.93); }
   .ss-prestige {
     display:none; align-items:center; gap:4px;
     background:linear-gradient(180deg,#ffd95e,#e0a400); color:var(--sb-ink);
-    font-weight:900; font-size:11px; border-radius:999px; padding:4px 10px;
-    box-shadow:var(--sb-shadow);
+    font-weight:900; font-size:11px; border-radius:999px; padding:4px 9px;
+    box-shadow:var(--sb-shadow); white-space:nowrap;
   }
   .ss-prestige.on { display:inline-flex; }
 
+  /* ---------- Skip-Bo card back (reusable) ---------- */
+  .ss-cardback {
+    position:relative; border-radius:6px; overflow:hidden;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.16) 0 5px, rgba(0,0,0,.06) 5px 10px),
+      radial-gradient(120% 110% at 50% 0%, #2f6ec9 0%, var(--sb-blue) 48%, #10305f 100%);
+    border:2px solid #0d2a55; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28);
+  }
+  .ss-cardback::after {
+    content:"SKIP·BO"; position:absolute; inset:0; display:grid; place-items:center;
+    font-size:7px; font-weight:900; letter-spacing:.4px; color:var(--sb-yellow);
+    text-shadow:0 1px 0 rgba(0,0,0,.6);
+  }
+  .ss-cardback.gold {
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 5px, rgba(160,105,0,.14) 5px 10px),
+      radial-gradient(120% 110% at 50% 0%, #fff3c9 0%, var(--sb-yellow) 45%, #c98f00 100%);
+    border-color:#8a6100; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.7), 0 0 14px rgba(255,199,44,.75);
+  }
+  .ss-cardback.gold::after { content:"★ SKIP·BO ★"; color:#6b4600; text-shadow:0 1px 0 rgba(255,255,255,.55); }
+  .ss-cardback.sm::after { content:"★"; font-size:15px; }
+
+  /* ---------- jackpot goal banner (always visible = the goal) ---------- */
+  .ss-goal {
+    display:flex; align-items:center; gap:9px; padding:6px 9px; margin-bottom:6px;
+    border-radius:13px; color:#fff;
+    background:linear-gradient(120deg,#5a2a00 0%,#8a5300 45%,#4a2200 100%);
+    border:2px solid var(--sb-yellow); box-shadow:var(--sb-shadow);
+  }
+  .ss-goal .ss-cardback { width:32px; height:45px; flex:0 0 auto; animation:ssGlow 2.4s ease-in-out infinite; }
+  @keyframes ssGlow { 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.18); } }
+  .ss-goal .g-txt { flex:1 1 auto; min-width:0; line-height:1.25; }
+  .ss-goal .g-hd { font-size:9.5px; font-weight:900; letter-spacing:.5px; color:var(--sb-yellow); white-space:nowrap; }
+  .ss-goal .g-bd { font-size:11.5px; font-weight:800; }
+  .ss-goal .g-prog { font-size:10px; font-weight:800; color:#ffe3a0; margin-top:1px; }
+
   /* ---------- board: ladder + vault ---------- */
-  .ss-board { display:flex; gap:10px; align-items:stretch; }
+  /* main becomes a column so the board absorbs spare vertical space on tall phones
+     instead of leaving a dead gap under the stats row */
+  .sb-main { display:flex; flex-direction:column; }
+  .ss-board {
+    display:flex; gap:8px; align-items:stretch;
+    flex:1 1 0; min-height:248px; max-height:430px;
+  }
+  .ss-climb { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
   .ss-ladder-wrap {
-    flex:1 1 auto; position:relative; height:334px; overflow-y:auto; overflow-x:hidden;
-    border-radius:16px; background:linear-gradient(180deg,#0e2b57 0%,#1D4FA1 60%,#2E9E4F 100%);
-    border:2px solid rgba(255,199,44,.4); box-shadow:inset 0 0 26px rgba(0,0,0,.4);
+    flex:1 1 auto; position:relative; overflow-y:auto; overflow-x:hidden;
+    border-radius:14px; background:linear-gradient(180deg,#08203f 0%,#123f80 55%,#1f6b3c 100%);
+    border:2px solid rgba(255,199,44,.42); box-shadow:inset 0 0 26px rgba(0,0,0,.55);
     -webkit-overflow-scrolling:touch;
   }
-  .ss-ladder { position:relative; padding:10px 8px 10px 52px; }
+  .ss-ladder { position:relative; padding:10px 6px 10px 40px; }
+
+  /* a rung = one Skip-Bo card lying in the stock pile */
   .ss-rung {
-    position:relative; height:48px; margin-bottom:8px;
-    background:var(--sb-cream); border:2px solid var(--sb-blue);
-    border-radius:10px; display:flex; align-items:center; gap:6px; padding:0 8px 0 34px;
-    box-shadow:0 3px 0 rgba(0,0,0,.28); transition:all .3s;
+    position:relative; height:48px; margin-bottom:8px; border-radius:9px;
+    background:linear-gradient(160deg,#fffdf4 0%,var(--sb-cream) 52%,#f1e5c8 100%);
+    border:2px solid #16305e;
+    box-shadow:0 2px 0 #091d3d, 0 5px 9px rgba(0,0,0,.42), inset 0 0 0 1.5px rgba(255,255,255,.8);
+    display:flex; align-items:center; gap:4px; padding:0 7px 0 22px;
+    transition:transform .25s, box-shadow .25s, background .25s, border-color .25s;
   }
+  .ss-rung:nth-child(even) { transform:rotate(-.35deg); }
+  .ss-rung:nth-child(odd)  { transform:rotate(.3deg); }
+  /* card-corner rank pips, like a real playing card */
   .ss-rung .num {
-    position:absolute; left:-3px; top:-3px; width:30px; height:30px;
-    display:grid; place-items:center; border-radius:9px;
-    background:var(--sb-blue); color:#fff; font-weight:900; font-size:13px;
-    box-shadow:0 2px 3px rgba(0,0,0,.3);
+    position:absolute; left:3px; top:1px; line-height:1;
+    font-weight:900; font-size:14px; color:var(--sb-blue); letter-spacing:-.5px;
   }
-  .ss-rung .rw { font-weight:800; font-size:12.5px; color:var(--sb-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ss-rung .num::after {
+    content:""; display:block; width:7px; height:8px; margin:1px auto 0;
+    background:currentColor; opacity:.4;
+    clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+  }
+  .ss-rung .rw {
+    flex:1 1 auto; font-weight:900; font-size:12.5px; color:var(--sb-ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+  }
   .ss-rung .rw .ico { font-size:15px; }
-  .ss-rung.vaulted { background:#e7f6e9; border-color:var(--sb-green); }
-  .ss-rung.vaulted .num { background:var(--sb-green); }
+  .ss-rung .rw .plus { opacity:.45; margin:0 1px; }
+
+  .ss-rung.vaulted {
+    background:linear-gradient(160deg,#f4fff5,#dcf3e0 60%,#c7e8ce);
+    border-color:var(--sb-green-dark); padding-right:26px;
+  }
+  .ss-rung.vaulted .num { color:var(--sb-green-dark); }
   .ss-rung.vaulted::after {
-    content:"✓ vault"; position:absolute; right:6px; top:50%; transform:translateY(-50%);
-    font-size:9px; font-weight:900; color:var(--sb-green); letter-spacing:.5px;
+    content:"🔒"; position:absolute; right:5px; top:50%; transform:translateY(-50%);
+    font-size:12px; opacity:.85;
   }
-  .ss-rung.here { border-color:var(--sb-yellow); box-shadow:0 0 0 3px rgba(255,199,44,.55), 0 3px 0 rgba(0,0,0,.28); }
+  .ss-rung.here {
+    border-color:var(--sb-yellow);
+    box-shadow:0 0 0 3px rgba(255,199,44,.6), 0 2px 0 #091d3d, 0 6px 14px rgba(0,0,0,.5);
+    transform:rotate(0deg) scale(1.015);
+  }
+  /* jackpot rung renders as the golden card back */
   .ss-rung.jack {
-    background:linear-gradient(160deg,#ffe9a8,#ffd95e); border-color:#e0a400;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.28) 0 5px, rgba(160,105,0,.12) 5px 10px),
+      radial-gradient(130% 120% at 50% 0%, #fff3c9 0%, var(--sb-yellow) 45%, #c98f00 100%);
+    border-color:#8a6100;
+    box-shadow:0 2px 0 #6b4600, 0 6px 16px rgba(0,0,0,.45), inset 0 0 0 1.5px rgba(255,255,255,.65), 0 0 18px rgba(255,199,44,.55);
   }
-  .ss-rung.jack .num { background:#e0a400; }
-  .ss-rung.hi-zone { border-style:dashed; }
+  .ss-rung.jack .num, .ss-rung.jack .rw { color:#5c3d00; }
+  .ss-rung.jack .rw { white-space:normal; font-size:11px; line-height:1.2; text-shadow:0 1px 0 rgba(255,255,255,.5); }
+  .ss-rung.jack .rw .hd { display:block; font-size:10px; letter-spacing:.8px; }
+  .ss-rung.hi-zone { border-style:dashed; border-color:#8c2033; }
+  .ss-rung.hi-zone.vaulted { border-color:var(--sb-green-dark); }
+  .ss-rung.jack.hi-zone { border-style:solid; }
   .ss-rung.start-row {
-    background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.4);
-    color:#fff; justify-content:center; padding-left:8px;
+    background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.09));
+    border:2px dashed rgba(255,255,255,.5); box-shadow:none;
+    justify-content:center; padding-left:8px; transform:none;
   }
-  .ss-rung.start-row .rw { color:#fff; font-size:11px; }
+  .ss-rung.start-row .rw { color:#fff; font-size:11px; font-weight:800; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+
+  /* marker = top of YOUR stock pile */
   .ss-pawn {
-    position:absolute; left:8px; width:38px; height:48px; z-index:5;
-    display:grid; place-items:center; font-size:27px;
-    transition:top .55s cubic-bezier(.34,1.3,.5,1);
-    filter:drop-shadow(0 3px 3px rgba(0,0,0,.45));
+    position:absolute; left:2px; width:34px; height:48px; z-index:6;
+    transition:top .5s cubic-bezier(.34,1.3,.5,1);
+    filter:drop-shadow(0 4px 5px rgba(0,0,0,.7));
   }
-  .ss-pawn .crown { position:absolute; top:-10px; left:50%; transform:translateX(-50%); font-size:14px; }
+  /* two cream cards stacked behind a gold card back = "the top of YOUR stock pile" */
+  .ss-pawn .tok, .ss-pawn .tok::before, .ss-pawn .tok::after {
+    position:absolute; border-radius:5px; border:1.5px solid #16305e;
+  }
+  .ss-pawn .tok::before, .ss-pawn .tok::after {
+    content:""; background:linear-gradient(160deg,#fffdf4,#e3d7b6);
+  }
+  .ss-pawn .tok::before { inset:-4px -3px 8px 5px; z-index:-2; transform:rotate(-6deg); }
+  .ss-pawn .tok::after  { inset:-2px 0 6px 3px; z-index:-1; transform:rotate(4deg); }
+  .ss-pawn .tok {
+    inset:5px 3px 3px 1px; z-index:1; border-color:#7a5200;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.32) 0 4px, rgba(160,105,0,.14) 4px 8px),
+      radial-gradient(120% 110% at 50% 0%, #fff3c9 0%, var(--sb-yellow) 45%, #c98f00 100%);
+    display:grid; place-items:center;
+    font-size:8px; font-weight:900; color:#5c3d00; line-height:1.05; text-align:center;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.65);
+  }
+  .ss-pawn .crown { position:absolute; top:-11px; left:50%; transform:translateX(-50%); font-size:15px; z-index:3; }
   .ss-pawn .net {
-    position:absolute; bottom:-7px; left:50%; transform:translateX(-50%);
-    font-size:15px; text-shadow:0 0 8px #FFC72C; animation:sbPulse 1.6s infinite;
+    position:absolute; bottom:-9px; left:50%; transform:translateX(-50%);
+    font-size:15px; text-shadow:0 0 8px #FFC72C; animation:sbPulse 1.6s infinite; z-index:2;
   }
   .ss-altitude {
-    position:absolute; left:0; right:0; text-align:center; font-size:9px; font-weight:900;
-    letter-spacing:1px; color:rgba(255,255,255,.75); pointer-events:none;
+    position:absolute; left:0; right:0; z-index:4; text-align:center; pointer-events:none;
+    transform:translateY(-50%);
+  }
+  /* must stay inside the 8px gap between rung 7 and rung 6 — keep it one short line */
+  .ss-altitude span {
+    display:inline-block; background:rgba(140,32,51,.97); color:#ffd7dd; white-space:nowrap;
+    font-size:7.5px; font-weight:900; letter-spacing:.3px; padding:1px 7px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.35); box-shadow:0 2px 6px rgba(0,0,0,.6);
   }
 
   /* ---------- vault ---------- */
   .ss-vault {
-    flex:0 0 122px; display:flex; flex-direction:column;
-    background:linear-gradient(180deg,#2a5cb0,#14396f);
-    border:2px solid rgba(255,199,44,.55); border-radius:16px; padding:8px;
+    flex:0 0 110px; display:flex; flex-direction:column; min-height:0;
+    background:linear-gradient(180deg,#2a5cb0,#0f2c58);
+    border:2px solid rgba(255,199,44,.55); border-radius:14px; padding:7px 6px;
     box-shadow:var(--sb-shadow); color:#fff;
   }
-  .ss-vault h4 { margin:0 0 2px; font-size:11px; letter-spacing:1px; text-align:center; color:var(--sb-yellow); }
-  .ss-vault .sub { font-size:8.5px; text-align:center; color:var(--sb-sky-light); font-weight:700; margin-bottom:6px; }
-  .ss-vault-chips { flex:1 1 auto; overflow-y:auto; display:flex; flex-direction:column; gap:5px; min-height:0; }
+  .ss-vault h4 { margin:0; font-size:11px; letter-spacing:1px; text-align:center; color:var(--sb-yellow); }
+  .ss-vault .sub { font-size:8px; text-align:center; color:#ffc9cf; font-weight:800; margin-bottom:5px; letter-spacing:.2px; white-space:nowrap; }
+  .ss-vault-chips { flex:1 1 auto; overflow-y:auto; display:flex; flex-direction:column; gap:4px; min-height:0; }
   .ss-vchip {
-    display:flex; align-items:center; gap:5px; background:rgba(255,255,255,.94);
-    border-radius:8px; padding:4px 7px; font-weight:800; font-size:11.5px; color:var(--sb-ink);
+    display:flex; align-items:center; gap:4px; background:rgba(255,255,255,.95);
+    border-radius:7px; padding:4px 6px; font-weight:900; font-size:11.5px; color:var(--sb-ink);
+    box-shadow:0 1px 2px rgba(0,0,0,.35);
     animation:sbPop .3s cubic-bezier(.34,1.56,.64,1);
   }
   .ss-vchip .r { margin-left:auto; font-size:8.5px; color:#7a89a8; font-weight:900; }
-  .ss-vault-empty { font-size:10px; color:var(--sb-sky-light); text-align:center; margin-top:14px; font-weight:700; }
-  .ss-vault-total { text-align:center; font-weight:900; font-size:12px; color:var(--sb-yellow); margin:6px 0 6px; }
-  .ss-bank-btn { min-height:44px; font-size:14px; padding:8px 6px; }
+  .ss-vault-chips.empty { justify-content:center; }
+  .ss-vault-empty { font-size:9.5px; color:var(--sb-sky-light); text-align:center; font-weight:700; line-height:1.45; }
+  .ss-vault-empty .ghost {
+    display:block; width:56px; height:34px; margin:0 auto 7px; border-radius:6px;
+    border:2px dashed rgba(255,255,255,.3);
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 5px, transparent 5px 10px);
+  }
+  .ss-vault-total { text-align:center; font-weight:900; font-size:11px; line-height:1.25; color:var(--sb-yellow); margin:5px 0; }
+  .ss-bank-btn { min-height:44px; font-size:14px; padding:8px 4px; }
 
   /* ---------- risk framing ---------- */
   .ss-risk {
-    margin-top:10px; background:rgba(20,57,111,.75); border:1.5px solid rgba(255,255,255,.2);
-    border-radius:12px; padding:8px 12px; color:#fff; font-size:12px; font-weight:700;
-    display:flex; flex-direction:column; gap:3px;
+    margin-top:7px; background:rgba(9,29,61,.8); border:1.5px solid rgba(255,255,255,.22);
+    border-radius:12px; padding:6px 10px; color:#fff; font-size:10.5px; font-weight:700;
+    line-height:1.35;
   }
   .ss-risk .warn { color:#ffb3bd; }
   .ss-risk .safe { color:#9be8ac; }
+  .ss-risk b { color:var(--sb-yellow); }
+  .ss-risk .safe b, .ss-risk .warn b { color:inherit; text-decoration:underline; text-underline-offset:2px; }
 
   /* ---------- actions ---------- */
-  .ss-actions { display:flex; gap:10px; margin-top:10px; }
-  .ss-actions .sb-btn { flex:1 1 0; flex-direction:column; gap:2px; padding:11px 8px; min-height:62px; }
-  .ss-actions .odds { font-size:10.5px; font-weight:800; opacity:.85; text-shadow:none; }
+  .ss-actions { display:flex; gap:8px; margin-top:7px; }
+  .ss-actions .sb-btn { flex:1 1 0; flex-direction:column; gap:1px; padding:8px 5px; min-height:56px; font-size:14.5px; }
+  .ss-actions .odds { font-size:9.5px; font-weight:800; opacity:.88; text-shadow:none; line-height:1.2; }
   .ss-net-row {
-    margin-top:10px; display:flex; align-items:center; gap:10px;
-    background:rgba(255,255,255,.1); border:1.5px dashed rgba(255,199,44,.5);
-    border-radius:12px; padding:8px 10px;
+    margin-top:7px; display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,.1); border:1.5px dashed rgba(255,199,44,.55);
+    border-radius:12px; padding:6px 8px;
   }
-  .ss-net-row .txt { flex:1 1 auto; color:#fff; font-size:11px; font-weight:700; line-height:1.35; }
+  .ss-net-row .txt { flex:1 1 auto; color:#fff; font-size:10px; font-weight:700; line-height:1.3; }
   .ss-net-row .txt b { color:var(--sb-yellow); }
+  .ss-net-row .free { color:#9be8ac; }
+  .ss-net-row .free b { color:#9be8ac; }
   .ss-net-row .sb-btn { flex:0 0 auto; }
   .ss-net-row.owned { border-style:solid; background:rgba(255,199,44,.18); }
   .ss-summit {
-    margin-top:10px; display:none; align-items:center; gap:10px;
+    margin-top:8px; display:none; align-items:center; gap:9px;
     background:linear-gradient(160deg,#7a1b2c,#4a0f1b); border:2px solid var(--sb-yellow);
-    border-radius:14px; padding:10px 12px; box-shadow:var(--sb-shadow);
+    border-radius:13px; padding:8px 10px; box-shadow:var(--sb-shadow);
   }
   .ss-summit.on { display:flex; }
-  .ss-summit .txt { flex:1 1 auto; color:#fff; font-size:11.5px; font-weight:700; line-height:1.4; }
+  .ss-summit .txt { flex:1 1 auto; color:#fff; font-size:10.5px; font-weight:700; line-height:1.35; }
   .ss-summit .txt b { color:var(--sb-yellow); }
-  .ss-stats {
-    margin-top:12px; display:flex; justify-content:space-around; gap:6px;
-    color:var(--sb-sky-light); font-size:10.5px; font-weight:800; text-align:center;
+  .ss-summit .free { color:#9be8ac; }
+  .ss-summit .free b { color:#9be8ac; }
+  .ss-ended {
+    display:none; margin-top:8px; align-items:center; gap:8px;
+    background:rgba(9,29,61,.9); border:2px solid var(--sb-yellow); border-radius:13px;
+    padding:8px 10px; color:#fff; font-size:11.5px; font-weight:800; line-height:1.35;
   }
-  .ss-stats b { display:block; color:#fff; font-size:14px; }
+  .ss-ended.on { display:flex; }
+  /* right padding keeps the last stat clear of the fixed "Reset demo" button */
+  .ss-stats {
+    margin-top:8px; display:flex; justify-content:space-between; gap:6px; padding-right:50px;
+    color:var(--sb-sky-light); font-size:9.5px; font-weight:800; text-align:center;
+  }
+  .ss-stats b { display:block; color:#fff; font-size:13px; }
 
-  /* ---------- fall sheet / jackpot ---------- */
+  /* ---------- fall / bank FX ---------- */
+  .ss-tumble {
+    position:fixed; z-index:400; pointer-events:none; border-radius:9px;
+    display:flex; align-items:center; padding:0 6px 0 8px;
+    font-weight:900; font-size:12px; color:var(--sb-ink);
+    background:linear-gradient(160deg,#fffdf4,var(--sb-cream) 60%,#f1e5c8);
+    border:2px solid #16305e; box-shadow:0 6px 14px rgba(0,0,0,.5);
+    transition:transform .95s cubic-bezier(.5,-.35,.85,.6), opacity .95s ease-in;
+  }
+  .ss-bankfly { position:fixed; z-index:400; pointer-events:none; width:26px; height:36px;
+    transition:transform .72s cubic-bezier(.5,-.15,.7,1), opacity .72s ease-in; }
+  @keyframes ssQuake {
+    0%,100%{ transform:translate(0,0) }
+    15%{ transform:translate(-7px,2px) } 35%{ transform:translate(6px,-3px) }
+    55%{ transform:translate(-5px,3px) } 75%{ transform:translate(4px,-2px) } 90%{ transform:translate(-2px,1px) }
+  }
+  .ss-quake { animation:ssQuake .55s ease-out; }
+  .ss-flash-red { animation:ssFlashRed .6s ease-out; }
+  @keyframes ssFlashRed { 0%{ box-shadow:inset 0 0 0 999px rgba(215,38,61,.55) } 100%{ box-shadow:inset 0 0 26px rgba(0,0,0,.55) } }
+
   .ss-fall-lost { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0; }
   .ss-free-path {
     margin-top:10px; background:#e7f6e9; border:1.5px solid var(--sb-green);
     border-radius:12px; padding:10px; font-size:12.5px; font-weight:700; color:var(--sb-green-dark);
   }
   .ss-golden-card {
-    width:110px; height:150px; margin:12px auto; border-radius:12px;
-    background:linear-gradient(150deg,#ffe9a8 0%,#FFC72C 45%,#e0a400 100%);
-    border:3px solid #b8860b; display:grid; place-items:center;
-    font-weight:900; font-size:15px; color:#7a5200; text-align:center;
-    box-shadow:0 0 34px rgba(255,199,44,.9), 0 8px 20px rgba(0,0,0,.35);
+    width:112px; height:156px; margin:14px auto 10px; border-radius:11px;
     animation:ssSpin .9s cubic-bezier(.34,1.3,.5,1);
   }
+  .ss-golden-card.ss-cardback.gold::after { font-size:11px; letter-spacing:1px; }
   @keyframes ssSpin { from { transform:rotateY(540deg) scale(.3); } to { transform:rotateY(0) scale(1); } }
-  .ss-fly-out { position:fixed; z-index:400; pointer-events:none; transition:all .8s cubic-bezier(.4,-0.2,.7,1); }
-  .ss-rules { text-align:left; font-size:13px; line-height:1.55; color:var(--sb-ink); }
-  .ss-rules li { margin-bottom:7px; }
+  .ss-rules { text-align:left; font-size:12.5px; line-height:1.5; color:var(--sb-ink); padding-left:20px; margin:0; }
+  .ss-rules li { margin-bottom:6px; }
+
   @media (max-width:374px) {
-    .ss-vault { flex-basis:106px; }
-    .ss-ladder-wrap { height:300px; }
+    .ss-vault { flex-basis:104px; }
     .ss-actions .sb-btn { font-size:13.5px; }
+    .ss-rung .rw { font-size:11.5px; }
+  }
+  @media (min-width:430px) {
+    .ss-vault { flex-basis:134px; }
   }
 </style>
 </head>
@@ -165,17 +305,27 @@
 
   <div class="ss-hero">
     <span class="sb-timer-chip">⏳ <span id="ss-timer"></span></span>
-    <span class="ss-prestige" id="ss-prestige">👑 PRESTIGE <span id="ss-ptier"></span> · +25% rewards</span>
-    <button class="ss-info-btn" id="ss-info" aria-label="Rules">ⓘ</button>
+    <span class="ss-prestige" id="ss-prestige">👑 P<span id="ss-ptier"></span> · +25%</span>
+    <button class="ss-info-btn" id="ss-info" aria-label="How it works">ⓘ</button>
   </div>
 
   <div class="ss-board">
-    <div class="ss-ladder-wrap" id="ss-ladder-wrap">
-      <div class="ss-ladder" id="ss-ladder"></div>
+    <div class="ss-climb">
+      <div class="ss-goal">
+        <div class="ss-cardback gold sm"></div>
+        <div class="g-txt">
+          <div class="g-hd">🏆 RUNG 12 JACKPOT</div>
+          <div class="g-bd" id="ss-goal-bd">Golden Card Back + 🪙2,500</div>
+          <div class="g-prog" id="ss-goal-prog"></div>
+        </div>
+      </div>
+      <div class="ss-ladder-wrap" id="ss-ladder-wrap">
+        <div class="ss-ladder" id="ss-ladder"></div>
+      </div>
     </div>
     <div class="ss-vault">
       <h4>🔒 VAULT</h4>
-      <div class="sub">unbanked — at risk</div>
+      <div class="sub">UNBANKED — AT RISK</div>
       <div class="ss-vault-chips" id="ss-vault-chips"></div>
       <div class="ss-vault-total" id="ss-vault-total"></div>
       <button class="sb-btn sb-btn-yellow sb-btn-block ss-bank-btn" id="ss-bank">🏦 BANK IT</button>
@@ -186,11 +336,16 @@
 
   <div class="ss-actions">
     <button class="sb-btn sb-btn-green" id="ss-play">
-      <span>▶ Play level</span><span class="odds">win = climb 1 · ~78% win rate</span>
+      <span>▶ Play level</span><span class="odds">win → climb 1 · ~78% win rate</span>
     </button>
     <button class="sb-btn sb-btn-red" id="ss-hard">
-      <span>🔥 Hard level</span><span class="odds">win = climb 2 · ~55% win rate</span>
+      <span>🔥 Hard level</span><span class="odds">win → climb 2 · ~55% win rate</span>
     </button>
+  </div>
+
+  <div class="ss-ended" id="ss-ended">
+    <span style="font-size:18px">🏁</span>
+    <span id="ss-ended-txt">Event ended.</span>
   </div>
 
   <div class="ss-net-row" id="ss-net-row">
@@ -199,8 +354,7 @@
   </div>
 
   <div class="ss-summit" id="ss-summit">
-    <div class="txt">⛰️ <b>Summit Pack</b> — 1 guaranteed climb + Safety Net.<br>
-      <span style="opacity:.8">Free path: keep winning levels — the summit is <b id="ss-summit-left"></b> away.</span></div>
+    <div class="txt" id="ss-summit-txt"></div>
     <button class="sb-btn sb-btn-yellow sb-btn-sm" id="ss-summit-buy">$2.99</button>
   </div>
 
@@ -219,13 +373,19 @@
   "use strict";
   SB.init({ title: "Stock Pile Streak", subtitle: "Win levels · climb the stack · bank anytime", resetKey: "stockpile-streak" });
 
-  var TOP = 12, RH = 56, ODDS = { normal: 0.78, hard: 0.55 };
+  var TOP = 12, RH = 56;
+  var HI = 7;            // rung >= HI is the high-altitude zone
+  var FALL_LOW = 2, FALL_HIGH = 3;
   var S = SB.store("stockpile-streak", {
     pos: 0, vault: [], net: false, prestige: 0,
     best: 0, bankedCoins: 0, banks: 0, golden: false,
     endTs: Date.now() + 72 * 3600 * 1000
   });
-  var st = S.data, busy = false;
+  var st = S.data, busy = false, ended = false;
+
+  // ---------- fall rule (single source of truth for text AND behaviour) ----------
+  function fallDepth(pos) { return pos >= HI ? FALL_HIGH : FALL_LOW; }
+  function landingRung(pos) { return Math.max(1, pos - fallDepth(pos)); }
 
   // ---------- reward table (coins scale +25% per prestige tier) ----------
   function mult() { return Math.pow(1.25, st.prestige); }
@@ -250,10 +410,12 @@
   function rwText(list) {
     return list.map(function (rw) {
       return '<span class="ico">' + SB.icon(rw.type) + "</span>" + SB.fmt(rw.amount);
-    }).join(" +");
+    }).join('<span class="plus">+</span>');
   }
   function rwWords(list) {
-    return list.map(function (rw) { return SB.fmt(rw.amount) + " " + (rw.type === "coins" ? "coins" : rw.type); }).join(" + ");
+    return list.map(function (rw) {
+      return SB.fmt(rw.amount) + " " + (rw.type === "coins" ? "coins" : rw.type === "gem" ? "gems" : rw.type);
+    }).join(" + ");
   }
   function vaultRewards(rungs) {
     var out = [];
@@ -282,27 +444,32 @@
   function buildLadder() {
     var html = "";
     for (var r = TOP; r >= 1; r--) {
-      var cls = "ss-rung" + (r === TOP ? " jack" : "") + (r >= 6 ? " hi-zone" : "");
+      var cls = "ss-rung" + (r === TOP ? " jack" : "") + (r >= HI ? " hi-zone" : "");
       html += '<div class="' + cls + '" id="ss-rung-' + r + '">' +
         '<div class="num">' + r + "</div>" +
-        '<div class="rw">' + (r === TOP ? "🏆 JACKPOT " : "") + rwText(rungRewards(r)) +
-        (r === TOP ? " + ✨Golden Back" : "") + "</div></div>";
+        '<div class="rw">' + (r === TOP ? '<span class="hd">🏆 JACKPOT</span>' : "") + rwText(rungRewards(r)) +
+        (r === TOP ? '<span class="plus">+</span>✨Gold Back' : "") + "</div></div>";
     }
-    html += '<div class="ss-rung start-row" id="ss-rung-0"><div class="rw">🏁 START — win a level to climb!</div></div>';
-    html += '<div class="ss-altitude" style="top:' + ((TOP - 6) * RH + 4) + 'px">⚠️ HIGH ALTITUDE — FALLS COST MORE HERE ⚠️</div>';
+    html += '<div class="ss-rung start-row" id="ss-rung-0"><div class="rw">🏁 START HERE</div></div>';
+    html += '<div class="ss-altitude" style="top:' + ((TOP - HI) * RH + 10 + 48 + 4) + 'px"><span>⚠ ABOVE HERE A FALL COSTS ' + FALL_HIGH + ' RUNGS ⚠</span></div>';
     ladderEl.innerHTML = html;
     pawnEl = document.createElement("div");
     pawnEl.className = "ss-pawn";
-    pawnEl.innerHTML = '<span class="crown" id="ss-crown" style="display:none">👑</span>🐹<span class="net" id="ss-netvis" style="display:none">🥅</span>';
+    pawnEl.innerHTML = '<span class="crown" id="ss-crown" style="display:none">👑</span>' +
+      '<span class="tok">YOU</span><span class="net" id="ss-netvis" style="display:none">🥅</span>';
     ladderEl.appendChild(pawnEl);
+    document.getElementById("ss-goal-bd").innerHTML = "Golden Card Back + " + rwText(rungRewards(TOP));
   }
   function pawnTop(pos) { return 10 + (TOP - pos) * RH; }
   function placePawn(animate) {
     if (!animate) pawnEl.style.transition = "none";
     pawnEl.style.top = pawnTop(st.pos) + "px";
     if (!animate) { void pawnEl.offsetHeight; pawnEl.style.transition = ""; }
-    var target = pawnTop(st.pos) - wrapEl.clientHeight / 2 + RH;
-    wrapEl.scrollTo({ top: Math.max(0, target), behavior: animate ? "smooth" : "auto" });
+    // keep the current rung low in the frame so the rungs still to climb stay visible,
+    // and clamp explicitly (the wrap's clientHeight is flex-derived and changes on resize)
+    var maxScroll = Math.max(0, wrapEl.scrollHeight - wrapEl.clientHeight);
+    var target = pawnTop(st.pos) - wrapEl.clientHeight * 0.62 + RH;
+    wrapEl.scrollTo({ top: Math.min(maxScroll, Math.max(0, target)), behavior: animate ? "smooth" : "auto" });
   }
 
   // ---------- full render ----------
@@ -319,10 +486,13 @@
       el.classList.toggle("vaulted", st.vault.indexOf(r) !== -1);
     }
     placePawn(animatePawn);
+    document.getElementById("ss-goal-prog").textContent =
+      st.pos > 0 ? "You're on rung " + st.pos + " · " + (TOP - st.pos) + " to go" : "You're at the start · 12 rungs to go";
 
     // vault
     var chips = document.getElementById("ss-vault-chips");
-    if (!st.vault.length) chips.innerHTML = '<div class="ss-vault-empty">Empty.<br>Climb rungs to fill it — bank anytime, free.</div>';
+    chips.classList.toggle("empty", !st.vault.length);
+    if (!st.vault.length) chips.innerHTML = '<div class="ss-vault-empty"><span class="ghost"></span>Empty.<br>Every rung you<br>reach lands here.<br>Banking is free.</div>';
     else chips.innerHTML = st.vault.slice().sort(function (a, b) { return b - a; }).map(function (r) {
       return '<div class="ss-vchip" id="ss-vchip-' + r + '">' + rwText(rungRewards(r)) + '<span class="r">R' + r + "</span></div>";
     }).join("");
@@ -330,42 +500,76 @@
     document.getElementById("ss-vault-total").innerHTML = st.vault.length
       ? "🪙 " + SB.fmt(cv) + (extras ? " + " + extras + " item" + (extras > 1 ? "s" : "") : "")
       : "&nbsp;";
+    // BANK stays available even after the event ends — banked value is never destroyed
     document.getElementById("ss-bank").disabled = !st.vault.length || busy;
 
-    // risk framing
+    // risk framing — the knock-down rule is always stated, including before the first climb.
+    // Once the event has ended nothing is at risk any more, so the whole box goes away and the
+    // ended banner carries the (single) message instead of contradicting it.
     var risk = document.getElementById("ss-risk");
+    risk.style.display = ended ? "none" : "";
+    var lines = [];
     var next = st.pos < TOP ? st.pos + 1 : TOP;
-    var lines = ['⬆️ Next rung ' + next + ' is worth <b>' + rwWords(rungRewards(next)) + "</b>" + (next === TOP ? " 🏆" : "")];
-    if (st.pos >= 1) {
-      var lostRungs = st.vault.filter(function (r) { return r > Math.max(1, st.pos - 2); });
-      if (st.net) lines.push('<span class="safe">🥅 Safety Net armed — your next fall is fully absorbed.</span>');
-      else if (lostRungs.length) lines.push('<span class="warn">⬇️ A loss knocks you to rung ' + Math.max(1, st.pos - 2) + " and drops " + rwWords(vaultRewards(lostRungs)) + " from your vault.</span>");
-      else lines.push('<span class="safe">🛡️ Rung 1 is a safety floor — you can never fall below it.</span>');
-      if (st.pos >= 6 && !st.net) lines.push('<span class="warn">⚠️ High altitude — falls cost more here!</span>');
+    lines.push('⬆️ Next rung ' + next + ' pays <b>' + rwWords(rungRewards(next)) + "</b>" + (next === TOP ? " 🏆" : ""));
+    if (st.net) {
+      lines.push('<span class="safe">🥅 Safety Net armed — your next fall is absorbed, then it\'s used up.' +
+        (st.pos >= 1 ? " After that a fall from rung " + st.pos + " costs " + (st.pos - landingRung(st.pos)) + " rungs." : "") + "</span>");
+    } else if (st.pos === 0) {
+      lines.push('<span class="warn">⬇️ Lose a level → drop ' + FALL_LOW + ' rungs (' + FALL_HIGH + ' from rung ' + HI +
+        ' up); those rungs leave the vault.</span>');
+      lines.push('<span class="safe">🛡️ Never below rung 1 · <b>banked</b> rewards can never be lost.</span>');
     } else {
-      lines.push('<span class="safe">🛡️ Losses never knock you below rung 1 — and banked rewards are yours forever.</span>');
+      var land = landingRung(st.pos);
+      var lostRungs = st.vault.filter(function (r) { return r > land; });
+      if (lostRungs.length) {
+        lines.push('<span class="warn">⬇️ Lose → rung ' + st.pos + " → rung " + land + " (−" + (st.pos - land) +
+          "), dropping " + rwWords(vaultRewards(lostRungs)) + " from the vault.</span>");
+      } else {
+        lines.push('<span class="safe">🛡️ Rung 1 is a safety floor — a loss here costs you nothing.</span>');
+      }
+      if (st.pos >= HI) lines.push('<span class="warn">⚠️ High altitude: falls here cost <b>' + FALL_HIGH + ' rungs</b>, not ' + FALL_LOW + '.</span>');
     }
     risk.innerHTML = lines.join("<br>");
 
-    // safety net row
+    // ended banner
+    var eb = document.getElementById("ss-ended");
+    eb.classList.toggle("on", ended);
+    document.getElementById("ss-ended-txt").innerHTML = st.vault.length
+      ? "<b>Event ended.</b> Your vault is still yours — tap BANK IT to collect it."
+      : "<b>Event ended.</b> Thanks for climbing! Total banked: 🪙 " + SB.fmt(st.bankedCoins) + ".";
+
+    // summit pack replaces the standalone Safety Net row when it is up: the pack already
+    // contains a Safety Net, and two stacked offers pushed the stats row off a 360x740 screen.
+    var summitOn = !ended && st.pos >= 10 && st.pos < TOP;
+
+    // safety net row — free path is stated in the same view as the price
     var nr = document.getElementById("ss-net-row");
     nr.classList.toggle("owned", st.net);
+    nr.style.display = (ended || summitOn) ? "none" : "";
     document.getElementById("ss-net-txt").innerHTML = st.net
-      ? "🥅 <b>Safety Net armed.</b> Your next fall is absorbed — then it's used up."
-      : "🥅 <b>Safety Net</b> — absorbs your next fall completely (one-time).<br><span style='opacity:.8'>Free option: tap <b>BANK IT</b> any time to lock in your vault — banking never costs anything.</span>";
-    document.getElementById("ss-net-buy").style.display = st.net ? "none" : "";
+      ? "🥅 <b>Safety Net armed</b> — one fall absorbed, then it's gone. It is never spent on a rung-1 loss (those cost nothing anyway).<br>" +
+        '<span class="free">🆓 <b>BANK IT</b> is still free, any time.</span>'
+      : "🥅 <b>Safety Net</b> — absorbs your next fall completely. One fall, then it's gone.<br>" +
+        '<span class="free">🆓 Free alternative, always: tap <b>BANK IT</b> to lock your vault in.</span>';
+    var nb = document.getElementById("ss-net-buy");
+    nb.style.display = st.net ? "none" : "";
+    nb.disabled = busy || ended;
 
     // summit pack
     var sm = document.getElementById("ss-summit");
-    sm.classList.toggle("on", st.pos >= 10 && st.pos < TOP);
-    document.getElementById("ss-summit-left").textContent = (TOP - st.pos) + " win" + (TOP - st.pos > 1 ? "s" : "");
+    sm.classList.toggle("on", summitOn);
+    var left = TOP - st.pos;
+    document.getElementById("ss-summit-txt").innerHTML =
+      "⛰️ <b>Summit Pack</b> — 1 guaranteed climb" + (st.net ? " (Safety Net stays armed)" : " + a Safety Net") + ".<br>" +
+      '<span class="free">🆓 Free path: <b>' + left + " more win" + (left > 1 ? "s" : "") + "</b> gets you there — banking stays free.</span>";
+    document.getElementById("ss-summit-buy").disabled = busy || ended;
 
     // stats
     document.getElementById("ss-best").textContent = st.best ? "R" + st.best : "—";
     document.getElementById("ss-banked").textContent = "🪙 " + SB.fmt(st.bankedCoins);
     document.getElementById("ss-golden").textContent = st.golden ? "✨ Owned" : "🔒 Rung 12";
-    document.getElementById("ss-play").disabled = busy;
-    document.getElementById("ss-hard").disabled = busy;
+    document.getElementById("ss-play").disabled = busy || ended;
+    document.getElementById("ss-hard").disabled = busy || ended;
   }
 
   // ---------- climb / fall / bank ----------
@@ -377,116 +581,169 @@
     S.save();
     render(true);
     SB.haptic(12);
-    if (st.pos === TOP) { setTimeout(jackpot, 650); return; }
+    if (st.pos >= TOP) { setTimeout(jackpot, 650); return; }
     setTimeout(function () { climbSteps(n - 1, done); }, 480);
   }
 
-  function flyChipsOut(rungs) {
+  // dramatic: the lost rung cards tumble out of the pile
+  function tumbleCards(rungs) {
     rungs.forEach(function (r, i) {
-      var chip = document.getElementById("ss-vchip-" + r);
-      if (!chip) return;
-      var rect = chip.getBoundingClientRect();
-      var ghost = chip.cloneNode(true);
-      ghost.className = "ss-vchip ss-fly-out";
-      ghost.style.left = rect.left + "px"; ghost.style.top = rect.top + "px";
-      document.body.appendChild(ghost);
-      requestAnimationFrame(function () { requestAnimationFrame(function () {
-        ghost.style.left = (rect.left - 140 - i * 30) + "px";
-        ghost.style.top = (rect.top + 190) + "px";
-        ghost.style.transform = "rotate(-35deg) scale(.55)";
-        ghost.style.opacity = "0";
-      }); });
-      setTimeout(function () { ghost.remove(); }, 900);
+      var src = document.getElementById("ss-rung-" + r) || document.getElementById("ss-vchip-" + r);
+      var rect = src ? src.getBoundingClientRect() : null;
+      if (!rect || !rect.width) rect = { left: window.innerWidth / 2 - 70, top: 200, width: 140, height: 48 };
+      var g = document.createElement("div");
+      g.className = "ss-tumble";
+      g.style.left = rect.left + "px"; g.style.top = rect.top + "px";
+      g.style.width = Math.max(120, rect.width) + "px"; g.style.height = "48px";
+      g.innerHTML = '<div class="num" style="position:absolute;left:5px;top:3px;font-weight:900;font-size:13px;color:#16305e">' + r + "</div>" +
+        '<div style="margin-left:22px">' + rwText(rungRewards(r)) + "</div>";
+      document.body.appendChild(g);
+      var dir = i % 2 ? 1 : -1;
+      setTimeout(function () {
+        requestAnimationFrame(function () {
+          g.style.transform = "translate(" + (dir * (70 + i * 26)) + "px," + (window.innerHeight - rect.top + 60) + "px) rotate(" + (dir * (160 + i * 55)) + "deg) scale(.75)";
+          g.style.opacity = "0";
+        });
+      }, i * 90);
+      setTimeout(function () { g.remove(); }, 1200 + i * 90);
     });
+    wrapEl.classList.remove("ss-quake", "ss-flash-red");
+    void wrapEl.offsetWidth;
+    wrapEl.classList.add("ss-quake", "ss-flash-red");
   }
 
   function onLoss() {
-    if (st.pos <= 0) { SB.toast("No climb lost — you're still at the start. Try again!"); busy = false; render(); return; }
+    var land = landingRung(st.pos);
+    var lostRungs = st.vault.filter(function (r) { return r > land; });
+    var realFall = st.pos > 0 && (land < st.pos || lostRungs.length > 0);
+
+    if (!realFall) {
+      // FIX: the Safety Net is NOT spent when there was nothing to absorb
+      SB.toast(st.pos === 0
+        ? "No climb lost — you're still at the start. Try again!"
+        : "🛡️ The rung-1 safety floor held — nothing lost!");
+      busy = false; render();
+      return;
+    }
     if (st.net) {
       st.net = false; S.save();
-      SB.toast("🥅 Safety Net absorbed the fall! You held rung " + st.pos + ".");
+      SB.toast("🥅 Safety Net absorbed the fall — you held rung " + st.pos + ". It's now used up.");
       SB.confetti(window.innerWidth / 2, window.innerHeight / 2, 40);
       busy = false; render();
       return;
     }
-    if (st.pos === 1) {
-      SB.toast("🛡️ The rung-1 safety floor held — nothing lost!");
-      busy = false; render();
-      return;
-    }
     var prevPos = st.pos, prevVault = st.vault.slice();
-    var newPos = Math.max(1, st.pos - 2);
-    var lostRungs = st.vault.filter(function (r) { return r > newPos; });
-    flyChipsOut(lostRungs);
-    st.pos = newPos;
-    st.vault = st.vault.filter(function (r) { return r <= newPos; });
+    tumbleCards(lostRungs);
+    st.pos = land;
+    st.vault = st.vault.filter(function (r) { return r <= land; });
     S.save();
     render(true);
     SB.haptic(30);
-    setTimeout(function () { fallSheet(prevPos, prevVault, lostRungs); }, 750);
+    setTimeout(function () { fallSheet(prevPos, prevVault, lostRungs); }, 900);
   }
 
   function fallSheet(prevPos, prevVault, lostRungs) {
     var lostChips = vaultRewards(lostRungs).map(SB.rewardChip).join("");
+    var settled = false;
     var m = SB.modal(
-      '<h3 style="margin:0 0 4px">💥 Knocked down!</h3>' +
-      '<div class="sb-muted" style="font-size:13px;font-weight:700">Rung ' + prevPos + " → rung " + st.pos + ". These fell out of your vault:</div>" +
+      '<h3 style="margin:0 0 4px">💥 Knocked down ' + (prevPos - st.pos) + ' rungs!</h3>' +
+      '<div class="sb-muted" style="font-size:13px;font-weight:700">Rung ' + prevPos + " → rung " + st.pos +
+      (prevPos >= HI ? " (high altitude = 3 rungs)" : "") + ". These fell out of your vault:</div>" +
       '<div class="ss-fall-lost">' + (lostChips || "—") + "</div>" +
       '<button class="sb-btn sb-btn-yellow sb-btn-block" id="ss-rewind">⏪ Rewind — restore rung + vault <span class="sb-price-tag">$1.99</span></button>' +
-      '<div class="ss-free-path">🆓 Free path: keep the knock-down and re-climb from rung ' + st.pos + ". Everything you already <b>banked</b> stays yours — always.</div>" +
-      '<button class="sb-sheet-cancel" id="ss-keep">Keep the knock-down & re-climb</button>',
+      '<div class="ss-free-path">🆓 Free path: keep the knock-down and re-climb from rung ' + st.pos +
+      ". Everything you already <b>banked</b> stays yours — always — and rung 1 is a floor you can't fall below.</div>" +
+      '<button class="sb-sheet-cancel" id="ss-keep">Keep the knock-down &amp; re-climb</button>',
       function () { busy = false; render(); }
     );
-    m.el.querySelector("#ss-keep").addEventListener("click", function () { m.close(); });
+    m.el.querySelector("#ss-keep").addEventListener("click", function () { if (settled) return; settled = true; m.close(); });
     m.el.querySelector("#ss-rewind").addEventListener("click", function () {
+      if (settled || document.querySelector(".sb-sheet-backdrop")) return;
       SB.buyIAP({
         label: "⏪ Rewind", price: "$1.99",
-        sub: "Restore your rung and everything that fell out of the vault",
+        sub: "Restore rung " + prevPos + " and everything that fell out of the vault",
         contents: vaultRewards(lostRungs), grant: false,
         onSuccess: function () {
-          st.pos = prevPos; st.vault = prevVault; S.save();
+          if (settled) return; settled = true;
+          st.pos = prevPos; st.vault = prevVault.slice(); S.save();
           m.close(true);
           busy = false; render(true);
           SB.toast("⏪ Rewound! Back on rung " + st.pos + " with your full vault.");
           SB.confetti();
-        },
-        onCancel: function () { /* fall sheet still open — no dead end */ }
+        }
       });
     });
   }
 
+  // cards fly from the vault into the wallet
+  function bankFly(rungs) {
+    var target = document.getElementById("sb-wallet-amt");
+    var tr = target ? target.getBoundingClientRect() : { left: window.innerWidth - 50, top: 26, width: 20, height: 20 };
+    var tx = tr.left + tr.width / 2, ty = tr.top + tr.height / 2;
+    rungs.slice(0, 6).forEach(function (r, i) {
+      var src = document.getElementById("ss-vchip-" + r);
+      var rect = src ? src.getBoundingClientRect() : null;
+      if (!rect || !rect.width) return;
+      var g = document.createElement("div");
+      g.className = "ss-bankfly ss-cardback";
+      g.style.left = rect.left + "px"; g.style.top = rect.top + "px";
+      document.body.appendChild(g);
+      setTimeout(function () {
+        requestAnimationFrame(function () {
+          g.style.transform = "translate(" + (tx - rect.left - 13) + "px," + (ty - rect.top - 18) + "px) rotate(" + (240 + i * 40) + "deg) scale(.35)";
+          g.style.opacity = "0.15";
+        });
+      }, i * 55);
+      setTimeout(function () { g.remove(); }, 900 + i * 55);
+    });
+  }
+
+  var banking = false;
   function bank(silent) {
-    if (!st.vault.length) return;
-    var rewards = vaultRewards(st.vault);
-    var coins = coinValue(st.vault);
+    if (banking || !st.vault.length) return;
+    banking = true;
+    var rungs = st.vault.slice();
+    var rewards = vaultRewards(rungs);
+    var coins = coinValue(rungs);
+    bankFly(rungs);
     SB.grantRewards(rewards, document.getElementById("ss-vault-chips"));
     st.bankedCoins += coins;
     st.banks++;
     st.vault = [];
     st.pos = 0;
     S.save();
-    if (!silent) { SB.confetti(); SB.toast("🏦 Banked! Pawn back to start — climb again!"); }
+    if (!silent) { SB.confetti(); SB.toast("🏦 Banked — locked in forever! Back to the start."); }
     render(true);
+    banking = false;
   }
 
+  var jackpotOpen = false;
   function jackpot() {
-    var rewards = vaultRewards(st.vault);
-    var coins = coinValue(st.vault);
+    if (jackpotOpen) return;
+    jackpotOpen = true;
+    busy = true;
+    var rungs = st.vault.slice();
+    var rewards = vaultRewards(rungs);
+    var coins = coinValue(rungs);
     SB.confetti(); SB.confetti(window.innerWidth * 0.25, 200); SB.confetti(window.innerWidth * 0.75, 200);
     SB.haptic(60);
     var firstGolden = !st.golden;
+    var claimed = false;
     var m = SB.modal(
       '<h3 style="margin:0">🏆 SUMMIT! RUNG 12!</h3>' +
-      '<div class="ss-golden-card">✨ GOLDEN<br>CARD BACK ✨<br><span style="font-size:10px">EXCLUSIVE COSMETIC</span></div>' +
+      '<div class="ss-golden-card ss-cardback gold"></div>' +
       '<div style="font-weight:800;font-size:13px;margin-bottom:8px">' +
       (firstGolden ? "The exclusive Golden Card Back is yours!" : "Golden Back already owned — enjoy the loot!") + "</div>" +
       '<div class="ss-fall-lost">' + rewards.map(SB.rewardChip).join("") + "</div>" +
-      '<div class="sb-muted" style="font-size:12px;font-weight:700">Vault auto-banked · Prestige tier up: rung values +25% and your pawn earns a crown 👑</div>' +
-      '<button class="sb-btn sb-btn-green sb-btn-block" id="ss-jack-ok" style="margin-top:12px">Claim & climb again</button>',
+      '<div class="sb-muted" style="font-size:12px;font-weight:700">Vault auto-banked · Prestige tier up: rung values +25% and your marker earns a crown 👑</div>' +
+      '<button class="sb-btn sb-btn-green sb-btn-block" id="ss-jack-ok" style="margin-top:12px">Claim &amp; climb again</button>',
       finishJack
     );
-    m.el.querySelector("#ss-jack-ok").addEventListener("click", function () { m.close(); });
+    m.el.querySelector("#ss-jack-ok").addEventListener("click", function () { if (claimed) return; m.close(); });
     function finishJack() {
+      if (claimed) return;      // FIX: rapid taps used to grant the jackpot once per tap
+      claimed = true;
+      jackpotOpen = false;
       SB.grantRewards(rewards);
       st.golden = true;
       st.bankedCoins += coins;
@@ -496,7 +753,7 @@
       st.pos = 0;
       st.best = TOP;
       S.save();
-      buildLadder(); // re-price rungs at new prestige tier
+      buildLadder(); // re-price rungs at the new prestige tier
       busy = false;
       render(false);
       SB.toast("👑 Prestige " + st.prestige + " — all rung values +25%!");
@@ -505,9 +762,10 @@
 
   // ---------- play ----------
   function play(hard) {
-    if (busy) return;
+    if (busy || ended) return;
     busy = true; render();
     SB.playLevel(simOpts(hard)).then(function (res) {
+      if (ended) { busy = false; render(); return; }
       if (res.won) {
         climbSteps(hard ? 2 : 1, function () { busy = false; render(); });
       } else {
@@ -521,56 +779,80 @@
 
   // ---------- IAPs ----------
   document.getElementById("ss-net-buy").addEventListener("click", function () {
+    if (busy || ended || st.net || document.querySelector(".sb-sheet-backdrop")) return;
     SB.buyIAP({
       label: "🥅 Safety Net", price: "$0.99",
-      sub: "One-time: your next fall is fully absorbed. Or bank anytime for free.",
+      sub: "One fall, fully absorbed — then it's used up. It is never spent on a rung-1 loss (those cost nothing anyway). Banking your vault is always free.",
       contents: [], grant: false,
       onSuccess: function () {
+        if (st.net) return;
         st.net = true; S.save(); render();
-        SB.toast("🥅 Safety Net armed under your pawn!");
+        SB.toast("🥅 Safety Net armed under your stock pile!");
       }
     });
   });
   document.getElementById("ss-summit-buy").addEventListener("click", function () {
+    if (busy || ended || document.querySelector(".sb-sheet-backdrop")) return;
+    var hadNet = st.net;
     SB.buyIAP({
       label: "⛰️ Summit Pack", price: "$2.99",
-      sub: "1 guaranteed climb + Safety Net. Free path: keep winning levels.",
+      sub: "1 guaranteed climb" + (hadNet ? " (your Safety Net stays armed)" : " + a Safety Net") +
+        ". Free path: keep winning levels — every win climbs you for free.",
       contents: [], grant: false,
       onSuccess: function () {
+        if (busy || ended) return;
         st.net = true; S.save();
         busy = true; render();
         SB.toast("⛰️ Guaranteed climb!");
-        setTimeout(function () { climbSteps(1, function () { busy = false; render(); }); }, 500);
+        setTimeout(function () { climbSteps(1, function () { busy = false; render(); }); }, 400);
       }
     });
   });
 
   // ---------- rules modal ----------
   document.getElementById("ss-info").addEventListener("click", function () {
+    if (document.querySelector(".sb-modal-backdrop")) return;
     SB.modal(
       '<h3 style="margin:0 0 8px">📜 Stock Pile Streak — Rules</h3>' +
       '<ul class="ss-rules">' +
-      "<li>🎮 <b>Win an adventure level</b> → climb <b>1 rung</b>. Win a <b>hard level</b> → climb <b>2</b>. That's the only fuel — no tickets, no timers.</li>" +
-      "<li>🎲 <b>Visible odds:</b> classic levels ≈ <b>78%</b> win rate, hard levels ≈ <b>55%</b> (shown on every button).</li>" +
-      "<li>🔒 Each rung you reach drops its reward into your <b>Vault (unbanked)</b>.</li>" +
-      "<li>🏦 <b>BANK IT</b> any time — always free — to collect the whole vault. Banked rewards can <b>never</b> be lost. Pawn returns to start.</li>" +
-      "<li>💥 Lose a level → fall <b>2 rungs</b> and the top 2 rungs' rewards drop out of the vault. You can <b>never fall below rung 1</b>, and never to zero.</li>" +
-      "<li>🏆 Rung 12 = <b>JACKPOT</b>: exclusive Golden Card Back + big coins, vault auto-banks, and you restart at a <b>Prestige tier</b> (+25% rung values, crown pawn 👑).</li>" +
-      "<li>🥅 Optional purchases always show the free alternative. Banking is the free safety valve — it costs nothing, ever.</li>" +
-      "<li>⏳ Event ends when the timer runs out (72h, compressed for this demo).</li>" +
+      "<li>🎮 <b>Win an adventure level</b> → climb <b>1 rung</b>. Win a <b>hard level</b> → climb <b>2</b>. Levels are the only fuel — no tickets, no energy gates.</li>" +
+      "<li>🎲 <b>Visible odds:</b> classic ≈ <b>78%</b> win rate, hard ≈ <b>55%</b> — printed on both buttons.</li>" +
+      "<li>🔒 Every rung you reach drops its reward into your <b>Vault (unbanked, at risk)</b>.</li>" +
+      "<li>🏦 <b>BANK IT</b> any time — always free — to collect the whole vault. Banked rewards can <b>never</b> be lost, even by losing. Your marker returns to the start.</li>" +
+      "<li>💥 Lose a level → drop <b>" + FALL_LOW + " rungs</b> (<b>" + FALL_HIGH + "</b> from rung " + HI + " and above), and those rungs' rewards leave the vault. You can <b>never fall below rung 1</b>.</li>" +
+      "<li>🏆 Rung " + TOP + " = <b>JACKPOT</b>: the exclusive Golden Card Back + the biggest coin payout. The vault auto-banks and you restart on a <b>Prestige tier</b> (+25% rung values, crowned marker 👑).</li>" +
+      "<li>🥅 Every paid option shows its free alternative next to the price. Banking is the free safety valve — it costs nothing, ever, and it stays open after the event ends.</li>" +
+      "<li>⏳ When the timer runs out the climb closes, but your vault stays bankable.</li>" +
       "</ul>" +
       '<button class="sb-btn sb-btn-blue sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>'
     );
   });
 
+  // ---------- expiry ----------
+  function endEvent() {
+    if (ended) return;
+    ended = true;
+    render();
+    SB.toast(st.vault.length
+      ? "⏳ Event ended — your vault is still bankable!"
+      : "⏳ Event ended — thanks for climbing!", 3000);
+  }
+
   // ---------- boot ----------
   S.save();
-  SB.countdown(document.getElementById("ss-timer"), st.endTs, function () {
-    SB.toast("⏳ Event ended — thanks for climbing!");
-  });
   buildLadder();
   render(false);
-  window.__ss = { state: st, save: S.save, render: render }; // demo/test hook
+  // the ladder viewport is flex-sized, so re-seat the marker once layout has settled
+  requestAnimationFrame(function () { placePawn(false); });
+  window.addEventListener("resize", function () { placePawn(false); });
+  SB.countdown(document.getElementById("ss-timer"), st.endTs, endEvent);
+  // FIX: a reload while the jackpot modal was open used to strand the player on rung 12
+  // (no golden back, no prestige, and every further play a silent no-op). Re-open it.
+  if (st.pos >= TOP) setTimeout(jackpot, 350);
+
+  window.__ss = { state: st, save: S.save, render: render, fallDepth: fallDepth,
+    landingRung: landingRung, rungRewards: rungRewards, isBusy: function () { return busy; },
+    isEnded: function () { return ended; } };
 })();
 </script>
 </body>
