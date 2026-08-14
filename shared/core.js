@@ -176,7 +176,9 @@
   }
 
   // rewards: [{type:'coins', amount:500}, ...]  originEl optional
-  function grantRewards(rewards, originEl) {
+  // opts: {toast:false} to suppress, or {toastTop:true} to keep it clear of bottom CTAs
+  function grantRewards(rewards, originEl, opts) {
+    opts = opts || {};
     var ox = window.innerWidth / 2, oy = window.innerHeight / 2;
     if (originEl && originEl.getBoundingClientRect) {
       var r = originEl.getBoundingClientRect();
@@ -195,7 +197,7 @@
     });
     saveWallet();
     haptic(20);
-    if (names.length) toast(names.join("  ·  "));
+    if (names.length && opts.toast !== false) toast(names.join("  ·  "), { top: !!opts.toastTop });
     var w = document.querySelector(".sb-wallet");
     if (w) { w.classList.remove("sb-bounce"); void w.offsetWidth; w.classList.add("sb-bounce"); }
   }
@@ -353,6 +355,7 @@
       var m = Math.floor((left % 3600000) / 60000);
       var s = Math.floor((left % 60000) / 1000);
       el.textContent = (h > 0 ? h + "h " : "") + String(m).padStart(2, "0") + "m " + String(s).padStart(2, "0") + "s";
+      if (!el.isConnected) { clearInterval(iv); return; }   // self-clear if the element is detached
       if (el.parentElement) el.parentElement.classList.toggle("urgent", left < UR);
       if (left <= 0) { clearInterval(iv); if (onEnd) onEnd(); }
     }

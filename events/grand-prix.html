@@ -7,29 +7,41 @@
 <link rel="stylesheet" href="../shared/core.css">
 <style>
 /* ---------- banner ---------- */
-.gp-banner{position:relative;border-radius:var(--sb-radius);padding:13px 13px 11px;color:#fff;overflow:hidden;
+.gp-banner{position:relative;border-radius:var(--sb-radius);padding:10px 12px 9px;color:#fff;overflow:hidden;
   background:linear-gradient(155deg,#1a1f35 0%,#1D4FA1 55%,#3E8EDE 100%);border:2px solid rgba(255,199,44,.5);box-shadow:var(--sb-shadow);}
-.gp-banner::before{content:"🏁";position:absolute;right:-10px;top:-16px;font-size:82px;opacity:.15;transform:rotate(12deg);}
-.gp-banner h2{margin:0;font-size:20px;text-shadow:0 2px 0 rgba(0,0,0,.35);padding-right:50px;}
-.gp-sub{font-size:11.5px;color:#cfe3fb;font-weight:700;margin-top:2px;line-height:1.35;padding-right:50px;}
-.gp-toprow{display:flex;align-items:center;gap:6px;margin-top:9px;flex-wrap:wrap;}
+.gp-banner::before{content:"🏁";position:absolute;right:-8px;top:-14px;font-size:70px;opacity:.15;transform:rotate(12deg);}
+.gp-banner h2{margin:0;font-size:18px;text-shadow:0 2px 0 rgba(0,0,0,.35);padding-right:48px;line-height:1.15;}
+.gp-sub{font-size:11px;color:#cfe3fb;font-weight:700;margin-top:2px;line-height:1.3;padding-right:48px;}
+.gp-toprow{display:flex;align-items:center;gap:5px;margin-top:7px;flex-wrap:wrap;padding-right:44px;}
+.gp-toprow .sb-timer-chip{font-size:11px;padding:2px 9px;}
 .gp-safe{background:rgba(46,158,79,.92)!important;}
 .gp-trophies{background:rgba(0,0,0,.4)!important;color:var(--sb-yellow)!important;border:1px solid rgba(255,199,44,.5);}
-.gp-info{position:absolute;top:11px;right:11px;z-index:2;width:44px;height:44px;border-radius:50%;
+.gp-info{position:absolute;top:8px;right:8px;z-index:2;width:44px;height:44px;border-radius:50%;
   border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff;font-weight:900;font-size:17px;cursor:pointer;}
 /* ---------- stage / HUD ---------- */
-.gp-stage{margin-top:12px;border-radius:var(--sb-radius);overflow:hidden;box-shadow:var(--sb-shadow);border:2px solid rgba(255,255,255,.16);}
+.gp-stage{margin-top:10px;border-radius:var(--sb-radius);overflow:hidden;box-shadow:var(--sb-shadow);border:2px solid rgba(255,255,255,.16);}
 .gp-hud{display:flex;align-items:stretch;background:linear-gradient(180deg,#141a2c,#0d1120);color:#fff;}
-.gp-hud>div{flex:1;text-align:center;padding:6px 2px;}
-.gp-hud b{display:block;font-size:19px;font-weight:900;line-height:1.05;color:var(--sb-yellow);text-shadow:0 2px 0 rgba(0,0,0,.4);}
-.gp-hud small{display:block;font-size:8.5px;letter-spacing:.8px;font-weight:900;color:#8fa8cc;margin-top:1px;}
+.gp-hud>div{flex:1;text-align:center;padding:5px 2px;}
+.gp-hud b{display:block;font-size:18px;font-weight:900;line-height:1.05;color:var(--sb-yellow);text-shadow:0 2px 0 rgba(0,0,0,.4);}
+.gp-hud small{display:block;font-size:8px;letter-spacing:.7px;font-weight:900;color:#8fa8cc;margin-top:1px;}
 .gp-hud .gp-lapboard{background:repeating-linear-gradient(45deg,#1b2338 0 6px,#141a2c 6px 12px);border-left:1.5px solid rgba(255,255,255,.12);border-right:1.5px solid rgba(255,255,255,.12);}
-.gp-hud .gp-lapboard b{display:inline;font-size:22px;}
-.gp-hud .gp-lapboard span{font-size:13px;font-weight:900;color:#8fa8cc;}
+.gp-hud .gp-lapboard b{display:inline;font-size:21px;}
+.gp-hud .gp-lapboard span{font-size:12px;font-weight:900;color:#8fa8cc;}
 /* ---------- track ---------- */
-.gp-track{position:relative;width:100%;aspect-ratio:360/250;background:#1f5c31;}
+.gp-track{position:relative;width:100%;background:#1f5c31;overflow:hidden;}
 #gp-svg{display:block;width:100%;height:100%;}
 #gp-cars{position:absolute;inset:0;pointer-events:none;}
+/* rush overlay for nitro / big boosts */
+.gp-rush{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 2px,rgba(255,255,255,0) 2px 26px);
+  -webkit-mask-image:radial-gradient(120% 70% at 50% 50%,#000 20%,transparent 75%);mask-image:radial-gradient(120% 70% at 50% 50%,#000 20%,transparent 75%);}
+.gp-track.rush .gp-rush{animation:gpRush .9s linear 2;}
+@keyframes gpRush{0%{opacity:0;transform:translateX(60px) scaleX(1.5);}22%{opacity:1;}100%{opacity:0;transform:translateX(-120px) scaleX(1.5);}}
+.gp-track.rush{animation:gpShake .42s ease-in-out 2;}
+@keyframes gpShake{0%,100%{transform:translate(0,0);}30%{transform:translate(-1.5px,1px);}65%{transform:translate(1.5px,-1px);}}
+.gp-flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:#fff;}
+.gp-track.flash .gp-flash{animation:gpFlash 1.1s ease-out;}
+@keyframes gpFlash{0%{opacity:0;}6%{opacity:.9;}16%{opacity:.05;}30%{opacity:.7;}45%{opacity:0;}70%{opacity:.45;}100%{opacity:0;}}
 /* ---------- car CSS art (top-down chunky racer) ---------- */
 .gp-car{position:absolute;width:32px;height:16px;margin:0;transform:translate(-50%,-50%);will-change:left,top,transform;}
 .gp-car .bd{position:absolute;left:2px;right:2px;top:3px;bottom:3px;border-radius:5px 9px 9px 5px;
@@ -48,33 +60,55 @@
 .gp-car.me .bd{box-shadow:0 0 0 1.6px #fff,0 0 10px 2px rgba(255,199,44,.85),0 2px 3px rgba(0,0,0,.45);}
 .gp-car.livery .bd{background:linear-gradient(180deg,#eaf6ff 0%,#8fd8ff 30%,#1D4FA1 66%,#0d2b5c 100%);}
 .gp-car.livery .bd::before{height:2.6px;top:3.7px;background:repeating-linear-gradient(90deg,var(--sb-red) 0 3px,#fff 3px 6px);}
-.gp-car .fl{position:absolute;left:-19px;top:3.4px;width:19px;height:9px;opacity:0;
-  background:linear-gradient(90deg,rgba(255,80,0,0) 0%,rgba(255,120,0,.55) 35%,#ffb02e 72%,#fff5c2 100%);
-  border-radius:60% 0 0 60%;filter:blur(1.2px);}
-.gp-car .sl{position:absolute;left:-32px;top:2.5px;width:32px;height:11px;opacity:0;
-  background:repeating-linear-gradient(0deg,rgba(255,255,255,.75) 0 1.4px,transparent 1.4px 5px);
+.gp-car .fl{position:absolute;left:-22px;top:3.2px;width:22px;height:9.6px;opacity:0;
+  background:linear-gradient(90deg,rgba(255,80,0,0) 0%,rgba(255,120,0,.55) 30%,#ffb02e 68%,#fff5c2 100%);
+  border-radius:60% 0 0 60%;filter:blur(1.1px);}
+.gp-car .sl{position:absolute;left:-46px;top:2.5px;width:46px;height:11px;opacity:0;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.8) 0 1.4px,transparent 1.4px 5px);
   -webkit-mask-image:linear-gradient(90deg,transparent,#000);mask-image:linear-gradient(90deg,transparent,#000);}
-.gp-car.boost .fl{opacity:1;animation:gpFlick .13s infinite alternate;}
-.gp-car.boost .sl{opacity:1;}
-@keyframes gpFlick{from{transform:scaleX(.82) translateX(3px);}to{transform:scaleX(1.12) translateX(-2px);}}
+.gp-car.boost .fl{opacity:1;animation:gpFlick .11s infinite alternate;}
+.gp-car.boost .sl{opacity:1;animation:gpStreak .22s infinite alternate;}
+.gp-car.boost .bd{filter:brightness(1.4) saturate(1.25);}
+.gp-car.boost{filter:drop-shadow(0 0 7px rgba(255,176,46,.95));}
+.gp-car.boost .bd{animation:gpBoostPop .45s ease-out;}
+@keyframes gpBoostPop{0%{transform:scale(1);}35%{transform:scale(1.22);}100%{transform:scale(1);}}
+@keyframes gpFlick{from{transform:scaleX(.78) translateX(4px);}to{transform:scaleX(1.18) translateX(-3px);}}
+@keyframes gpStreak{from{opacity:.45;}to{opacity:1;}}
 /* ---------- lap banner ---------- */
-.gp-lapban{position:absolute;left:0;right:0;top:38%;text-align:center;pointer-events:none;opacity:0;transform:translateX(-100%);}
+.gp-lapban{position:absolute;left:0;right:0;top:34%;text-align:center;pointer-events:none;opacity:0;transform:translateX(-100%);}
 .gp-lapban.on{animation:gpBan 2.1s ease-out;}
 .gp-lapban b{display:inline-block;background:linear-gradient(180deg,#fff3c9,var(--sb-yellow));color:var(--sb-ink);
-  font-size:24px;font-weight:900;letter-spacing:1px;padding:5px 22px;border-radius:10px;border:2.5px solid #a37700;box-shadow:0 6px 18px rgba(0,0,0,.6);}
+  font-size:22px;font-weight:900;letter-spacing:1px;padding:4px 20px;border-radius:10px;border:2.5px solid #a37700;box-shadow:0 6px 18px rgba(0,0,0,.6);}
 .gp-lapban i{display:block;margin-top:5px;font-style:normal;font-size:11.5px;font-weight:900;color:#fff;text-shadow:0 2px 4px #000;}
 @keyframes gpBan{0%{opacity:0;transform:translateX(-70%) scale(.8);}18%{opacity:1;transform:translateX(0) scale(1);}
   78%{opacity:1;transform:translateX(0) scale(1);}100%{opacity:0;transform:translateX(60%) scale(.9);}}
 /* ---------- nudge ---------- */
 .gp-nudge b{color:var(--sb-yellow);}
-.gp-nudge{margin-top:10px;font-size:12.5px;font-weight:800;color:#fff;background:rgba(0,0,0,.32);
-  border-left:4px solid var(--sb-yellow);border-radius:10px;padding:8px 11px;line-height:1.35;}
+.gp-nudge{margin-top:8px;font-size:12px;font-weight:800;color:#fff;background:rgba(0,0,0,.32);
+  border-left:4px solid var(--sb-yellow);border-radius:10px;padding:7px 10px;line-height:1.3;}
 /* ---------- CTA ---------- */
-.gp-cta{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
-.gp-cta .sb-btn{flex-direction:column;gap:1px;padding:9px 14px;}.gp-sub2{display:block;font-size:10.5px;font-weight:800;opacity:.9;}
+.gp-cta{margin-top:9px;display:flex;flex-direction:column;gap:7px;}
+.gp-cta .sb-btn{flex-direction:column;gap:0;padding:6px 12px;font-size:15px;min-height:46px;}
+.gp-sub2{display:block;font-size:10px;font-weight:800;opacity:.92;}
 .gp-hardbtn{background:linear-gradient(180deg,#ff8a5c 0%,#D7263D 55%,#8f1024 100%)!important;}
+/* ---------- standings ---------- */
+.gp-board{margin-top:8px;background:rgba(253,246,227,.97);border-radius:13px;box-shadow:var(--sb-shadow);overflow:hidden;}
+.gp-board h3{margin:0;font-size:10px;font-weight:900;letter-spacing:.8px;color:#5a6b8c;padding:6px 11px 3px;
+  display:flex;justify-content:space-between;align-items:center;}
+.gp-board h3 em{font-style:normal;font-size:9px;color:#8296b5;letter-spacing:.2px;}
+.gp-row{display:flex;align-items:center;gap:7px;padding:4px 10px;border-top:1px solid rgba(27,42,74,.08);font-size:12.5px;font-weight:800;min-height:34px;}
+.gp-row .pos{width:22px;text-align:center;font-weight:900;font-size:12px;color:#5a6b8c;flex:0 0 auto;}.gp-row .pos.medal{font-size:16px;}
+.gp-row .av{width:24px;height:24px;flex:0 0 auto;border-radius:50%;background:#e6eefb;color:var(--sb-ink);display:grid;place-items:center;font-size:14px;position:relative;}
+.gp-row .av::after{content:"";position:absolute;right:-2px;bottom:-2px;width:9px;height:6px;border-radius:2px;background:var(--c);border:1.5px solid #fff;}
+.gp-row .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gp-row .nm small{display:block;font-size:9px;font-weight:800;color:#8296b5;letter-spacing:.2px;}
+.gp-row .sg{flex:0 0 auto;text-align:right;font-weight:900;color:var(--sb-blue);font-size:11.5px;}
+.gp-row .sg small{display:block;font-size:9px;color:#8296b5;font-weight:800;}
+.gp-row.me{background:linear-gradient(90deg,#1D4FA1,#3E8EDE);color:#fff;}.gp-row.done{background:linear-gradient(90deg,rgba(255,199,44,.28),transparent);}
+.gp-row.me.done{background:linear-gradient(90deg,#1D4FA1,#3E8EDE);box-shadow:inset 0 0 0 2px rgba(255,199,44,.7);}
+.gp-row.me .pos,.gp-row.me .sg{color:var(--sb-yellow);}.gp-row.me .nm small,.gp-row.me .sg small{color:#cfe3fb;}
 /* ---------- aids ---------- */
-.gp-aids{display:flex;gap:8px;margin-top:10px;}
+.gp-aids{display:flex;gap:8px;margin-top:9px;}
 .gp-aid{flex:1;background:rgba(253,246,227,.97);border-radius:13px;padding:8px 9px;box-shadow:var(--sb-shadow);}
 .gp-aid h4{margin:0 0 3px;font-size:11px;font-weight:900;letter-spacing:.4px;color:var(--sb-ink);}
 .gp-aid p{margin:0;font-size:10px;font-weight:700;color:#5a6b8c;line-height:1.3;}
@@ -82,51 +116,68 @@
 .gp-pip{width:16px;height:16px;border-radius:50%;background:#dfe8f6;border:2px solid #c2d2e8;display:grid;place-items:center;font-size:9px;}
 .gp-pip.on{background:linear-gradient(180deg,#ffd95e,var(--sb-yellow));border-color:var(--sb-yellow-dark);}
 .gp-aid .sb-btn{width:100%;font-size:11.5px;padding:7px 6px;min-height:44px;border-radius:9px;}
-.gp-bar{height:8px;border-radius:99px;background:#dfe8f6;overflow:hidden;margin:6px 0 4px;}.gp-bar i{display:block;height:100%;background:linear-gradient(90deg,#5ba0e8,var(--sb-sky));transition:width .3s;}
-/* ---------- standings ---------- */
-.gp-board{margin-top:11px;background:rgba(253,246,227,.97);border-radius:13px;box-shadow:var(--sb-shadow);overflow:hidden;}
-.gp-board h3{margin:0;font-size:11px;font-weight:900;letter-spacing:.8px;color:#5a6b8c;padding:9px 11px 6px;}
-.gp-row{display:flex;align-items:center;gap:8px;padding:7px 11px;border-top:1px solid rgba(27,42,74,.08);font-size:13px;font-weight:800;min-height:44px;}
-.gp-row .pos{width:26px;text-align:center;font-weight:900;font-size:13px;color:#5a6b8c;flex:0 0 auto;}.gp-row .pos.medal{font-size:18px;}
-.gp-row .av{width:28px;height:28px;flex:0 0 auto;border-radius:50%;background:#e6eefb;color:var(--sb-ink);display:grid;place-items:center;font-size:16px;position:relative;}
-.gp-row .av::after{content:"";position:absolute;right:-2px;bottom:-2px;width:10px;height:7px;border-radius:2px;background:var(--c);border:1.5px solid #fff;}
-.gp-row .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.gp-row .nm small{display:block;font-size:9.5px;font-weight:800;color:#8296b5;letter-spacing:.3px;}
-.gp-row .sg{flex:0 0 auto;text-align:right;font-weight:900;color:var(--sb-blue);font-size:12px;}
-.gp-row .sg small{display:block;font-size:9px;color:#8296b5;font-weight:800;}
-.gp-row.me{background:linear-gradient(90deg,#1D4FA1,#3E8EDE);color:#fff;}.gp-row.done{background:linear-gradient(90deg,rgba(255,199,44,.28),transparent);}
-.gp-row.me .pos,.gp-row.me .sg{color:var(--sb-yellow);}.gp-row.me .nm small,.gp-row.me .sg small{color:#cfe3fb;}
+.gp-bar{height:8px;border-radius:99px;background:#dfe8f6;overflow:hidden;margin:6px 0 4px;}
+.gp-bar i{display:block;height:100%;background:linear-gradient(90deg,#5ba0e8,var(--sb-sky));transition:width .25s linear;}
+.gp-bar.live i{background:linear-gradient(90deg,#3fc167,var(--sb-green));}
 /* ---------- offers ---------- */
-.gp-offers{margin-top:11px;display:flex;flex-direction:column;gap:8px;}
+.gp-offers{margin-top:9px;display:flex;flex-direction:column;gap:8px;}
 .gp-offer{border-radius:13px;padding:10px 11px;color:#fff;position:relative;overflow:hidden;box-shadow:var(--sb-shadow);
   background:linear-gradient(135deg,#3a2a6d,#1a1f35);border:2px solid rgba(255,199,44,.45);}
 .gp-offer.pass{background:linear-gradient(135deg,#0d4b52,#0b2a3f);border-color:rgba(127,215,255,.55);}
-.gp-offer.urgent{background:linear-gradient(135deg,#7a1b2c,#33101a);border-color:rgba(255,120,120,.6);animation:sbPulse 2.2s infinite;}
-.gp-offer h4{margin:0 0 2px;font-size:14px;}.gp-offer p{margin:0 0 8px;font-size:11px;font-weight:700;color:#d6e2f5;line-height:1.35;}
+.gp-offer.urgent{background:linear-gradient(135deg,#7a1b2c,#33101a);border-color:rgba(255,120,120,.75);box-shadow:0 0 0 1px rgba(255,120,120,.25),var(--sb-shadow);}
+.gp-offer.done{background:linear-gradient(135deg,#22314f,#141a2c);border-color:rgba(255,255,255,.25);}
+.gp-offer h4{margin:0 0 2px;font-size:14px;padding-right:60px;}
+.gp-offer p{margin:0 0 8px;font-size:11px;font-weight:700;color:#d6e2f5;line-height:1.35;}
+.fchip{background:#2E9E4F;color:#fff;border-radius:5px;font-size:9px;font-weight:900;padding:2px 5px;letter-spacing:.6px;}
 .gp-offer .free-note{font-size:10.5px;font-weight:800;color:#b8e6c4;margin-top:7px;line-height:1.35;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .gp-offer .free-go{background:rgba(46,158,79,.9);border:none;color:#fff;font-family:var(--sb-font);font-weight:900;font-size:10.5px;
   border-radius:9px;padding:6px 12px;min-height:44px;cursor:pointer;}
+.gp-offer .free-go:disabled{opacity:.5;}
 .gp-offer .tag{position:absolute;top:8px;right:-26px;transform:rotate(38deg);background:var(--sb-yellow);color:var(--sb-ink);
   font-size:9px;font-weight:900;letter-spacing:.5px;padding:2px 28px;}
 .gp-offer .sb-btn{width:100%;}.gp-owned{font-size:11.5px;font-weight:900;color:#b8e6c4;}
 /* ---------- stats + podium ---------- */
-.gp-stats{display:flex;gap:6px;margin-top:11px;}.gp-ff{margin-top:11px;opacity:.92;}
+.gp-stats{display:flex;gap:6px;margin-top:10px;}.gp-ff{margin-top:10px;opacity:.92;}
 .gp-stat{flex:1;background:rgba(0,0,0,.3);border-radius:11px;padding:7px 3px;text-align:center;color:#bcd4f2;font-size:8.5px;font-weight:900;letter-spacing:.4px;}
 .gp-stat b{display:block;font-size:15px;color:#fff;}
-.gp-podium{display:flex;align-items:flex-end;justify-content:center;gap:5px;margin:36px 0 4px;}
-.gp-pod{position:relative;width:60px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#5ba0e8,#1D4FA1);color:#fff;
+.gp-podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin:12px 0 4px;padding-top:32px;
+  background:radial-gradient(80% 100% at 50% 100%,rgba(255,199,44,.28),transparent 70%);}
+.gp-podcol{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+.gp-podcol .fig{font-size:26px;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));position:relative;
+  animation:gpDrop .45s cubic-bezier(.34,1.56,.64,1) both;}
+.gp-podcol.c1 .fig::after{content:"🏆";position:absolute;right:-15px;bottom:-2px;font-size:15px;}
+.gp-pod{width:60px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#5ba0e8,#1D4FA1);color:#fff;
   font-weight:900;font-size:16px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.4);}
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.4);transform-origin:bottom;animation:gpGrow .55s cubic-bezier(.2,1.3,.5,1) both;}
 .gp-pod.p1{height:74px;background:linear-gradient(180deg,#ffd95e,var(--sb-yellow-dark));color:var(--sb-ink);}
 .gp-pod.p2{height:56px;background:linear-gradient(180deg,#eef3fb,#9fb0c8);color:var(--sb-ink);}
 .gp-pod.p3{height:44px;background:linear-gradient(180deg,#e9a76a,#a86a34);}
-.gp-pod .fig{position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:27px;line-height:1;
-  filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));}
-.gp-pod.p1 .fig::after{content:"🏆";position:absolute;right:-13px;bottom:-2px;font-size:15px;}
+.gp-podcol.c1 .fig{animation-delay:.5s;}.gp-podcol.c2 .fig{animation-delay:.25s;}.gp-podcol.c3 .fig{animation-delay:.38s;}
+.gp-pod.p1{animation-delay:.3s;}.gp-pod.p2{animation-delay:.05s;}.gp-pod.p3{animation-delay:.18s;}
+@keyframes gpGrow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+@keyframes gpDrop{from{opacity:0;transform:translateY(-26px) scale(.6);}to{opacity:1;transform:translateY(0) scale(1);}}
 .gp-final{width:100%;border-collapse:collapse;font-size:12px;font-weight:800;margin:6px 0 2px;}
 .gp-final td{padding:5px 4px;border-bottom:1px solid rgba(27,42,74,.1);text-align:left;}.gp-final tr.me td{background:rgba(255,199,44,.28);}
-.gp-final td.r{text-align:right;color:#5a6b8c;font-size:11px;}.gp-recap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:9px 0;}.hidden{display:none!important;}
-@media (max-width:374px){.gp-row{font-size:12px;}.gp-offer h4{font-size:13px;}.gp-hud b{font-size:17px;}}
+.gp-final td.r{text-align:right;color:#5a6b8c;font-size:11px;}
+.gp-recap{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:9px 0;}
+.gp-fair{font-size:10.5px;font-weight:800;color:#5a6b8c;background:rgba(46,158,79,.13);border:1px solid rgba(46,158,79,.35);
+  border-radius:9px;padding:6px 8px;line-height:1.35;margin-top:8px;}
+.hidden{display:none!important;}
+@media (max-width:374px){.gp-row{font-size:11.5px;}.gp-offer h4{font-size:13px;}.gp-hud b{font-size:16px;}.gp-banner h2{font-size:17px;}}
+@media (max-height:800px){
+  .gp-banner{padding:8px 11px 8px;}
+  .gp-banner h2{font-size:16.5px;}
+  .gp-banner .gp-sub{display:none;}
+  .gp-nudge{font-size:11.5px;padding:6px 9px;margin-top:6px;line-height:1.25;}
+  .gp-cta{margin-top:6px;gap:6px;}
+  .gp-cta .sb-btn{min-height:44px;padding:4px 12px;font-size:14px;}
+  .gp-board{margin-top:6px;}
+  .gp-board h3{padding:4px 11px 2px;}
+  .gp-row{min-height:29px;padding:2px 10px;}
+  .gp-row .av{width:22px;height:22px;font-size:13px;}
+  .gp-stage{margin-top:6px;}
+  .gp-hud>div{padding:4px 2px;}
+}
 </style>
 </head>
 <body>
@@ -135,7 +186,7 @@
 
   <div class="gp-banner">
     <h2>🏁 Grand Prix Circuit</h2>
-    <div class="gp-sub">3 laps · 24 segments · 5 racers. Every metre of track is fuelled by clearing main-game levels.</div>
+    <div class="gp-sub">Clear main-game levels to move your car. 3 laps × 8 segments = 24 to the flag.</div>
     <div class="gp-toprow">
       <span class="sb-timer-chip">🏁 <span id="gp-timer">—</span></span>
       <span class="sb-timer-chip gp-safe">🛡️ A loss never sets you back</span>
@@ -146,13 +197,15 @@
 
   <div class="gp-stage">
     <div class="gp-hud">
-      <div><b id="gp-pos">5th</b><small>POSITION</small></div>
+      <div><b id="gp-pos">3rd</b><small>POSITION</small></div>
       <div class="gp-lapboard"><b id="gp-lap">1</b><span>/3</span><small>LAP</small></div>
       <div><b id="gp-seg">0</b><small>OF 24 SEGMENTS</small></div>
     </div>
     <div class="gp-track" id="gp-track">
-      <svg id="gp-svg" viewBox="0 0 360 250" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+      <svg id="gp-svg" viewBox="0 0 360 206" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
       <div id="gp-cars"></div>
+      <div class="gp-rush"></div>
+      <div class="gp-flash"></div>
       <div class="gp-lapban" id="gp-lapban"><b>LAP 2</b><i></i></div>
     </div>
   </div>
@@ -164,6 +217,11 @@
     <button class="sb-btn sb-btn-block gp-hardbtn" id="gp-hard">🔥 Hard level<span class="gp-sub2">clear = +2 segments &amp; +1 nitro charge</span></button>
   </div>
 
+  <div class="gp-board">
+    <h3>LIVE STANDINGS <em id="gp-cadnote">rival pace is fixed &amp; published</em></h3>
+    <div id="gp-rows"></div>
+  </div>
+
   <div class="gp-aids">
     <div class="gp-aid">
       <h4>⚡ NITRO CHARGES</h4>
@@ -173,14 +231,9 @@
     </div>
     <div class="gp-aid">
       <h4>🌀 SLIPSTREAM</h4>
-      <div class="gp-bar"><i id="gp-slipbar" style="width:0%"></i></div>
+      <div class="gp-bar" id="gp-slipwrap"><i id="gp-slipbar" style="width:0%"></i></div>
       <p id="gp-sliptxt">Only runs while you are last — a free comeback aid, +1 segment each time it fills.</p>
     </div>
-  </div>
-
-  <div class="gp-board">
-    <h3>LIVE STANDINGS</h3>
-    <div id="gp-rows"></div>
   </div>
 
   <div class="gp-offers" id="gp-offers"></div>
@@ -206,14 +259,15 @@
 /* ============ config ============ */
 var SEG_LAP = 8, LAPS = 3, TOTAL = SEG_LAP * LAPS;
 var EVENT_MS = 8*60*1000;          // 24-48h circuit window, compressed for demo
-var DEMO_DIV = 6.5;                // rival live cadence (25-40s) compressed ~6.5x
-var SLIP_LIVE = 90000, SLIP_MS = 25000;   // 90s live -> 25s demo
+var DEMO_DIV = 6.5;                // published live cadence compressed ~6.5x for the demo
+var SLIP_LIVE = 90000;             // free slipstream: +1 segment / 90s live
+var SLIP_MS = Math.round(SLIP_LIVE/DEMO_DIV);
 var TICK = 250;
 var RIVALS = [
-  {name:"Ruby Reyes",  av:"🦊", color:"#D7263D", live:26000, team:"Scarlet Skips", grid:1},
-  {name:"Duke Nakano", av:"🐻", color:"#2E9E4F", live:31000, team:"Verde Stock",   grid:2},
-  {name:"Zola Mbeki",  av:"🦜", color:"#8b5cf6", live:36000, team:"Violet Wilds",  grid:4},
-  {name:"Pip Larsson", av:"🐧", color:"#f97316", live:40000, team:"Amber Draw",    grid:5}
+  {name:"Ruby Reyes",  av:"🦊", color:"#D7263D", live:26000, team:"Scarlet Skips", grid:1, lane:1},
+  {name:"Duke Nakano", av:"🐻", color:"#2E9E4F", live:31000, team:"Verde Stock",   grid:2, lane:2},
+  {name:"Zola Mbeki",  av:"🦜", color:"#8b5cf6", live:36000, team:"Violet Wilds",  grid:4, lane:3},
+  {name:"Pip Larsson", av:"🐧", color:"#f97316", live:40000, team:"Amber Draw",    grid:5, lane:4}
 ];
 var MY_GRID = 3;
 var LAP_RW = [
@@ -227,53 +281,82 @@ function podiumRw(p){
   if(p===3) return [{type:"coins",amount:1200},{type:"wild",amount:1},{type:"gem",amount:6}];
   return [{type:"coins",amount:700},{type:"energy",amount:1}];
 }
+/* THE honesty rule: a rival's cadence is a constant, set from its published live
+   number. Nothing in this file may ever write to it, and no code path other than
+   the wall clock may move a rival. Segment k of rival r always lands at
+   d.start + k*cad(r) in race-clock time — reload-proof, purchase-proof.       */
+function cad(r){ return r.live/DEMO_DIV; }
+function liveS(ms){ return Math.round(ms/1000)+"s"; }
+function demoS(ms){ return (ms/DEMO_DIV/1000).toFixed(1)+"s"; }
 
 /* ============ state ============ */
 var st = SB.store("grand-prix", {start:0,end:0,skew:0,circuit:1,level:214,
   seg:0,at:0,fin:0,plays:0,wins:0,firstTry:0,hardWins:0,attempts:0,charges:0,
-  laps:[],rivals:null,nitro:false,pass:false,rerace:false,slipAt:0,slipCarry:0,
+  laps:[],rivals:null,nitro:false,pass:false,rerace:false,slipAt:0,slipGot:0,
   finished:false,finalPos:0,career:0,nextStart:0});
 var d = st.data;
-
+function save(){ st.save(); }
 function raceNow(){ return Date.now() + d.skew; }
-function pace(r){ return r.live/DEMO_DIV*(0.85+Math.random()*0.3); }
 
 var now = raceNow();
 if(!d.start){ d.start = now; d.end = now + EVENT_MS; }
-if(!d.rivals){
-  d.rivals = RIVALS.map(function(r,i){
-    return {name:r.name,av:r.av,color:r.color,live:r.live,team:r.team,grid:r.grid,lane:i+1,seg:0,at:0,fin:0,next:now+pace(r)};
+if(!d.rivals) d.rivals = freshGrid(now);
+function freshGrid(t){
+  return RIVALS.map(function(r){
+    return {name:r.name,av:r.av,color:r.color,live:r.live,team:r.team,grid:r.grid,lane:r.lane,
+            seg:0,at:0,fin:0,next:t+cad(r)};
   });
 }
-/* offline catch-up: rivals kept racing on their own clock */
-(function(){
-  var moved=0,g=0;
+/* rivals move ONLY on their own absolute schedule — identical whether the tab was
+   open, backgrounded or closed. Bounded by TOTAL, so no burst and no overshoot. */
+var booting = true;
+function catchUp(t){
+  var moved = 0;
   d.rivals.forEach(function(r){
-    while(r.seg<TOTAL && r.next<=now && g++<400){ r.seg++; r.at=r.next; r.next+=pace(r); moved++; if(r.seg>=TOTAL) r.fin=r.at; }
-    if(r.next<=now) r.next = now + pace(r);
+    while(r.seg < TOTAL && r.next <= t){
+      r.seg++; r.at = r.next; r.next += cad(r); moved++;
+      if(r.seg >= TOTAL){
+        r.fin = r.at;
+        if(!booting && !d.finished) SB.toast(r.av+" "+r.name+" takes the flag!", {ms:2000, top:true});
+      }
+    }
   });
-  if(moved>3) setTimeout(function(){ SB.toast("While you were away, the pack kept lapping…",2400); },900);
-})();
+  return moved;
+}
+var awayMoves = catchUp(now);
+booting = false;
 if(!d.slipAt) d.slipAt = now;
-st.save();
+save();
 
 SB.init({title:"Grand Prix Circuit", subtitle:"Circuit "+d.circuit+" · Weekly Race Event", resetKey:"grand-prix"});
 
-/* ============ track geometry ============ */
-var VW=360, VH=250, CX=180, CY=133, W=72;
-var LANE_H=[92,78,64,50,36], MIDH=64, BAND=78, OUT=103, INN=25;
-function stad(H){
-  return "M "+CX+" "+(CY+H)+" L "+(CX+W)+" "+(CY+H)
-    +" A "+H+" "+H+" 0 0 0 "+(CX+W)+" "+(CY-H)+" L "+(CX-W)+" "+(CY-H)
-    +" A "+H+" "+H+" 0 0 0 "+(CX-W)+" "+(CY+H)+" Z";
+/* ============ track geometry (analytic — every lane shares one lap parameter,
+   so cars in different lanes stay radially aligned with the segment ticks) ==== */
+var VW=360, VH=206, CX=180, CY=106, W=76;
+var MIDH=56, BAND=72, INN=MIDH-BAND/2, OUT=MIDH+BAND/2;   /* 20 .. 92 */
+var LANE_H=[80,68,56,44,32];
+var PER = 4*W + 2*Math.PI*MIDH;
+var U1 = W/PER, U2 = (W+Math.PI*MIDH)/PER, U3 = (3*W+Math.PI*MIDH)/PER, U4 = (3*W+2*Math.PI*MIDH)/PER;
+function pt(h,u){
+  u = u - Math.floor(u);
+  if(u < U1){ return {x:CX + W*(u/U1), y:CY+h}; }
+  if(u < U2){ var t=(u-U1)/(U2-U1); return {x:CX+W + h*Math.sin(Math.PI*t), y:CY + h*Math.cos(Math.PI*t)}; }
+  if(u < U3){ var t2=(u-U2)/(U3-U2); return {x:CX+W - 2*W*t2, y:CY-h}; }
+  if(u < U4){ var t3=(u-U3)/(U4-U3); return {x:CX-W - h*Math.sin(Math.PI*t3), y:CY - h*Math.cos(Math.PI*t3)}; }
+  var t4=(u-U4)/(1-U4); return {x:CX-W + W*t4, y:CY+h};
+}
+function stad(h){
+  return "M "+CX+" "+(CY+h)+" L "+(CX+W)+" "+(CY+h)
+    +" A "+h+" "+h+" 0 0 0 "+(CX+W)+" "+(CY-h)+" L "+(CX-W)+" "+(CY-h)
+    +" A "+h+" "+h+" 0 0 0 "+(CX-W)+" "+(CY+h)+" Z";
 }
 function stand(x,y,w,h){
-  var g='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="5" fill="#26304a" stroke="#11172a" stroke-width="1.5"/>';
+  var g='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="4" fill="#26304a" stroke="#11172a" stroke-width="1.5"/>';
   var cols=["#FFC72C","#D7263D","#3E8EDE","#FDF6E3","#2E9E4F","#ff8a5c","#b98cff"];
-  for(var r=0;r<3;r++) for(var i=0;i*9<w-8;i++){
-    var cx=x+5.5+i*9+(r%2?4:0), cy=y+5.5+r*6.4;
-    if(cx>x+w-4) continue;
-    g+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="2.1" fill="'+cols[(i*3+r*2)%7]+'" opacity=".88"/>';
+  for(var r=0;r<2;r++) for(var i=0;i*8<w-6;i++){
+    var cx=x+4.5+i*8+(r%2?3.5:0), cy=y+4+r*5.4;
+    if(cx>x+w-3) continue;
+    g+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="1.9" fill="'+cols[(i*3+r*2)%7]+'" opacity=".9"/>';
   }
   return g;
 }
@@ -285,64 +368,58 @@ function buildTrack(){
    +'<rect width="4.5" height="4.5" fill="#161d30"/><rect x="4.5" y="4.5" width="4.5" height="4.5" fill="#161d30"/></pattern>'
    +'<pattern id="gpMow" width="26" height="26" patternUnits="userSpaceOnUse"><rect width="13" height="26" fill="#fff" opacity=".07"/></pattern>'
    +'</defs>';
-  s+='<rect width="360" height="250" fill="url(#gpG)"/><rect width="360" height="250" fill="url(#gpMow)"/>';
-  s+=stand(30,1,300,24);
+  s+='<rect width="'+VW+'" height="'+VH+'" fill="url(#gpG)"/><rect width="'+VW+'" height="'+VH+'" fill="url(#gpMow)"/>';
+  s+=stand(46,0,268,13);
   s+='<path d="'+stad(MIDH)+'" fill="none" stroke="url(#gpT)" stroke-width="'+BAND+'"/>';
-  /* kerbs */
   [OUT,INN].forEach(function(h){
-    s+='<path d="'+stad(h)+'" fill="none" stroke="#f4f4f4" stroke-width="4"/>'
-      +'<path d="'+stad(h)+'" fill="none" stroke="#D7263D" stroke-width="4" stroke-dasharray="10 10"/>';
+    s+='<path d="'+stad(h)+'" fill="none" stroke="#f4f4f4" stroke-width="3.6"/>'
+      +'<path d="'+stad(h)+'" fill="none" stroke="#D7263D" stroke-width="3.6" stroke-dasharray="10 10"/>';
   });
-  /* lane dividers */
-  [85,71,57,43].forEach(function(h){
-    s+='<path d="'+stad(h)+'" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="1.4" stroke-dasharray="7 10"/>';
+  [77.5,64.5,51.5,38.5].forEach(function(h){
+    s+='<path d="'+stad(h)+'" fill="none" stroke="rgba(255,255,255,.30)" stroke-width="1.3" stroke-dasharray="7 10"/>';
   });
-  s+='<g id="gp-ticks"></g>';
-  /* start / finish */
-  s+='<rect x="174" y="'+(CY+INN)+'" width="12" height="'+(OUT-INN)+'" fill="url(#gpChk)"/>'
-    +'<rect x="174" y="'+(CY+INN)+'" width="12" height="'+(OUT-INN)+'" fill="none" stroke="#fff" stroke-width="1"/>';
-  /* infield dressing */
-  s+='<text x="180" y="129" text-anchor="middle" font-size="16">🏁</text>'
-    +'<text x="180" y="145" text-anchor="middle" font-size="9" font-weight="bold" fill="#cfe3fb" letter-spacing="1.6" font-family="Trebuchet MS">GRAND PRIX</text>'
-    +'<text x="180" y="155" text-anchor="middle" font-size="6.5" font-weight="bold" fill="#8fd3a0" letter-spacing="1.2" font-family="Trebuchet MS">START / FINISH</text>';
-  s+='<rect x="24" y="238" width="312" height="11" rx="4" fill="#11172a"/>'
-    +'<text x="180" y="246.2" text-anchor="middle" font-size="6.6" font-weight="bold" fill="#FFC72C" letter-spacing="2.4" font-family="Trebuchet MS">SKIP·BO GRAND PRIX CIRCUIT</text>';
-  /* invisible guide paths */
-  LANE_H.forEach(function(h,i){ s+='<path id="gpL'+i+'" d="'+stad(h)+'" fill="none" stroke="none"/>'; });
-  document.getElementById("gp-svg").innerHTML = s;
-
-  /* segment ticks across the band, from the mid guide path */
-  var mid=document.getElementById("gpL2"), L=mid.getTotalLength(), t="";
+  /* segment ticks — same parameterisation the cars use */
+  var t="";
   for(var k=1;k<SEG_LAP;k++){
-    var a=mid.getPointAtLength(L*k/SEG_LAP), b=mid.getPointAtLength((L*k/SEG_LAP+2)%L);
-    var dx=b.x-a.x, dy=b.y-a.y, m=Math.sqrt(dx*dx+dy*dy)||1, nx=-dy/m, ny=dx/m, half=BAND/2-2;
-    t+='<line x1="'+(a.x-nx*half).toFixed(1)+'" y1="'+(a.y-ny*half).toFixed(1)+'" x2="'+(a.x+nx*half).toFixed(1)
-      +'" y2="'+(a.y+ny*half).toFixed(1)+'" stroke="rgba(255,255,255,.5)" stroke-width="1.6" stroke-dasharray="3 4"/>';
+    var a=pt(INN+2,k/SEG_LAP), b=pt(OUT-2,k/SEG_LAP);
+    t+='<line x1="'+a.x.toFixed(1)+'" y1="'+a.y.toFixed(1)+'" x2="'+b.x.toFixed(1)+'" y2="'+b.y.toFixed(1)
+      +'" stroke="rgba(255,255,255,.5)" stroke-width="1.6" stroke-dasharray="3 4"/>';
   }
-  document.getElementById("gp-ticks").innerHTML = t;
+  s+=t;
+  /* start / finish */
+  s+='<rect x="'+(CX-6)+'" y="'+(CY+INN)+'" width="12" height="'+(OUT-INN)+'" fill="url(#gpChk)"/>'
+    +'<rect x="'+(CX-6)+'" y="'+(CY+INN)+'" width="12" height="'+(OUT-INN)+'" fill="none" stroke="#fff" stroke-width="1"/>';
+  /* infield dressing */
+  s+='<text x="'+CX+'" y="'+(CY-8)+'" text-anchor="middle" font-size="13">🏁</text>'
+    +'<text x="'+CX+'" y="'+(CY+5)+'" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#dbeaff" letter-spacing="1.8" font-family="Trebuchet MS">GRAND PRIX</text>'
+    +'<text x="'+CX+'" y="'+(CY+14)+'" text-anchor="middle" font-size="6.2" font-weight="bold" fill="#8fd3a0" letter-spacing="1.2" font-family="Trebuchet MS">START · FINISH</text>';
+  document.getElementById("gp-svg").innerHTML = s;
+  document.getElementById("gp-svg").setAttribute("viewBox","0 0 "+VW+" "+VH);
+  /* keep the CSS box and the viewBox in lock-step: cars are positioned in % of
+     the box, so any letterboxing would desync them from the painted track */
+  document.getElementById("gp-track").style.aspectRatio = VW+" / "+VH;
 }
 buildTrack();
 
 /* ============ cars ============ */
-var carsEl=document.getElementById("gp-cars"), cars=[], guides=[];
-LANE_H.forEach(function(h,i){ guides[i]=document.getElementById("gpL"+i); });
+var carsEl=document.getElementById("gp-cars"), cars=[];
 function makeCar(color, me){
   var el=document.createElement("div");
   el.className="gp-car"+(me?" me":"");
   el.style.setProperty("--c",color);
   el.innerHTML='<i class="fl"></i><i class="sl"></i><div class="wg rw"></div><div class="wg fw"></div>'
-    +'<div class="w w1"></div><div class="w w2"></div><div class="bd"></div><div class="ck"></div><div class="dv"></div>';
+    +'<div class="w w1"></div><div class="w w2"></div><div class="bd"></div><div class="ck"></div><div class="dv"></div>'
+    ;
   carsEl.appendChild(el);
   return {el:el, disp:0};
 }
-cars[0]=makeCar("#FFC72C", true);                                   /* player, outer lane */
+cars[0]=makeCar("#FFC72C", true);
 d.rivals.forEach(function(r,i){ cars[i+1]=makeCar(r.color,false); });
-
-function target(idx){ return idx===0 ? d.seg : d.rivals[idx-1].seg; }
+function laneOf(i){ return i===0 ? 0 : d.rivals[i-1].lane; }
+function segOf(i){ return i===0 ? d.seg : d.rivals[i-1].seg; }
 function place(c, lane, seg){
-  var p=guides[lane], L=p.getTotalLength();
-  var f=(seg>=TOTAL)?0:((seg%SEG_LAP)/SEG_LAP);
-  var a=p.getPointAtLength(f*L), b=p.getPointAtLength((f*L+3)%L);
+  var u=(seg%SEG_LAP)/SEG_LAP, h=LANE_H[lane];
+  var a=pt(h,u), b=pt(h,u+0.004);
   var ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
   c.el.style.left=(a.x/VW*100)+"%";
   c.el.style.top=(a.y/VH*100)+"%";
@@ -350,16 +427,24 @@ function place(c, lane, seg){
 }
 (function loop(){
   for(var i=0;i<cars.length;i++){
-    var lane = i===0?0:d.rivals[i-1].lane, t=target(i), c=cars[i];
-    var diff=t-c.disp;
+    var c=cars[i], t=segOf(i), diff=t-c.disp;
     if(Math.abs(diff)<0.004) c.disp=t; else c.disp+=diff*0.075;
-    place(c, lane, c.disp);
+    place(c, laneOf(i), c.disp);
   }
   requestAnimationFrame(loop);
 })();
 function boostFx(idx,ms){
   var c=cars[idx]; c.el.classList.add("boost");
-  setTimeout(function(){ c.el.classList.remove("boost"); }, ms||1400);
+  clearTimeout(c.bt);
+  c.bt=setTimeout(function(){ c.el.classList.remove("boost"); }, ms||1400);
+}
+var rushT;
+function rushFx(ms){
+  var tr=$("gp-track");
+  tr.classList.remove("rush"); void tr.offsetWidth; tr.classList.add("rush");
+  boostFx(0, ms||1600); SB.haptic(30);
+  clearTimeout(rushT);
+  rushT=setTimeout(function(){ tr.classList.remove("rush"); }, ms||1800);
 }
 function applyLivery(){ cars[0].el.classList.toggle("livery", !!d.pass); }
 applyLivery();
@@ -368,15 +453,20 @@ applyLivery();
 function $(id){ return document.getElementById(id); }
 function ended(){ return d.finished || raceNow()>=d.end; }
 function lapOf(s){ return Math.min(LAPS, Math.floor(s/SEG_LAP)+1); }
-function wr(base){ if(window.__forceWin===true) return 1; if(window.__forceWin===false) return 0; return base; }
 function chips(l){ return l.map(SB.rewardChip).join(" "); }
-function ordinal(n){ return n+["th","st","nd","rd"][(n%100-n%10!=10)*(n%10<4)*n%10]; }
+function ordinal(n){
+  var s=["th","st","nd","rd"], v=n%100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+}
 function order(){
-  var a=d.rivals.map(function(r){ return {name:r.name,av:r.av,color:r.color,team:r.team,grid:r.grid||9,seg:r.seg,at:r.at,fin:r.fin,me:false}; });
-  a.push({name:"You",av:"😎",color:"#FFC72C",team:d.pass?"Chrome Comet":"Privateer",grid:MY_GRID,seg:d.seg,at:d.at,fin:d.fin,me:true});
+  var a=d.rivals.map(function(r){
+    return {name:r.name,av:r.av,color:r.color,team:r.team,grid:r.grid,seg:r.seg,at:r.at,fin:r.fin,me:false,live:r.live};
+  });
+  a.push({name:"You",av:"😎",color:"#FFC72C",team:d.pass?"Chrome Comet":"Privateer",grid:MY_GRID,seg:d.seg,at:d.at,fin:d.fin,me:true,live:0});
   a.sort(function(x,y){
-    if(x.fin&&y.fin) return x.fin-y.fin;
-    if(x.fin) return -1; if(y.fin) return 1;
+    var xf = x.seg>=TOTAL, yf = y.seg>=TOTAL;          /* only a real crossing counts */
+    if(xf&&yf) return x.fin-y.fin;
+    if(xf) return -1; if(yf) return 1;
     return (y.seg-x.seg) || (x.at-y.at) || (x.grid-y.grid);
   });
   return a;
@@ -385,15 +475,17 @@ function myPos(){ var o=order(); for(var i=0;i<o.length;i++) if(o[i].me) return 
 
 /* ============ progression ============ */
 function advance(n, boosted, label){
-  if(n<=0 || d.finished) return;
+  if(n<=0 || d.finished || d.fin) return 0;
   var prev=d.seg;
   d.seg=Math.min(TOTAL,d.seg+n);
+  var got=d.seg-prev;
   d.at=raceNow();
-  if(boosted) boostFx(0, 1600);
-  if(label) SB.toast(label,2000);
+  if(boosted) rushFx(); else SB.haptic(15);
+  if(label) SB.toast(label,{ms:2000,top:true});
   checkLaps(prev);
-  if(d.seg>=TOTAL && !d.fin){ d.fin=raceNow(); setTimeout(finishRace, 1500); }
-  st.save(); renderAll();
+  if(d.seg>=TOTAL){ d.fin=raceNow(); photoFinish(); setTimeout(finishRace, 2200); }
+  save(); renderAll();
+  return got;
 }
 function lapBanner(txt,sub){
   var b=$("gp-lapban");
@@ -405,7 +497,7 @@ function checkLaps(prev){
   for(var l=1;l<=LAPS;l++){
     var line=l*SEG_LAP;
     if(prev<line && d.seg>=line && d.laps.indexOf(l)===-1){
-      d.laps.push(l); st.save();
+      d.laps.push(l); save();
       var rw=LAP_RW[l-1];
       lapBanner(l<LAPS?("LAP "+l+" DONE"):"CHEQUERED FLAG", rw.map(function(r){return "+"+SB.fmt(r.amount)+" "+SB.icon(r.type);}).join("  "));
       SB.grantRewards(rw, $("gp-track"));
@@ -413,84 +505,112 @@ function checkLaps(prev){
     }
   }
 }
+function photoFinish(){
+  var tr=$("gp-track");
+  tr.classList.remove("flash"); void tr.offsetWidth; tr.classList.add("flash");
+  setTimeout(function(){ tr.classList.remove("flash"); }, 1200);
+  var closest=99;
+  d.rivals.forEach(function(r){ closest=Math.min(closest, Math.abs(TOTAL-r.seg)); });
+  lapBanner(closest<=1 ? "PHOTO FINISH!" : "CHEQUERED FLAG", closest<=1 ? "Split-second call at the line…" : "You cross the line!");
+}
 function applyResult(res, hard){
-  d.plays++; d.level++;
+  d.plays++;
   if(!res.won){
-    d.attempts++;
-    st.save(); renderAll();
-    SB.toast("No ground lost — you keep all "+d.seg+" segments. Line up again!",2400);
+    d.attempts++;                       /* the level stays the same level — you retry it */
+    save(); renderAll();
+    SB.toast("No ground lost — you keep all "+d.seg+" segments. Line up again!",{ms:2400,top:true});
     return;
   }
   var firstTry = d.attempts===0;
-  d.wins++; d.attempts=0; if(hard) d.hardWins++; if(firstTry) d.firstTry++;
-  var gain=1, msg="+1 segment · clean lap section";
-  if(firstTry){ gain = d.pass?3:2; msg = d.pass?"🔧 PIT CREW SPEED BOOST · +3 segments!":"🔥 FIRST-TRY SPEED BOOST · +2 segments!"; }
-  if(hard){ gain=Math.max(gain,2); d.charges=Math.min(3,d.charges+1); msg="🔥 Hard clear · +"+gain+" segments and +1 nitro charge"; }
+  d.level++; d.wins++; d.attempts=0;
+  if(hard) d.hardWins++;
+  if(firstTry) d.firstTry++;
+  var gain=1, msg="✅ Level cleared · +1 segment";
+  if(firstTry){ gain = d.pass?3:2; msg = d.pass?"🔧 Pit crew first-try · +3 segments!":"🔥 First-try clear · +2 segments!"; }
+  if(hard){
+    gain=Math.max(gain,2);
+    var full = d.charges>=3;
+    if(!full) d.charges++;
+    msg="🔥 Hard clear · +"+gain+" segments"+(full?" · nitro already full (3/3)":" · +1 nitro charge");
+  }
   advance(gain, gain>=2, msg);
 }
+var busy=false;
 function play(hard){
-  if(ended()){ SB.toast("Circuit finished — check the podium!"); return; }
-  $("gp-play").disabled=$("gp-hard").disabled=true;
-  SB.playLevel({hard:hard, winRate:wr(hard?0.55:0.78), title:"Adventure Level "+d.level})
-    .then(function(res){ applyResult(res,hard); $("gp-play").disabled=$("gp-hard").disabled=ended(); });
+  if(busy) return;
+  if(ended()||d.fin){ SB.toast("Circuit finished — check the podium!",{top:true}); return; }
+  busy=true; setCtaState();
+  SB.playLevel({hard:hard, winRate:hard?0.55:0.78, title:"Adventure Level "+d.level})
+    .then(function(res){ busy=false; applyResult(res,hard); setCtaState(); })
+    .catch(function(){ busy=false; setCtaState(); });
+}
+function setCtaState(){
+  var off = busy || ended() || !!d.fin;
+  $("gp-play").disabled = off;
+  $("gp-hard").disabled = off;
+  Array.prototype.forEach.call(document.querySelectorAll(".free-go"), function(b){ b.disabled = off; });
 }
 $("gp-play").addEventListener("click", function(){ play(false); });
 $("gp-hard").addEventListener("click", function(){ play(true); });
 $("gp-usenitro").addEventListener("click", function(){
-  if(d.charges<3||ended()) return;
-  d.charges=0; st.save();
+  if(d.charges<3 || ended() || d.fin) return;
+  d.charges=0; save();
   advance(2,true,"⚡ Free nitro burn · +2 segments!");
 });
 
 /* ============ race clock ============ */
-var ff=false, nextAuto=0;
+var ff=false, nextAuto=0, boardSig="";
 function tick(){
   var t=raceNow();
-  d.rivals.forEach(function(r,i){
-    if(r.seg>=TOTAL) return;
-    if(r.next<=t){
-      r.seg++; r.at=t; r.next=t+pace(r);
-      if(r.seg>=TOTAL){ r.fin=t; if(!d.finished) SB.toast(r.av+" "+r.name+" takes the flag!",2200); }
-      else if(cars[i+1]) { /* rivals move on their own honest cadence */ }
-    }
-  });
-  /* free slipstream: last place only */
-  if(!d.finished && !ended()){
+  var moved=catchUp(t);
+  if(!d.finished && !d.fin && !ended()){
     if(myPos()===5){
-      if(t-d.slipAt>=SLIP_MS){ d.slipAt=t; advance(1,false,"🌀 Slipstream! Free +1 segment for running last."); }
+      if(t-d.slipAt>=SLIP_MS){ d.slipAt=t; d.slipGot++; advance(1,false,"🌀 Slipstream! Free +1 segment for running last."); }
     } else d.slipAt=t;
   }
-  if(ff && !d.finished && !ended() && t>=nextAuto){
+  if(ff && !d.finished && !d.fin && !ended() && t>=nextAuto){
     nextAuto=t+5500;
-    applyResult({won:Math.random()<wr(0.78)}, false);
+    SB.playLevel({instant:true, winRate:0.78}).then(function(r){ applyResult(r,false); });
   }
-  if(!d.finished && raceNow()>=d.end && !d.fin){ finishRace(); }
-  st.save(); renderAll();
+  if(!d.finished && raceNow()>=d.end) finishRace();
+  if(moved) save();
+  renderClock(); renderAll();
 }
 setInterval(tick, TICK);
+function renderClock(){
+  var left=Math.max(0, d.end-raceNow());
+  var m=Math.floor(left/60000), s=Math.floor((left%60000)/1000);
+  $("gp-timer").textContent = String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s";
+  $("gp-timer").parentElement.classList.toggle("urgent", left<60000 && left>0);
+}
 
 /* ============ render ============ */
 function renderAll(){ renderHud(); renderBoard(); renderAids(); renderOffers(); renderStats(); }
 function renderHud(){
-  var p=myPos();
-  $("gp-pos").textContent=ordinal(p);
+  $("gp-pos").textContent=ordinal(myPos());
   $("gp-lap").textContent=lapOf(d.seg);
   $("gp-seg").textContent=d.seg;
   $("gp-career").textContent="🏆 "+d.career;
 }
 function renderBoard(){
-  var o=order(), p=myPos(), h="";
-  o.forEach(function(r,i){
-    var pos=i+1;
-    var mk = pos===1?'<span class="pos medal">🥇</span>':pos===2?'<span class="pos medal">🥈</span>':pos===3?'<span class="pos medal">🥉</span>':'<span class="pos">'+pos+'</span>';
-    h+='<div class="gp-row'+(r.me?" me":"")+(r.fin?" done":"")+'">'+mk
-      +'<span class="av" style="--c:'+r.color+'">'+r.av+'</span>'
-      +'<span class="nm">'+(r.me?"You":r.name)+'<small>'+r.team+'</small></span>'
-      +'<span class="sg">'+(r.fin?"🏁 FIN":("Lap "+lapOf(r.seg)+"/3"))+'<small>'+r.seg+'/24 seg</small></span></div>';
-  });
-  $("gp-rows").innerHTML=h;
+  var o=order(), p=myPos();
+  var sig=o.map(function(r){return r.name+r.seg+(r.seg>=TOTAL?"F":"");}).join("|")+"|"+d.finished+d.fin+d.plays+d.pass;
+  if(sig!==boardSig){
+    boardSig=sig;
+    var h="";
+    o.forEach(function(r,i){
+      var pos=i+1;
+      var mk = pos===1?'<span class="pos medal">🥇</span>':pos===2?'<span class="pos medal">🥈</span>':pos===3?'<span class="pos medal">🥉</span>':'<span class="pos">'+pos+'</span>';
+      var sub = r.me ? r.team : (r.team+" · 1 seg / "+liveS(r.live));
+      h+='<div class="gp-row'+(r.me?" me":"")+(r.seg>=TOTAL?" done":"")+'">'+mk
+        +'<span class="av" style="--c:'+r.color+'">'+r.av+'</span>'
+        +'<span class="nm">'+(r.me?"You":r.name)+'<small>'+sub+'</small></span>'
+        +'<span class="sg">'+(r.seg>=TOTAL?"🏁 FIN":("Lap "+lapOf(r.seg)+"/3"))+'<small>'+r.seg+'/24 seg</small></span></div>';
+    });
+    $("gp-rows").innerHTML=h;
+  }
   var n=$("gp-nudge");
-  if(d.finished){ n.innerHTML="🏁 <b>Race over.</b> Final result: <b>"+ordinal(d.finalPos)+" place</b> — every finisher was paid."; return; }
+  if(d.finished){ n.innerHTML="🏁 <b>Race over.</b> Final result: <b>"+ordinal(d.finalPos)+" place</b> — every finisher was paid. Tap the button below to see the podium again."; return; }
   if(d.fin){ n.innerHTML="🏁 <b>You crossed the line!</b> Waiting for the podium ceremony…"; return; }
   if(d.seg===0 && d.plays===0){
     n.innerHTML="🚦 <b>Lights out — you start "+ordinal(MY_GRID)+" on the grid.</b> Clear a level to launch; a first-try clear is a +2 speed boost.";
@@ -501,27 +621,35 @@ function renderBoard(){
     n.innerHTML = lead>0
       ? "🥇 <b>You lead the Grand Prix!</b> "+back.av+" "+back.name+" is <b>"+lead+" segment"+(lead===1?"":"s")+"</b> back — keep clearing levels."
       : "🥇 <b>You lead on the road</b>, but "+back.av+" "+back.name+" is <b>level on segments</b> — one clear and the gap is real.";
-  } else {
-    var ah=o[p-2], gap=ah.seg-d.seg;
-    n.innerHTML = gap===0
-      ? "🎯 <b>Side by side with "+ah.av+" "+ah.name+"</b> — they got there first, so one clear takes the place back."
-      : "🎯 You're <b>"+gap+" segment"+(gap===1?"":"s")+" behind "+ah.av+" "+ah.name+"</b> — "+
-        (gap<=2?"one first-try clear puts you level.":Math.ceil(gap/2)+" first-try clears takes the place.");
+    return;
   }
+  var ah=o[p-2], gap=ah.seg-d.seg;
+  if(ah.seg>=TOTAL){
+    var homed=o.filter(function(r){return r.seg>=TOTAL;}).length;
+    n.innerHTML = homed>=4
+      ? "🏁 <b>All four rivals are home.</b> Finish your 24 segments before the flag drops and the finisher prize is yours."
+      : "🏁 <b>"+ah.av+" "+ah.name+" has finished.</b> You're <b>"+(TOTAL-d.seg)+" segment"+(TOTAL-d.seg===1?"":"s")+"</b> from your own chequered flag.";
+    return;
+  }
+  n.innerHTML = gap===0
+    ? "🎯 <b>Side by side with "+ah.av+" "+ah.name+"</b> — they got there first, so one clear takes the place back."
+    : "🎯 You're <b>"+gap+" segment"+(gap===1?"":"s")+" behind "+ah.av+" "+ah.name+"</b> — "+
+      (gap<=2?"one first-try clear puts you level.":Math.ceil(gap/2)+" first-try clears takes the place.");
 }
 function renderAids(){
   var h="";
   for(var i=0;i<3;i++) h+='<span class="gp-pip'+(i<d.charges?" on":"")+'">'+(i<d.charges?"⚡":"")+'</span>';
-  $("gp-pips").innerHTML=h;
+  if($("gp-pips").innerHTML!==h) $("gp-pips").innerHTML=h;
   var b=$("gp-usenitro");
-  b.disabled = d.charges<3 || ended();
+  b.disabled = d.charges<3 || ended() || !!d.fin;
   b.textContent = d.charges>=3 ? "BURN NITRO · +2" : ("Fill 3 to burn ("+d.charges+"/3)");
-  var last = myPos()===5 && !d.finished && !d.fin;
+  var last = myPos()===5 && !d.finished && !d.fin && !ended();
   var pct = last ? Math.min(100,(raceNow()-d.slipAt)/SLIP_MS*100) : 0;
   $("gp-slipbar").style.width=pct.toFixed(1)+"%";
+  $("gp-slipwrap").classList.toggle("live", last);
   $("gp-sliptxt").innerHTML = last
-    ? "<b style='color:#1D4FA1'>Active — you're last.</b> Free +1 segment every 90s until you're out of last place."
-    : "Idle. Runs only while you're last: a free +1 segment every 90s. No purchase, no catch to it.";
+    ? "<b style='color:#1f7038'>Active — you're last.</b> Free +1 segment every "+liveS(SLIP_LIVE)+" (≈"+demoS(SLIP_LIVE)+" in this demo) until you leave last place."
+    : "Idle. Runs only while you're last: a free +1 segment every "+liveS(SLIP_LIVE)+". No purchase, no ad, no catch.";
 }
 function renderStats(){
   $("gp-st-plays").textContent=d.plays; $("gp-st-wins").textContent=d.wins;
@@ -529,91 +657,136 @@ function renderStats(){
   $("gp-st-circ").textContent=d.circuit;
 }
 
-/* ============ offers (free path always in view) ============ */
+/* ============ offers (a free path sits in every card, same view) ============ */
 var offerSig="";
+function reraceGain(){ return Math.min(TOTAL,(Math.floor(d.seg/SEG_LAP)+1)*SEG_LAP) - d.seg; }
 function renderOffers(){
-  var o=order(), p=myPos(), gapTo4 = p===5 ? (o[3].seg-d.seg) : 0;
-  var showRerace = !d.rerace && !d.finished && !d.fin && p===5 && gapTo4>=3;
-  /* only rebuild when something actually changed — avoids swapping buttons under a live tap */
-  var sig=[d.nitro,d.pass,d.rerace,showRerace,gapTo4,d.seg].join("|");
+  var o=order(), p=myPos(), over = d.finished || !!d.fin || ended();
+  var gapTo4 = (!over && p===5) ? (o[3].seg-d.seg) : 0;
+  var rrGain = reraceGain();
+  var showRerace = !d.rerace && !over && p===5 && gapTo4>=3 && rrGain>=4;
+  var nitroRoom = TOTAL-d.seg;                       /* never sell +3 we cannot deliver */
+  var sig=[d.nitro,d.pass,d.rerace,showRerace,gapTo4,rrGain,d.seg,over,busy].join("|");
   if(sig===offerSig) return;
   offerSig=sig;
   var h="";
-  h+='<div class="gp-offer"><span class="tag">ONE-TIME</span><h4>⚡ Nitro Boost</h4>'
-    +'<p>Fires instantly: <b>+3 segments</b>, right now, once per circuit. Your rivals\' timers do not change.</p>'
-    +(d.nitro?'<div class="gp-owned">✓ Burned this circuit — nice launch.</div>'
-      :'<button class="sb-btn sb-btn-yellow" id="gp-buy-nitro">Nitro Boost · $0.99</button>')
-    +'<div class="free-note">🆓 Same ground, free: two first-try clears = +4 segments.'
-    +'<button class="free-go" data-free>▶ Play a level</button></div></div>';
-
-  h+='<div class="gp-offer pass"><h4>🔧 Pit Crew Pass</h4>'
-    +'<p>Every <b>first-try clear pays +3 instead of +2</b> for the whole circuit, plus the exclusive <b>Chrome Comet</b> livery on your car.</p>'
-    +(d.pass?'<div class="gp-owned">✓ Pit crew on the wall — first-try clears now pay +3.</div>'
-      :'<button class="sb-btn sb-btn-blue" id="gp-buy-pass">Pit Crew Pass · $4.99</button>')
-    +'<div class="free-note">🆓 Free lane: hard clears already pay +2 and charge your nitro — three charges = a free +2 burn.'
-    +'<button class="free-go" data-freehard>🔥 Play a hard level</button></div></div>';
-
-  if(showRerace){
-    h+='<div class="gp-offer urgent"><h4>🔁 Re-Race Token</h4>'
-      +'<p>Running last and <b>'+gapTo4+' segments</b> off 4th. Re-run this lap at full speed: jump straight to your next lap line '
-      +'(<b>+'+reraceGain()+' segments</b>), keeping every lap reward already banked.</p>'
-      +'<button class="sb-btn sb-btn-red" id="gp-buy-rerace">Re-Race Token · $1.99</button>'
-      +'<div class="free-note">🆓 Free comeback already running: <b>Slipstream</b> gives you +1 segment every 90s while you\'re last, and levels never take ground away.'
+  if(over){
+    h+='<div class="gp-offer done"><h4>🏁 Circuit '+d.circuit+' closed</h4>'
+      +'<p>Offers are switched off once your race is run — there is nothing left to sell you this circuit. '
+      +'Circuit '+(d.circuit+1)+' starts with a clean grid and your trophies kept.</p></div>';
+  } else {
+    h+='<div class="gp-offer"><span class="tag">ONE-TIME</span><h4>⚡ Nitro Boost</h4>'
+      +(nitroRoom>=3
+        ? '<p>Fires instantly: <b>+3 segments</b>, right now, once per circuit. Every rival timer keeps ticking on exactly the same schedule.</p>'
+          +(d.nitro?'<div class="gp-owned">✓ Burned this circuit — nice launch.</div>'
+            :'<button class="sb-btn sb-btn-yellow" id="gp-buy-nitro">Nitro Boost · $0.99</button>')
+        : '<p>You are <b>'+nitroRoom+' segment'+(nitroRoom===1?"":"s")+'</b> from the flag — a +3 boost can\'t all fit, so it is off sale. Go and take it for free.</p>')
+      +'<div class="free-note"><b class="fchip">FREE</b> Same ground, free: two first-try clears = +4 segments.'
       +'<button class="free-go" data-free>▶ Play a level</button></div></div>';
+
+    h+='<div class="gp-offer pass"><h4>🔧 Pit Crew Pass</h4>'
+      +'<p>Every <b>first-try clear pays +3 instead of +2</b> for the rest of this circuit, plus 2 Wild Cards now and the <b>Chrome Comet</b> livery on your car.</p>'
+      +(d.pass?'<div class="gp-owned">✓ Pit crew on the wall — first-try clears now pay +3.</div>'
+        :'<button class="sb-btn sb-btn-blue" id="gp-buy-pass">Pit Crew Pass · $4.99</button>')
+      +'<div class="free-note"><b class="fchip">FREE</b> Free lane: hard clears already pay +2 and charge your nitro — three charges = a free +2 burn.'
+      +'<button class="free-go" data-freehard>🔥 Play a hard level</button></div></div>';
+
+    if(showRerace){
+      h+='<div class="gp-offer urgent"><h4>🔁 Re-Race Token</h4>'
+        +'<p>Running last and <b>'+gapTo4+' segments</b> off 4th. Jump straight to your next lap line — that is <b>+'+rrGain+' segments</b> '
+        +'from where you are now — keeping every lap reward already banked. One per circuit.</p>'
+        +'<button class="sb-btn sb-btn-red" id="gp-buy-rerace">Re-Race Token · $1.99</button>'
+        +'<div class="free-note"><b class="fchip">FREE</b> Free comeback already running: <b>Slipstream</b> gives you +1 segment every '+liveS(SLIP_LIVE)+' while you\'re last, and a lost level never takes ground away.'
+        +'<button class="free-go" data-free>▶ Play a level</button></div></div>';
+    }
   }
   $("gp-offers").innerHTML=h;
   var a=$("gp-buy-nitro"); if(a) a.addEventListener("click", buyNitro);
   var b=$("gp-buy-pass"); if(b) b.addEventListener("click", buyPass);
   var c=$("gp-buy-rerace"); if(c) c.addEventListener("click", buyRerace);
-  $("gp-offers").querySelectorAll("[data-free]").forEach(function(x){ x.addEventListener("click", function(){ play(false); }); });
-  $("gp-offers").querySelectorAll("[data-freehard]").forEach(function(x){ x.addEventListener("click", function(){ play(true); }); });
+  Array.prototype.forEach.call($("gp-offers").querySelectorAll("[data-free]"), function(x){ x.addEventListener("click", function(){ play(false); }); });
+  Array.prototype.forEach.call($("gp-offers").querySelectorAll("[data-freehard]"), function(x){ x.addEventListener("click", function(){ play(true); }); });
+  setCtaState();
 }
-function reraceGain(){ return Math.max(4, Math.min(TOTAL,(Math.floor(d.seg/SEG_LAP)+1)*SEG_LAP)-d.seg); }
-function celebrate(title, body){
+function pacingLine(){
+  return "Rival timers this circuit: "+d.rivals.map(function(r){ return r.av+" "+liveS(r.live); }).join(" · ")
+    +" — fixed at lights-out, untouched by anything you buy.";
+}
+function celebrate(title, body, delay){
+  if(delay){ setTimeout(function(){ celebrate(title, body); }, delay); return; }
   SB.confetti();
-  SB.modal('<h3 style="margin:0 0 6px">'+title+'</h3><p class="sb-muted" style="font-size:13px;margin:0 0 12px;line-height:1.45">'+body+'</p>'
-    +'<button class="sb-btn sb-btn-green sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Back to the track!</button>');
+  var m=SB.modal('<h3 style="margin:0 0 6px">'+title+'</h3>'
+    +'<p class="sb-muted" style="font-size:13px;margin:0 0 10px;line-height:1.45">'+body+'</p>'
+    +'<div class="gp-fair">🤝 '+pacingLine()+'</div>'
+    +'<button class="sb-btn sb-btn-green sb-btn-block" style="margin-top:12px" id="gp-cel-ok">Back to the track!</button>');
+  m.el.querySelector("#gp-cel-ok").addEventListener("click", function(){ m.close(true); });
 }
 function buyNitro(){
+  if(d.nitro || d.finished || d.fin || TOTAL-d.seg<3) return;
   SB.buyIAP({label:"⚡ Nitro Boost", price:"$0.99", grant:false,
     sub:"Instant +3 segments, once per circuit. Rival pace timers are untouched.",
-    contents:[{type:"token",amount:1}],
-    onSuccess:function(){ d.nitro=true; st.save(); advance(3,true,"⚡ NITRO! +3 segments"); boostFx(0,2600);
-      celebrate("⚡ Nitro burned!","+3 segments on the board and you're now "+ordinal(myPos())+". The rivals' timers ran exactly the same through all of it."); }});
+    contents:[{icon:"🏁",label:"Track Segment",amount:3}],
+    onSuccess:function(){
+      if(d.nitro) return;
+      d.nitro=true; save();
+      var got=advance(3,true,"⚡ NITRO! +3 segments");
+      celebrate("⚡ Nitro burned!","+"+got+" segments on the board and you're now "+ordinal(myPos())+".", 1500);
+    }});
 }
 function buyPass(){
+  if(d.pass || d.finished || d.fin) return;
   SB.buyIAP({label:"🔧 Pit Crew Pass", price:"$4.99", grant:false,
-    sub:"First-try clears pay +3 instead of +2 for the whole circuit + Chrome Comet livery.",
-    contents:[{type:"wild",amount:2}],
-    onSuccess:function(){ d.pass=true; st.save(); SB.grantRewards([{type:"wild",amount:2}]); applyLivery(); boostFx(0,1800);
-      celebrate("🔧 Pit crew is on the wall!","Your Chrome Comet livery is on the car and every first-try clear now pays <b>+3 segments</b> for the rest of Circuit "+d.circuit+"."); renderAll(); }});
+    sub:"First-try clears pay +3 instead of +2 for the rest of the circuit, plus 2 Wild Cards and the Chrome Comet livery.",
+    contents:[{type:"wild",amount:2},{icon:"🔧",label:"First-try upgrade",amount:1}],
+    onSuccess:function(){
+      if(d.pass) return;
+      d.pass=true; save();
+      SB.grantRewards([{type:"wild",amount:2}]);
+      applyLivery(); boostFx(0,1800);
+      celebrate("🔧 Pit crew is on the wall!","Your Chrome Comet livery is on the car and every first-try clear now pays <b>+3 segments</b> for the rest of Circuit "+d.circuit+".", 900);
+      renderAll();
+    }});
 }
 function buyRerace(){
+  if(d.rerace || d.finished || d.fin) return;
   var g=reraceGain();
   SB.buyIAP({label:"🔁 Re-Race Token", price:"$1.99", grant:false,
-    sub:"Re-run the lap you're on: jump to your next lap line (+"+g+" segments) and keep every reward earned.",
-    contents:[{type:"token",amount:1}],
-    onSuccess:function(){ d.rerace=true; st.save(); advance(g,true,"🔁 Lap re-run! +"+g+" segments"); boostFx(0,2600);
-      celebrate("🔁 Back in the fight!","You re-ran the lap for +"+g+" segments and every lap reward stayed banked. You're "+ordinal(myPos())+" — Slipstream is still there for free if you drop to last again."); }});
+    sub:"Jump to your next lap line (+"+g+" segments from here) and keep every reward already earned. One per circuit.",
+    contents:[{icon:"🏁",label:"Track Segment",amount:g}],
+    onSuccess:function(){
+      if(d.rerace) return;
+      d.rerace=true; save();
+      var got=advance(g,true,"🔁 Lap re-run! +"+g+" segments");
+      celebrate("🔁 Back in the fight!","You jumped to the lap line for +"+got+" segments and every lap reward stayed banked. You're "+ordinal(myPos())+" — Slipstream is still there, free, if you drop to last again.", 1500);
+    }});
 }
 
-/* ============ podium ceremony ============ */
+/* ============ finish + podium ceremony ============ */
 function finishRace(){
   if(d.finished) return;
-  var o=order(), pos=myPos();
+  var pos=myPos();
   d.finished=true; d.finalPos=pos;
-  if(!d.fin) d.fin=raceNow();
   var rw=podiumRw(pos);
   if(pos===1) d.career++;
   d.nextStart = Date.now() + 3*60*1000;
-  st.save();
-  SB.grantRewards(rw, $("gp-track"));
+  save();
+  setTimeout(function(){ SB.grantRewards(rw, $("gp-track")); }, 250);
   if(pos<=3){ SB.confetti(); setTimeout(function(){ SB.confetti(90,220,50); },300); setTimeout(function(){ SB.confetti(window.innerWidth-90,220,50); },600); }
+  setCtaState();
+  $("gp-ff").textContent="🏆 View the podium ceremony";
+  $("gp-ff").disabled=false;
+  ff=false;
+  renderAll();
+  showPodium();
+}
+var podiumCd=null;
+function showPodium(){
+  var o=order(), pos=d.finalPos||myPos(), rw=podiumRw(pos);
   var top=o.slice(0,3);
   var pod='<div class="gp-podium">'
-    +'<div class="gp-pod p2"><span class="fig">'+top[1].av+'</span>2</div>'
-    +'<div class="gp-pod p1"><span class="fig">'+top[0].av+'</span>1</div>'
-    +'<div class="gp-pod p3"><span class="fig">'+top[2].av+'</span>3</div></div>';
+    +'<div class="gp-podcol c2"><span class="fig">'+top[1].av+'</span><div class="gp-pod p2">2</div></div>'
+    +'<div class="gp-podcol c1"><span class="fig">'+top[0].av+'</span><div class="gp-pod p1">1</div></div>'
+    +'<div class="gp-podcol c3"><span class="fig">'+top[2].av+'</span><div class="gp-pod p3">3</div></div></div>';
   var rows=o.map(function(r,i){
     return '<tr class="'+(r.me?"me":"")+'"><td>'+(i+1)+'</td><td>'+r.av+' '+(r.me?"You":r.name)+'</td>'
       +'<td class="r">'+r.seg+'/24</td></tr>';
@@ -631,74 +804,85 @@ function finishRace(){
     +'<div class="sb-timer-chip" style="margin:10px 0 4px">🏁 Next circuit in <span id="gp-next">—</span></div>'
     +'<button class="sb-btn sb-btn-green sb-btn-block" id="gp-next-btn">🚦 Start Circuit '+(d.circuit+1)+' now (demo)</button>'
     +'<button class="sb-btn sb-btn-blue sb-btn-block sb-btn-sm" style="margin-top:8px" id="gp-close">Close</button>');
-  SB.countdown(document.getElementById("gp-next"), d.nextStart);
-  document.getElementById("gp-close").addEventListener("click", function(){ m.close(true); });
-  document.getElementById("gp-next-btn").addEventListener("click", function(){ m.close(true); nextCircuit(); });
-  $("gp-play").disabled=$("gp-hard").disabled=true;
-  $("gp-ff").textContent="🏁 Circuit complete — view the podium";
-  renderAll();
+  clearInterval(podiumCd);
+  podiumCd = SB.countdown(m.el.querySelector("#gp-next"), d.nextStart);
+  function shut(){ clearInterval(podiumCd); podiumCd=null; m.close(true); }
+  m.el.querySelector("#gp-close").addEventListener("click", shut);
+  m.el.querySelector("#gp-next-btn").addEventListener("click", function(){ shut(); nextCircuit(); });
 }
 function nextCircuit(){
-  var career=d.career, circ=d.circuit+1, lvl=d.level;
   var t=Date.now();
-  d.skew=0; d.start=t; d.end=t+EVENT_MS; d.circuit=circ; d.level=lvl; d.career=career;
-  d.seg=0; d.at=0; d.fin=0; d.attempts=0; d.charges=0; d.laps=[];
+  d.skew=0; d.start=t; d.end=t+EVENT_MS; d.circuit++;
+  d.seg=0; d.at=0; d.fin=0; d.attempts=0; d.charges=0; d.laps=[]; d.slipGot=0;
   d.nitro=false; d.pass=false; d.rerace=false; d.finished=false; d.finalPos=0; d.slipAt=t; d.nextStart=0;
-  d.rivals=RIVALS.map(function(r,i){ return {name:r.name,av:r.av,color:r.color,live:r.live,team:r.team,grid:r.grid,lane:i+1,seg:0,at:0,fin:0,next:t+pace(r)}; });
-  st.save();
+  d.rivals=freshGrid(t);
+  save();
   cars.forEach(function(c){ c.disp=0; });
   applyLivery();
-  ff=false; offerSig=""; $("gp-ff").disabled=false;
+  ff=false; offerSig=""; boardSig="";
+  $("gp-ff").disabled=false;
   $("gp-ff").textContent="⏩ Fast-forward the race to the chequered flag (demo)";
-  $("gp-play").disabled=$("gp-hard").disabled=false;
+  busy=false; setCtaState();
   document.querySelector(".sb-subtitle").textContent="Circuit "+d.circuit+" · Weekly Race Event";
-  SB.countdown($("gp-timer"), d.end, function(){ if(!d.finished) finishRace(); });
-  SB.toast("🚦 Circuit "+d.circuit+" lights out — grid is reset, trophies kept!",2600);
-  renderAll();
+  SB.toast("🚦 Circuit "+d.circuit+" lights out — grid reset, trophies kept!",{ms:2600,top:true});
+  renderClock(); renderAll();
 }
 
 /* ============ demo fast-forward (accelerates the clock for everyone) ============ */
+var ffIv=null;
 $("gp-ff").addEventListener("click", function(){
-  if(d.finished){ finishRace(); return; }
+  if(d.finished){ showPodium(); return; }
   if(ff) return;
   ff=true; nextAuto=raceNow();
   $("gp-ff").disabled=true; $("gp-ff").textContent="⏩ Racing at 12× — every car on the same clock…";
-  SB.toast("Demo: race clock at 12×. Rivals keep their own pace.",2600);
-  var iv=setInterval(function(){
-    if(d.finished || ended()){ clearInterval(iv); ff=false; $("gp-ff").disabled=false; return; }
+  SB.toast("Demo: race clock at 12×. Rivals keep their published pace.",{ms:2600,top:true});
+  clearInterval(ffIv);
+  ffIv=setInterval(function(){
+    if(d.finished || ended() || d.fin){ clearInterval(ffIv); ffIv=null; ff=false;
+      if(!d.finished){ $("gp-ff").disabled=false; $("gp-ff").textContent="⏩ Fast-forward the race to the chequered flag (demo)"; }
+      return; }
     d.skew+=600; tick();
   }, 50);
 });
 
 /* ============ info modal ============ */
 $("gp-info").addEventListener("click", function(){
-  SB.modal('<h3 style="margin:0 0 8px">🏁 How the Grand Prix works</h3>'
+  var cadList = d.rivals.map(function(r){ return r.av+" "+r.name+" — <b>1 segment / "+liveS(r.live)+"</b> (≈"+demoS(r.live)+" here)"; }).join("<br>");
+  var m=SB.modal('<h3 style="margin:0 0 8px">🏁 How the Grand Prix works</h3>'
     +'<div style="text-align:left;font-size:12.5px;line-height:1.55">'
     +'<b>Fuel = main levels only</b><br>▶ Clear a level: <b>+1 segment</b><br>🔥 Clear it <b>first try</b>: <b>+2</b> (speed boost)<br>'
     +'🔥 Clear a <b>hard</b> level: <b>+2</b> + <b>1 nitro charge</b> (3 charges = a free +2 burn)<br>'
-    +'🛡️ A loss costs you nothing — you never move backwards.<br><br>'
+    +'🛡️ A loss costs you nothing — you never move backwards, and you retry the same level.<br><br>'
     +'<b>The circuit</b><br>3 laps × 8 segments = 24 to the flag. Every lap completion pays a reward, so you bank prizes whether or not you podium.<br><br>'
-    +'<b>Rival pace — the honest rule</b><br>Each of the 4 rivals advances <b>1 segment every 25–40s on their own fixed timer</b> '
-    +'(this demo runs the clock ~6.5× faster, so you\'ll see 4–6s). Their timers are set when the circuit starts and <b>never change</b>: '
-    +'they do not speed up when you buy something, do not slow down when you fall behind, and never react to your position. '
-    +'Ruby Reyes is simply the quickest of them — that\'s why the finish is usually close.<br><br>'
-    +'<b>Free comeback: Slipstream</b><br>While you are in last place you gain <b>+1 segment every 90s</b>, free, automatically. '
-    +'It switches off the moment you\'re out of last. No purchase, no ad.<br><br>'
-    +'<b>Optional offers</b><br>⚡ Nitro Boost $0.99 — +3 segments once per circuit.<br>🔧 Pit Crew Pass $4.99 — first-try clears pay +3 all circuit + livery.<br>'
-    +'🔁 Re-Race Token $1.99 — only offered when you\'re last by 3+, jumps you to your next lap line.<br>'
-    +'Everything they buy is also reachable by playing levels; nothing is gated behind them.<br><br>'
-    +'<b>Everyone gets paid</b><br>1st 3,000🪙+3🃏+trophy · 2nd 2,000🪙+2🃏 · 3rd 1,200🪙+1🃏 · 4th/5th 700🪙+1⚡ finisher prize.<br><br>'
-    +'<span class="sb-muted" style="font-size:11px">Demo note: the 24–48h circuit is compressed to 8 minutes, rivals are simulated, and the fast-forward button accelerates the clock equally for all five cars.</span></div>'
-    +'<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Lights out!</button>');
+    +'<b>Rival pace — the honest rule</b><br>Each rival advances one segment on a fixed timer set at lights-out:<br>'+cadList+'<br>'
+    +'Those timers <b>never change</b>: they do not speed up when you buy something, do not slow down when you fall behind, and never react to your position. '
+    +'Segment <i>k</i> of a rival always lands at exactly <i>k</i> × their timer after the start — the same whether this tab is open, closed or reloaded. '
+    +'Ruby Reyes is simply the quickest of them, which is why the finish is usually close.<br><br>'
+    +'<b>Free comeback: Slipstream</b><br>While you are in last place you gain <b>+1 segment every '+liveS(SLIP_LIVE)+'</b> (≈'+demoS(SLIP_LIVE)+' at this demo speed), free and automatic. '
+    +'It switches off the moment you are out of last. No purchase, no ad.<br><br>'
+    +'<b>Optional offers</b><br>⚡ Nitro Boost $0.99 — +3 segments, once per circuit.<br>🔧 Pit Crew Pass $4.99 — first-try clears pay +3 for the rest of the circuit, +2 Wild Cards, + livery.<br>'
+    +'🔁 Re-Race Token $1.99 — only offered when you are last by 3+ with a lap line 4+ segments away; jumps you to that lap line. One per circuit.<br>'
+    +'Every one of them is reachable for free by playing levels; nothing is gated behind them, and buying never changes a rival.<br><br>'
+    +'<b>Everyone gets paid</b><br>1st 3,000🪙+3🃏+25💎+trophy · 2nd 2,000🪙+2🃏+12💎 · 3rd 1,200🪙+1🃏+6💎 · 4th/5th 700🪙+1⚡ finisher prize.<br><br>'
+    +'<span class="sb-muted" style="font-size:11px">Demo note: the 24–48h circuit is compressed to 8 minutes and rival timers are divided by '+DEMO_DIV+'. The fast-forward button accelerates the race clock equally for all five cars.</span></div>'
+    +'<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" id="gp-info-ok">Lights out!</button>');
+  m.el.querySelector("#gp-info-ok").addEventListener("click", function(){ m.close(true); });
 });
 
 /* ============ boot ============ */
-SB.countdown($("gp-timer"), d.end, function(){ if(!d.finished) finishRace(); });
-renderAll();
-if(d.finished){ $("gp-play").disabled=$("gp-hard").disabled=true; $("gp-ff").textContent="🏁 Circuit complete — view the podium"; }
-if(d.plays===0 && d.seg===0) setTimeout(function(){ SB.toast("🚦 Lights out! Clear levels to move your car — a loss never sets you back.",3000); },700);
+renderClock(); renderAll(); setCtaState();
+if(d.finished){
+  $("gp-ff").textContent="🏆 View the podium ceremony";
+} else if(d.fin){
+  setTimeout(finishRace, 600);            /* reloaded between the line and the ceremony */
+} else if(raceNow()>=d.end){
+  finishRace();
+}
+if(awayMoves>3 && !d.finished) setTimeout(function(){ SB.toast("While you were away, the pack kept to its published pace…",{ms:2400,top:true}); },900);
 
-window.__gp = {state:d, order:order, advance:advance, finish:finishRace, tick:tick};
+window.__gp = {state:d, order:order, advance:advance, finish:finishRace, podium:showPodium,
+               tick:tick, cad:cad, TOTAL:TOTAL, myPos:myPos, next:nextCircuit,
+               play:play, reraceGain:reraceGain};
 })();
 </script>
 </body>
