@@ -8,10 +8,8 @@
 <style>
 /* ============ layout ============ */
 body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5a1e 100%); }
+/* bottom padding clears the fixed .playbar only — the demo-reset now lives in the top bar */
 .sb-main { padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 92px); }
-.sb-demo-reset { bottom:calc(env(safe-area-inset-bottom,0px) + 88px); }
-.sb-toast { bottom:auto; top:calc(env(safe-area-inset-top,0px) + 64px); transform:translateX(-50%) translateY(-14px); }
-.sb-toast.show { transform:translateX(-50%) translateY(0); }
 .sb-topbar { background:rgba(43,26,12,.94); border-bottom:2px solid rgba(217,139,43,.5); }
 
 /* ============ header ============ */
@@ -27,6 +25,15 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
 .rescard b { display:block; font-size:17px; color:#4a2a11; line-height:1.05; }
 .rescard small { display:block; font-size:9px; font-weight:800; color:#8a5a2a; letter-spacing:.4px; text-transform:uppercase; }
 .regen { font-size:9px; font-weight:800; color:#2E9E4F; }
+/* the power-dig card doubles as the arm/disarm control, so the player is never
+   forced to spend a power dig on a tile they only wanted a ticket for */
+button.rescard { font-family:var(--sb-font); text-align:left; min-height:48px; cursor:pointer; }
+button.rescard:active { transform:scale(.97); }
+.armpill { display:inline-block; margin-top:1px; font-size:8.5px; font-weight:900; letter-spacing:.4px;
+  background:#8a5a2a; color:#ffeed6; border-radius:999px; padding:2px 7px; white-space:nowrap; }
+.rescard.armed { border-color:#ffe07a; background:linear-gradient(180deg,#fff2cf,#ffe0a0); box-shadow:0 0 0 3px rgba(255,199,44,.5), 0 3px 8px rgba(0,0,0,.35); }
+.rescard.armed .armpill { background:var(--sb-green); color:#fff; animation:sbPulse 1.2s infinite; }
+.grid.armed .tile:not(.dug) .mound { filter:brightness(1.12) saturate(1.1); }
 
 /* ============ pity meter ============ */
 .pity { background:linear-gradient(180deg,#3f2a12,#291a09); border:2px solid rgba(255,199,44,.55); border-radius:14px; padding:9px 10px 8px; margin-bottom:9px; box-shadow:0 4px 12px rgba(0,0,0,.4); display:flex; gap:10px; align-items:center; }
@@ -60,7 +67,7 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
   filter:drop-shadow(0 4px 5px rgba(0,0,0,.5)); }
 .canopy .branch { position:absolute; left:-4px; right:-4px; top:19px; height:5px; border-radius:4px; z-index:0;
   background:linear-gradient(180deg,#6b4a1e,#3a2209); box-shadow:0 2px 3px rgba(0,0,0,.6); }
-.canopy .cl { position:absolute; border-radius:52% 48% 46% 54% / 54% 50% 50% 46%; }
+.canopy .cl { position:absolute; border-radius:58% 42% 52% 48% / 62% 58% 42% 38%; }
 .canopy .hang { position:absolute; font-size:11px; transform-origin:50% 0; animation:sway 3.6s ease-in-out infinite; opacity:.92; }
 @keyframes sway { 0%,100%{transform:rotate(-14deg);} 50%{transform:rotate(14deg);} }
 .lf { position:absolute; top:-18px; font-size:13px; pointer-events:none; opacity:.55; animation:fall linear infinite; z-index:4; filter:drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
@@ -70,27 +77,48 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
 .grid { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; position:relative; z-index:2; }
 .tile { position:relative; aspect-ratio:1; border:none; padding:0; border-radius:9px; overflow:visible; cursor:pointer; background:transparent; font-family:var(--sb-font); }
 .hole { position:absolute; inset:0; border-radius:9px; overflow:hidden;
-  background:radial-gradient(circle at 46% 54%, #241505 0%, #150c03 78%);
-  box-shadow:inset 0 4px 7px rgba(0,0,0,.9), inset -1px -2px 3px rgba(255,200,130,.12); }
-.hole::after { content:""; position:absolute; inset:0; /* leaf crumbs left in the hole */
-  background:radial-gradient(circle at 26% 72%, rgba(184,97,31,.5) 0 10%, transparent 11%), radial-gradient(circle at 66% 78%, rgba(217,139,43,.4) 0 8%, transparent 9%), radial-gradient(circle at 50% 62%, rgba(120,70,28,.55) 0 7%, transparent 8%); }
+  background:radial-gradient(ellipse 88% 76% at 48% 58%, #2b1907 0%, #180d03 62%, #0d0702 100%);
+  box-shadow:inset 0 5px 9px rgba(0,0,0,.9), inset -1px -2px 3px rgba(255,200,130,.1); }
+/* lit upper lip of the hole, then loose crumbs of leaf + soil settled at the bottom */
+.hole::before { content:""; position:absolute; left:7%; right:7%; top:3%; height:26%; border-radius:50%;
+  background:linear-gradient(180deg, rgba(255,214,150,.2), rgba(255,214,150,0) 85%); }
+.hole::after { content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 62% 22% at 50% 101%, rgba(126,72,26,.6), transparent 72%),
+    radial-gradient(circle at 23% 79%, rgba(184,97,31,.42) 0 4%, transparent 5.2%),
+    radial-gradient(circle at 39% 87%, rgba(217,139,43,.3) 0 3%, transparent 4.2%),
+    radial-gradient(circle at 69% 81%, rgba(150,86,30,.4) 0 3.6%, transparent 4.8%),
+    radial-gradient(circle at 57% 72%, rgba(110,64,24,.36) 0 2.8%, transparent 4%); }
 .mound { position:absolute; inset:0; border-radius:9px; transition:opacity .2s, transform .2s; overflow:hidden;
   background:
-    /* pebbles + crumbs, then sunlight from the upper-left */
-    radial-gradient(circle at 25% 33%, rgba(70,34,10,.2) 0 6%, transparent 7%), radial-gradient(circle at 40% 78%, rgba(70,34,10,.14) 0 4%, transparent 5%),
-    radial-gradient(circle at 88% 26%, rgba(255,226,170,.14) 0 4%, transparent 5%), radial-gradient(circle at 14% 62%, rgba(70,34,10,.13) 0 4%, transparent 5%),
-    radial-gradient(circle at 74% 63%, rgba(70,34,10,.16) 0 5%, transparent 6%), radial-gradient(circle at 58% 20%, rgba(255,226,170,.14) 0 4%, transparent 5%),
+    /* fine grit + pebbles, then sunlight raking in from the upper-left */
+    radial-gradient(circle at 25% 34%, rgba(58,26,7,.24) 0 3.4%, transparent 4.6%), radial-gradient(circle at 41% 79%, rgba(58,26,7,.17) 0 2.4%, transparent 3.4%),
+    radial-gradient(circle at 87% 27%, rgba(255,226,170,.17) 0 2.4%, transparent 3.4%), radial-gradient(circle at 13% 63%, rgba(58,26,7,.16) 0 2.4%, transparent 3.4%),
+    radial-gradient(circle at 74% 62%, rgba(58,26,7,.19) 0 3%, transparent 4.2%), radial-gradient(circle at 59% 21%, rgba(255,226,170,.16) 0 2.4%, transparent 3.4%),
+    radial-gradient(circle at 33% 53%, rgba(58,26,7,.13) 0 1.9%, transparent 2.9%), radial-gradient(circle at 67% 43%, rgba(255,226,170,.12) 0 1.9%, transparent 2.9%),
+    radial-gradient(circle at 82% 48%, rgba(58,26,7,.12) 0 1.7%, transparent 2.7%), radial-gradient(circle at 20% 15%, rgba(58,26,7,.1) 0 1.7%, transparent 2.7%),
     radial-gradient(ellipse 78% 52% at 34% 6%, rgba(255,230,180,.34), transparent 72%),
     linear-gradient(158deg,#d18227 0%,#b05c1d 40%,#8a4416 76%,#65310f 100%);
   box-shadow:inset 2px 2px 0 rgba(255,232,180,.32), inset -2px -3px 0 rgba(0,0,0,.38), 0 2px 4px rgba(0,0,0,.42); }
-/* fallen leaves resting on the mound (pointed both ends, faint centre vein) */
+/* fallen leaves resting on the mound (pointed both ends, midrib down the centre) */
 .mound::before, .mound i {
-  content:""; position:absolute; width:36%; height:18%; left:10%; top:19%;
-  border-radius:64% 5% 64% 5%; transform:rotate(-24deg); opacity:.92;
-  background:linear-gradient(to bottom, transparent 42%, rgba(104,46,10,.34) 47% 53%, transparent 58%), linear-gradient(128deg, rgba(255,246,214,.3) 0 28%, transparent 46%), linear-gradient(142deg,#eeb352 0%,#c25a1e 58%,#93400f 100%);
-  box-shadow:0 1px 2px rgba(0,0,0,.3); }
-.mound i { width:25%; height:13%; left:56%; top:56%; transform:rotate(28deg); opacity:.8;
-  background:linear-gradient(to bottom, transparent 42%, rgba(104,46,10,.3) 47% 53%, transparent 58%), linear-gradient(142deg,#d9973a 0%,#a3480f 60%,#7c320a 100%); }
+  content:""; position:absolute; width:38%; height:19%; left:9%; top:18%;
+  border-radius:64% 5% 64% 5%; transform:rotate(-24deg); opacity:.96;
+  background:
+    linear-gradient(to bottom, transparent 44%, rgba(96,38,6,.5) 48% 52%, transparent 57%),
+    linear-gradient(128deg, rgba(255,246,214,.22) 0 22%, transparent 40%),
+    linear-gradient(142deg,#f0b348 0%,#d3691f 46%,#a8410d 78%,#7d2d06 100%);
+  box-shadow:0 1px 2px rgba(0,0,0,.38); }
+.mound i { width:27%; height:14%; left:55%; top:55%; transform:rotate(28deg); opacity:.9;
+  background:
+    linear-gradient(to bottom, transparent 44%, rgba(96,38,6,.45) 48% 52%, transparent 57%),
+    linear-gradient(142deg,#c98b30 0%,#9c4310 58%,#722c07 100%); }
+/* a third, smaller leaf scrap so the litter never reads as two repeated decals */
+.mound i::after { content:""; position:absolute; left:-118%; top:118%; width:82%; height:80%;
+  border-radius:64% 5% 64% 5%; transform:rotate(62deg); opacity:.78;
+  background:
+    linear-gradient(to bottom, transparent 42%, rgba(96,38,6,.4) 47% 53%, transparent 58%),
+    linear-gradient(142deg,#e8a63c 0%,#a8480f 62%,#7d2d06 100%); }
 /* grass blades along the bottom edge */
 .mound::after { content:""; position:absolute; left:0; right:0; bottom:0; height:40%;
   background:
@@ -118,8 +146,9 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
 .tile.cross .mound { filter:brightness(1.35) saturate(1.2) !important; }
 
 /* found marker left in the hole */
-.mark { position:absolute; inset:0; display:grid; place-items:center; font-size:16px; opacity:.62; z-index:1; pointer-events:none; }
-.mark.gold { opacity:.95; filter:drop-shadow(0 0 5px rgba(255,199,44,.9)); }
+.mark { position:absolute; inset:0; display:grid; place-items:center; font-size:16px; opacity:.82; z-index:1; pointer-events:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.mark.gold { opacity:1; filter:drop-shadow(0 0 6px rgba(255,199,44,.95)); }
 /* the pop that appears on reveal */
 .pop { position:absolute; inset:-6px; display:grid; place-items:center; z-index:6; pointer-events:none; animation:popIn .42s cubic-bezier(.34,1.56,.64,1); }
 @keyframes popIn { 0%{transform:scale(.2); opacity:0;} 60%{transform:scale(1.22);} 100%{transform:scale(1); opacity:1;} }
@@ -180,12 +209,17 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
 .odds > summary::-webkit-details-marker { display:none; }
 .odds > summary .arw { margin-left:auto; font-size:12px; color:#8a6a3a; transition:transform .2s; }
 .odds[open] > summary .arw { transform:rotate(180deg); }
-.otbl { width:100%; border-collapse:collapse; font-size:11.5px; }
-.otbl th { background:#efe2c4; color:#6b4a1e; font-size:9.5px; letter-spacing:.4px; text-transform:uppercase; padding:5px 6px; text-align:left; }
-.otbl td { padding:6px; border-top:1px solid rgba(107,74,30,.16); vertical-align:middle; color:var(--sb-ink); }
-.otbl td.pc { font-weight:900; text-align:right; white-space:nowrap; }
-.otbl td.tl { text-align:center; color:#6b4a1e; font-weight:800; }
-.oico { display:inline-flex; align-items:center; justify-content:center; width:22px; vertical-align:middle; margin-right:3px; }
+.otbl { width:100%; border-collapse:collapse; font-size:11px; table-layout:fixed; }
+.otbl th { background:#efe2c4; color:#6b4a1e; font-size:8.5px; letter-spacing:.3px; text-transform:uppercase; padding:5px 4px; text-align:right; line-height:1.2; }
+.otbl th:first-child { text-align:left; padding-left:8px; }
+.otbl td { padding:5px 4px; border-top:1px solid rgba(107,74,30,.16); vertical-align:middle; color:var(--sb-ink); }
+.otbl td.nm { padding-left:8px; }
+.otbl td.pc { font-weight:900; text-align:right; white-space:nowrap; font-size:11.5px; }
+.otbl td.pc.ef { color:#8a4416; }
+.otbl td.tl { text-align:right; color:#6b4a1e; font-weight:800; }
+.oico { display:inline-flex; align-items:center; justify-content:center; width:20px; vertical-align:middle; margin-right:2px; }
+.onm { display:inline-block; vertical-align:middle; font-weight:800; line-height:1.2; }
+.onm em { display:block; font-style:normal; font-size:9.5px; font-weight:800; color:#8a6a3a; letter-spacing:.1px; }
 .otbl tr.gold td { background:rgba(255,199,44,.22); }
 .otbl tr.grand td { background:rgba(215,38,61,.12); }
 .otbl tr.tot td { background:#efe2c4; font-weight:900; font-size:11px; }
@@ -241,14 +275,14 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
 
   <div class="res">
     <div class="rescard"><span class="em">🎫</span><div><b id="tkN">0</b><small>Dig tickets</small><span class="regen" id="regen"></span></div></div>
-    <div class="rescard"><span class="em">✚</span><div><b id="pwN">0</b><small>Power digs</small></div></div>
+    <button class="rescard" id="pwCard" aria-pressed="false"><span class="em">✚</span><div><b id="pwN">0</b><small>Power digs</small><span class="armpill" id="armPill">TAP TO ARM</span></div></button>
   </div>
 
   <div class="pity" id="pityBox">
     <div class="acorn"><div class="stem"></div><div class="body"><div class="fill" id="pfill"></div></div><div class="cap"></div></div>
     <div class="ptxt">
       <div class="ptit" id="ptit">Golden chestnut guaranteed in 12 digs</div>
-      <div class="psub">Free &amp; always active · resets when you find one</div>
+      <div class="psub">Free · always on · every dig counts</div>
       <div class="pips" id="pips"></div>
     </div>
   </div>
@@ -258,6 +292,13 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
     <div class="grid" id="grid"></div>
     <div class="nearmiss" id="nearmiss" style="display:none"></div>
   </div>
+
+  <details class="odds" id="oddsPanel" open>
+    <summary>📊 Published dig odds — exact tile counts <span class="arw">▾</span></summary>
+    <div class="left" id="oleft"></div>
+    <table class="otbl" id="otbl"></table>
+    <div class="note" id="onote"></div>
+  </details>
 
   <div class="basket">
     <h4>🧺 Forager's basket — patch <span id="bpatch">1</span></h4>
@@ -269,13 +310,6 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
     </div>
   </div>
 
-  <details class="odds" id="oddsPanel" open>
-    <summary>📊 Dig odds — this patch <span class="arw">▾</span></summary>
-    <div class="left" id="oleft"></div>
-    <table class="otbl" id="otbl"></table>
-    <div class="note" id="onote"></div>
-  </details>
-
   <div id="offers"></div>
   <div class="stats" id="stats"></div>
 </div>
@@ -283,7 +317,7 @@ body { background:linear-gradient(180deg,#2b1a0c 0%,#4a2a11 34%,#6b3d16 68%,#8a5
 
 <div class="playbar">
   <button class="sb-btn sb-btn-green" id="playBtn">▶ Play level<small>clear = +1 🎫 dig ticket</small></button>
-  <button class="sb-btn sb-btn-red" id="hardBtn">🔥 Hard level<small>clear = +1 ✚ power dig (3 tiles)</small></button>
+  <button class="sb-btn sb-btn-red" id="hardBtn">🔥 Hard level<small>clear = +1 ✚ power dig</small></button>
 </div>
 
 <script src="../shared/core.js"></script>
@@ -327,6 +361,59 @@ function rewardText(t, p) {
   if (t === "dud") return "nothing";
   return rewardsFor(t, p).map(function (r) { return SB.icon(r.type) + " " + SB.fmt(r.amount); }).join(" ");
 }
+// event-local currencies rendered through the shared chip helper ({icon,label,amount})
+var TICKET_RW = function (n) { return { icon:"🎫", label:"Dig Tickets", amount:n }; };
+var POWER_RW  = function (n) { return { icon:"✚", label:"Power Digs", amount:n }; };
+
+/* ===== exact published odds =====
+   The "deal" column is the literal 36-tile mix. The "with pity" column is the exact
+   long-run frequency once the 12-dig guarantee is applied — computed here from the
+   SAME constants the game runs on, not hand-typed, so the table can never drift.
+
+   Why it is exact: a patch is only ever left by digging all 36 tiles, so every rare
+   in the deck is always found exactly once per patch. The only extra golden chestnuts
+   come from forced pity upgrades, whose expected count per patch (F) is obtained by
+   a dynamic program over (tiles dug, rares still buried, pity counter). Pity upgrades
+   depend only on WHERE the rares sit in the shuffle, never on which non-rare tile is
+   upgraded, so the non-rare types keep their relative shares. */
+var EFF = {};
+function effOdds(tier) {
+  if (EFF[tier]) return EFF[tier];
+  var c = COMP[tier], R = c.grand + c.gold, N = SIZE - R;
+  var v = new Array(PITY), i, r, p, k;
+  for (i = 0; i < PITY; i++) v[i] = 0;
+  v[0] = 1;
+  var F = 0;
+  for (var it = 0; it < 200; it++) {          // iterate the cross-patch pity carry-over to its fixed point
+    var g = [], ng;
+    for (r = 0; r <= R; r++) { g.push(new Array(PITY)); for (p = 0; p < PITY; p++) g[r][p] = 0; }
+    for (p = 0; p < PITY; p++) g[R][p] = v[p];
+    F = 0;
+    for (k = 0; k < SIZE; k++) {
+      var left = SIZE - k;
+      ng = [];
+      for (r = 0; r <= R; r++) { ng.push(new Array(PITY)); for (p = 0; p < PITY; p++) ng[r][p] = 0; }
+      for (r = 0; r <= R; r++) for (p = 0; p < PITY; p++) {
+        var w = g[r][p]; if (!w) continue;
+        var pr = r / left, pn = 1 - pr;
+        if (pr > 0) ng[r - 1][0] += w * pr;                       // natural rare → pity resets
+        if (pn > 0) {
+          if (p === PITY - 1) { F += w * pn; ng[r][0] += w * pn; } // forced golden chestnut
+          else ng[r][p + 1] += w * pn;
+        }
+      }
+      g = ng;
+    }
+    v = g[0].slice();
+  }
+  var nonrare = SIZE - R - F;
+  var out = { grand:c.grand, gold:c.gold + F, acorn:c.acorn / N * nonrare, nut:c.nut / N * nonrare, dud:c.dud / N * nonrare };
+  var pct = {};
+  ORDER.forEach(function (kk) { pct[kk] = out[kk] / SIZE * 100; });
+  pct.forcedPerPatch = F;
+  EFF[tier] = pct;
+  return pct;
+}
 
 /* ================= grid + pity core (shared with the simulator) ================= */
 function buildGrid(patch) {
@@ -347,12 +434,14 @@ function resolveTile(state, idx) {
 /* ================= state ================= */
 var S = SB.store("chestnut-dig", {
   tickets: 3, power: 1, pity: 0, patch: 1, grid: null, dug: [], found: [],
-  digs: 0, rares: 0, patches: 0, grandFound: false, pass: false, lvl: 214,
+  digs: 0, rares: 0, patches: 0, pass: false, lvl: 214,
   haul: { nut:0, acorn:0, gold:0, dud:0, grand:0, coins:0 },
-  endTs: 0, nextTicket: 0, nextSquirrel: 0
+  endTs: 0, nextTicket: 0, nextSquirrel: 0,
+  pendingGrant: null,   // reward committed to the tile but not yet paid out (reload-safe)
+  clearAwarded: false   // patch-clear bonus already paid for the current full grid
 });
 var st = S.data;
-if (!st.grid || st.grid.length !== SIZE) { st.grid = buildGrid(st.patch); st.dug = []; st.found = []; }
+if (!st.grid || st.grid.length !== SIZE) { st.grid = buildGrid(st.patch); st.dug = []; st.found = []; st.clearAwarded = false; }
 if (!st.endTs || st.endTs < Date.now() - 864e5) st.endTs = Date.now() + EVENT_MS;
 if (!st.nextTicket) st.nextTicket = Date.now() + REGEN_MS;
 if (!st.nextSquirrel) st.nextSquirrel = Date.now() + SQUIRREL_MS;
@@ -394,12 +483,18 @@ function buildTiles() {
 }
 function markFace(t) {
   if (!t) return "·";
-  if (t === "dud") return '<span style="font-size:11px;opacity:.7">·</span>';
-  return art(t, t === "grand" ? 18 : 17);
+  if (t === "dud") return '<span style="font-size:13px;opacity:.55">·</span>';
+  return art(t, t === "acorn" ? 22 : 20);
 }
 function renderRes() {
   $("#tkN").textContent = st.tickets;
   $("#pwN").textContent = st.power;
+  if (armed && st.power <= 0) armed = false;
+  var card = $("#pwCard");
+  card.classList.toggle("armed", armed);
+  card.setAttribute("aria-pressed", armed ? "true" : "false");
+  $("#armPill").textContent = armed ? "ARMED ✚" : (st.power > 0 ? "TAP TO ARM" : "NONE LEFT");
+  $("#grid").classList.toggle("armed", armed);
 }
 function renderPity() {
   var left = PITY - st.pity;
@@ -422,34 +517,44 @@ function renderHaul() {
   $("#pbadge").innerHTML = "🌲 Patch " + st.patch + (st.patch > 1 ? " · deeper" : "");
 }
 function renderOdds() {
-  var c = COMP[tierOf(st.patch)], p = st.patch;
+  var tier = tierOf(st.patch), c = COMP[tier], p = st.patch, eff = effOdds(tier);
   var rows = ORDER.map(function (k) {
     var pct = (c[k] / SIZE * 100);
-    return '<tr class="' + INFO[k].cls + '"><td><span class="oico">' + art(k, 19) + "</span>" + INFO[k].nm + "</td>" +
+    return '<tr class="' + INFO[k].cls + '"><td class="nm"><span class="oico">' + art(k, 18) + "</span>" +
+      '<span class="onm">' + INFO[k].nm + "<em>" + rewardText(k, p) + "</em></span></td>" +
       '<td class="tl">' + c[k] + "</td>" +
       '<td class="pc">' + pct.toFixed(2) + "%</td>" +
-      "<td>" + rewardText(k, p) + "</td></tr>";
+      '<td class="pc ef">' + eff[k].toFixed(2) + "%</td></tr>";
   }).join("");
-  $("#otbl").innerHTML = "<tr><th>Under the leaves</th><th>Tiles</th><th>Chance</th><th>Pays</th></tr>" + rows +
-    '<tr class="tot"><td>Total</td><td class="tl">36</td><td class="pc">100.00%</td><td>every dig resolves</td></tr>';
+  var effTot = ORDER.reduce(function (a, k) { return a + eff[k]; }, 0);
+  $("#otbl").innerHTML =
+    '<tr><th style="width:47%">Under the leaves</th><th style="width:12%">Tiles</th><th style="width:20%">Deal</th><th style="width:21%">With<br>pity</th></tr>' + rows +
+    '<tr class="tot"><td class="nm">Total — every dig resolves</td><td class="tl">36</td><td class="pc">100.00%</td><td class="pc">' +
+    effTot.toFixed(2) + "%</td></tr>";
   var lft = ORDER.filter(function (k) { return countLeft(k) > 0; }).map(function (k) {
     return '<span class="lgrp">' + art(k, 15) + "&nbsp;" + countLeft(k) + "</span>";
   }).join('<span class="lsep">·</span>');
-  $("#oleft").innerHTML = "Still buried in this patch: <b>" + (lft || "—") + "</b> in " + remaining() + " tiles";
-  $("#onote").innerHTML = "Every patch is <b>36 real tiles</b> dealt face-down — the table above is the literal tile count, " +
-    "so chances shift as you dig (no reshuffling, no hidden re-rolls). " +
+  $("#oleft").innerHTML = "Still buried right now: <b>" + (lft || "—") + "</b> in " + remaining() + " tiles";
+  $("#onote").innerHTML =
+    "<b>Deal</b> = the literal 36 face-down tiles of this patch. No reshuffling, no hidden re-rolls — so the live " +
+    "“still buried” line above is your true remaining chance. " +
+    "<b>With pity</b> = the exact long-run rate once the free " + PITY + "-dig guarantee is applied; it is computed from the same " +
+    "numbers the game runs on (a forced upgrade turns one non-golden tile golden, which is why the other rows sit a hair below the deal). " +
     (st.patch > 1 ? "<b>Patch " + st.patch + "</b> is a deeper patch: more golden chestnuts, fewer empty burrows. " : "") +
-    "<b>Empty burrows are real</b> — " + (c.dud / SIZE * 100).toFixed(2) + "% of tiles pay nothing, and we show them here rather than hide them. " +
-    "The 12-dig pity guarantee can only <b>add</b> golden chestnuts, so your real golden rate is <b>≥ " + (c.gold / SIZE * 100).toFixed(2) + "%</b>.";
+    "<b>Empty burrows are real</b> — " + eff.dud.toFixed(2) + "% of digs pay nothing and we print it rather than hide it. " +
+    "Nothing you can buy changes a single number in this table.";
 }
 function renderNearMiss() {
   var el = $("#nearmiss"), rem = remaining();
-  if (st.grandFound) {
+  // derived from the live grid, never from a flag: this line must be literally true
+  var buried = false;
+  for (var i = 0; i < SIZE; i++) if (!st.dug[i] && st.grid[i] === "grand") { buried = true; break; }
+  if (!buried) {
     el.style.display = ""; el.className = "nearmiss done";
     el.innerHTML = "🐿️ Golden Squirrel hoard claimed from this patch!";
     return;
   }
-  if (rem <= 10) {
+  if (rem > 0 && rem <= 10) {
     el.style.display = ""; el.className = "nearmiss" + (rem <= 4 ? " hot" : "");
     el.innerHTML = "🐿️ <b>Golden Squirrel still buried</b> — " + rem + " tiles left, so it's <b>1 in " + rem + "</b> per dig now.";
     return;
@@ -466,7 +571,7 @@ function renderOffers() {
     '<div class="row"><button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyT">Get 5 tickets — $0.99</button></div>' +
     '<div class="free">Free path: <b>every level clear = 1 ticket</b>, plus 1 free ticket every 20 min (up to ' + TICKET_CAP + ' banked). ' +
     'Purchased digs advance the same free pity meter.</div></div>';
-  h += '<div class="offer"><h4>✚ Power Dig Pack — $1.99</h4><p>3 Power Digs. Each clears a 3-tile cross ✚ in one tap — all 3 tiles count toward the pity guarantee.</p>' +
+  h += '<div class="offer"><h4>✚ Power Dig Pack — $1.99</h4><p>3 Power Digs. Arm one and tap a mound: it clears that tile plus up to 2 fresh neighbours in a cross ✚ — and every tile it turns over counts toward the pity guarantee.</p>' +
     '<div class="row"><button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyP">Get 3 power digs — $1.99</button></div>' +
     '<div class="free">Free path: <b>every hard-level clear = 1 Power Dig</b>. Hard levels are the fastest free route to 3 tiles at once.</div></div>';
   h += '<div class="offer pass' + (st.pass ? " owned" : "") + '"><h4>🍁 Forager\'s Pass — $4.99</h4>' +
@@ -483,7 +588,9 @@ function renderOffers() {
 function renderAll() { renderRes(); renderPity(); renderHaul(); renderOdds(); renderNearMiss(); renderStats(); renderOffers(); }
 
 /* ================= digging ================= */
-var busy = false;
+var busy = false;        // one dig sequence at a time
+var armed = false;       // power-dig mode (session only — never persisted)
+var grandOpen = false;   // grand-prize modal on screen; patch clear waits for it
 function scatter(tile, gold) {
   var bits = ["🍂", "🍁", "🍂"];
   for (var i = 0; i < 7; i++) {
@@ -509,18 +616,30 @@ function scatter(tile, gold) {
     (function (n) { setTimeout(function () { n.remove(); }, 620); })(d);
   }
 }
+// Pays out a reward that was already committed to state. Safe to call after a reload:
+// the pending record is cleared inside the same save, so it can never pay twice.
+function flushPending(originEl, opts) {
+  var pend = st.pendingGrant;
+  if (!pend || !pend.length) { st.pendingGrant = null; return null; }
+  st.pendingGrant = null; S.save();
+  SB.grantRewards(pend, originEl, opts || { toastTop: true });
+  return pend;
+}
 function digTile(idx, delay) {
   return new Promise(function (resolve) {
     setTimeout(function () {
       var tile = $('.tile[data-i="' + idx + '"]');
+      if (st.dug[idx] || !tile) { resolve(); return; }        // never resolve the same tile twice
       var r = resolveTile(st, idx);
       var out = r.out;
+      var rw = rewardsFor(out, st.patch);
+      // one atomic commit: tile revealed, haul updated, payout recorded as pending
       st.dug[idx] = true; st.found[idx] = out;
       st.digs++; st.haul[out]++;
       if (out === "gold" || out === "grand") st.rares++;
-      if (out === "grand") st.grandFound = true;
-      var rw = rewardsFor(out, st.patch);
       rw.forEach(function (x) { if (x.type === "coins") st.haul.coins += x.amount; });
+      st.pendingGrant = rw.length ? rw : null;
+      S.save();
 
       tile.classList.add("dug");
       tile.classList.remove("cross");
@@ -532,44 +651,55 @@ function digTile(idx, delay) {
       tile.appendChild(pop);
 
       setTimeout(function () {
-        if (rw.length) SB.grantRewards(rw, tile);
+        // custom line wins the single toast slot; the grant keeps its fly-to-wallet FX
+        var line = null;
+        if (out === "dud") line = "🕳️ Empty burrow — nothing here. Pity meter still advanced.";
+        if (out === "gold") line = (r.forced ? "✨ PITY GUARANTEE — golden chestnut! " : "✨ Golden chestnut! ") + rewardText(out, st.patch);
+        if (out === "grand") line = "🐿️ GOLDEN SQUIRREL HOARD!";
+        flushPending(tile, { toast: !line, toastTop: true });
+        if (line) SB.toast(line, { top: true });
         var mk = document.createElement("span");
         mk.className = "mark" + (out === "gold" || out === "grand" ? " gold" : "");
         mk.innerHTML = markFace(out);
         pop.remove(); tile.appendChild(mk);
-        if (out === "dud") SB.toast("🕳️ Empty burrow — nothing here. Pity meter still advanced.");
         if (out === "gold") {
           var b = tile.getBoundingClientRect();
           SB.confetti(b.left + b.width / 2, b.top + b.height / 2, 38);
-          SB.toast(r.forced ? "✨ PITY GUARANTEE — golden chestnut!" : "✨ Golden chestnut!");
         }
         renderAll();
-        if (out === "grand") setTimeout(function () { grandModal(); }, 260);
+        if (out === "grand") { grandOpen = true; setTimeout(grandModal, 260); }
         resolve();
       }, 430);
     }, delay || 0);
   });
 }
+// Strict orthogonal cross, clipped at the edges — never wraps, never reaches across the grid.
 function crossOf(idx) {
-  var r = (idx / 6) | 0, c = idx % 6, out = [idx];
-  var cand = [];
+  var r = (idx / 6) | 0, c = idx % 6, out = [idx], cand = [];
+  if (r > 0) cand.push(idx - 6);
   if (c > 0) cand.push(idx - 1);
   if (c < 5) cand.push(idx + 1);
-  if (r > 0) cand.push(idx - 6);
   if (r < 5) cand.push(idx + 6);
   cand.forEach(function (i) { if (out.length < 3 && !st.dug[i]) out.push(i); });
-  if (out.length < 3) { // fall back to any nearby untouched tile
-    for (var i = 0; i < SIZE && out.length < 3; i++) if (!st.dug[i] && out.indexOf(i) < 0) out.push(i);
-  }
   return out;
 }
 function onTile(e) {
   var t = e.target.closest(".tile");
   if (!t || busy) return;
   var idx = +t.dataset.i;
-  if (st.dug[idx]) { SB.toast("Already dug — pick a fresh mound."); return; }
-  if (st.power > 0) return doDig(idx, true);
+  if (st.dug[idx]) { SB.toast("Already dug — pick a fresh mound.", { top:true }); return; }
+  if (armed && st.power > 0) {
+    var list = crossOf(idx);
+    // don't silently eat a power dig for less than it promises, unless the patch really is that empty
+    if (list.length < 3 && remaining() > list.length) {
+      SB.toast("✚ Only " + list.length + " fresh tile" + (list.length > 1 ? "s" : "") + " around there — pick a mound with more neighbours.", { top:true });
+      return;
+    }
+    return doDig(idx, true);
+  }
   if (st.tickets > 0) return doDig(idx, false);
+  // a free power dig in the bank is still a way to play — never show the paid wall over it
+  if (st.power > 0) { SB.toast("✚ Out of tickets — tap the Power digs card to arm one.", { top:true }); return; }
   outOfTickets();
 }
 function doDig(idx, power) {
@@ -577,37 +707,60 @@ function doDig(idx, power) {
   var list = power ? crossOf(idx) : [idx];
   var lead = 0;
   if (power) {
-    st.power--;
+    st.power--; armed = false;
     list.forEach(function (i) { var el = $('.tile[data-i="' + i + '"]'); if (el) el.classList.add("cross"); });
-    SB.toast("✚ POWER DIG — clearing " + list.length + " tiles!");
+    SB.toast(list.length < 3 ? "✚ POWER DIG — only " + list.length + " tile" + (list.length > 1 ? "s" : "") + " left to clear!"
+                             : "✚ POWER DIG — clearing " + list.length + " tiles!", { top:true });
     SB.haptic(25);
     lead = 340;
   } else st.tickets--;
   renderRes(); S.save();
   var chain = new Promise(function (r) { setTimeout(r, lead); });
   list.forEach(function (i, n) { chain = chain.then(function () { return digTile(i, n ? 130 : 0); }); });
-  chain.then(function () {
-    S.save(); busy = false; renderAll();
-    if (remaining() === 0) setTimeout(patchClear, 420);
-  });
+  chain["catch"](function (err) { console.error(err); })
+    .then(function () { S.save(); busy = false; renderAll(); checkPatchDone(); });
 }
 $("#grid").addEventListener("click", onTile);
+$("#pwCard").addEventListener("click", function () {
+  if (busy) return;
+  if (st.power <= 0) {
+    SB.toast("✚ No power digs — clear a hard level to earn one.", { top:true });
+    return;
+  }
+  armed = !armed;
+  renderRes();
+  SB.toast(armed ? "✚ Power dig armed — tap a mound to clear up to 3 tiles." : "Power dig disarmed — normal digs cost 1 🎫.", { top:true });
+});
 
 /* ================= grand prize + patch clear ================= */
 function grandModal() {
   var rw = rewardsFor("grand", st.patch);
   SB.confetti(); setTimeout(function () { SB.confetti(window.innerWidth / 2, 180, 90); }, 400);
   var m = SB.modal('<div style="font-size:46px">🐿️</div><h3 style="margin:2px 0 4px">GOLDEN SQUIRREL HOARD!</h3>' +
-    '<p class="sb-muted" style="font-size:12px;margin:0">The 1-in-36 tile of this patch — you found it.</p>' +
+    '<p class="sb-muted" style="font-size:12px;margin:0">The 1-in-36 tile of this patch — you found it. Already added to your wallet.</p>' +
     '<div class="mrow">' + rw.map(SB.rewardChip).join("") + "</div>" +
-    '<button class="sb-btn sb-btn-green sb-btn-block" id="gOk">Grab the hoard!</button>');
+    '<button class="sb-btn sb-btn-green sb-btn-block" id="gOk">Nice!</button>', done);
   m.el.querySelector("#gOk").addEventListener("click", function () { m.close(); });
+  function done() { grandOpen = false; checkPatchDone(); }
 }
+// Called after every dig sequence AND on load. Idempotent: the season bonus is tied to
+// st.clearAwarded, so a reload mid-transition re-opens the modal without paying twice.
+function checkPatchDone() {
+  if (remaining() !== 0 || busy || grandOpen) return;
+  setTimeout(patchClear, st.clearAwarded ? 0 : 420);
+}
+function patchClearBonus() { return [{ type:"coins", amount: Math.round(1000 * mult(st.patch)) }, { type:"gem", amount:10 }]; }
+var patchModalOpen = false;
 function patchClear() {
-  st.patches++;
-  var bonus = [{ type:"coins", amount: Math.round(1000 * mult(st.patch)) }, { type:"gem", amount:10 }];
-  SB.grantRewards(bonus);
-  SB.confetti();
+  if (remaining() !== 0 || patchModalOpen || grandOpen) return;
+  patchModalOpen = true;
+  var bonus = patchClearBonus();
+  if (!st.clearAwarded) {
+    st.clearAwarded = true; st.patches++;
+    S.save();
+    SB.grantRewards(bonus, null, { toastTop: true });
+    SB.confetti();
+  }
   var np = st.patch + 1, c = COMP[tierOf(np)], oldc = COMP[tierOf(st.patch)];
   var deeper = tierOf(np) !== tierOf(st.patch);
   var m = SB.modal('<div style="font-size:40px">🍁</div><h3 style="margin:2px 0 4px">PATCH ' + st.patch + " CLEARED!</h3>" +
@@ -616,42 +769,44 @@ function patchClear() {
     '<div class="regbox" style="text-align:left">🌲 <b>Patch ' + np + " opens — " + (deeper ? "a deeper part of the forest" : "same depth, fresh 36 tiles") + "</b><br>" +
     '<span style="font-weight:700;font-size:11.5px">Golden chestnuts: ' + oldc.gold + " → <b>" + c.gold + "</b> tiles &nbsp;·&nbsp; Empty burrows: " + oldc.dud + " → <b>" + c.dud + "</b> tiles<br>" +
     "Your pity meter carries over — it never resets between patches.</span></div>" +
-    '<button class="sb-btn sb-btn-green sb-btn-block" id="pcOk">Open Patch ' + np + "</button>");
-  m.el.querySelector("#pcOk").addEventListener("click", function () { m.close(); });
-  m.el.addEventListener("click", function (e) { if (e.target === m.el) newPatch(); });
-  var closed = false;
+    '<button class="sb-btn sb-btn-green sb-btn-block" id="pcOk">Open Patch ' + np + "</button>", newPatch);
+  m.el.querySelector("#pcOk").addEventListener("click", function () { m.close(); });   // close() runs newPatch once
   function newPatch() {
-    if (closed) return; closed = true;
+    patchModalOpen = false;
     st.patch = np; st.grid = buildGrid(np); st.dug = []; st.found = [];
-    st.grandFound = false;
+    st.clearAwarded = false; st.pendingGrant = null;
     st.haul = { nut:0, acorn:0, gold:0, dud:0, grand:0, coins:0 };
     S.save(); buildTiles(); renderAll();
     $("#oddsPanel").setAttribute("open", "");
-    SB.toast("🌲 Patch " + np + " — updated odds table above");
+    SB.toast("🌲 Patch " + np + " — updated odds table above", { top:true });
   }
-  m.el.querySelector("#pcOk").addEventListener("click", newPatch);
 }
 
 /* ================= tickets: free regen + offers ================= */
+var outModalOpen = false;
 function outOfTickets() {
+  if (outModalOpen) return;                       // rapid taps on an empty grid must not stack modals
+  outModalOpen = true;
   var m = SB.modal('<h3 style="margin:0 0 2px">Out of digs</h3>' +
     '<p class="sb-muted" style="font-size:12px;margin:0 0 4px">Three ways forward — one of them is free and already running.</p>' +
     '<div class="regbox">⏳ Next <b>free</b> ticket in <span class="big" id="regCd">--</span><br>' +
     '<span style="font-weight:700;font-size:11px">1 free ticket every 20 min, up to ' + TICKET_CAP + ' banked (demo: ' + Math.round(REGEN_MS / 1000) + "s)</span></div>" +
     '<button class="sb-btn sb-btn-green sb-btn-block mbtn" id="mPlay">▶ Play a level<span class="sm">clear = +1 🎫</span></button>' +
-    '<button class="sb-btn sb-btn-red sb-btn-block mbtn" id="mHard">🔥 Play a hard level<span class="sm">clear = +1 ✚ (3 tiles)</span></button>' +
+    '<button class="sb-btn sb-btn-red sb-btn-block mbtn" id="mHard">🔥 Play a hard level<span class="sm">clear = +1 ✚ (up to 3 tiles)</span></button>' +
     '<div style="height:10px"></div>' +
     '<button class="sb-btn sb-btn-yellow sb-btn-block mbtn" id="mBuy">🎫 5 Dig Tickets — $0.99</button>' +
     '<div class="note" style="font-size:10.5px;color:#5a4a30;line-height:1.5;margin-top:8px">Buying only skips the wait. ' +
     "Your <b>" + (PITY - st.pity) + "-dig</b> golden guarantee, the 36-tile mix and the odds table are exactly the same either way.</div>" +
-    '<button class="sb-sheet-cancel" id="mNo">Not now</button>');
+    '<button class="sb-sheet-cancel" id="mNo">Not now</button>',
+    function () { outModalOpen = false; clearInterval(iv); });
   var cdEl = m.el.querySelector("#regCd");
   var iv = setInterval(function () {
+    if (m.closed) { clearInterval(iv); return; }   // backdrop dismissal must not leave a live timer
     var left = Math.max(0, st.nextTicket - Date.now());
     cdEl.textContent = Math.floor(left / 60000) + ":" + String(Math.floor(left % 60000 / 1000)).padStart(2, "0");
-    if (st.tickets > 0) { clearInterval(iv); m.close(true); SB.toast("🎫 Free ticket ready — dig!"); }
+    if (st.tickets > 0) { clearInterval(iv); m.close(true); SB.toast("🎫 Free ticket ready — dig!", { top:true }); }
   }, 250);
-  function shut() { clearInterval(iv); m.close(true); }
+  function shut() { outModalOpen = false; clearInterval(iv); m.close(true); }
   m.el.querySelector("#mNo").addEventListener("click", shut);
   m.el.querySelector("#mPlay").addEventListener("click", function () { shut(); play(false); });
   m.el.querySelector("#mHard").addEventListener("click", function () { shut(); play(true); });
@@ -659,19 +814,20 @@ function outOfTickets() {
 }
 function buyTickets() {
   SB.buyIAP({ label:"5 Dig Tickets", price:"$0.99", grant:false, sub:"Odds unchanged · pity meter unchanged",
-    contents:[{ type:"token", amount:5 }],
+    contents:[TICKET_RW(5)],
     onSuccess: function () {
       st.tickets += 5; S.save(); renderAll();
-      SB.toast("🎫 +5 Dig Tickets — happy foraging!");
+      SB.toast("🎫 +5 Dig Tickets — happy foraging!", { top:true });
     } });
 }
 function buyPower() {
-  SB.buyIAP({ label:"Power Dig Pack", price:"$1.99", grant:false, sub:"3 Power Digs · 3 tiles each · 9 tiles total",
-    contents:[{ type:"shovel", amount:3 }],
-    onSuccess: function () { st.power += 3; S.save(); renderAll(); SB.toast("✚ +3 Power Digs!"); } });
+  SB.buyIAP({ label:"Power Dig Pack", price:"$1.99", grant:false, sub:"3 Power Digs · up to 3 tiles each",
+    contents:[POWER_RW(3)],
+    onSuccess: function () { st.power += 3; S.save(); renderAll(); SB.toast("✚ +3 Power Digs — tap the card to arm one.", { top:true }); } });
 }
 function buyPass() {
   SB.buyIAP({ label:"Forager's Pass", price:"$4.99", grant:false, sub:"+2 tickets per clear · squirrel companion",
+    contents:[{ icon:"🎫", label:"Tickets", amount:2 }, { icon:"🐿️", label:"Squirrel Companion", amount:1 }],
     onSuccess: function () {
       st.pass = true; st.nextSquirrel = Date.now() + SQUIRREL_MS; S.save(); renderAll();
       SB.confetti(window.innerWidth / 2, 200, 100);
@@ -685,24 +841,28 @@ function buyPass() {
 }
 
 /* ================= fuel: play levels ================= */
+var playing = false;
 function play(hard) {
-  var wr; if (window.__forceWin === true) wr = 1; else if (window.__forceWin === false) wr = 0;
+  if (playing) return;                 // double-tap / modal + playbar can't run two levels
+  playing = true;
   $("#playBtn").disabled = true; $("#hardBtn").disabled = true;
-  SB.playLevel({ hard: hard, winRate: wr, instant: !!window.__instant, title: "Adventure Level " + st.lvl })
+  // window.__forceWin / __forceInstant are honoured inside levelsim for every event
+  SB.playLevel({ hard: hard, title: "Adventure Level " + st.lvl,
+      rewardTag: hard ? "🔥 HARD · CLEAR = +1 ✚ POWER DIG" : "CLEAR = +1 🎫 DIG TICKET" })
     .then(function (res) {
+      playing = false;
       $("#playBtn").disabled = false; $("#hardBtn").disabled = false;
       st.lvl++;
       if (res.won) {
         if (hard) {
           st.power++;
-          if (st.pass) { st.tickets = Math.min(TICKET_CAP + 20, st.tickets + 2); SB.toast("🔥 +1 ✚ Power Dig · 🍁 Pass +2 🎫"); }
-          else SB.toast("🔥 +1 Power Dig — clear a 3-tile cross!");
+          if (st.pass) { st.tickets += 2; SB.toast("🔥 +1 ✚ Power Dig · 🍁 Pass +2 🎫", { top:true }); }
+          else SB.toast("🔥 +1 Power Dig — clears up to 3 tiles!", { top:true });
         } else {
-          var n = st.pass ? 2 : 1;
-          st.tickets += n;
-          SB.toast(st.pass ? "🍁 Pass: +2 Dig Tickets!" : "🎫 +1 Dig Ticket!");
+          st.tickets += st.pass ? 2 : 1;
+          SB.toast(st.pass ? "🍁 Pass: +2 Dig Tickets!" : "🎫 +1 Dig Ticket!", { top:true });
         }
-      } else SB.toast("So close — no ticket. Run it again!");
+      } else SB.toast("So close — no ticket. Run it again!", { top:true });
       S.save(); renderAll();
     });
 }
@@ -710,15 +870,17 @@ $("#playBtn").addEventListener("click", function () { play(false); });
 $("#hardBtn").addEventListener("click", function () { play(true); });
 
 /* ================= squirrel companion + regen + countdown ================= */
+// Exactly one tile, exactly once per timer — the pass buys frequency, never odds.
 function squirrelDig() {
   var free = [];
   for (var i = 0; i < SIZE; i++) if (!st.dug[i]) free.push(i);
-  if (!free.length || busy) return;
-  var idx = free[(Math.random() * free.length) | 0];
+  var tile = null, idx = -1;
+  if (free.length) { idx = free[(Math.random() * free.length) | 0]; tile = $('.tile[data-i="' + idx + '"]'); }
+  if (!tile) return false;
   busy = true;
-  SB.toast("🐿️ Your companion dug a tile for you!");
+  SB.toast("🐿️ Your companion dug a tile for you!", { top:true });
   // the squirrel hops from the edge of the patch to the tile it turns over
-  var tile = $('.tile[data-i="' + idx + '"]'), fr = $("#forest").getBoundingClientRect();
+  var fr = $("#forest").getBoundingClientRect();
   var sq = document.createElement("div");
   sq.className = "squirrel"; sq.textContent = "🐿️";
   sq.style.left = (fr.left + 6) + "px"; sq.style.top = (fr.bottom - 30) + "px";
@@ -730,52 +892,68 @@ function squirrelDig() {
   }); });
   setTimeout(function () { sq.remove(); }, 900);
   digTile(idx, 620).then(function () {
-    S.save(); busy = false; renderAll();
-    if (remaining() === 0) setTimeout(patchClear, 420);
+    S.save(); busy = false; renderAll(); checkPatchDone();
   });
+  return true;
 }
 function tick() {
   var now = Date.now();
-  // free ticket regen
+  // free ticket regen — accrues offline instead of restarting or bursting one-per-frame
   if (st.tickets < TICKET_CAP) {
     if (now >= st.nextTicket) {
-      st.tickets++; st.nextTicket = now + REGEN_MS; S.save();
-      renderRes(); SB.toast("🎫 Free ticket added (1 per 20 min)");
+      var gained = Math.min(1 + Math.floor((now - st.nextTicket) / REGEN_MS), TICKET_CAP - st.tickets);
+      st.tickets += gained;
+      st.nextTicket += gained * REGEN_MS;
+      if (st.nextTicket <= now) st.nextTicket = now + REGEN_MS;   // capped out: re-arm from now
+      S.save();
+      renderRes();
+      SB.toast("🎫 +" + gained + " free ticket" + (gained > 1 ? "s" : "") + " (1 per 20 min)", { top:true });
     }
     var l = Math.max(0, st.nextTicket - now);
     $("#regen").textContent = "+1 free in " + Math.floor(l / 60000) + ":" + String(Math.floor(l % 60000 / 1000)).padStart(2, "0");
-  } else { st.nextTicket = now + REGEN_MS; $("#regen").textContent = "banked (max " + TICKET_CAP + ")"; }
+  } else {
+    // at the bank cap the timer idles; persist the re-arm so a reload can't mint a free ticket
+    if (st.nextTicket <= now) { st.nextTicket = now + REGEN_MS; S.save(); }
+    $("#regen").textContent = "free regen paused at " + TICKET_CAP;
+  }
   // squirrel companion
   if (st.pass) {
-    if (now >= st.nextSquirrel) { st.nextSquirrel = now + SQUIRREL_MS; S.save(); squirrelDig(); }
+    // only consume the timer when the dig actually happens (busy / full patch = try again next tick)
+    if (now >= st.nextSquirrel && !busy && remaining() > 0) {
+      if (squirrelDig()) { st.nextSquirrel = now + SQUIRREL_MS; S.save(); }
+    }
   } else st.nextSquirrel = now + SQUIRREL_MS;
   // event countdown (virtual 4 days)
   var left = Math.max(0, st.endTs - now), v = left * VIRT;
   var d = Math.floor(v / 864e5), h = Math.floor(v % 864e5 / 36e5), mn = Math.floor(v % 36e5 / 6e4);
   $("#cd").textContent = d > 0 ? d + "d " + h + "h" : h + "h " + String(mn).padStart(2, "0") + "m";
   document.querySelector(".sb-timer-chip").classList.toggle("urgent", left < EVENT_MS / 4);
-  if (left <= 0) {
+  if (left <= 0 && !evOpen) {
+    evOpen = true;
     st.endTs = now + EVENT_MS; S.save();
     var m = SB.modal("<h3>🍂 Forage window closed</h3><p style='font-size:12.5px;line-height:1.55'>Chestnut Dig runs 4 days every 2 weeks. " +
-      "Your patch, pity meter and basket are saved for the next window.</p>" +
-      '<button class="sb-btn sb-btn-blue sb-btn-block" id="evOk">See you in 2 weeks</button>');
+      "Your patch, pity meter and basket are saved for the next window — the next one has just opened.</p>" +
+      '<button class="sb-btn sb-btn-blue sb-btn-block" id="evOk">Keep foraging</button>',
+      function () { evOpen = false; });
     m.el.querySelector("#evOk").addEventListener("click", function () { m.close(); });
   }
 }
+var evOpen = false;
 setInterval(tick, 500);
 
 /* ================= info ================= */
 $("#infoBtn").addEventListener("click", function () {
-  var c = COMP[tierOf(st.patch)];
+  var tier = tierOf(st.patch), c = COMP[tier], eff = effOdds(tier);
   var m = SB.modal("<h3>ⓘ Chestnut Dig</h3>" +
     '<div class="mleft">' +
-    "<b>Every dig is earned by playing</b><br>▶ Level clear = <b>+1 🎫 Dig Ticket</b>.<br>🔥 Hard clear = <b>+1 ✚ Power Dig</b> (clears a 3-tile cross).<br>" +
+    "<b>Every dig is earned by playing</b><br>▶ Level clear = <b>+1 🎫 Dig Ticket</b>.<br>🔥 Hard clear = <b>+1 ✚ Power Dig</b> — tap the Power digs card to arm it, then a mound: it clears that tile plus up to 2 fresh orthogonal neighbours.<br>" +
     "Plus 1 free ticket every 20 min, up to " + TICKET_CAP + " banked.<br><br>" +
     "<b>The odds table is the tile list</b><br>A patch is 36 face-down tiles in the exact mix shown on screen (" +
     c.grand + " hoard · " + c.gold + " golden · " + c.acorn + " caches · " + c.nut + " chestnuts · " + c.dud + " empty). " +
     "Nothing re-rolls behind the scenes — so the live 'still buried' line is your true remaining chance.<br><br>" +
-    "<b>Pity is free and always on</b><br>If " + (PITY - 1) + " digs pass with no golden chestnut, your " + PITY + "th is upgraded to one — guaranteed. " +
-    "The meter carries across patches and counts <i>every</i> tile: free, regenerated, power-dug, squirrel-dug or purchased.<br><br>" +
+    "<b>Pity is free and always on</b><br>If " + (PITY - 1) + " digs pass with no golden chestnut, your " + PITY + "th is upgraded to one — guaranteed, so you can never go more than " + PITY + " digs without one. " +
+    "The meter carries across patches and counts <i>every</i> tile: free, regenerated, power-dug, squirrel-dug or purchased. Because the guarantee only ever <i>adds</i> golden chestnuts, your real long-run golden rate on this patch is <b>" +
+    eff.gold.toFixed(2) + "%</b>, above the " + (c.gold / SIZE * 100).toFixed(2) + "% raw tile share — that is the “with pity” column.<br><br>" +
     "<b>Bundles buy digs, never odds</b><br>No pack, pass or price improves a tile's chance. The free path reaches every reward, including the Golden Squirrel hoard.<br><br>" +
     "<b>Clearing a patch</b><br>All 36 tiles = season bonus + a deeper patch with a new, published table. Endless.<br><br>" +
     "<i>Demo timers: 4 days runs in 8 minutes; ticket regen 20 min → " + Math.round(REGEN_MS / 1000) + "s; squirrel 2h → " + Math.round(SQUIRREL_MS / 1000) + "s.</i>" +
@@ -788,11 +966,11 @@ $("#infoBtn").addEventListener("click", function () {
   // three depth rows of leaf clumps: dark green behind, autumn tones in front
   var rows = [
     // ragged bottom edge of the canopy mass
-    { n:24, r:[17,25], y:[6,15], cols:[["#245012","#14300a"],["#1e4213","#132c09"],["#2a5418","#173209"]] },
+    { n:26, r:[18,27], y:[5,15], cols:[["#245012","#0f2807"],["#1e4213","#0f2607"],["#2a5418","#122b07"]] },
     // texture inside the mass
-    { n:20, r:[13,20], y:[-2,7], cols:[["#3d6b22","#20440f"],["#a33f12","#6b2708"],["#31601c","#1a3a10"]] },
+    { n:22, r:[14,21], y:[-3,7], cols:[["#3d6b22","#1a3a0c"],["#8f3410","#4d1c05"],["#31601c","#152f08"]] },
     // sunlit autumn highlights on top
-    { n:16, r:[10,16], y:[-6,4], cols:[["#c25a1e","#7d3208"],["#e0a02c","#a3660f"],["#5c8f33","#2f5c1e"],["#b8611f","#7a3d10"]] }
+    { n:17, r:[11,17], y:[-7,4], cols:[["#b8551b","#6b2a06"],["#c98a1e","#7d4c08"],["#5c8f33","#28511a"],["#a04c15","#5e2c08"]] }
   ];
   var h = '<div class="branch"></div>';
   rows.forEach(function (row, ri) {
@@ -801,9 +979,10 @@ $("#infoBtn").addEventListener("click", function () {
       var x = (i + Math.random() * 0.55) * (100 / row.n) - 4;
       var y = row.y[0] + Math.random() * (row.y[1] - row.y[0]);
       var c = row.cols[(Math.random() * row.cols.length) | 0];
-      h += '<i class="cl" style="left:' + x.toFixed(1) + "%;top:" + y.toFixed(1) + "px;width:" + d.toFixed(0) + "px;height:" + d.toFixed(0) +
-        "px;z-index:" + ri + ";background:radial-gradient(circle at 36% 30%," + c[0] + " 0%," + c[0] + " 46%," + c[1] + " 100%);" +
-        "transform:rotate(" + ((Math.random() * 60 - 30) | 0) + 'deg)"></i>';
+      // leaf clumps read as foliage, not beads: squashed, overlapping, lit from above
+      h += '<i class="cl" style="left:' + x.toFixed(1) + "%;top:" + y.toFixed(1) + "px;width:" + d.toFixed(0) + "px;height:" + (d * 0.72).toFixed(0) +
+        "px;z-index:" + ri + ";background:radial-gradient(ellipse 78% 88% at 34% 22%," + c[0] + " 0%," + c[0] + " 40%," + c[1] + " 100%);" +
+        "transform:rotate(" + ((Math.random() * 70 - 35) | 0) + 'deg)"></i>';
     }
   });
   h += '<span class="hang" style="left:23%;top:26px;z-index:4">🍁</span>' +
@@ -821,6 +1000,15 @@ $("#infoBtn").addEventListener("click", function () {
 })();
 
 buildTiles(); renderAll(); tick();
+// Resume anything a reload interrupted: an un-paid tile reward, or a finished patch
+// whose transition modal never got dismissed. Neither can pay out twice.
+(function resume() {
+  if (st.pendingGrant && st.pendingGrant.length) {
+    var pend = flushPending(null, { toast:false, toastTop:true });
+    if (pend) SB.toast("Restored your last find: " + pend.map(function (r) { return SB.icon(r.type) + " " + SB.fmt(r.amount); }).join(" "), { top:true });
+  }
+  if (remaining() === 0) setTimeout(patchClear, 300);
+})();
 
 /* ================= test hooks ================= */
 // usePity=false → raw published-table draw. usePity=true → live game path.
@@ -847,9 +1035,12 @@ function simulate(n, usePity, fixedPatch) {
     rarePct:+((counts.gold + counts.grand) / n * 100).toFixed(4) };
 }
 function simulateGaps(n, fixedPatch) { return simulate(n, true, fixedPatch); }
-window.__dig = { st:st, S:S, COMP:COMP, PITY:PITY, buildGrid:buildGrid, resolveTile:resolveTile,
+window.__dig = { st:st, S:S, COMP:COMP, PITY:PITY, SIZE:SIZE, buildGrid:buildGrid, resolveTile:resolveTile,
   simulate:simulate, simulateGaps:simulateGaps, renderAll:renderAll, buildTiles:buildTiles,
-  digTile:digTile, patchClear:patchClear, outOfTickets:outOfTickets, play:play };
+  digTile:digTile, patchClear:patchClear, outOfTickets:outOfTickets, play:play,
+  effOdds:effOdds, crossOf:crossOf, rewardsFor:rewardsFor, remaining:remaining,
+  arm: function (v) { armed = !!v; renderRes(); }, isArmed: function () { return armed; },
+  isBusy: function () { return busy; } };
 })();
 </script>
 </body>

@@ -62,6 +62,10 @@
   function plural(label, amount) {
     var irr = IRREGULAR[label];
     if (irr) return amount === 1 ? irr.one : irr.many;
+    // Phrases ("Tickets per clear", "Digs remaining") must be left alone — inflecting
+    // the trailing word produces nonsense. Plain noun phrases ("Dig Ticket") inflect
+    // normally.
+    if (/\s(per|remaining|left|to|in|of|for|from|and)\b|\b(remaining|left)$/i.test(label)) return label;
     if (amount === 1) return (/s$/.test(label) && !/ss$/.test(label)) ? label.replace(/s$/, "") : label;
     return /s$/.test(label) ? label : label + "s";
   }
