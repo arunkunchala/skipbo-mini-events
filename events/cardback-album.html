@@ -3,21 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Card-Back Collection Album — Skip-Bo Event</title>
+<title>Card-Back Album — Skip-Bo Event</title>
 <link rel="stylesheet" href="../shared/core.css">
 <style>
-/* ---------- layout ---------- */
-.sb-main { padding-bottom: calc(env(safe-area-inset-bottom,0px) + 150px); }
-.sb-demo-reset { bottom: calc(env(safe-area-inset-bottom,0px) + 96px); }
-.hdr-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-.pr-badge { display:inline-flex; align-items:center; gap:4px; background:linear-gradient(180deg,#ffd95e,#e0a400); color:var(--sb-ink); font-weight:900; font-size:12px; border-radius:999px; padding:4px 11px; box-shadow:var(--sb-shadow); white-space:nowrap; }
+/* ---------- layout ----------
+   Height budget: the album grid + token meter + BOTH pack CTAs must sit above the
+   fixed play bar on a 360x740 screen. --cbh derives the card-back height from the
+   viewport so the three rows always fit; everything else is fixed-height chrome. */
+:root { --cbh: clamp(54px, calc((100dvh - 551px) / 3), 116px); --cbw: calc(var(--cbh) * 0.7143); }
+.sb-main { padding: 10px 14px calc(env(safe-area-inset-bottom,0px) + 88px); }
+.hdr-row { display:flex; align-items:center; gap:7px; margin-bottom:8px; }
+.pr-badge { display:inline-flex; align-items:center; gap:4px; background:linear-gradient(180deg,#ffd95e,#e0a400); color:var(--sb-ink); font-weight:900; font-size:12px; border-radius:999px; padding:0 11px; min-height:32px; box-shadow:var(--sb-shadow); white-space:nowrap; }
 .info-btn { margin-left:auto; width:44px; height:44px; border-radius:50%; border:none; background:rgba(255,255,255,.18); color:#fff; font-size:19px; font-weight:900; cursor:pointer; }
-.sb-timer-chip { min-height:30px; cursor:pointer; }
+.sb-timer-chip { min-height:44px; cursor:pointer; padding:3px 11px; }
+.eqbtn { flex:0 0 auto; width:44px; height:44px; border-radius:12px; border:1.5px solid rgba(255,199,44,.55); background:rgba(0,0,0,.28); padding:0; display:grid; place-items:center; cursor:pointer; }
+.eqbtn:active { transform:scale(.93); }
+.eqbtn .cba { height:32px; width:23px; border-width:1.5px; border-radius:4px; box-shadow:none; }
+.eqbtn .cba.emb::before { font-size:7px; border-width:1px; }
 
 /* ---------- card-back art (the stars of the show) ---------- */
-.cba { position:relative; width:100%; aspect-ratio:2/2.8; border-radius:10px; border:2.5px solid rgba(255,255,255,.9); box-shadow:0 3px 8px rgba(0,0,0,.3), inset 0 0 0 2px rgba(0,0,0,.14); overflow:hidden; }
-.cba::before { position:absolute; inset:0; display:grid; place-items:center; font-weight:900; }
-.cba.emb::before { width:44%; aspect-ratio:1; inset:auto; left:28%; top:34%; background:rgba(255,255,255,.94); border-radius:50%; border:2px solid rgba(0,0,0,.12); font-size:clamp(13px,4.5vw,20px); }
+.cba { position:relative; width:100%; aspect-ratio:2/2.8; border-radius:10px; border:2.5px solid rgba(255,255,255,.92); box-shadow:0 3px 8px rgba(0,0,0,.32), inset 0 0 0 2px rgba(0,0,0,.14); overflow:hidden; }
+.cba::before { position:absolute; inset:0; display:grid; place-items:center; font-weight:900; line-height:1; }
+.cba.emb::before { width:46%; aspect-ratio:1; inset:auto; left:27%; top:33%; background:rgba(255,255,255,.94); border-radius:50%; border:2px solid rgba(0,0,0,.12); font-size:calc(var(--cbh) * 0.20); box-shadow:0 1px 3px rgba(0,0,0,.3); }
 /* commons */
 .a1 { background:repeating-linear-gradient(45deg,#1D4FA1 0 8px,#3E8EDE 8px 16px); }
 .a1::before { content:"SB"; color:#1D4FA1; border-color:#FFC72C !important; }
@@ -33,13 +40,12 @@
 .a6 { background:#0b7fa8; background-image:repeating-radial-gradient(circle at 50% 135%,rgba(255,255,255,.28) 0 3px,transparent 3px 14px),radial-gradient(circle at 50% -20%,#9be8ff 0 30%,transparent 46%); }
 .a6::before { content:"🌊"; }
 .a7 { background-color:#141230; background-image:radial-gradient(ellipse at 50% 120%,rgba(255,0,200,.55),transparent 62%),linear-gradient(rgba(0,255,240,.32) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,200,.32) 1px,transparent 1px); background-size:auto,11px 11px,11px 11px; }
-.a7::before { content:"SB"; color:#7dfcff; font-size:clamp(15px,5vw,24px); letter-spacing:1px; text-shadow:0 0 6px #00fff0,0 0 16px #ff00c8,0 0 30px #ff00c8; }
+.a7::before { content:"SB"; color:#7dfcff; font-size:calc(var(--cbh) * 0.26); letter-spacing:1px; text-shadow:0 0 6px #00fff0,0 0 16px #ff00c8,0 0 30px #ff00c8; }
 /* epics */
-.a8 { background:conic-gradient(from 210deg,#8a5a00,#f6d365,#b8860b,#fff2b0,#d4af37,#8a5a00); }
 .a8 { background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.14) 0 3px,transparent 3px 9px),conic-gradient(from 210deg,#8a5a00,#f6d365,#b8860b,#fff2b0,#d4af37,#8a5a00); }
 .a8::before { content:"❖"; color:#8a5a00; }
 .a9 { background-color:#0b0b2a; background-image:radial-gradient(circle at 32% 28%,rgba(140,90,255,.95),transparent 46%),radial-gradient(circle at 70% 68%,rgba(62,142,222,.85),transparent 42%),radial-gradient(rgba(255,255,255,.9) 1px,transparent 1.5px); background-size:auto,auto,13px 13px; }
-.a9::before { content:"✦"; color:#fff; font-size:clamp(18px,6vw,30px); text-shadow:0 0 10px #b18cff,0 0 24px #6f4bff; }
+.a9::before { content:"✦"; color:#fff; font-size:calc(var(--cbh) * 0.3); text-shadow:0 0 10px #b18cff,0 0 24px #6f4bff; }
 /* master (prestige exclusive) + default */
 .aM { background:linear-gradient(120deg,#ffd700,#ff8c00,#d7263d,#7e57ff,#3E8EDE,#ffd700); background-size:380% 380%; animation:mShift 5s linear infinite; }
 .aM::before { content:"🏆"; }
@@ -49,55 +55,75 @@
 /* foil shimmer on epics/master */
 .foil::after { content:""; position:absolute; inset:-40%; background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.55) 50%,transparent 58%); animation:foilSweep 2.6s ease-in-out infinite; pointer-events:none; }
 @keyframes foilSweep { 0%,55%{transform:translateX(-70%);} 90%,100%{transform:translateX(70%);} }
-/* empty slot = embossed outline */
-.ghost { background:rgba(27,42,74,.12); border:2.5px dashed rgba(27,42,74,.35); box-shadow:inset 0 2px 6px rgba(0,0,0,.18); }
-.ghost::before { content:"?"; inset:0; color:rgba(27,42,74,.35); font-size:26px; }
+/* empty slot = embossed, rarity-framed silhouette of the real art (teaser, not a grey box) */
+.lockw { position:relative; border-radius:11px; box-shadow:inset 0 3px 8px rgba(0,0,0,.3); }
+.album .lockw { width:var(--cbw); margin:0 auto; }
+.lockw .cba { filter:grayscale(.88) brightness(.46) contrast(.95); border-color:rgba(255,255,255,.35); }
+.lockw .cba.emb::before { opacity:.3; }
+.lockw::after { content:""; position:absolute; inset:0; border-radius:10px; border:2.5px dashed rgba(255,255,255,.5); box-shadow:inset 0 0 12px rgba(0,0,0,.55); pointer-events:none; }
+.lockw.r::after { border-color:rgba(120,190,255,.85); }
+.lockw.e::after { border-color:rgba(255,199,44,.9); }
+.lockq { position:absolute; inset:0; display:grid; place-items:center; font-size:calc(var(--cbh) * 0.36); font-weight:900; color:rgba(255,255,255,.8); text-shadow:0 2px 7px rgba(0,0,0,.9); pointer-events:none; }
+.bigcba .lockq { font-size:44px; }
 
 /* ---------- album grid ---------- */
-.album { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
-.slot { border:none; background:rgba(255,255,255,.92); border-radius:13px; padding:7px 6px 6px; cursor:pointer; box-shadow:var(--sb-shadow); font-family:var(--sb-font); min-height:44px; position:relative; }
+.album { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; border-radius:14px; }
+.slot { border:none; background:rgba(255,255,255,.93); border-radius:13px; padding:6px 5px 5px; cursor:pointer; box-shadow:var(--sb-shadow); font-family:var(--sb-font); min-height:44px; position:relative; display:block; width:100%; }
 .slot:active { transform:scale(.95); }
-.slot .nm { font-size:10px; font-weight:800; color:var(--sb-ink); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.slot .rr { font-size:9px; font-weight:900; letter-spacing:.5px; }
-.rr.c{color:#7a89a8;} .rr.r{color:var(--sb-sky);} .rr.e{color:var(--sb-yellow-dark);}
+.album .cba { height:var(--cbh); width:var(--cbw); margin:0 auto; }
+.slot .nm { max-width:100%; display:flex; justify-content:center; align-items:baseline; gap:3px; font-size:10px; font-weight:800; color:var(--sb-ink); margin-top:3px; line-height:1.25; }
+.slot .nmt { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.slot .nm .rr { flex:0 0 auto; font-size:9px; }
+.slot .eq { display:block; margin-top:2px; color:var(--sb-green-dark); font-size:9px; font-weight:900; letter-spacing:.4px; }
+.pickgrid .nm { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rr { font-weight:900; letter-spacing:.4px; }
+.rr.c{color:#7a89a8;} .rr.r{color:#2f7fd0;} .rr.e{color:#b07d00;}
+.pickgrid .rr, .sb-modal > .rr { font-size:9px; }
 .slot.on { background:linear-gradient(180deg,#eafff0,#c9f3d2); outline:2.5px solid var(--sb-green); outline-offset:-2px; }
-.slot .eq { display:block; margin-top:2px; color:var(--sb-green-dark); font-size:9px; font-weight:900; letter-spacing:.5px; }
-body.p2 .slot { outline:2px solid var(--sb-yellow); outline-offset:-2px; }
-
-/* ---------- fan preview ---------- */
-.fanwrap { display:flex; align-items:center; gap:12px; }
-.fan { position:relative; width:96px; height:86px; flex:0 0 auto; }
-.fan .cba { position:absolute; width:52px; left:22px; top:4px; transform-origin:50% 95%; }
-.fan .f1{ transform:rotate(-16deg) translateX(-9px);} .fan .f2{ transform:rotate(0deg) translateY(-4px); z-index:2;} .fan .f3{ transform:rotate(16deg) translateX(9px);}
-.fanmeta { color:#fff; min-width:0; }
-.fanmeta b { font-size:14px; } .fanmeta small { display:block; font-size:11px; color:var(--sb-sky-light); font-weight:700; }
-.mchip { display:inline-flex; align-items:center; gap:4px; margin-top:5px; background:rgba(255,215,0,.2); border:1.5px solid var(--sb-yellow); color:var(--sb-yellow); font-size:11px; font-weight:900; border-radius:999px; padding:3px 9px; cursor:pointer; min-height:26px; }
+.slot .nm.eqn { color:var(--sb-green-dark); }
+.slot .unl { position:absolute; top:3px; right:4px; font-size:10px; color:var(--sb-yellow-dark); text-shadow:0 1px 0 #fff; }
+/* prestige restyle — outline/offset only, costs no layout height */
+body.pr2 .album { outline:2px solid rgba(255,199,44,.55); outline-offset:5px; }
+body.pr2 .slot:not(.on) { outline:2px solid rgba(224,164,0,.85); outline-offset:-2px; background:linear-gradient(180deg,#fffaec,#ffeec2); }
 
 /* ---------- token meter ---------- */
-.meter { background:rgba(255,255,255,.92); border-radius:13px; padding:10px 12px; box-shadow:var(--sb-shadow); margin-top:10px; }
-.meter .bar { height:14px; border-radius:999px; background:#dfe6f2; overflow:hidden; margin:6px 0 4px; }
+.meter { background:rgba(255,255,255,.93); border-radius:13px; padding:8px 12px 9px; box-shadow:var(--sb-shadow); margin-top:8px; }
+.meter .bar { height:12px; border-radius:999px; background:#dfe6f2; overflow:hidden; margin:5px 0 3px; box-shadow:inset 0 1px 3px rgba(0,0,0,.2); }
 .meter .fill { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--sb-sky),var(--sb-blue)); transition:width .5s cubic-bezier(.34,1.56,.64,1); }
-.meter .cap { font-size:11px; font-weight:700; color:#5a6b8c; }
+.meter .cap { font-size:10px; font-weight:700; color:#5a6b8c; line-height:1.35; }
+.mrow { display:flex; align-items:center; gap:8px; }
+.mrow b { flex:1 1 auto; font-size:13px; min-width:0; }
+.mrow .sb-btn-sm { flex:0 0 auto; white-space:nowrap; }
 
 /* ---------- packs ---------- */
-.packs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
-.pack { border-radius:15px; padding:11px 10px 12px; color:#fff; text-align:center; box-shadow:var(--sb-shadow); position:relative; overflow:hidden; }
+.loop { margin-top:8px; text-align:center; font-size:10px; font-weight:800; color:var(--sb-sky-light); line-height:1.3; }
+.loop b { color:#fff; }
+.packs { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; margin-top:8px; }
+.pack { border-radius:15px; padding:8px 8px 9px; color:#fff; text-align:center; box-shadow:var(--sb-shadow); position:relative; overflow:hidden; }
 .pack.std { background:linear-gradient(180deg,#2a5cb0,#14396f); border:2px solid rgba(255,255,255,.25); }
 .pack.prm { background:linear-gradient(180deg,#7a1b8c,#3d0b52); border:2px solid rgba(255,199,44,.6); }
-.pack h4 { margin:0; font-size:13px; } .pack .pk { font-size:26px; }
-.pips { display:flex; justify-content:center; gap:5px; margin:6px 0; }
-.pip { width:13px; height:13px; border-radius:50%; background:rgba(255,255,255,.22); border:1.5px solid rgba(255,255,255,.4); }
+.pack h4 { margin:0; font-size:12.5px; }
+.pips { display:flex; justify-content:center; gap:5px; margin:4px 0 3px; }
+.pip { width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,.2); border:1.5px solid rgba(255,255,255,.4); }
 .pip.on { background:var(--sb-yellow); border-color:#fff; box-shadow:0 0 6px rgba(255,199,44,.9); }
-.odds { font-size:9.5px; font-weight:700; color:rgba(255,255,255,.85); line-height:1.45; margin-bottom:7px; }
-.pack .sb-btn { width:100%; font-size:13px; padding:10px 6px; min-height:44px; }
-.meter .sb-btn-sm { min-height:44px; }
+.odds { font-size:9.5px; font-weight:700; color:rgba(255,255,255,.88); line-height:1.4; margin-bottom:5px; }
+.pack .sb-btn { width:100%; font-size:12.5px; padding:9px 4px; min-height:44px; }
 .pack.ready { animation:readyGlow 1.5s ease-in-out infinite; }
 @keyframes readyGlow { 0%,100%{box-shadow:0 0 0 0 rgba(255,199,44,.55), var(--sb-shadow);} 50%{box-shadow:0 0 0 7px rgba(255,199,44,0), 0 0 18px 3px rgba(255,199,44,.85), var(--sb-shadow);} }
-.bank { position:absolute; top:6px; right:6px; background:var(--sb-red); font-size:9px; font-weight:900; border-radius:999px; padding:2px 6px; }
+.bank { position:absolute; top:5px; right:5px; background:var(--sb-red); font-size:9px; font-weight:900; border-radius:999px; padding:2px 6px; }
+
+/* ---------- equipped panel ---------- */
+.fanwrap { display:flex; align-items:center; gap:12px; margin-top:11px; padding:11px 12px; }
+.fan { position:relative; width:92px; height:82px; flex:0 0 auto; }
+.fan .cba { position:absolute; width:50px; left:21px; top:3px; transform-origin:50% 95%; }
+.fan .cba.emb::before { font-size:11px; }
+.fan .f1{ transform:rotate(-16deg) translateX(-9px);} .fan .f2{ transform:rotate(0deg) translateY(-4px); z-index:2;} .fan .f3{ transform:rotate(16deg) translateX(9px);}
+.fanmeta { color:#fff; min-width:0; flex:1 1 auto; }
+.fanmeta b { font-size:14px; } .fanmeta small { display:block; font-size:11px; color:var(--sb-sky-light); font-weight:700; margin-bottom:6px; }
 
 /* ---------- set rewards ---------- */
 .sets { display:flex; gap:7px; margin-top:10px; }
-.setchip { flex:1; background:rgba(255,255,255,.92); border-radius:11px; padding:7px 6px; text-align:center; font-size:10px; font-weight:800; color:var(--sb-ink); box-shadow:var(--sb-shadow); }
+.setchip { flex:1; background:rgba(255,255,255,.93); border-radius:11px; padding:7px 6px; text-align:center; font-size:10px; font-weight:800; color:var(--sb-ink); box-shadow:var(--sb-shadow); }
 .setchip small { display:block; color:#5a6b8c; font-weight:700; font-size:9px; margin-top:2px; }
 .setchip.done { background:linear-gradient(180deg,#e9ffe9,#c9f3d2); outline:2px solid var(--sb-green); }
 
@@ -106,35 +132,45 @@ body.p2 .slot { outline:2px solid var(--sb-yellow); outline-offset:-2px; }
 .offer { background:linear-gradient(120deg,#7a1b2c,#4a0f1b); border:2px solid var(--sb-yellow); border-radius:15px; padding:12px; color:#fff; margin-bottom:9px; box-shadow:var(--sb-shadow); }
 .offer h4 { margin:0 0 3px; font-size:14px; color:var(--sb-yellow); }
 .offer p { margin:0 0 8px; font-size:11.5px; line-height:1.45; }
-.offer .free { font-size:10.5px; color:#ffd9a0; font-weight:700; margin-top:6px; }
+.offer .free { font-size:10.5px; color:#ffd9a0; font-weight:700; margin-top:6px; line-height:1.4; }
 .offer .sb-btn-sm { min-height:44px; font-size:14px; padding:10px 18px; }
 .fday { background:var(--sb-red); color:#fff; font-weight:900; font-size:12px; text-align:center; border-radius:10px; padding:7px; margin-bottom:9px; animation:sbPulse 1.2s infinite; }
 
 /* ---------- stats + play bar ---------- */
-.stats { margin-top:14px; text-align:center; color:var(--sb-sky-light); font-size:11.5px; font-weight:700; }
-.playbar { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:480px; z-index:120; display:flex; gap:9px; padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px); background:linear-gradient(180deg,rgba(20,57,111,0) 0%,rgba(13,32,64,.96) 32%); }
-.playbar .sb-btn { flex:1; flex-direction:column; gap:1px; padding:9px 6px; }
+.stats { margin-top:12px; text-align:center; color:var(--sb-sky-light); font-size:11.5px; font-weight:700; }
+.playbar { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:480px; z-index:120; display:flex; gap:9px; padding:9px 12px calc(env(safe-area-inset-bottom,0px) + 11px); background:linear-gradient(180deg,rgba(20,57,111,0) 0%,rgba(13,32,64,.96) 32%); }
+.playbar .sb-btn { flex:1; flex-direction:column; gap:1px; padding:8px 6px; font-size:15px; min-height:44px; }
 .playbar .sb-btn small { font-size:10px; font-weight:800; opacity:.9; }
 
 /* ---------- reveal modal ---------- */
-.rvrow { display:flex; justify-content:center; gap:16px; margin:12px 0 4px; }
+.rvrow { display:flex; justify-content:center; gap:16px; margin:12px 0 10px; }
 .rvc { width:104px; perspective:600px; cursor:pointer; }
 .rvin { position:relative; width:100%; aspect-ratio:2/2.8; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.34,1.3,.64,1); }
 .rvc.flip .rvin { transform:rotateY(180deg); }
 .rvf, .rvb { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:10px; }
 .rvb { transform:rotateY(180deg); }
-.rvc .cba { height:100%; }
+.rvc .cba { height:100%; width:100%; }
+.rvc .cba.emb::before { font-size:21px; }
 .rvc.flip.gc .rvin { box-shadow:0 0 16px rgba(160,175,200,.9); border-radius:10px; }
-.rvc.flip.gr .rvin { box-shadow:0 0 20px rgba(62,142,222,1); border-radius:10px; }
-.rvc.flip.ge .rvin { box-shadow:0 0 26px rgba(255,199,44,1); border-radius:10px; }
-.rvlab { margin-top:7px; font-size:11px; font-weight:900; min-height:28px; opacity:0; transition:opacity .3s .25s; }
-.rvc.flip + .rvlab, .rvlab.show { opacity:1; }
+.rvc.flip.gr .rvin { box-shadow:0 0 22px rgba(62,142,222,1); border-radius:10px; }
+.rvc.flip.ge .rvin { box-shadow:0 0 28px rgba(255,199,44,1); border-radius:10px; }
+.rvlab { margin-top:7px; font-size:11px; font-weight:900; min-height:30px; opacity:0; transition:opacity .3s .25s; }
+.rvlab.show { opacity:1; }
 .rvlab .new { color:var(--sb-green); } .rvlab .dup { color:#8a5a00; }
-.bigcba { width:130px; margin:10px auto; }
-.pickgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0; }
-.pickgrid .slot { box-shadow:0 2px 6px rgba(0,0,0,.2); background:#fff; }
+.bigcba { width:132px; margin:10px auto; }
+.bigcba .cba.emb::before { font-size:27px; }
+.pickgrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:10px 0; max-height:52dvh; overflow-y:auto; }
+.pickgrid .slot { box-shadow:0 2px 6px rgba(0,0,0,.2); background:#fff; outline:none; }
+.pickgrid .slot.on { background:linear-gradient(180deg,#eafff0,#c9f3d2); outline:2.5px solid var(--sb-green); outline-offset:-2px; }
+body.pr2 .pickgrid .slot:not(.on) { outline:none; }
+.pickgrid .cba { height:74px; width:53px; margin:0 auto; }
+.pickgrid .cba.emb::before { font-size:15px; }
 .ceremony h2 { margin:4px 0 8px; color:var(--sb-ink); }
 .chestrow { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin:10px 0 14px; }
+.otab { width:100%; border-collapse:collapse; font-size:11px; margin:4px 0 2px; }
+.otab th, .otab td { padding:3px 4px; text-align:center; border-bottom:1px solid rgba(27,42,74,.12); }
+.otab th { font-size:10px; color:#5a6b8c; }
+.otab tr.cur { background:rgba(255,199,44,.28); font-weight:900; }
 </style>
 </head>
 <body>
@@ -144,7 +180,31 @@ body.p2 .slot { outline:2px solid var(--sb-yellow); outline-offset:-2px; }
   <div class="hdr-row">
     <span class="sb-timer-chip" id="chip" title="tap to fast-forward (demo)">⏳ <span id="cd">—</span></span>
     <span class="pr-badge" id="prb">🏅 Prestige I</span>
+    <button class="eqbtn" id="wardBtn" aria-label="Wardrobe — change equipped card back"><span id="eqMini"></span></button>
     <button class="info-btn" id="infoBtn" aria-label="Event info">ⓘ</button>
+  </div>
+
+  <div class="album" id="album"></div>
+
+  <div class="meter" id="meter"></div>
+
+  <div class="loop">▶ Levels → packs → all 9 → 🏅 <b>Prestige ∞</b> · +50%, no slump</div>
+
+  <div class="packs">
+    <div class="pack std" id="packS">
+      <span class="bank" id="bankS" style="display:none"></span>
+      <h4>🎴 Standard Pack</h4>
+      <div class="pips" id="pipS"></div>
+      <div class="odds" id="oddsS"></div>
+      <button class="sb-btn sb-btn-blue" id="openS">Open pack</button>
+    </div>
+    <div class="pack prm" id="packP">
+      <span class="bank" id="bankP" style="display:none"></span>
+      <h4>✨ Premium Pack</h4>
+      <div class="pips" id="pipP"></div>
+      <div class="odds" id="oddsP"></div>
+      <button class="sb-btn sb-btn-yellow" id="openP">Open pack</button>
+    </div>
   </div>
 
   <div class="sb-panel-blue fanwrap">
@@ -152,47 +212,19 @@ body.p2 .slot { outline:2px solid var(--sb-yellow); outline-offset:-2px; }
     <div class="fanmeta">
       <b id="eqName">Standard Back</b>
       <small>Equipped card back — shown in every match</small>
-      <span class="mchip" id="mchip" style="display:none">🏆 Equip Master back</span>
+      <button class="sb-btn sb-btn-blue sb-btn-sm" id="wardBtn2">🎽 Wardrobe</button>
     </div>
-  </div>
-
-  <div style="height:12px"></div>
-  <div class="album" id="album"></div>
-
-  <div class="meter" id="meter">
-    <b style="font-size:13px" id="tkLab">🎟️ Wild Tokens — 0/8</b>
-    <div class="bar"><div class="fill" id="tkFill"></div></div>
-    <div class="cap">Duplicates are never wasted: each converts to +1 🎟️. <b>Any missing card guaranteed at 8 tokens.</b></div>
-    <button class="sb-btn sb-btn-yellow sb-btn-sm sb-btn-block" id="claimBtn" style="margin-top:8px">🎟️ Claim any missing card — 8 tokens</button>
   </div>
 
   <div class="sets" id="sets"></div>
-
-  <div class="packs">
-    <div class="pack std" id="packS">
-      <span class="bank" id="bankS" style="display:none"></span>
-      <div class="pk">🎴</div><h4>Standard Pack</h4>
-      <div class="pips" id="pipS"></div>
-      <div class="odds" id="oddsS"></div>
-      <button class="sb-btn sb-btn-blue" id="openS">Open pack</button>
-    </div>
-    <div class="pack prm" id="packP">
-      <span class="bank" id="bankP" style="display:none"></span>
-      <div class="pk">✨</div><h4>Premium Pack</h4>
-      <div class="pips" id="pipP"></div>
-      <div class="odds" id="oddsP"></div>
-      <button class="sb-btn sb-btn-yellow" id="openP">Open pack</button>
-    </div>
-  </div>
-
   <div class="offers" id="offers"></div>
   <div class="stats" id="stats"></div>
 </div>
 </div>
 
 <div class="playbar">
-  <button class="sb-btn sb-btn-green" id="playBtn">▶ Play level<small>win = +1 pack point</small></button>
-  <button class="sb-btn sb-btn-red" id="hardBtn">🔥 Hard level<small>win = +1 premium point</small></button>
+  <button class="sb-btn sb-btn-green" id="playBtn">▶ Play level<small>clear = +1 pack point</small></button>
+  <button class="sb-btn sb-btn-red" id="hardBtn">🔥 Hard level<small>clear = +1 premium point</small></button>
 </div>
 
 <script src="../shared/core.js"></script>
@@ -200,7 +232,11 @@ body.p2 .slot { outline:2px solid var(--sb-yellow); outline-offset:-2px; }
 <script>
 (function () {
 "use strict";
-SB.init({ title: "Card-Back Collection Album", subtitle: "Season 1 · Collect all 9 card backs", resetKey: "cardback-album" });
+SB.init({
+  title: "Card-Back Album",
+  subtitle: "Collect 9 · Prestige ∞",
+  resetKey: "cardback-album"
+});
 
 // ---------- data ----------
 var CARDS = [
@@ -215,34 +251,56 @@ var CARDS = [
   { i:"nebula", n:"Nebula Royale",  r:"e", a:"a9", glow:1 }
 ];
 var RN = { c:"COMMON ★", r:"RARE ★★", e:"EPIC ★★★" };
-var SEASON_MS = 6 * 60 * 1000;          // 6 real min stands in for 72h (demo-compressed)
-var VIRT = 72 * 3600 * 1000 / SEASON_MS; // real→virtual factor (×720)
+var STARS = { c:"★", r:"★★", e:"★★★" };
+var PACK_SIZE = 2;        // cards per pack — published on both packs
+var PITY = 8;             // wild tokens for a guaranteed pick — published everywhere
+var STD_COST = 3;         // pack points per standard pack
+var PRM_COST = 2;         // premium points per premium pack
+
+// Published odds table. rendered odds are derived from THIS object, so the printed
+// table can never drift from the roller. Every entry is an exact 1/100 multiple so
+// Math.round(p*100) is lossless. Tier caps at III (stated in the info sheet).
+var ODDS = [
+  { std:{ c:.70, r:.25, e:.05 }, prm:{ c:.40, r:.40, e:.20 } },  // Prestige I
+  { std:{ c:.78, r:.19, e:.03 }, prm:{ c:.50, r:.38, e:.12 } },  // Prestige II
+  { std:{ c:.84, r:.14, e:.02 }, prm:{ c:.58, r:.34, e:.08 } }   // Prestige III+
+];
+
+var SEASON_MS = 6 * 60 * 1000;           // 6 real min stands in for 72h (demo-compressed)
+var VIRT = 72 * 3600 * 1000 / SEASON_MS; // real→virtual factor (x720)
 var FINAL_MS = SEASON_MS / 3;            // last "24h"
 
 var S = SB.store("cardback-album", {
-  prestige: 1, owned: {}, packPts: 0, premPts: 0, tokens: 0,
-  packs: 0, equipped: null, master: false,
+  prestige: 1, owned: {}, unlocked: {}, packPts: 0, premPts: 0, tokens: 0,
+  packs: 0, equipped: null, master: false, chests: 0,
   sets: { c:false, r:false, e:false }, endTs: 0, fdShown: false, lvl: 214
 });
 var st = S.data;
-if (!st.endTs || st.endTs < Date.now() - 864e5) { st.endTs = Date.now() + SEASON_MS; S.save(); }
+if (!st.unlocked) st.unlocked = {};
+// unlocked = permanent cosmetic wardrobe; owned = THIS prestige's album progress.
+Object.keys(st.owned || {}).forEach(function (k) { st.unlocked[k] = true; });
+if (st.master) st.unlocked.master = true;
+if (!st.endTs || st.endTs < Date.now() - 864e5) { st.endTs = Date.now() + SEASON_MS; }
+S.save();
 
-function mult() { return 1 + 0.5 * (st.prestige - 1); }
-function odds(prem) {
-  var p2 = st.prestige > 1;
-  if (prem) return p2 ? { c:.50, r:.38, e:.12 } : { c:.40, r:.40, e:.20 };
-  return p2 ? { c:.78, r:.19, e:.03 } : { c:.70, r:.25, e:.05 };
-}
+function tierIdx() { return Math.min(st.prestige, ODDS.length) - 1; }
+function mult() { return Math.pow(1.5, st.prestige - 1); }   // +50% every prestige
+function multPct() { return Math.round((mult() - 1) * 100); }
+function odds(prem) { var t = ODDS[tierIdx()]; return prem ? t.prm : t.std; }
 function byRar(r) { return CARDS.filter(function (c) { return c.r === r; }); }
 function missing() { return CARDS.filter(function (c) { return !st.owned[c.i]; }); }
-function newPct(prem) {
+// exact new-card probability for the NEXT card drawn, at the live collection state
+function newP(prem) {
   var o = odds(prem), p = 0;
   ["c","r","e"].forEach(function (r) {
     var g = byRar(r), miss = g.filter(function (c) { return !st.owned[c.i]; }).length;
     p += o[r] * miss / g.length;
   });
-  return Math.round(p * 100);
+  return p;
 }
+// shown to 0.1% so the printed figure can never overstate the true chance by a
+// rounding step (rarity odds are whole %, but 1/3-size rarity groups are not).
+function newPct(prem) { return String(Math.round(newP(prem) * 1000) / 10).replace(/\.0$/, ""); }
 function rollCard(prem) {
   var o = odds(prem), x = Math.random();
   var r = x < o.c ? "c" : (x < o.c + o.r ? "r" : "e");
@@ -254,6 +312,16 @@ function art(c, cls) {
   var foil = (c.r === "e" || c.a === "aM") ? " foil" : "";
   return '<div class="cba ' + (c.glow ? "" : "emb ") + c.a + foil + " " + (cls || "") + '"></div>';
 }
+// locked slot: the real art, darkened behind a rarity-coloured embossed frame
+function artLocked(c) {
+  return '<div class="lockw ' + c.r + '">' + art(c) + '<span class="lockq">?</span></div>';
+}
+function MASTER() { return { i:"master", a:"aM", n:"Season 1 Master", r:"e" }; }
+function DEFAULT_BACK() { return { i:null, a:"a0", n:"Standard Back", r:"c" }; }
+function equippedCard() {
+  if (st.equipped === "master") return MASTER();
+  return st.equipped ? (findCard(st.equipped) || DEFAULT_BACK()) : DEFAULT_BACK();
+}
 
 // ---------- renders ----------
 function $(s) { return document.querySelector(s); }
@@ -261,37 +329,57 @@ function renderAlbum() {
   $("#album").innerHTML = CARDS.map(function (c) {
     var own = !!st.owned[c.i];
     var eq = st.equipped === c.i;
+    var unl = !own && !!st.unlocked[c.i];
     return '<button class="slot' + (eq ? " on" : "") + '" data-id="' + c.i + '">' +
-      (own ? art(c) : '<div class="cba ghost"></div>') +
-      '<div class="nm">' + (own ? c.n : "???") + "</div>" +
-      (eq ? '<span class="eq">✓ EQUIPPED</span>' : '<div class="rr ' + c.r + '">' + RN[c.r] + "</div>") +
+      (unl ? '<span class="unl" aria-hidden="true">★</span>' : "") +
+      (own ? art(c) : artLocked(c)) +
+      '<div class="nm' + (eq ? " eqn" : "") + '"><span class="nmt">' + (eq ? "✓ " : "") + (own ? c.n : "???") + "</span>" +
+      (eq ? "" : '<span class="rr ' + c.r + '">' + STARS[c.r] + "</span>") + "</div>" +
       "</button>";
   }).join("");
 }
 function renderFan() {
-  var c = st.equipped === "master" ? { a:"aM", n:"Season 1 Master", r:"e" } : (st.equipped ? findCard(st.equipped) : { a:"a0", n:"Standard Back", r:"c" });
+  var c = equippedCard();
   $("#fan").innerHTML = ["f1","f2","f3"].map(function (f) { return art(c, f); }).join("");
   $("#eqName").textContent = c.n;
-  $("#mchip").style.display = st.master && st.equipped !== "master" ? "" : "none";
+  $("#eqMini").innerHTML = art(c);
 }
 function renderMeter() {
-  var claims = Math.floor(st.tokens / 8);
-  $("#tkLab").innerHTML = claims
-    ? "🎟️ Wild Tokens — " + st.tokens + " · <span style='color:#2E9E4F'>" + claims + " claim" + (claims > 1 ? "s" : "") + " ready!</span>"
-    : "🎟️ Wild Tokens — " + st.tokens + "/8";
-  $("#tkFill").style.width = (st.tokens % 8 === 0 && claims ? 100 : (st.tokens % 8) / 8 * 100) + "%";
-  $("#claimBtn").disabled = !(claims && missing().length);
+  var claims = Math.floor(st.tokens / PITY), miss = missing().length;
+  var canClaim = claims > 0 && miss > 0;
+  // The claim CTA sits INLINE with the label and replaces the (full) progress bar,
+  // so a ready claim can never push the pack CTAs under the play bar.
+  var lab = canClaim
+    ? "🎟️ " + st.tokens + " · <span style='color:#1f7038'>" + (claims > 1 ? claims + " claims ready" : "claim ready!") + "</span>"
+    : "🎟️ Wild Tokens — " + st.tokens + (claims && !miss ? "" : "/" + PITY);
+  $("#meter").innerHTML =
+    '<div class="mrow"><b>' + lab + "</b>" +
+    (canClaim ? '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="claimBtn">Claim a card</button>' : "") + "</div>" +
+    (canClaim ? "" : '<div class="bar"><div class="fill" id="tkFill"></div></div>') +
+    '<div class="cap">Every dupe = <b>+1 🎟️</b> · <b>' + PITY + " 🎟️ = any missing card</b>" +
+    (claims && !miss ? " · album complete, tokens carry into the next Prestige" : "") + "</div>";
+  if (!canClaim) {
+    var fill = claims ? 100 : (st.tokens % PITY) / PITY * 100;
+    requestAnimationFrame(function () { var f = $("#tkFill"); if (f) f.style.width = fill + "%"; });
+  }
+}
+var SETDEFS = [
+  { r:"c", lab:"All Commons", coins:300, extra:null },
+  { r:"r", lab:"All Rares",   coins:500, extra:{ type:"wild", amount:1 } },
+  { r:"e", lab:"All Epics",   coins:800, extra:{ type:"gem",  amount:1 } }
+];
+function setRewards(d) {
+  var rw = [{ type:"coins", amount: Math.round(d.coins * mult()) }];
+  if (d.extra) rw.push({ type:d.extra.type, amount:d.extra.amount });
+  return rw;
 }
 function renderSets() {
-  var defs = [
-    { r:"c", lab:"All Commons", rw: SB.fmt(Math.round(300 * mult())) + " 🪙" },
-    { r:"r", lab:"All Rares", rw: SB.fmt(Math.round(500 * mult())) + " 🪙 + 1 🃏" },
-    { r:"e", lab:"All Epics", rw: SB.fmt(Math.round(800 * mult())) + " 🪙 + 1 💎" }
-  ];
-  $("#sets").innerHTML = defs.map(function (d) {
+  $("#sets").innerHTML = SETDEFS.map(function (d) {
     var g = byRar(d.r), have = g.filter(function (c) { return st.owned[c.i]; }).length;
+    var rw = setRewards(d);
+    var txt = SB.fmt(rw[0].amount) + " 🪙" + (d.extra ? " + " + d.extra.amount + " " + SB.icon(d.extra.type) : "");
     return '<div class="setchip' + (st.sets[d.r] ? " done" : "") + '">' + d.lab + " " + have + "/" + g.length +
-      "<small>" + (st.sets[d.r] ? "✓ claimed" : "reward: " + d.rw) + "</small></div>";
+      "<small>" + (st.sets[d.r] ? "✓ claimed" : "reward: " + txt) + "</small></div>";
   }).join("");
 }
 function pips(n, of) {
@@ -299,68 +387,103 @@ function pips(n, of) {
   for (var i = 0; i < of; i++) h += '<span class="pip' + (i < Math.min(n, of) ? " on" : "") + '"></span>';
   return h;
 }
+function oddsLine(prem) {
+  var o = odds(prem);
+  var head = missing().length ? "New: <b>" + newPct(prem) + "%</b>/card" : "<b>all 9 owned ✓</b>";
+  return PACK_SIZE + " cards · " + head + "<br>Common " + Math.round(o.c * 100) +
+    "% · Rare " + Math.round(o.r * 100) + "% · " + (prem ? "<b>Epic " + Math.round(o.e * 100) + "%</b>" : "Epic " + Math.round(o.e * 100) + "%");
+}
 function renderPacks() {
-  var oS = odds(false), oP = odds(true);
-  $("#pipS").innerHTML = pips(st.packPts, 3);
-  $("#pipP").innerHTML = pips(st.premPts, 2);
-  $("#oddsS").innerHTML = "2 cards · New card: <b>" + newPct(false) + "%</b><br>Common " + Math.round(oS.c*100) + "% · Rare " + Math.round(oS.r*100) + "% · Epic " + Math.round(oS.e*100) + "%";
-  $("#oddsP").innerHTML = "2 cards · New card: <b>" + newPct(true) + "%</b><br>Common " + Math.round(oP.c*100) + "% · Rare " + Math.round(oP.r*100) + "% · <b>Epic " + Math.round(oP.e*100) + "%</b>";
-  var rS = st.packPts >= 3, rP = st.premPts >= 2;
-  $("#openS").disabled = !rS; $("#openP").disabled = !rP;
-  $("#openS").textContent = rS ? "Open pack!" : "Win " + (3 - st.packPts) + " more level" + (3 - st.packPts > 1 ? "s" : "");
-  $("#openP").textContent = rP ? "Open pack!" : "Win " + (2 - st.premPts) + " more hard";
+  $("#pipS").innerHTML = pips(st.packPts, STD_COST);
+  $("#pipP").innerHTML = pips(st.premPts, PRM_COST);
+  $("#oddsS").innerHTML = oddsLine(false);
+  $("#oddsP").innerHTML = oddsLine(true);
+  var rS = st.packPts >= STD_COST, rP = st.premPts >= PRM_COST;
+  $("#openS").disabled = !rS || busy; $("#openP").disabled = !rP || busy;
+  $("#openS").textContent = rS ? "Open pack!" : "Win " + (STD_COST - st.packPts) + " more level" + (STD_COST - st.packPts > 1 ? "s" : "");
+  $("#openP").textContent = rP ? "Open pack!" : "Win " + (PRM_COST - st.premPts) + " more hard";
   $("#packS").classList.toggle("ready", rS); $("#packP").classList.toggle("ready", rP);
-  var bS = Math.floor(st.packPts / 3), bP = Math.floor(st.premPts / 2);
+  var bS = Math.floor(st.packPts / STD_COST), bP = Math.floor(st.premPts / PRM_COST);
   $("#bankS").style.display = bS > 1 ? "" : "none"; $("#bankS").textContent = "×" + bS + " ready";
   $("#bankP").style.display = bP > 1 ? "" : "none"; $("#bankP").textContent = "×" + bP + " ready";
 }
 function renderStats() {
-  $("#stats").innerHTML = "🎴 Packs opened: <b>" + st.packs + "</b> · 🏅 Prestige <b>" + roman(st.prestige) + "</b> · 🃏 Collected: <b>" + (9 - missing().length) + "/9</b>";
+  $("#stats").innerHTML = "🎴 Packs opened: <b>" + st.packs + "</b> · 🎁 Grand Chests: <b>" + st.chests +
+    "</b> · 🃏 Collected: <b>" + (CARDS.length - missing().length) + "/" + CARDS.length + "</b>";
   $("#prb").textContent = "🏅 Prestige " + roman(st.prestige);
-  document.body.classList.toggle("p2", st.prestige > 1);
+  document.body.classList.toggle("pr2", st.prestige > 1);
 }
 function roman(n) { return ["I","II","III","IV","V","VI","VII","VIII","IX","X"][n - 1] || n; }
 function isFinal() { return st.endTs - Date.now() < FINAL_MS; }
+
+function offerCards() { return missing().slice(0, 2); }
 function renderOffers() {
   var el = $("#offers");
   if (!isFinal()) { el.innerHTML = ""; return; }
-  var miss = missing().slice(0, 2);
+  var miss = offerCards(), missAll = missing().length;
   var h = '<div class="fday">⏰ FINAL 24 HOURS — last chance offers!</div>';
   if (miss.length) {
     h += '<div class="offer"><h4>🎯 Complete-Your-Set Pack — $1.99</h4><p>Contains <b>' +
-      miss.map(function (c) { return c.n; }).join(" + ") + "</b> — " + miss.length + " of your missing card" + (miss.length > 1 ? "s" : "") + ", guaranteed.</p>" +
+      miss.map(function (c) { return c.n; }).join(" + ") + "</b> — " + miss.length + " of the " + missAll +
+      " card" + (missAll > 1 ? "s" : "") + " still missing from your album, guaranteed.</p>" +
       '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyTarget">Get it — $1.99</button>' +
-      '<div class="free">Free path: keep winning levels — packs stay earnable until the season ends, and 8 🎟️ tokens claim any card.</div></div>';
+      '<div class="free">Free path: keep winning levels — packs stay earnable until the season ends, and ' + PITY + ' 🎟️ tokens claim any card you like.</div></div>';
   }
-  h += '<div class="offer"><h4>✨ Premium Pack Bundle — $0.99</h4><p>2 Premium Packs instantly (Epic ' + Math.round(odds(true).e * 100) + "% each card, odds above).</p>" +
+  h += '<div class="offer"><h4>✨ Premium Pack Bundle — $0.99</h4><p>2 Premium Packs instantly (Epic ' +
+    Math.round(odds(true).e * 100) + "% per card — same published odds as above).</p>" +
     '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyPrem">Buy — $0.99</button>' +
-    '<div class="free">Free path: the same 2 packs = 4 hard-level wins.</div></div>';
-  h += '<div class="offer"><h4>🎟️ Wild Token Bundle — $2.99</h4><p>+8 Wild Tokens = claim <b>any</b> missing card immediately.</p>' +
-    '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyTok">Buy — $2.99</button>' +
-    '<div class="free">Free path: every duplicate card = +1 token, no purchase needed.</div></div>';
+    '<div class="free">Free path: the same 2 packs = ' + (PRM_COST * 2) + ' hard-level clears.</div></div>';
+  if (missAll) {
+    h += '<div class="offer"><h4>🎟️ Wild Token Bundle — $2.99</h4><p>+' + PITY + ' Wild Tokens = claim <b>any</b> one missing card immediately.</p>' +
+      '<button class="sb-btn sb-btn-yellow sb-btn-sm" id="buyTok">Buy — $2.99</button>' +
+      '<div class="free">Free path: every duplicate card = +1 token, no purchase needed.</div></div>';
+  }
   el.innerHTML = h;
-  if ($("#buyTarget")) $("#buyTarget").addEventListener("click", function () {
-    SB.buyIAP({ label: "Complete-Your-Set Pack", price: "$1.99", grant: false,
-      sub: "Guaranteed: " + miss.map(function (c) { return c.n; }).join(" + "),
+
+  var bt = $("#buyTarget");
+  if (bt) bt.addEventListener("click", function () {
+    var give = offerCards();                              // re-read live state at tap time
+    if (!give.length) { SB.toast("Nothing missing — offer withdrawn.", { top:true }); renderAll(); return; }
+    SB.buyIAP({
+      label: "Complete-Your-Set Pack", price: "$1.99", grant: false,
+      sub: "Guaranteed: " + give.map(function (c) { return c.n; }).join(" + "),
+      contents: [{ icon:"🃏", label:"Guaranteed Card", amount: give.length }],
       onSuccess: function () {
-        miss.forEach(function (c) { st.owned[c.i] = true; });
-        S.save(); renderAll(); SB.confetti(); SB.toast("🎉 " + miss.map(function (c) { return c.n; }).join(" + ") + " added to your album!");
+        var got = [], comp = 0;
+        give.forEach(function (c) {
+          if (st.owned[c.i]) comp++;                      // acquired since purchase → compensate
+          else { st.owned[c.i] = true; st.unlocked[c.i] = true; got.push(c.n); }
+        });
+        if (comp) st.tokens += comp * PITY;
+        S.save(); renderAll(); SB.confetti();
+        SB.toast(got.length ? "🎉 " + got.join(" + ") + " added to your album!"
+                            : "Already collected — refunded as " + (comp * PITY) + " 🎟️ tokens.", { top:true });
         setTimeout(checkCompletions, 700);
-      } });
+      }
+    });
   });
   $("#buyPrem").addEventListener("click", function () {
-    SB.buyIAP({ label: "Premium Pack Bundle", price: "$0.99", grant: false, sub: "2 Premium Packs, ready to open",
-      onSuccess: function () { st.premPts += 4; S.save(); renderAll(); SB.toast("✨ 2 Premium Packs ready — open them!"); } });
+    SB.buyIAP({
+      label: "Premium Pack Bundle", price: "$0.99", grant: false, sub: "2 Premium Packs, ready to open",
+      contents: [{ icon:"✨", label:"Premium Pack", amount: 2 }],
+      onSuccess: function () { st.premPts += PRM_COST * 2; S.save(); renderAll(); SB.toast("✨ 2 Premium Packs ready — open them!", { top:true }); }
+    });
   });
-  $("#buyTok").addEventListener("click", function () {
-    SB.buyIAP({ label: "Wild Token Bundle", price: "$2.99", grant: false, sub: "+8 🎟️ = one guaranteed card of your choice",
-      onSuccess: function () { st.tokens += 8; S.save(); renderAll(); SB.toast("🎟️ +8 Wild Tokens — claim any card!"); } });
+  var btk = $("#buyTok");
+  if (btk) btk.addEventListener("click", function () {
+    if (!missing().length) { SB.toast("Album already complete — nothing to claim.", { top:true }); renderAll(); return; }
+    SB.buyIAP({
+      label: "Wild Token Bundle", price: "$2.99", grant: false, sub: "+" + PITY + " 🎟️ = one guaranteed card of your choice",
+      contents: [{ icon:"🎟️", label:"Wild Token", amount: PITY }],
+      onSuccess: function () { st.tokens += PITY; S.save(); renderAll(); SB.toast("🎟️ +" + PITY + " Wild Tokens — claim any card!", { top:true }); }
+    });
   });
 }
 function renderAll() { renderAlbum(); renderFan(); renderMeter(); renderSets(); renderPacks(); renderStats(); renderOffers(); }
 
 // ---------- fly helper ----------
 function flyTo(icon, fx, fy, toEl) {
+  if (!toEl) return;
   var r = toEl.getBoundingClientRect(), el = document.createElement("div");
   el.className = "sb-fly"; el.textContent = icon;
   el.style.left = fx + "px"; el.style.top = fy + "px";
@@ -373,98 +496,135 @@ function flyTo(icon, fx, fy, toEl) {
 }
 
 // ---------- fuel: play levels ----------
+// window.__forceWin / __forceInstant are honoured inside levelsim for every event.
+var playing = false;
 function play(hard) {
-  var wr; if (window.__forceWin === true) wr = 1; else if (window.__forceWin === false) wr = 0;
+  if (playing) return Promise.resolve(null);
+  playing = true;
   var btn = hard ? $("#hardBtn") : $("#playBtn");
-  btn.disabled = true; $("#playBtn").disabled = true; $("#hardBtn").disabled = true;
-  SB.playLevel({ hard: hard, winRate: wr, instant: !!window.__instant, title: "Adventure Level " + st.lvl })
-  .then(function (res) {
+  $("#playBtn").disabled = true; $("#hardBtn").disabled = true;
+  return SB.playLevel({
+    hard: hard,
+    title: "Adventure Level " + st.lvl,
+    rewardTag: hard ? "🔥 HARD · CLEAR = +1 ✨ PREMIUM POINT" : "CLEAR = +1 🎴 PACK POINT"
+  }).then(function (res) {
+    playing = false;
     $("#playBtn").disabled = false; $("#hardBtn").disabled = false;
     st.lvl++;
     if (res.won) {
-      if (hard) { st.premPts++; SB.toast("🔥 +1 Premium pack point!"); }
-      else { st.packPts++; SB.toast("🎴 +1 Pack point!"); }
+      if (hard) { st.premPts++; SB.toast("🔥 +1 Premium pack point!", { top:true }); }
+      else { st.packPts++; SB.toast("🎴 +1 Pack point!", { top:true }); }
       var r = btn.getBoundingClientRect();
       flyTo(hard ? "✨" : "🎴", r.left + r.width / 2, r.top, hard ? $("#packP") : $("#packS"));
-    } else SB.toast("So close! No pack point — try again.");
+    } else SB.toast("So close! No pack point — try again.", { top:true });
     S.save(); renderAll();
+    return res;
   });
 }
 $("#playBtn").addEventListener("click", function () { play(false); });
 $("#hardBtn").addEventListener("click", function () { play(true); });
 
 // ---------- pack opening ----------
-function openPack(prem) {
-  var cost = prem ? 2 : 1e9;
-  if (prem) { if (st.premPts < 2) return; st.premPts -= 2; }
-  else { if (st.packPts < 3) return; st.packPts -= 3; }
+// State mutation is atomic and persisted BEFORE any reveal UI exists, so a reload
+// mid-reveal (or a dismissed reveal) can never lose a card or a token.
+var busy = false;
+function drawPack(prem) {
+  if (prem) { if (st.premPts < PRM_COST) return null; st.premPts -= PRM_COST; }
+  else { if (st.packPts < STD_COST) return null; st.packPts -= STD_COST; }
   st.packs++;
   var results = [];
-  for (var k = 0; k < 2; k++) {
+  for (var k = 0; k < PACK_SIZE; k++) {
     var res = rollCard(prem);
-    if (res.isNew) st.owned[res.card.i] = true; else st.tokens++;
+    if (res.isNew) { st.owned[res.card.i] = true; st.unlocked[res.card.i] = true; }
+    else st.tokens++;
     results.push(res);
   }
-  S.save(); renderPacks();
+  S.save();
+  return results;
+}
+function openPack(prem) {
+  if (busy) return;
+  var results = drawPack(prem);
+  if (!results) return;
+  busy = true;
+  renderPacks();
   showReveal(results, prem);
 }
 function showReveal(results, prem) {
   var html = '<h3 style="margin:0">' + (prem ? "✨ Premium Pack" : "🎴 Standard Pack") + "</h3>" +
-    '<div class="sb-muted" style="font-size:11px">Tap cards to reveal</div><div class="rvrow">' +
+    '<div class="sb-muted" style="font-size:11px">Tap to reveal — every card is already banked</div><div class="rvrow">' +
     results.map(function (res, i) {
       var c = res.card;
       return '<div><div class="rvc g' + c.r + '" data-i="' + i + '"><div class="rvin">' +
         '<div class="rvf"><div class="cba emb a0" style="height:100%"></div></div>' +
         '<div class="rvb">' + art(c) + "</div></div></div>" +
-        '<div class="rvlab" id="rvl' + i + '"><b>' + c.n + "</b><br>" +
+        '<div class="rvlab" data-lab="' + i + '"><b>' + c.n + "</b><br>" +
         (res.isNew ? '<span class="new">NEW! ' + RN[c.r] + "</span>" : '<span class="dup">Duplicate → +1 🎟️</span>') + "</div></div>";
     }).join("") + "</div>" +
-    '<button class="sb-btn sb-btn-green sb-btn-block" id="rvDone" disabled>Done</button>';
+    '<button class="sb-btn sb-btn-green sb-btn-block" id="rvDone">Done</button>';
+  var timers = [];
   var m = SB.modal(html, afterReveal);
   var flipped = 0;
   function flip(el) {
-    if (el.classList.contains("flip")) return;
+    if (m.closed || !el || el.classList.contains("flip")) return;
     el.classList.add("flip"); SB.haptic(12);
-    document.getElementById("rvl" + el.dataset.i).classList.add("show");
+    var lab = m.el.querySelector('[data-lab="' + el.dataset.i + '"]');
+    if (lab) lab.classList.add("show");
     var r = results[+el.dataset.i];
-    if (r.card.r === "e" && r.isNew) { var b = el.getBoundingClientRect(); SB.confetti(b.left + b.width / 2, b.top, 40); }
-    if (++flipped === results.length) m.el.querySelector("#rvDone").disabled = false;
+    if (r && r.card.r === "e" && r.isNew) { var b = el.getBoundingClientRect(); SB.confetti(b.left + b.width / 2, b.top, 40); }
+    flipped++;
   }
   var cards = m.el.querySelectorAll(".rvc");
   cards.forEach(function (el) { el.addEventListener("click", function () { flip(el); }); });
-  setTimeout(function () { flip(cards[0]); }, 700);
-  setTimeout(function () { flip(cards[1]); }, 1300);
+  timers.push(setTimeout(function () { flip(cards[0]); }, 650));
+  timers.push(setTimeout(function () { flip(cards[1]); }, 1250));
   m.el.querySelector("#rvDone").addEventListener("click", function () { m.close(); });
   function afterReveal() {
+    timers.forEach(clearTimeout);
+    busy = false;
     results.forEach(function (res, i) {
       if (!res.isNew) setTimeout(function () {
         flyTo("🎟️", window.innerWidth / 2 + (i ? 60 : -60), window.innerHeight / 2, $("#meter"));
       }, i * 160);
     });
-    setTimeout(function () { renderAll(); checkCompletions(); }, 550);
+    renderAll();
+    setTimeout(checkCompletions, 520);
   }
 }
 $("#openS").addEventListener("click", function () { openPack(false); });
 $("#openP").addEventListener("click", function () { openPack(true); });
 
 // ---------- completions: sets → album → prestige ----------
+var ceremonyOpen = false;
+function mergeRw(list) {
+  var order = [], byType = {};
+  list.forEach(function (r) {
+    if (byType[r.type]) byType[r.type].amount += r.amount;
+    else { byType[r.type] = { type:r.type, amount:r.amount }; order.push(r.type); }
+  });
+  return order.map(function (t) { return byType[t]; });
+}
 function checkCompletions() {
-  var queue = [];
-  [{ r:"c", coins:300, extra:null }, { r:"r", coins:500, extra:{ type:"wild", amount:1 } }, { r:"e", coins:800, extra:{ type:"gem", amount:1 } }].forEach(function (d) {
+  var queue = [], payout = [];
+  SETDEFS.forEach(function (d) {
     if (st.sets[d.r]) return;
     if (byRar(d.r).every(function (c) { return st.owned[c.i]; })) {
       st.sets[d.r] = true;
-      var rw = [{ type:"coins", amount: Math.round(d.coins * mult()) }];
-      if (d.extra) rw.push(d.extra);
+      var rw = setRewards(d);
+      payout = payout.concat(rw);
       queue.push({ lab: RN[d.r].split(" ")[0] + " set complete!", rw: rw });
     }
   });
   S.save();
+  // Pay every completed set NOW, in one atomic grant. The modals below are pure
+  // presentation: a reload part-way through the chain can no longer strand a
+  // reward that the saved st.sets flags already mark as claimed.
+  if (payout.length) SB.grantRewards(mergeRw(payout), null, { toastTop: true });
   function next() {
     var q = queue.shift();
     if (!q) { if (missing().length === 0) ceremony(); else renderAll(); return; }
-    SB.grantRewards(q.rw);
     var m = SB.modal('<h3>🏆 ' + q.lab + "</h3><div class='chestrow'>" + q.rw.map(SB.rewardChip).join("") + "</div>" +
+      '<p class="sb-muted" style="font-size:11.5px;margin:0 0 10px">Set bonuses pay again at every Prestige — and they grow +50% each time.</p>' +
       '<button class="sb-btn sb-btn-green sb-btn-block" id="setOk">Nice!</button>', next);
     m.el.querySelector("#setOk").addEventListener("click", function () { m.close(); });
     SB.confetti();
@@ -472,115 +632,184 @@ function checkCompletions() {
   next();
 }
 function ceremony() {
-  var coins = Math.round(2000 * mult());
-  var rw = [{ type:"coins", amount: coins }, { type:"wild", amount: 3 }];
+  if (ceremonyOpen) return;
+  ceremonyOpen = true;
+  var rw = [{ type:"coins", amount: Math.round(2000 * mult()) }, { type:"wild", amount: 3 }];
+  var nextMult = Math.pow(1.5, st.prestige);
   var html = '<div class="ceremony"><div style="font-size:44px">🎁</div><h2>ALBUM COMPLETE!</h2>' +
     '<p class="sb-muted" style="font-size:13px;margin:0 0 6px">Grand Chest — Prestige ' + roman(st.prestige) + '</p>' +
     '<div class="chestrow">' + rw.map(SB.rewardChip).join("") +
     '<span class="sb-reward"><span class="ico">🏆</span>Season 1 Master back</span></div>' +
-    '<div class="bigcba">' + art({ a:"aM", r:"e" }) + '</div>' +
-    '<p style="font-size:12px;color:#5a6b8c;margin:6px 0 12px">The exclusive animated <b>Season 1 Master</b> card back is yours forever.</p>' +
+    '<div class="bigcba">' + art(MASTER()) + '</div>' +
+    '<p style="font-size:12px;color:#5a6b8c;margin:6px 0 12px">The exclusive animated <b>Season 1 Master</b> back is yours forever. ' +
+    'Your album now resets to <b>Prestige ' + roman(st.prestige + 1) + '</b> — rewards <b>+50%</b> (×' + trimX(nextMult) + ' of base), odds harden.</p>' +
     '<button class="sb-btn sb-btn-yellow sb-btn-block" id="prOk">Claim & enter Prestige ' + roman(st.prestige + 1) + "</button></div>";
   var m = SB.modal(html, doPrestige);
   m.el.querySelector("#prOk").addEventListener("click", function () { m.close(); });
   SB.confetti(); setTimeout(SB.confetti, 600);
   function doPrestige() {
-    SB.grantRewards(rw);
-    st.master = true; st.prestige++;
+    SB.grantRewards(rw, null, { toastTop: true });
+    st.chests++;
+    st.master = true; st.unlocked.master = true;
+    st.prestige++;
     st.owned = {}; st.sets = { c:false, r:false, e:false };
-    if (st.equipped && st.equipped !== "master") st.equipped = st.equipped; // cosmetics stay equipped
+    // cosmetics are permanent: st.unlocked and st.equipped survive the reset.
     S.save(); renderAll();
+    ceremonyOpen = false;
+    var tierTxt = st.prestige >= ODDS.length
+      ? "Odds are now at their hardest tier (Prestige " + roman(ODDS.length) + "+) and stop changing."
+      : "Card odds harden — the full table is in the ⓘ sheet.";
     var m2 = SB.modal('<h3>✨ PRESTIGE ' + roman(st.prestige) + " UNLOCKED</h3>" +
-      '<p style="font-size:13px;line-height:1.5">Your album resets with a <b>gold-trim theme</b>.<br>All set & chest rewards <b>+' + Math.round((mult() - 1) * 100) + "%</b> — but card odds are rarer. Collect them all again!</p>" +
+      '<div class="bigcba">' + art(MASTER()) + "</div>" +
+      '<p style="font-size:13px;line-height:1.55">Album reset with a <b>gold-trim theme</b> — no completion slump, the collection loop just starts again.<br>' +
+      "All set &amp; Grand Chest rewards <b>+50%</b> (now ×" + trimX(mult()) + " of base). " + tierTxt + "</p>" +
       '<button class="sb-btn sb-btn-green sb-btn-block" id="p2Ok">Let\'s go!</button>');
     m2.el.querySelector("#p2Ok").addEventListener("click", function () { m2.close(); });
     SB.confetti(window.innerWidth / 2, 160, 90);
   }
 }
+function trimX(n) { return String(Math.round(n * 100) / 100); }
 
-// ---------- pity claim + slot details ----------
-$("#claimBtn").addEventListener("click", function () {
+// ---------- pity claim ----------
+$("#meter").addEventListener("click", function (e) {
+  if (!e.target.closest("#claimBtn")) return;
   var miss = missing();
-  if (st.tokens < 8 || !miss.length) return;
-  var m = SB.modal('<h3>🎟️ Claim any card — 8 tokens</h3><div class="pickgrid">' +
+  if (st.tokens < PITY || !miss.length) return;
+  var claimed = false;
+  var m = SB.modal('<h3>🎟️ Claim any card — ' + PITY + ' tokens</h3>' +
+    '<p class="sb-muted" style="font-size:11.5px;margin:2px 0 0">You have ' + st.tokens + ' 🎟️. Pick any card still missing.</p>' +
+    '<div class="pickgrid">' +
     miss.map(function (c) {
       return '<button class="slot" data-pick="' + c.i + '">' + art(c) + '<div class="nm">' + c.n + '</div><div class="rr ' + c.r + '">' + RN[c.r] + "</div></button>";
     }).join("") + '</div><button class="sb-sheet-cancel" id="pkCancel">Cancel</button>');
-  m.el.querySelector("#pkCancel").addEventListener("click", function () { m.close(); });
+  m.el.querySelector("#pkCancel").addEventListener("click", function () { m.close(true); });
   m.el.querySelectorAll("[data-pick]").forEach(function (b) {
     b.addEventListener("click", function () {
-      st.tokens -= 8; st.owned[b.dataset.pick] = true; S.save();
+      if (claimed || st.tokens < PITY || st.owned[b.dataset.pick]) return;  // no double-spend on double-tap
+      claimed = true;
+      st.tokens -= PITY; st.owned[b.dataset.pick] = true; st.unlocked[b.dataset.pick] = true; S.save();
       m.close(true); SB.confetti(); SB.haptic(30);
-      SB.toast("🎉 " + findCard(b.dataset.pick).n + " added to your album!");
+      SB.toast("🎉 " + findCard(b.dataset.pick).n + " added to your album!", { top:true });
       renderAll(); setTimeout(checkCompletions, 500);
     });
   });
 });
+
+// ---------- album slot detail + equip ----------
 $("#album").addEventListener("click", function (e) {
   var slot = e.target.closest(".slot"); if (!slot) return;
-  var c = findCard(slot.dataset.id), own = !!st.owned[c.i];
-  var html = '<div class="bigcba">' + (own ? art(c) : '<div class="cba ghost"></div>') + "</div>" +
-    "<h3 style='margin:4px 0'>" + (own ? c.n : "???") + '</h3><div class="rr ' + c.r + '" style="font-size:12px">' + RN[c.r] + "</div>";
-  if (own) {
+  var c = findCard(slot.dataset.id), own = !!st.owned[c.i], unl = !!st.unlocked[c.i];
+  var html = '<div class="bigcba">' + ((own || unl) ? art(c) : artLocked(c)) + "</div>" +
+    "<h3 style='margin:4px 0'>" + ((own || unl) ? c.n : "???") + '</h3><div class="rr ' + c.r + '" style="font-size:12px">' + RN[c.r] + "</div>";
+  if (!own && unl) html += '<p style="font-size:11.5px;color:#8a5a00;font-weight:800;margin:8px 0 0">★ Unlocked in an earlier Prestige — still equippable, but collect it again to fill this album.</p>';
+  if (own || unl) {
     html += st.equipped === c.i
-      ? '<p style="font-size:13px;color:#2E9E4F;font-weight:800">✓ Equipped</p>'
-      : '<button class="sb-btn sb-btn-green sb-btn-block" style="margin-top:10px" id="eqBtn">Equip this back</button>';
-  } else {
-    html += '<p style="font-size:12.5px;line-height:1.5;color:#5a6b8c;margin:10px 0 4px">Win levels to earn packs (new-card odds shown on each pack), or claim it directly with <b>8 🎟️ Wild Tokens</b>.' +
-      (isFinal() ? "<br><b style='color:#D7263D'>Final 24h:</b> it's in the Complete-Your-Set pack below!" : "") + "</p>";
+      ? '<p style="font-size:13px;color:#2E9E4F;font-weight:800;margin-top:10px">✓ Equipped</p>'
+      : '<button class="sb-btn sb-btn-green sb-btn-block" style="margin-top:10px" id="eqB">Equip this back</button>';
+  }
+  if (!own) {
+    html += '<p style="font-size:12.5px;line-height:1.5;color:#5a6b8c;margin:10px 0 4px">Win levels to earn packs (live new-card odds are printed on each pack), or claim it outright with <b>' + PITY + ' 🎟️ Wild Tokens</b> — you have ' + st.tokens + '.' +
+      (isFinal() ? "<br><b style='color:#D7263D'>Final 24h:</b> check the targeted offers below." : "") + "</p>";
   }
   var m = SB.modal(html);
-  var eb = m.el.querySelector("#eqBtn");
+  var eb = m.el.querySelector("#eqB");
   if (eb) eb.addEventListener("click", function () {
-    st.equipped = c.i; S.save(); m.close(); renderAll(); SB.haptic(20); SB.toast("Equipped: " + c.n);
+    st.equipped = c.i; S.save(); m.close(); renderAll(); SB.haptic(20); SB.toast("Equipped: " + c.n, { top:true });
   });
 });
-$("#mchip").addEventListener("click", function () {
-  st.equipped = "master"; S.save(); renderAll(); SB.toast("Equipped: Season 1 Master 🏆");
-});
+
+// ---------- wardrobe ----------
+function wardrobe() {
+  var list = [DEFAULT_BACK()].concat(
+    CARDS.filter(function (c) { return st.unlocked[c.i]; })
+  );
+  if (st.unlocked.master) list.push(MASTER());
+  var m = SB.modal('<h3>🎽 Wardrobe</h3>' +
+    '<p class="sb-muted" style="font-size:11.5px;margin:2px 0 0">Every back you have ever unlocked stays yours — across seasons and Prestiges.</p>' +
+    '<div class="pickgrid">' + list.map(function (c) {
+      var on = (st.equipped || null) === (c.i || null);
+      return '<button class="slot' + (on ? " on" : "") + '" data-eq="' + (c.i == null ? "" : c.i) + '">' + art(c) +
+        '<div class="nm">' + c.n + "</div>" + (on ? '<span class="eq">✓ EQUIPPED</span>' : '<div class="rr ' + c.r + '">' + RN[c.r] + "</div>") + "</button>";
+    }).join("") + '</div><button class="sb-sheet-cancel" id="wdClose">Close</button>');
+  m.el.querySelector("#wdClose").addEventListener("click", function () { m.close(); });
+  m.el.querySelectorAll("[data-eq]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      st.equipped = b.dataset.eq || null; S.save(); m.close(); renderAll(); SB.haptic(20);
+      SB.toast("Equipped: " + equippedCard().n, { top:true });
+    });
+  });
+}
+$("#wardBtn").addEventListener("click", wardrobe);
+$("#wardBtn2").addEventListener("click", wardrobe);
 
 // ---------- countdown (72h compressed to 6 min; tap = skip to final day) ----------
-var tickIv, wasFinal = isFinal();
+var tickIv, wasFinal = isFinal(), endShown = false;
+function seasonRollover() {
+  st.endTs = Date.now() + SEASON_MS; st.fdShown = false; wasFinal = false; endShown = false;
+  S.save(); renderAll(); startTick();
+}
 function tick() {
   var left = Math.max(0, st.endTs - Date.now());
   var v = left * VIRT, h = Math.floor(v / 36e5), mn = Math.floor(v % 36e5 / 6e4);
   $("#cd").textContent = h + "h " + String(mn).padStart(2, "0") + "m";
   $("#chip").classList.toggle("urgent", isFinal());
-  if (isFinal() && !wasFinal) { wasFinal = true; renderOffers(); if (!st.fdShown) { st.fdShown = true; S.save(); SB.toast("⏰ FINAL DAY — targeted offers unlocked!"); } }
-  if (left <= 0) {
+  if (isFinal() && !wasFinal) {
+    wasFinal = true; renderOffers();
+    if (!st.fdShown) { st.fdShown = true; S.save(); SB.toast("⏰ FINAL DAY — targeted offers unlocked!", { top:true }); }
+  }
+  if (left <= 0 && !endShown) {
+    endShown = true;
     clearInterval(tickIv);
-    var m = SB.modal("<h3>🏁 Season complete!</h3><p style='font-size:13px'>Your card backs are yours forever. A new season begins now.</p>" +
-      '<button class="sb-btn sb-btn-blue sb-btn-block" id="nsOk">Start next season</button>', reset);
+    var m = SB.modal("<h3>🏁 Season complete!</h3><p style='font-size:13px;line-height:1.5'>Your card backs, Wild Tokens and Prestige <b>" + roman(st.prestige) +
+      "</b> all carry over — nothing is taken away. A new season starts now.</p>" +
+      '<button class="sb-btn sb-btn-blue sb-btn-block" id="nsOk">Start next season</button>', seasonRollover);
     m.el.querySelector("#nsOk").addEventListener("click", function () { m.close(); });
-    function reset() { st.endTs = Date.now() + SEASON_MS; st.fdShown = false; wasFinal = false; S.save(); renderOffers(); startTick(); }
   }
 }
 function startTick() { clearInterval(tickIv); tickIv = setInterval(tick, 1000); tick(); }
 $("#chip").addEventListener("click", function () {
   if (isFinal()) return;
   st.endTs = Date.now() + FINAL_MS - 1500; S.save();
-  SB.toast("⏩ Demo: skipped to the final day");
+  SB.toast("⏩ Demo: skipped to the final day", { top:true });
   tick();
 });
 startTick();
 
 // ---------- info ----------
 $("#infoBtn").addEventListener("click", function () {
-  var m = SB.modal('<h3>ⓘ Card-Back Collection Album</h3>' +
-    '<div style="text-align:left;font-size:12.5px;line-height:1.65">' +
-    "<b>Earn packs by playing levels</b><br>▶ Level win = +1 pack point (3 = Standard Pack).<br>🔥 Hard win = +1 premium point (2 = Premium Pack, better odds — shown on the pack).<br><br>" +
-    "<b>Honest odds</b> — rarity odds and your live new-card % are printed on every pack.<br><br>" +
-    "<b>Duplicates never wasted</b> — each dupe = +1 🎟️. 8 tokens = claim <b>any</b> missing card, guaranteed.<br><br>" +
-    "<b>Set bonuses</b> — completing all commons / rares / epics pays instantly.<br><br>" +
-    "<b>Prestige</b> — finish all 9 for the Grand Chest + the animated Master back, then the album resets to the next Prestige: gold theme, rewards +50%, rarer odds. Endless.<br><br>" +
+  var rows = ODDS.map(function (t, i) {
+    var lab = "Prestige " + roman(i + 1) + (i === ODDS.length - 1 ? "+" : "");
+    return '<tr class="' + (i === tierIdx() ? "cur" : "") + '"><td>' + lab + "</td>" +
+      "<td>" + Math.round(t.std.c * 100) + " / " + Math.round(t.std.r * 100) + " / " + Math.round(t.std.e * 100) + "</td>" +
+      "<td>" + Math.round(t.prm.c * 100) + " / " + Math.round(t.prm.r * 100) + " / " + Math.round(t.prm.e * 100) + "</td></tr>";
+  }).join("");
+  var m = SB.modal('<h3>ⓘ Card-Back Album</h3>' +
+    '<div style="text-align:left;font-size:12.5px;line-height:1.6">' +
+    "<b>Earn packs by playing levels</b><br>▶ Level clear = +1 pack point (" + STD_COST + " = Standard Pack).<br>🔥 Hard clear = +1 premium point (" + PRM_COST + " = Premium Pack).<br>Every pack contains exactly " + PACK_SIZE + " cards.<br><br>" +
+    "<b>Published odds — code and table are the same numbers</b>" +
+    '<table class="otab"><tr><th></th><th>Standard<br>C / R / E</th><th>Premium<br>C / R / E</th></tr>' + rows + "</table>" +
+    "<div style='font-size:11px;color:#5a6b8c'>Within a rarity every card is equally likely. Your live new-card % is printed on each pack.</div><br>" +
+    "<b>Duplicates are never wasted</b> — each dupe = +1 🎟️. <b>" + PITY + " 🎟️ = claim ANY missing card</b>, guaranteed. Tokens never expire and never reset.<br><br>" +
+    "<b>Set bonuses</b> — completing all commons / rares / epics pays instantly, every Prestige.<br><br>" +
+    "<b>Prestige (endless)</b> — finish all 9 for the Grand Chest + the animated Master back, then the album resets: gold theme, rewards <b>+50% each Prestige</b>, odds harden to Prestige " + roman(ODDS.length) + "+ and then hold. Backs you have unlocked stay equippable forever.<br><br>" +
     "<i>Demo timers: the 72h season runs in 6 minutes; tap the ⏳ chip to jump to the final-24h offers.</i></div>" +
     '<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" id="infOk">Got it</button>');
   m.el.querySelector("#infOk").addEventListener("click", function () { m.close(); });
 });
 
 renderAll();
+// Reconcile on load: a reload during a reveal / set modal / prestige ceremony must
+// still hand out everything the banked state has already earned.
+setTimeout(checkCompletions, 250);
+
 // test hooks
-window.__alb = { st: st, save: S.save, rollCard: rollCard, odds: odds, newPct: newPct, openPack: openPack, checkCompletions: checkCompletions, renderAll: renderAll };
+window.__alb = {
+  st: st, save: function () { S.save(); }, rollCard: rollCard, odds: odds, newPct: newPct,
+  drawPack: drawPack, openPack: openPack, newP: newP, checkCompletions: checkCompletions, renderAll: renderAll,
+  missing: missing, mult: mult, tierIdx: tierIdx, play: play, ODDS: ODDS,
+  PITY: PITY, PACK_SIZE: PACK_SIZE, STD_COST: STD_COST, PRM_COST: PRM_COST,
+  setRewards: setRewards, SETDEFS: SETDEFS
+};
 })();
 </script>
 </body>

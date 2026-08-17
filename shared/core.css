@@ -222,7 +222,8 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
   transition: all 0.25s ease;
   max-width: 92vw; text-align: center;
 }
-.sb-toast.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 66px); }
+/* --sb-toast-top lets an event push the toast below its own header chip row */
+.sb-toast.top { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + var(--sb-toast-top, 66px)); }
 .sb-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ---------- Flying reward ---------- */
