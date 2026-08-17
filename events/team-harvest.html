@@ -6,108 +6,183 @@
 <title>Skip-Bo · Team Harvest</title>
 <link rel="stylesheet" href="../shared/core.css">
 <style>
+:root{ --sb-toast-top:118px; }
 /* ---------- layout ---------- */
-.th-toprow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
-.th-info{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:19px;font-weight:900;cursor:pointer;}
-.th-sec{margin-bottom:12px;}
+.sb-main{padding-top:10px;}
+.th-toprow{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.th-toprow .sb-timer-chip{flex:0 0 auto;}
+.th-rankpill{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;
+  background:rgba(255,199,44,.16);border:1.5px solid rgba(255,199,44,.65);border-radius:999px;
+  color:#fff;font-size:12px;font-weight:900;padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.th-rankpill b{color:var(--sb-yellow);font-size:13px;}
+.th-info{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;
+  font-size:19px;font-weight:900;cursor:pointer;line-height:1;}
+.th-info:active{transform:scale(.93);}
+.th-sec{margin-bottom:8px;}
 /* ---------- wagon scene ---------- */
-.th-scene{position:relative;height:190px;border-radius:16px;overflow:hidden;box-shadow:var(--sb-shadow);
-  background:linear-gradient(180deg,#7ec4f2 0%,#bfe3fb 46%,#e8c96a 47%,#d9a943 100%);}
-.th-sun{position:absolute;top:12px;right:16px;width:36px;height:36px;border-radius:50%;
-  background:radial-gradient(circle,#fff6c9 20%,#FFC72C 70%);box-shadow:0 0 24px 8px rgba(255,199,44,.55);}
-.th-hill{position:absolute;bottom:78px;width:70%;height:60px;border-radius:50% 50% 0 0;background:#c9992f;opacity:.55;}
-.th-hill.h2{left:45%;width:80%;height:46px;opacity:.4;}
-.th-barn{position:absolute;bottom:80px;left:10px;font-size:30px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
-.th-wagon{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;width:212px;height:96px;}
-.th-bed{position:absolute;left:0;right:0;bottom:20px;top:14px;border-radius:6px 6px 12px 12px;
-  background:repeating-linear-gradient(90deg,#8a5a2b 0 22px,#7a4c21 22px 26px);
+.th-scene{position:relative;height:134px;border-radius:16px;overflow:hidden;box-shadow:var(--sb-shadow);
+  background:linear-gradient(180deg,#7ec4f2 0%,#bfe3fb 44%,#e8c96a 45%,#cf9c36 100%);}
+.th-sun{position:absolute;top:8px;right:14px;width:30px;height:30px;border-radius:50%;
+  background:radial-gradient(circle,#fff6c9 20%,#FFC72C 70%);box-shadow:0 0 22px 7px rgba(255,199,44,.5);}
+.th-cloud{position:absolute;height:11px;border-radius:999px;background:rgba(255,255,255,.75);}
+.th-cloud:before,.th-cloud:after{content:"";position:absolute;background:inherit;border-radius:50%;}
+.th-cloud:before{width:16px;height:16px;left:7px;top:-7px;}
+.th-cloud:after{width:11px;height:11px;left:22px;top:-5px;}
+.th-cloud.c1{width:44px;left:16%;top:14px;}
+.th-cloud.c2{width:32px;left:52%;top:26px;opacity:.75;}
+.th-hill{position:absolute;bottom:54px;width:64%;height:38px;border-radius:50% 50% 0 0;background:#c9992f;opacity:.5;}
+.th-hill.h2{left:44%;width:52%;height:28px;opacity:.35;}
+.th-barn{position:absolute;bottom:40px;right:10px;width:40px;height:34px;}
+.th-barn i{position:absolute;left:3px;bottom:0;width:34px;height:21px;background:#b8482f;border:2px solid #7e2d1c;border-radius:2px;}
+.th-barn u{position:absolute;left:0;bottom:19px;width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;
+  border-bottom:13px solid #8f3423;}
+.th-barn s{position:absolute;left:15px;bottom:0;width:10px;height:13px;background:#f3d9a8;border:1.5px solid #7e2d1c;}
+.th-fence{position:absolute;bottom:44px;left:10px;width:62px;height:14px;opacity:.7;}
+.th-fence i{position:absolute;bottom:0;width:4px;height:14px;background:#e9dcc0;border-radius:1px;}
+.th-fence u{position:absolute;bottom:8px;left:0;right:0;height:3px;background:#e9dcc0;}
+.th-wagon{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;width:186px;height:74px;}
+.th-ox{position:absolute;left:-34px;bottom:6px;font-size:26px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+.th-bed{position:absolute;left:0;right:0;bottom:16px;top:16px;border-radius:5px 5px 11px 11px;
+  background:repeating-linear-gradient(90deg,#8a5a2b 0 20px,#7a4c21 20px 24px);
   border:3px solid #5d3a17;box-shadow:inset 0 -10px 16px rgba(0,0,0,.3);}
-.th-wheel{position:absolute;bottom:-2px;width:34px;height:34px;border-radius:50%;background:#3b2410;
+.th-wheel{position:absolute;bottom:-1px;width:30px;height:30px;border-radius:50%;background:#3b2410;
   border:5px solid #241505;box-shadow:inset 0 0 0 3px #6b4a22;}
-.th-wheel.w1{left:22px;}.th-wheel.w2{right:22px;}
-.th-pile{position:absolute;left:6px;right:6px;bottom:38px;height:88px;pointer-events:none;}
-.th-crop{position:absolute;font-size:17px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));animation:thPop .4s cubic-bezier(.34,1.56,.64,1);}
+.th-wheel.w1{left:20px;}.th-wheel.w2{right:20px;}
+.th-pile{position:absolute;left:5px;right:5px;bottom:30px;height:66px;pointer-events:none;}
+.th-crop{position:absolute;font-size:15px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));animation:thPop .4s cubic-bezier(.34,1.56,.64,1);}
 @keyframes thPop{from{transform:scale(0);}to{transform:scale(1);}}
-.th-score{position:absolute;top:8px;left:12px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35);}
-.th-score b{font-size:26px;}.th-score small{display:block;font-size:10px;font-weight:800;letter-spacing:1px;opacity:.95;}
-.th-teamtag{position:absolute;top:10px;right:60px;background:rgba(27,42,74,.75);color:#fff;font-size:11px;font-weight:900;
-  padding:4px 10px;border-radius:999px;}
+.th-score{position:absolute;top:7px;left:11px;color:#fff;text-shadow:0 2px 2px rgba(0,0,0,.4);line-height:1;}
+.th-score small{display:block;font-size:9.5px;font-weight:900;letter-spacing:1.2px;opacity:.95;margin-bottom:2px;}
+.th-score b{font-size:23px;}
+.th-score span{font-weight:800;font-size:12px;}
+.th-youchip{display:block;width:-webkit-fit-content;width:fit-content;margin-top:4px;
+  background:rgba(27,42,74,.7);border:1.5px solid rgba(255,199,44,.7);
+  color:#fff;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;text-shadow:none;}
+.th-youchip b{color:var(--sb-yellow);font-size:11px;}
+.th-rankpill .sb-card{width:13px;height:18px;border-width:1.5px;flex:0 0 auto;
+  background:linear-gradient(160deg,#1D4FA1 0%,#3E8EDE 100%);border-color:#14396f;
+  background-image:repeating-linear-gradient(45deg,rgba(255,199,44,.85) 0 2px,transparent 2px 5px);}
+/* ---------- stacked contribution bar ---------- */
+.th-stack{display:flex;height:14px;border-radius:999px;overflow:hidden;background:rgba(27,42,74,.3);margin-top:7px;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.3);}
+.th-stack i{display:block;height:100%;transition:width .5s ease;min-width:0;}
+.th-stacklab{font-size:9.5px;font-weight:800;color:rgba(255,255,255,.8);margin-top:2px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.th-stacklab b{color:var(--sb-yellow);}
 /* milestone progress */
-.th-prog{position:relative;height:20px;border-radius:999px;background:rgba(27,42,74,.25);margin:10px 2px 4px;overflow:hidden;}
+.th-prog{position:relative;height:18px;border-radius:999px;background:rgba(27,42,74,.28);margin:0 2px 6px;overflow:hidden;}
 .th-prog-fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#2E9E4F,#3fc167);border-radius:999px;transition:width .6s ease;}
-.th-prog-lab{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.4);}
-.th-miles{display:flex;gap:8px;}
-.th-mile{flex:1;background:var(--sb-cream);border-radius:14px;padding:8px 6px;text-align:center;box-shadow:var(--sb-shadow);}
-.th-mile .em{font-size:26px;}
-.th-mile .pt{font-size:11px;font-weight:900;color:#5a6b8c;}
-.th-mile button{margin-top:5px;width:100%;min-height:44px;border:none;border-radius:10px;font-weight:900;font-size:12px;cursor:pointer;
-  font-family:var(--sb-font);background:linear-gradient(180deg,#ffd95e,#FFC72C);color:var(--sb-ink);box-shadow:0 3px 0 rgba(0,0,0,.2);}
+.th-prog-lab{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+.th-miles{display:flex;gap:7px;}
+.th-mile{flex:1;background:var(--sb-cream);border-radius:13px;padding:5px 5px 6px;text-align:center;box-shadow:var(--sb-shadow);position:relative;}
+.th-mile .em{font-size:21px;line-height:1.1;}
+.th-mile .nm{font-size:9.5px;font-weight:900;color:var(--sb-ink);}
+.th-mile .pt{font-size:10.5px;font-weight:900;color:#5a6b8c;}
+.th-mile button{margin-top:4px;width:100%;min-height:44px;border:none;border-radius:10px;font-weight:900;font-size:11.5px;cursor:pointer;
+  font-family:var(--sb-font);background:linear-gradient(180deg,#ffd95e,#FFC72C);color:var(--sb-ink);box-shadow:0 3px 0 rgba(0,0,0,.2);
+  padding:2px 3px;line-height:1.15;}
 .th-mile button:disabled{background:#cfd6e4;color:#8b97ad;box-shadow:none;}
-.th-mile.done{opacity:.75;}
-.th-gatehint{font-size:10.5px;font-weight:700;color:#a8552a;text-align:center;margin-top:5px;}
+.th-mile button.ready{animation:thGlow 1.3s infinite;}
+@keyframes thGlow{0%,100%{box-shadow:0 3px 0 rgba(0,0,0,.2);}50%{box-shadow:0 3px 0 rgba(0,0,0,.2),0 0 12px 3px rgba(255,199,44,.85);}}
+.th-mile.done{opacity:.7;}
+.th-gatehint{font-size:10.5px;font-weight:800;color:#ffd07a;text-align:center;margin-top:6px;}
 /* ---------- play buttons ---------- */
-.th-play{display:flex;gap:10px;}
-.th-play .sb-btn{flex:1;min-height:56px;font-size:15px;flex-direction:column;gap:1px;padding:9px 6px;}
-.th-play .sb-btn small{font-size:11px;font-weight:800;opacity:.92;}
-.th-x2{display:inline-block;background:#D7263D;color:#fff;font-size:10px;font-weight:900;border-radius:999px;padding:1px 7px;margin-left:4px;}
+.th-play{display:flex;gap:9px;}
+.th-play .sb-btn{flex:1;min-height:56px;font-size:15px;flex-direction:column;gap:1px;padding:8px 5px;}
+.th-play .sb-btn small{font-size:11px;font-weight:800;opacity:.95;}
+.th-x2{display:inline-block;background:#D7263D;color:#fff;font-size:9.5px;font-weight:900;border-radius:999px;padding:1px 6px;margin-left:3px;}
 /* ---------- team panel ---------- */
-.th-member{display:flex;align-items:center;gap:9px;padding:6px 0;}
-.th-av{position:relative;width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:22px;
+.th-member{display:flex;align-items:center;gap:7px;padding:5px 0;}
+.th-av{position:relative;width:38px;height:38px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:21px;
   border:2.5px solid var(--sb-sky);flex:0 0 auto;}
 .th-av.me{border-color:var(--sb-yellow);box-shadow:0 0 0 2px rgba(255,199,44,.4);}
-.th-av.tractor{border-color:#2E9E4F;box-shadow:0 0 0 3px rgba(46,158,79,.55);}
-.th-av .bdg{position:absolute;right:-6px;bottom:-4px;font-size:12px;background:#D7263D;color:#fff;border-radius:999px;
-  padding:0 4px;font-weight:900;line-height:15px;}
-.th-av .frame{position:absolute;left:-8px;top:-10px;font-size:14px;}
-.th-mname{font-weight:900;font-size:13px;color:var(--sb-ink);white-space:nowrap;}
-.th-mrole{font-size:10px;font-weight:700;color:#7a89a8;}
+.th-av.tractor{border-color:#2E9E4F;box-shadow:0 0 0 3px rgba(46,158,79,.5);}
+.th-av .bdg{position:absolute;right:-7px;bottom:-4px;font-size:10px;background:#D7263D;color:#fff;border-radius:999px;
+  padding:0 4px;font-weight:900;line-height:14px;}
+.th-av .frame{position:absolute;left:-7px;top:-9px;font-size:13px;}
+.th-av .mvp{position:absolute;left:-7px;top:-9px;font-size:13px;}
+.th-who{width:64px;flex:0 0 auto;min-width:0;}
+.th-mname{font-weight:900;font-size:12.5px;color:var(--sb-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.th-mrole{font-size:9.5px;font-weight:700;color:#7a89a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .th-barwrap{flex:1;min-width:0;}
-.th-bar{height:13px;border-radius:999px;background:rgba(27,42,74,.12);overflow:hidden;}
-.th-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#3E8EDE,#1D4FA1);transition:width .5s;}
-.th-bar.me i{background:linear-gradient(90deg,#FFC72C,#e0a400);}
-.th-mpts{font-weight:900;font-size:13px;min-width:44px;text-align:right;color:var(--sb-ink);}
-.th-cheer{flex:0 0 auto;width:46px;height:44px;border:none;border-radius:12px;background:linear-gradient(180deg,#ffd95e,#FFC72C);
-  font-size:18px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.18);}
+.th-bar{height:12px;border-radius:999px;background:rgba(27,42,74,.12);overflow:hidden;}
+.th-bar i{display:block;height:100%;border-radius:999px;transition:width .5s;}
+.th-bsub{font-size:9px;font-weight:800;color:#7a89a8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.th-mpts{font-weight:900;font-size:13px;min-width:34px;text-align:right;color:var(--sb-ink);flex:0 0 auto;}
+.th-cheer{flex:0 0 auto;width:46px;min-height:44px;border:none;border-radius:12px;background:linear-gradient(180deg,#ffd95e,#FFC72C);
+  font-size:16px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.18);color:var(--sb-ink);font-weight:900;font-family:var(--sb-font);
+  line-height:1.05;padding:0;}
+.th-cheer small{display:block;font-size:8px;font-weight:800;opacity:.75;}
 .th-cheer:disabled{background:#e2e7f0;filter:grayscale(1);opacity:.55;}
-.th-cheer:active{transform:translateY(2px);box-shadow:none;}
+.th-cheer:active:not(:disabled){transform:translateY(2px);box-shadow:none;}
+.th-nocontrib{font-size:9px;font-weight:800;color:#c1642c;}
 /* ---------- feed ---------- */
-.th-feed{max-height:118px;overflow:hidden;font-size:12px;}
-.th-feed div{padding:4px 0;border-bottom:1px dashed rgba(27,42,74,.12);font-weight:700;color:#41527a;animation:thPop .3s;}
+.th-feed{font-size:11.5px;}
+.th-feed div{padding:3.5px 0;border-bottom:1px dashed rgba(27,42,74,.12);font-weight:700;color:#41527a;animation:thPop .3s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .th-feed div:first-child{color:var(--sb-ink);}
+.th-feed div:last-child{border-bottom:none;}
 /* ---------- leaderboard ---------- */
-.th-rival{display:flex;align-items:center;gap:8px;padding:9px 10px;margin:5px 0;background:rgba(27,42,74,.16);border-radius:12px;color:#fff;}
-.th-rival.mine{background:linear-gradient(90deg,rgba(255,199,44,.32),rgba(255,199,44,.14));border:1.5px solid var(--sb-yellow);}
-.th-rival .rk{width:26px;font-weight:900;font-size:14px;text-align:center;}
-.th-rival .tn{flex:1;font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.th-rival .tp{font-weight:900;font-size:13px;color:var(--sb-yellow);}
-.th-delta{display:flex;align-items:center;gap:7px;background:rgba(215,38,61,.85);color:#fff;border-radius:12px;
-  padding:8px 12px;font-size:12.5px;font-weight:800;margin-bottom:6px;}
+.th-rival{display:flex;align-items:center;gap:8px;padding:6px 9px;margin:3.5px 0;background:rgba(27,42,74,.18);border-radius:12px;color:#fff;}
+.th-rival.mine{background:linear-gradient(90deg,rgba(255,199,44,.34),rgba(255,199,44,.14));border:1.5px solid var(--sb-yellow);}
+.th-rival .rk{width:24px;height:24px;flex:0 0 auto;display:grid;place-items:center;border-radius:50%;
+  font-weight:900;font-size:12px;background:rgba(255,255,255,.14);}
+.th-rival .rk.m1{background:linear-gradient(180deg,#ffe07a,#e0a400);color:#4a3200;}
+.th-rival .rk.m2{background:linear-gradient(180deg,#e8eef7,#9fb0c6);color:#33445e;}
+.th-rival .rk.m3{background:linear-gradient(180deg,#e6a874,#b06a33);color:#3d1e06;}
+.th-rival .av{font-size:17px;flex:0 0 auto;width:20px;text-align:center;}
+.th-rival .tn{flex:1;font-weight:800;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+.th-rival .pace{font-size:9px;font-weight:700;color:rgba(255,255,255,.6);flex:0 0 auto;}
+.th-rival .tp{font-weight:900;font-size:13px;color:var(--sb-yellow);flex:0 0 auto;min-width:42px;text-align:right;}
+.th-gap{text-align:center;color:rgba(255,255,255,.45);font-weight:900;font-size:12px;letter-spacing:2px;line-height:1;}
+.th-more{width:100%;min-height:44px;margin-top:4px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  color:#fff;font-family:var(--sb-font);font-weight:800;font-size:12px;border-radius:11px;cursor:pointer;}
+.th-delta{display:flex;align-items:center;gap:6px;background:rgba(215,38,61,.85);color:#fff;border-radius:12px;
+  padding:6px 10px;font-size:11.5px;font-weight:800;margin-bottom:4px;line-height:1.3;}
 .th-delta.lead{background:rgba(46,158,79,.85);}
 /* ---------- offers ---------- */
-.th-offers{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.th-offer{background:var(--sb-cream);border-radius:14px;padding:11px 10px;text-align:center;box-shadow:var(--sb-shadow);
+.th-offers{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.th-offer{background:var(--sb-cream);border-radius:14px;padding:10px 9px;text-align:center;box-shadow:var(--sb-shadow);
   display:flex;flex-direction:column;}
-.th-offer .em{font-size:30px;}
-.th-offer h4{margin:4px 0 2px;font-size:13.5px;color:var(--sb-ink);}
-.th-offer p{margin:0 0 8px;font-size:10.5px;font-weight:700;color:#5a6b8c;flex:1;}
+.th-offer.free{background:linear-gradient(180deg,#e8f6ec,#d7eedd);grid-column:1 / -1;text-align:left;flex-direction:row;
+  align-items:center;gap:10px;padding:9px 11px;}
+.th-offer .em{font-size:27px;line-height:1.1;}
+.th-offer.free .em{font-size:26px;flex:0 0 auto;}
+.th-offer h4{margin:3px 0 2px;font-size:13px;color:var(--sb-ink);}
+.th-offer p{margin:0 0 7px;font-size:10px;font-weight:700;color:#5a6b8c;flex:1;line-height:1.35;}
+.th-offer.free p{margin:0;font-size:10.5px;color:#2f6b45;}
 .th-offer .sb-btn{min-height:44px;font-size:14px;}
-.th-owned{display:grid;place-items:center;min-height:44px;font-weight:900;color:#2E9E4F;font-size:14px;}
-.th-freepath{margin-top:8px;font-size:11px;font-weight:700;color:#3a6b46;text-align:center;background:rgba(46,158,79,.12);
-  border-radius:10px;padding:7px 10px;}
+.th-owned{display:grid;place-items:center;min-height:44px;font-weight:900;color:#2E9E4F;font-size:13px;line-height:1.2;}
+.th-alt{font-size:9.5px;font-weight:800;color:#2f6b45;margin-top:5px;}
 /* ---------- footer / podium ---------- */
-.th-foot{font-size:11.5px;font-weight:700;color:rgba(255,255,255,.85);text-align:center;padding:6px 0 2px;}
-.th-podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:12px 0;}
-.th-pod{width:80px;border-radius:10px 10px 0 0;color:#fff;text-align:center;padding-top:6px;font-weight:900;}
-.th-pod .pe{font-size:28px;display:block;}
-.th-pod .pn{font-size:10.5px;display:block;padding:0 3px;}
-.th-pod .pp{font-size:11px;color:rgba(255,255,255,.9);}
-.th-pod.p1{height:96px;background:linear-gradient(180deg,#FFC72C,#e0a400);}
-.th-pod.p2{height:74px;background:linear-gradient(180deg,#b9c6d8,#8fa0b8);}
-.th-pod.p3{height:60px;background:linear-gradient(180deg,#d8925a,#b06a33);}
+.th-foot{font-size:11px;font-weight:700;color:rgba(255,255,255,.8);text-align:center;padding:4px 0 2px;line-height:1.5;}
+.th-podium{display:flex;align-items:flex-end;justify-content:center;gap:7px;margin:12px 0;}
+.th-pod{width:78px;border-radius:10px 10px 0 0;color:#fff;text-align:center;padding:5px 2px 0;font-weight:900;
+  display:flex;flex-direction:column;justify-content:flex-start;gap:1px;overflow:hidden;}
+.th-pod .pe{font-size:21px;display:block;line-height:1.1;}
+.th-pod .pn{font-size:9.5px;display:block;padding:0 2px;line-height:1.1;}
+.th-pod .pp{font-size:10px;color:rgba(255,255,255,.95);}
+.th-pod.p1{height:98px;background:linear-gradient(180deg,#FFC72C,#e0a400);}
+.th-pod.p2{height:84px;background:linear-gradient(180deg,#b9c6d8,#8fa0b8);}
+.th-pod.p3{height:72px;background:linear-gradient(180deg,#d8925a,#b06a33);}
 .th-pod.mine{outline:3px solid #fff;outline-offset:-3px;}
-h3.th-h{color:#fff;font-size:14px;margin:0 0 7px;text-shadow:0 1px 0 rgba(0,0,0,.3);}
-h3.th-h .sub{font-weight:700;font-size:11px;color:var(--sb-sky-light);margin-left:6px;}
-@media (max-width:374px){.th-wagon{width:186px;}.th-play .sb-btn{font-size:13.5px;}}
+.th-split{background:rgba(46,158,79,.12);border:1.5px dashed rgba(46,158,79,.5);border-radius:12px;padding:8px 10px;
+  font-size:11.5px;font-weight:800;color:#2f6b45;margin:8px 0;line-height:1.5;}
+h3.th-h{color:#fff;font-size:13.5px;margin:0 0 5px;text-shadow:0 1px 0 rgba(0,0,0,.3);display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+h3.th-h .sub{font-weight:700;font-size:10.5px;color:var(--sb-sky-light);}
+.th-rules{text-align:left;font-size:12.5px;font-weight:600;color:#41527a;line-height:1.5;}
+.th-rules p{margin:0 0 9px;}
+.th-rules b{color:var(--sb-ink);}
+.th-rules table{width:100%;border-collapse:collapse;font-size:11.5px;margin:0 0 9px;}
+.th-rules td{padding:3px 4px;border-bottom:1px solid rgba(27,42,74,.1);}
+.th-rules td:last-child{text-align:right;font-weight:900;color:var(--sb-ink);}
+.th-rules td.nm{white-space:nowrap;width:1%;}
+@media (max-width:374px){
+  .th-wagon{width:174px;}
+  .th-play .sb-btn{font-size:13.5px;}
+  .th-who{width:64px;}
+  .th-offer p{font-size:9.5px;}
+}
 </style>
 </head>
 <body>
@@ -115,21 +190,30 @@ h3.th-h .sub{font-weight:700;font-size:11px;color:var(--sb-sky-light);margin-lef
 <div class="sb-main">
 
   <div class="th-toprow">
-    <span class="sb-timer-chip">🌾 Ends in <span id="th-cd"></span></span>
-    <span class="sb-timer-chip" style="background:rgba(46,158,79,.9);">Fri–Mon Festival</span>
+    <span class="sb-timer-chip">🌾 <span id="th-cd"></span></span>
+    <span class="th-rankpill" id="th-rankpill"><span class="sb-card wild"></span>Wild Cards <b id="th-rankn">#4</b> of 10</span>
     <button class="th-info" id="th-info" aria-label="Event rules">ⓘ</button>
   </div>
 
-  <div class="th-sec th-scene" id="th-scene">
-    <div class="th-sun"></div><div class="th-hill"></div><div class="th-hill h2"></div>
-    <div class="th-barn">🏚️</div>
-    <div class="th-score"><small>TEAM HARVEST</small><b id="th-teampts">0</b> <span style="font-weight:800;font-size:12px;">pts</span></div>
-    <div class="th-teamtag">🃏 Wild Cards</div>
-    <div class="th-wagon">
-      <div class="th-pile" id="th-pile"></div>
-      <div class="th-bed"></div>
-      <div class="th-wheel w1"></div><div class="th-wheel w2"></div>
+  <div class="th-sec">
+    <div class="th-scene" id="th-scene">
+      <div class="th-sun"></div>
+      <div class="th-cloud c1"></div><div class="th-cloud c2"></div>
+      <div class="th-hill"></div><div class="th-hill h2"></div>
+      <div class="th-barn"><u></u><i></i><s></s></div>
+      <div class="th-fence"><u></u><i style="left:0"></i><i style="left:15px"></i><i style="left:30px"></i><i style="left:45px"></i><i style="left:60px"></i></div>
+      <div class="th-score"><small>TEAM WAGON</small><b id="th-teampts">0</b> <span>pts</span>
+        <div class="th-youchip">You <b id="th-mypts">0</b> pts · <b id="th-myshare">0%</b></div>
+      </div>
+      <div class="th-wagon">
+        <div class="th-ox">🐂</div>
+        <div class="th-pile" id="th-pile"></div>
+        <div class="th-bed"></div>
+        <div class="th-wheel w1"></div><div class="th-wheel w2"></div>
+      </div>
     </div>
+    <div class="th-stack" id="th-stack"></div>
+    <div class="th-stacklab" id="th-stacksum"></div>
   </div>
 
   <div class="th-sec">
@@ -143,24 +227,24 @@ h3.th-h .sub{font-weight:700;font-size:11px;color:var(--sb-sky-light);margin-lef
     <button class="sb-btn sb-btn-red" id="th-play-h"></button>
   </div>
 
+  <div class="th-sec">
+    <h3 class="th-h">🏆 Harvest Festival <span class="sub">10 teams · top 3 split podium pools</span></h3>
+    <div class="th-delta" id="th-delta"></div>
+    <div id="th-board"></div>
+    <button class="th-more" id="th-more">Show all 10 teams ▾</button>
+  </div>
+
   <div class="th-sec sb-panel">
-    <h3 class="th-h" style="color:var(--sb-ink);">👥 Wild Cards — who's pulling weight?<span class="sub" style="color:#7a89a8;">tap 👏 to cheer</span></h3>
+    <h3 class="th-h" style="color:var(--sb-ink);">👥 Wild Cards roster <span class="sub" style="color:#7a89a8;">tap 👏 to nudge a teammate</span></h3>
     <div id="th-members"></div>
-    <div style="border-top:2px dashed rgba(27,42,74,.15);margin-top:6px;padding-top:7px;">
+    <div style="border-top:2px dashed rgba(27,42,74,.15);margin-top:5px;padding-top:6px;">
       <div class="th-feed" id="th-feed"></div>
     </div>
   </div>
 
-  <div class="th-sec">
-    <h3 class="th-h">🏆 Harvest Festival — 10 teams <span class="sub">Top 3 win podium prizes</span></h3>
-    <div class="th-delta" id="th-delta"></div>
-    <div id="th-board"></div>
-  </div>
-
   <div class="th-sec th-offers" id="th-offers"></div>
-  <div class="th-freepath">🌱 No purchase needed — every level you clear feeds the wagon, and cheering teammates earns points back too!</div>
 
-  <div class="th-sec" style="margin-top:12px;">
+  <div class="th-sec">
     <button class="sb-btn sb-btn-blue sb-btn-block" id="th-finale">⏩ See finale (demo)</button>
   </div>
 
@@ -172,316 +256,653 @@ h3.th-h .sub{font-weight:700;font-size:11px;color:var(--sb-sky-light);margin-lef
 <script>
 (function(){
 "use strict";
-var DUR=15*60*1000;              // demo-compressed "72h Fri–Mon"
-var MILES=[500,1200,2500];
+
+/* ==========================================================
+   TUNING — every number here is published in the ⓘ rules.
+   ========================================================== */
+var DUR      = 15*60*1000;      // demo-compressed "Fri–Mon 72h festival"
+var NORMAL   = 40;              // pts for any cleared level
+var HARD     = 80;              // hard level = EXACTLY 2x NORMAL
+var COIN_N   = 35, COIN_H = 70; // wallet coins per clear (separate from harvest pts)
+var MILES    = [500,1200,2500];
 var MILE_META=[
   {em:"🎁",name:"Bronze Chest",rw:[{type:"coins",amount:300},{type:"wild",amount:1}]},
-  {em:"🎁",name:"Silver Chest",rw:[{type:"coins",amount:600},{type:"energy",amount:2}]},
-  {em:"🎁",name:"Golden Chest",rw:[{type:"coins",amount:1200},{type:"gem",amount:5},{type:"chest",amount:1}]}
+  {em:"🧰",name:"Silver Chest",rw:[{type:"coins",amount:600},{type:"energy",amount:2}]},
+  {em:"🏅",name:"Golden Chest",rw:[{type:"coins",amount:1200},{type:"gem",amount:5},{type:"chest",amount:1}]}
 ];
-var PODIUM=[[{type:"coins",amount:2000},{type:"gem",amount:5}],
-            [{type:"coins",amount:1200},{type:"gem",amount:3}],
-            [{type:"coins",amount:800},{type:"gem",amount:2}]];
-var now=Date.now();
-function mkBots(){return [
-  {name:"Maya",av:"🦊",role:"the carry 🔥",pts:88,intMs:26000,big:.65,nextAt:now+9000},
-  {name:"Leo",av:"🐺",role:"steady grinder",pts:52,intMs:42000,big:.25,nextAt:now+16000},
-  {name:"Priya",av:"🦉",role:"night owl",pts:61,intMs:50000,big:.4,nextAt:now+24000},
-  {name:"Sam",av:"🐢",role:"a bit idle…",pts:14,intMs:115000,big:.1,nextAt:now+50000}
-];}
-function mkRivals(){
-  var t=[["Golden Geese","🦢",255,20000],["Lucky Ducks","🦆",238,24000],["Card Sharks","🦈",230,26000],
-         ["Pumpkin Kings","🎃",205,30000],["Barn Owls","🦉",178,34000],["Corn Crushers","🌽",150,38000],
-         ["Hay Makers","🌾",118,42000],["Apple Aces","🍎",92,48000],["Turbo Turkeys","🦃",60,55000]];
-  return t.map(function(r,i){return {name:r[0],av:r[1],pts:r[2],intMs:r[3],nextAt:now+6000+i*4000};});
-}
+/* Podium: the COIN POOL is split evenly between contributing members.
+   Pools are divisible by 1..5 so the split is always exact. Gems are a
+   flat per-contributor bonus, not split. */
+var PODIUM=[{pool:12000,gem:5},{pool:6000,gem:3},{pool:3000,gem:2}];
+var TEAM_SIZE=5;
+var CHEER_MAX=3, CHEER_COOL=60000;
+
+/* Teammates run a FIXED schedule: one clear every `every` ms, every
+   `hardEvery`-th clear is a hard one. `head` = levels they had already
+   cleared when you opened the event. Nothing here is random and nothing
+   reads the player's wallet. */
+/* `phase` only staggers WHEN the first clear lands (mid-schedule join); the
+   rate stays exactly 1 clear per `every`. Sam has no phase on purpose: he is
+   the teammate who has not contributed yet, so the "no clears, no share"
+   rule is visible for the first couple of minutes. */
+var BOTS=[
+  {name:"Maya", av:"🦊", role:"the carry",     every: 50000, hardEvery:3, head:3, phase:38000},
+  {name:"Leo",  av:"🐺", role:"the grinder",   every: 78000, hardEvery:5, head:2, phase:55000},
+  {name:"Priya",av:"🦉", role:"night owl",     every: 95000, hardEvery:4, head:2, phase:60000},
+  {name:"Sam",  av:"🐢", role:"just joined",   every:160000, hardEvery:6, head:0, phase:0}
+];
+/* Rival teams: a fixed pace in points per demo-minute, quantised to whole
+   level clears (multiples of 40) so their score is always made of clears. */
+var RIVALS=[
+  {name:"Golden Geese", av:"🦢", base:400, rate:172},
+  {name:"Lucky Ducks",  av:"🦆", base:360, rate:168},
+  {name:"Card Sharks",  av:"🦈", base:320, rate:164},
+  {name:"Pumpkin Kings",av:"🎃", base:280, rate:158},
+  {name:"Barn Owls",    av:"🦉", base:240, rate:152},
+  {name:"Corn Crushers",av:"🌽", base:200, rate:146},
+  {name:"Hay Makers",   av:"🌾", base:160, rate:138},
+  {name:"Apple Aces",   av:"🍎", base:120, rate:128},
+  {name:"Turbo Turkeys",av:"🦃", base: 80, rate:116}
+];
+var MEMBER_COL=["linear-gradient(90deg,#FFC72C,#e0a400)","linear-gradient(90deg,#5ba0e8,#1D4FA1)",
+                "linear-gradient(90deg,#3fc167,#1f7038)","linear-gradient(90deg,#a98cf0,#6b4fd0)",
+                "linear-gradient(90deg,#f08a6b,#c1502c)"];
+
+/* ==========================================================
+   STATE — only the PLAYER's own facts are persisted. Teammate
+   and rival totals are pure functions of elapsed event time,
+   so a reload can never make them burst, teleport or drift.
+   ========================================================== */
+var boot=Date.now();
 var st=SB.store("team-harvest",{
-  start:now,end:now+DUR,myPts:0,myLevels:0,hardClears:0,
-  booster:false,pass:false,ended:false,
-  claimed:[false,false,false],botClaimNoted:[false,false,false],
-  bots:mkBots(),rivals:mkRivals(),
-  feed:[{t:"🍂 Harvest Festival begins! Fill the wagon together.",ts:now}],
-  rankHist:[],lastRank:null,cheerAt:{}
+  start:boot, end:boot+DUR,
+  myPts:0, myLevels:0, hardClears:0,
+  booster:false, pass:false,
+  claimed:[false,false,false], chestNoted:[false,false,false],
+  nudges:{}, nudgeAt:{}, seen:{},
+  feed:[], ended:false, finalRank:0, finaleSeen:false, podiumClaimed:false,
+  lastRank:null, lastSeenAt:boot
 });
 var s=st.data;
-SB.init({title:"Team Harvest 🌾",subtitle:"Wild Cards 🃏 · clear levels, fill the team wagon",resetKey:"team-harvest"});
+if(!s.start){ s.start=boot; s.end=boot+DUR; }
+if(!s.hardEnd) s.hardEnd=s.end;        // the scheduled close; s.end can move earlier when settling
+if(!s.feed.length) s.feed=[{t:"🍂 Harvest Festival begins — fill the wagon!"}];
 
-// ---------- helpers ----------
-function teamPts(){return s.myPts+s.bots.reduce(function(a,b){return a+b.pts;},0);}
-function feed(t){s.feed.unshift({t:t,ts:Date.now()});s.feed=s.feed.slice(0,14);renderFeed();st.save();}
-function standings(){
-  var rows=s.rivals.map(function(r){return {name:r.name,av:r.av,pts:r.pts,mine:false};});
-  rows.push({name:"Wild Cards",av:"🃏",pts:teamPts(),mine:true});
-  rows.sort(function(a,b){return b.pts-a.pts;});
+SB.init({title:"Team Harvest 🌾",subtitle:"Team Wild Cards · clear levels, fill the wagon",resetKey:"team-harvest"});
+function $(id){return document.getElementById(id);}
+
+/* ==========================================================
+   PURE SIMULATION
+   ========================================================== */
+function clampT(t){ return Math.max(s.start, Math.min(t, s.end)); }
+function expired(){ return Date.now()>=s.end; }
+function ended(){ return !!s.ended; }
+
+// points for n cleared levels on a given hard cadence
+function ptsFor(n,hardEvery){ return n*NORMAL + Math.floor(n/hardEvery)*(HARD-NORMAL); }
+function isHardIdx(i,hardEvery){ return (i % hardEvery)===hardEvery-1; }
+/* Two independent bounds, deliberately not the same clamp:
+   clampT() freezes the LIVE clock at s.end (which settling can move earlier),
+   while the schedule itself is always defined over the full original window
+   [start, hardEnd] — otherwise settling early would retroactively un-schedule
+   clears that have already happened. */
+function schedClears(b,t){
+  return Math.floor((Math.max(s.start,Math.min(t,s.hardEnd))-s.start+(b.phase||0))/b.every)
+       - Math.floor((b.phase||0)/b.every);
+}
+/* A cheer pulls the NEXT scheduled clear forward. It can never mint points:
+   the total is clamped to the schedule at the ORIGINAL window end, so by the
+   final horn a nudged teammate has cleared exactly as many levels as an
+   un-nudged one. The clamp deliberately uses s.hardEnd, not s.end — settling
+   early (the demo button) must never un-clear a level a teammate already
+   finished, which would shrink the wagon at the payout moment. */
+function effClears(b,t){
+  var n=s.nudges[b.name]||0;
+  return Math.min(schedClears(b,clampT(t))+n, schedClears(b,s.hardEnd));
+}
+function botPts(b,t){ return ptsFor(b.head+effClears(b,t===undefined?Date.now():t), b.hardEvery); }
+function botClearCount(b,t){ return b.head+effClears(b,t===undefined?Date.now():t); }
+function botRate(b){ return Math.round((NORMAL+(HARD-NORMAL)/b.hardEvery)/b.every*60000); }
+function rivalPts(r,t){
+  var mins=(clampT(t===undefined?Date.now():t)-s.start)/60000;
+  return r.base + NORMAL*Math.floor(r.rate*mins/NORMAL);
+}
+function members(t){
+  var out=[{name:"You",av:"😄",role:"that's you",pts:s.myPts,clears:s.myLevels,me:true,i:-1}];
+  BOTS.forEach(function(b,i){
+    out.push({name:b.name,av:b.av,role:b.role,pts:botPts(b,t),clears:botClearCount(b,t),me:false,i:i,bot:b});
+  });
+  return out;
+}
+function teamPts(t){ return members(t).reduce(function(a,m){return a+m.pts;},0); }
+function contributors(t){ return members(t).filter(function(m){return m.clears>=1;}); }
+/* Standings: points desc, then YOUR team wins ties (i=-1), then fixed
+   roster order. Fully deterministic — same inputs, same table, always. */
+function standings(t){
+  var rows=RIVALS.map(function(r,i){return {name:r.name,av:r.av,pts:rivalPts(r,t),rate:r.rate,mine:false,i:i};});
+  rows.push({name:"Wild Cards",av:"🃏",pts:teamPts(t),rate:null,mine:true,i:-1});
+  rows.sort(function(a,b){ return b.pts-a.pts || a.i-b.i; });
   return rows;
 }
-function myRank(rows){for(var i=0;i<rows.length;i++)if(rows[i].mine)return i+1;return 10;}
-function myGain(base){return s.booster?base*2:base;}
+function myRank(rows){ for(var i=0;i<rows.length;i++) if(rows[i].mine) return i+1; return rows.length; }
+// exact, comma-grouped — prize arithmetic must never be shown abbreviated ("12K ÷ 4")
+function num(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+// 1st/2nd/3rd/4th — "every 3th hard" is not shippable copy
+function ord(n){ var t=n%100, u=n%10;
+  return n+((t>=11&&t<=13)?"th":u===1?"st":u===2?"nd":u===3?"rd":"th"); }
+function gainFor(hard){ return (hard?HARD:NORMAL)*(s.booster?2:1); }
 
-// ---------- offline catch-up (reload) ----------
-(function catchUp(){
-  var t=Date.now(),sum=0;
-  s.bots.forEach(function(b){var n=0;
-    while(b.nextAt<=t&&n<4){var g=Math.random()<b.big?25:10;b.pts+=g;sum+=g;n++;b.nextAt+=b.intMs*(0.7+Math.random()*0.6);}
-    if(b.nextAt<=t)b.nextAt=t+b.intMs*(0.5+Math.random());});
-  s.rivals.forEach(function(r){var n=0;
-    while(r.nextAt<=t&&n<6){r.pts+=Math.random()<0.3?25:10;n++;r.nextAt+=r.intMs*(0.7+Math.random()*0.6);}
-    if(r.nextAt<=t)r.nextAt=t+r.intMs*(0.5+Math.random());});
-  if(sum>0)s.feed.unshift({t:"⏰ While you were away, teammates hauled in +"+sum+" pts (capped — no runaway)",ts:t});
-  st.save();
-})();
+/* ==========================================================
+   FEED
+   ========================================================== */
+function feed(t){ s.feed.unshift({t:t}); s.feed=s.feed.slice(0,14); }
+function renderFeed(){
+  $("th-feed").innerHTML=s.feed.slice(0,5).map(function(e){return "<div>"+e.t+"</div>";}).join("");
+}
 
-// ---------- wagon ----------
-var CROPS=["🎃","🌽","🍎","🥕","🎃","🌽"];
-function renderWagon(){
-  var tp=teamPts();
-  document.getElementById("th-teampts").textContent=SB.fmt(tp);
-  var pile=document.getElementById("th-pile");
-  var want=Math.min(36,Math.floor(tp/70));
-  while(pile.children.length>want)pile.removeChild(pile.lastChild);
+/* Announce teammate clears that have happened since we last looked.
+   A long gap collapses into one summary line instead of 40 fake bursts. */
+function announce(t){
+  var lines=[],total=0;
+  BOTS.forEach(function(b){
+    var cur=effClears(b,t), seen=s.seen[b.name]||0;
+    if(cur<=seen){ if(cur<seen) s.seen[b.name]=cur; return; }
+    var gained=ptsFor(b.head+cur,b.hardEvery)-ptsFor(b.head+seen,b.hardEvery);
+    total+=gained;
+    if(cur-seen>2){
+      lines.push({t:b.av+" "+b.name+" cleared "+(cur-seen)+" levels · +"+gained+" 🌾"});
+    }else{
+      for(var k=seen;k<cur;k++){
+        var hard=isHardIdx(b.head+k,b.hardEvery);
+        lines.push({t:b.av+" "+b.name+" +"+(hard?HARD:NORMAL)+(hard?" 🔥 hard clear!":" 🌽 level clear")});
+      }
+    }
+    s.seen[b.name]=cur;
+  });
+  for(var i=lines.length-1;i>=0;i--) s.feed.unshift(lines[i]);
+  s.feed=s.feed.slice(0,14);
+  return {n:lines.length,pts:total};
+}
+
+/* ==========================================================
+   BOOT catch-up (deterministic — just re-reads the clock)
+   ========================================================== */
+var awayMs=boot-(s.lastSeenAt||boot);
+var caught=announce(boot);
+s.lastSeenAt=boot;
+st.save();
+
+/* ==========================================================
+   RENDER: wagon + stacked contribution bar
+   ========================================================== */
+var CROPS=["🎃","🌽","🍎","🥕","🌰","🍐"];
+function renderWagon(mem,tp){
+  $("th-teampts").textContent=SB.fmt(tp);
+  $("th-mypts").textContent=SB.fmt(s.myPts);
+  $("th-myshare").textContent=(tp>0?Math.round(s.myPts/tp*100):0)+"%";
+  var pile=$("th-pile"), want=Math.min(30,Math.floor(tp/110));
+  while(pile.children.length>want) pile.removeChild(pile.lastChild);
   while(pile.children.length<want){
-    var i=pile.children.length,el=document.createElement("span");
-    el.className="th-crop";el.textContent=CROPS[i%CROPS.length];
-    el.style.left=((i*37+13)%84)+"%";
-    el.style.bottom=(Math.floor(i/9)*15)+"px";
-    el.style.zIndex=String(9-Math.floor(i/9));
+    var i=pile.children.length, el=document.createElement("span");
+    el.className="th-crop"; el.textContent=CROPS[i%CROPS.length];
+    el.style.left=((i*31+9)%86)+"%";
+    el.style.bottom=(Math.floor(i/10)*14)+"px";
+    el.style.zIndex=String(9-Math.floor(i/10));
     pile.appendChild(el);
   }
-  var next=MILES.find(function(m){return tp<m;});
-  var fill=document.getElementById("th-fill"),lab=document.getElementById("th-proglab");
-  if(next){var prev=MILES[MILES.indexOf(next)-1]||0;
-    fill.style.width=Math.min(100,(tp-prev)/(next-prev)*100)+"%";
-    lab.textContent=SB.fmt(tp)+" / "+SB.fmt(next)+" pts to next team chest";
-  }else{fill.style.width="100%";lab.textContent="All team chests unlocked! 🎉";}
+  // stacked contribution bar: widths sum to exactly 100% of the team total
+  var stack=$("th-stack"); stack.innerHTML="";
+  mem.forEach(function(m,idx){
+    var i=document.createElement("i");
+    i.style.width=(tp>0?m.pts/tp*100:(idx===0?100:0))+"%";
+    i.style.background=MEMBER_COL[idx%MEMBER_COL.length];
+    i.title=m.name+" "+m.pts+" pts";
+    stack.appendChild(i);
+  });
+  // the wagon total is literally the sum of the five members — shown, not asserted
+  $("th-stacksum").innerHTML=mem.map(function(m,i){
+    return '<span style="color:'+(i===0?"#FFC72C":"rgba(255,255,255,.8)")+'">'+m.pts+'</span>';
+  }).join(" + ")+" = <b>"+SB.fmt(tp)+" pts</b>";
+
+  var next=null,prev=0;
+  for(var k=0;k<MILES.length;k++){ if(tp<MILES[k]){ next=MILES[k]; prev=k?MILES[k-1]:0; break; } }
+  var fill=$("th-fill"), lab=$("th-proglab");
+  if(next){
+    fill.style.width=Math.max(0,Math.min(100,(tp-prev)/(next-prev)*100))+"%";
+    lab.textContent=SB.fmt(tp)+" / "+SB.fmt(next)+" pts to the next team chest";
+  }else{ fill.style.width="100%"; lab.textContent="All 3 team chests unlocked! 🎉"; }
 }
 
-// ---------- milestones ----------
-function renderMiles(){
-  var tp=teamPts(),box=document.getElementById("th-miles");box.innerHTML="";
+/* ==========================================================
+   RENDER: milestones
+   ========================================================== */
+function renderMiles(tp){
+  var box=$("th-miles"); box.innerHTML="";
+  var gateOk=s.myLevels>=1;
   MILES.forEach(function(m,i){
-    var d=document.createElement("div");d.className="th-mile"+(s.claimed[i]?" done":"");
-    var unlocked=tp>=m,gateOk=s.myLevels>=1;
-    d.innerHTML='<div class="em">'+(unlocked?MILE_META[i].em:"🔒")+'</div><div class="pt">'+SB.fmt(m)+' pts</div>'+
-      '<button data-i="'+i+'" '+(!unlocked||s.claimed[i]||!gateOk?"disabled":"")+'>'+
-      (s.claimed[i]?"Claimed ✓":unlocked?(gateOk?"Claim":"🔒 Locked"):"Team goal")+'</button>';
+    var unlocked=tp>=m, can=unlocked&&!s.claimed[i]&&gateOk;
+    var d=document.createElement("div"); d.className="th-mile"+(s.claimed[i]?" done":"");
+    d.innerHTML='<div class="em">'+(unlocked?MILE_META[i].em:"🔒")+'</div>'+
+      '<div class="nm">'+MILE_META[i].name.replace(" Chest","")+'</div>'+
+      '<div class="pt">'+SB.fmt(m)+' pts</div>'+
+      '<button data-i="'+i+'" class="'+(can?"ready":"")+'" '+(can?"":"disabled")+'>'+
+      (s.claimed[i]?"Claimed ✓":unlocked?(gateOk?"Claim":"🔒 Clear 1 level"):"Team goal")+'</button>';
     box.appendChild(d);
   });
-  document.getElementById("th-gate").style.display=(s.myLevels<1&&tp>=MILES[0])?"block":"none";
+  $("th-gate").style.display=(!gateOk&&tp>=MILES[0])?"block":"none";
   box.querySelectorAll("button").forEach(function(b){
     b.addEventListener("click",function(){
-      var i=+b.dataset.i;if(s.claimed[i])return;
-      s.claimed[i]=true;
+      var i=+b.dataset.i;
+      // re-check every gate at claim time, not just at render time
+      if(s.claimed[i]||teamPts()<MILES[i]||s.myLevels<1) return;
+      s.claimed[i]=true; st.save();
+      b.disabled=true;
       var rw=MILE_META[i].rw.map(function(r){return {type:r.type,amount:r.amount*(s.pass?2:1)};});
-      SB.grantRewards(rw,b);SB.confetti();
-      SB.toast(MILE_META[i].name+" claimed!"+(s.pass?" (×2 Harvest Pass share)":""));
-      st.save();renderMiles();
+      SB.grantRewards(rw,b,{toast:false});
+      SB.confetti();
+      SB.toast(MILE_META[i].name+" claimed!"+(s.pass?" 🚜 ×2 Harvest Pass":""),{top:true});
+      feed("🎁 You claimed the "+MILE_META[i].name+(s.pass?" (×2 Harvest Pass)":""));
+      refresh();
     });
   });
 }
-function checkBotClaims(){
-  var tp=teamPts();
+function checkChests(tp){
   MILES.forEach(function(m,i){
-    if(tp>=m&&!s.botClaimNoted[i]){
-      s.botClaimNoted[i]=true;
-      feed("🎉 Team goal "+SB.fmt(m)+" reached! "+s.bots[i%4].name+" and the team claimed the "+MILE_META[i].name+" 🎁");
-      SB.toast("🌾 Team milestone reached — "+MILE_META[i].name+" ready to claim!");
-      renderMiles();
+    if(tp>=m&&!s.chestNoted[i]){
+      s.chestNoted[i]=true;
+      feed("🎉 Team goal "+SB.fmt(m)+" reached — "+MILE_META[i].name+" unlocked for every member!");
+      if(!s.claimed[i]) SB.toast("🌾 "+MILE_META[i].name+" unlocked — claim it!",{top:true});
     }
   });
 }
 
-// ---------- members ----------
-function renderMembers(){
-  var box=document.getElementById("th-members");box.innerHTML="";
-  var all=[{name:"You",av:"😄",role:"that's you"+(s.booster?" · booster active":""),pts:s.myPts,me:true}].concat(s.bots);
-  var max=Math.max.apply(null,all.map(function(m){return m.pts;}).concat([1]));
-  all.forEach(function(m,idx){
-    var row=document.createElement("div");row.className="th-member";
-    row.innerHTML='<div class="th-av'+(m.me?" me":"")+(m.me&&s.pass?" tractor":"")+'">'+m.av+
-      (m.me&&s.pass?'<span class="frame">🚜</span>':"")+(m.me&&s.booster?'<span class="bdg">×2</span>':"")+'</div>'+
-      '<div style="width:64px;flex:0 0 auto;"><div class="th-mname">'+m.name+'</div><div class="th-mrole">'+m.role+'</div></div>'+
-      '<div class="th-barwrap"><div class="th-bar'+(m.me?" me":"")+'"><i style="width:'+(m.pts/max*100)+'%"></i></div></div>'+
+/* ==========================================================
+   RENDER: roster
+   ========================================================== */
+function renderMembers(mem,tp){
+  var box=$("th-members"); box.innerHTML="";
+  var max=Math.max.apply(null,mem.map(function(m){return m.pts;}).concat([1]));
+  var top=mem.reduce(function(a,b){return b.pts>a.pts?b:a;},mem[0]);
+  mem.forEach(function(m,idx){
+    var row=document.createElement("div"); row.className="th-member";
+    var pct=tp>0?Math.round(m.pts/tp*100):0;
+    var sub=m.clears>=1
+      ? (m.me? m.clears+" level"+(m.clears===1?"":"s")+" · "+pct+"% of the wagon"
+             : m.clears+" lvls · "+pct+"% · ~"+botRate(m.bot)+"/min")
+      : '<span class="th-nocontrib">'+(m.me?"clear 1 level to earn a share":"no clears yet")+'</span>';
+    var role=m.me?("that's you"+(s.booster?" · ⚡×2":"")):m.role;
+    var mvp=(m.pts>0&&m===top)?'<span class="mvp">👑</span>':"";
+    row.innerHTML=
+      '<div class="th-av'+(m.me?" me":"")+(m.me&&s.pass?" tractor":"")+'">'+m.av+mvp+
+        (m.me&&s.pass?'<span class="frame">🚜</span>':"")+(m.me&&s.booster?'<span class="bdg">×2</span>':"")+'</div>'+
+      '<div class="th-who"><div class="th-mname">'+m.name+'</div><div class="th-mrole">'+role+'</div></div>'+
+      '<div class="th-barwrap"><div class="th-bar"><i style="width:'+(m.pts/max*100)+'%;background:'+MEMBER_COL[idx%MEMBER_COL.length]+'"></i></div>'+
+        '<div class="th-bsub">'+sub+'</div></div>'+
       '<div class="th-mpts">'+SB.fmt(m.pts)+'</div>'+
-      (m.me?'<div style="width:46px;flex:0 0 auto;"></div>':'<button class="th-cheer" data-b="'+(idx-1)+'" aria-label="Cheer '+m.name+'">👏</button>');
+      (m.me?'<div style="width:46px;flex:0 0 auto;"></div>'
+           :'<button class="th-cheer" data-b="'+m.i+'" aria-label="Cheer '+m.name+'">👏<small id="th-ch'+m.i+'"></small></button>');
     box.appendChild(row);
   });
-  box.querySelectorAll(".th-cheer").forEach(function(b){
-    var i=+b.dataset.b,bot=s.bots[i];
-    if(s.ended||(s.cheerAt[bot.name]&&Date.now()-s.cheerAt[bot.name]<60000))b.disabled=true;
-    b.addEventListener("click",function(){
-      s.cheerAt[bot.name]=Date.now();b.disabled=true;SB.haptic(15);
-      SB.toast("👏 You cheered "+bot.name+"!");
-      feed("👏 You cheered "+bot.name+" on!");
-      setTimeout(function(){
-        if(s.ended)return;
-        var g=15+Math.floor(Math.random()*16);bot.pts+=g;
-        feed(bot.av+" "+bot.name+" felt the love! +"+g+" 🌽 burst for the team");
-        refresh();st.save();
-      },3500+Math.random()*2500);
-      st.save();
-    });
+  box.querySelectorAll(".th-cheer").forEach(function(btn){
+    var b=BOTS[+btn.dataset.b];
+    var used=s.nudges[b.name]||0, cool=Date.now()-(s.nudgeAt[b.name]||0);
+    var left=CHEER_MAX-used;
+    var lbl=btn.querySelector("small");
+    if(lbl) lbl.textContent=left>0?left+" left":"used";
+    btn.disabled=ended()||left<=0||cool<CHEER_COOL;
+    btn.addEventListener("click",function(){ cheer(b,btn); });
   });
 }
-
-// ---------- feed ----------
-function renderFeed(){
-  var f=document.getElementById("th-feed");
-  f.innerHTML=s.feed.slice(0,5).map(function(e){return "<div>"+e.t+"</div>";}).join("");
+function cheer(b,btn){
+  if(ended()) return;
+  var used=s.nudges[b.name]||0;
+  if(used>=CHEER_MAX) return;
+  if(Date.now()-(s.nudgeAt[b.name]||0)<CHEER_COOL) return;
+  btn.disabled=true;
+  s.nudges[b.name]=used+1; s.nudgeAt[b.name]=Date.now();
+  SB.haptic(15);
+  feed("👏 You cheered "+b.name+" — they jumped straight into their next level");
+  SB.toast("👏 "+b.name+" is heading back in! (nudge "+(used+1)+"/"+CHEER_MAX+")",{top:true});
+  st.save();
+  tick(true);
 }
 
-// ---------- leaderboard ----------
-function renderBoard(){
-  var rows=standings(),box=document.getElementById("th-board");box.innerHTML="";
-  rows.forEach(function(r,i){
-    var d=document.createElement("div");d.className="th-rival"+(r.mine?" mine":"");
-    var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
-    d.innerHTML='<span class="rk">'+medal+'</span><span style="font-size:18px;">'+r.av+'</span>'+
-      '<span class="tn">'+r.name+(r.mine?" (you)":"")+'</span><span class="tp">'+SB.fmt(r.pts)+'</span>';
+/* ==========================================================
+   RENDER: leaderboard
+   ========================================================== */
+var expandBoard=false;
+$("th-more").addEventListener("click",function(){ expandBoard=!expandBoard; refresh(); });
+function rankBadge(i){
+  var cls=i<3?" m"+(i+1):"";
+  return '<span class="rk'+cls+'">'+(i+1)+'</span>';
+}
+function renderBoard(rows,rk,live){
+  var box=$("th-board"); box.innerHTML="";
+  var show=[];
+  if(expandBoard){ for(var i=0;i<rows.length;i++) show.push(i); }
+  else{
+    show=[0,1,2];
+    if(rk>4) show.push(-1);            // gap marker
+    if(rk>3) show.push(rk-1);
+    if(rk<=3) show.push(3);
+  }
+  show.forEach(function(i){
+    if(i===-1){ var g=document.createElement("div"); g.className="th-gap"; g.textContent="···"; box.appendChild(g); return; }
+    var r=rows[i];
+    var d=document.createElement("div"); d.className="th-rival"+(r.mine?" mine":"");
+    d.innerHTML=rankBadge(i)+'<span class="av">'+(r.mine?"🌾":r.av)+'</span>'+
+      '<span class="tn">'+r.name+(r.mine?" (your team)":"")+'</span>'+
+      '<span class="pace">'+(r.mine?"you + 4":"~"+r.rate+"/min")+'</span>'+
+      '<span class="tp">'+SB.fmt(r.pts)+'</span>';
     box.appendChild(d);
   });
-  var rk=myRank(rows),delta=document.getElementById("th-delta");
-  if(rk===1){var chase=rows[1];delta.className="th-delta lead";
-    delta.innerHTML="👑 Your team leads! "+chase.av+" "+chase.name+" is "+SB.fmt(rows[0].pts-chase.pts)+" pts behind — keep harvesting!";
-  }else{var ahead=rows[rk-2];delta.className="th-delta";
-    delta.innerHTML="🎯 "+ahead.av+" "+ahead.name+" is "+SB.fmt(ahead.pts-rows[rk-1].pts)+" pts ahead — clear levels to catch them!";
+  $("th-more").textContent=expandBoard?"Show fewer ▴":"Show all 10 teams ▾";
+
+  var delta=$("th-delta");
+  if(rk===1){
+    var chase=rows[1];
+    delta.className="th-delta lead";
+    delta.innerHTML="👑 Wild Cards lead! "+chase.av+" "+chase.name+" is "+SB.fmt(rows[0].pts-chase.pts)+" pts behind.";
+  }else{
+    var ahead=rows[rk-2], need=ahead.pts-rows[rk-1].pts;
+    var nh=Math.max(1,Math.ceil(need/gainFor(true)));   // ties go your way, so matching is enough
+    delta.className="th-delta";
+    delta.innerHTML="🎯 "+ahead.av+" "+ahead.name+" is "+SB.fmt(need)+" pts ahead — "+
+      nh+" hard clear"+(nh===1?"":"s")+" would pass them.";
   }
-  // rank history + overtake toasts
-  if(s.lastRank!=null&&rk>s.lastRank&&!s.ended){
-    SB.toast("😱 "+rows[rk-2].av+" "+rows[rk-2].name+" passed you! "+SB.fmt(rows[rk-2].pts-rows[rk-1].pts)+" pts ahead");SB.haptic(25);
-  }else if(s.lastRank!=null&&rk<s.lastRank&&!s.ended){
-    SB.toast("🚜 Wild Cards climbed to #"+rk+"!");SB.confetti(window.innerWidth/2,180,40);
+  $("th-rankn").textContent="#"+rk;
+  $("th-rankpill").style.borderColor=rk<=3?"rgba(255,199,44,.65)":"rgba(255,255,255,.3)";
+
+  if(live&&s.lastRank!=null&&!ended()){
+    if(rk>s.lastRank){ SB.toast("😱 "+rows[rk-2].av+" "+rows[rk-2].name+" passed Wild Cards!",{top:true}); SB.haptic(25); }
+    else if(rk<s.lastRank){ SB.toast("🚜 Wild Cards climbed to #"+rk+"!",{top:true}); SB.confetti(window.innerWidth/2,170,40); }
   }
-  if(s.lastRank!==rk){s.lastRank=rk;s.rankHist.push(rk);s.rankHist=s.rankHist.slice(-8);st.save();}
-  document.getElementById("th-foot").textContent=
-    "Your harvest: "+SB.fmt(s.myPts)+" pts · "+s.myLevels+" levels ("+s.hardClears+" hard) · Team rank: "+
-    (s.rankHist.length?s.rankHist.map(function(r){return "#"+r;}).join(" → "):"#"+rk);
+  s.lastRank=rk;
 }
 
-// ---------- play buttons ----------
-var btnN=document.getElementById("th-play-n"),btnH=document.getElementById("th-play-h");
+/* ==========================================================
+   RENDER: play buttons + offers + footer
+   ========================================================== */
+var btnN=$("th-play-n"), btnH=$("th-play-h"), playing=false;
 function renderPlay(){
-  btnN.innerHTML="▶ Play level<small>+"+myGain(10)+" pts"+(s.booster?' <span class="th-x2">×2</span>':"")+"</small>";
-  btnH.innerHTML="🔥 Hard level<small>+"+myGain(25)+" pts"+(s.booster?' <span class="th-x2">×2</span>':"")+"</small>";
-  btnN.disabled=btnH.disabled=s.ended;
+  var lock=ended()||playing;
+  btnN.innerHTML="▶ Play level<small>+"+gainFor(false)+" pts"+(s.booster?' <span class="th-x2">×2</span>':"")+"</small>";
+  btnH.innerHTML="🔥 Hard level<small>+"+gainFor(true)+" pts"+(s.booster?' <span class="th-x2">×2</span>':"")+"</small>";
+  btnN.disabled=btnH.disabled=lock;
+  if(ended()){ btnN.innerHTML="Festival ended<small>chests stay claimable</small>"; btnH.innerHTML="Festival ended<small>see final standings</small>"; }
 }
 function play(hard){
-  if(s.ended)return;
-  var wr=window.__forceWin===true?1:(window.__forceWin===false?0:undefined);
-  SB.playLevel({hard:hard,winRate:wr,title:"Adventure Level "+(214+s.myLevels)}).then(function(res){
+  if(ended()||playing) return;          // one level at a time: no double-grant on a double tap
+  playing=true; renderPlay();
+  SB.playLevel({
+    hard:hard,
+    title:"Adventure Level "+(214+s.myLevels),
+    rewardTag:hard?"🔥 HARD LEVEL · +"+gainFor(true)+" HARVEST PTS":"CLASSIC LEVEL · +"+gainFor(false)+" HARVEST PTS"
+  }).then(function(res){
+    playing=false;
+    if(ended()){ renderPlay(); return; }
     if(res.won){
-      var g=myGain(hard?25:10);
-      s.myPts+=g;s.myLevels++;if(hard)s.hardClears++;
-      feed("😄 You +"+g+" "+(hard?"🔥 hard clear!":"🌽 level clear!"));
-      SB.grantRewards([{type:"coins",amount:hard?60:35}],hard?btnH:btnN);
-      SB.toast("+"+g+" harvest pts for Wild Cards! 🌾");
-      checkBotClaims();refresh();st.save();
+      var g=gainFor(hard);
+      s.myPts+=g; s.myLevels++; if(hard) s.hardClears++;
+      feed("😄 You +"+g+(hard?" 🔥 hard clear!":" 🌽 level clear")+(s.booster?" (⚡×2)":""));
+      var coins=hard?COIN_H:COIN_N;
+      SB.grantRewards([{type:"coins",amount:coins}],hard?btnH:btnN,{toast:false});
+      SB.toast("+"+g+" 🌾 harvest pts for Wild Cards · +"+coins+" 🪙",{top:true});
     }else{
-      SB.toast("So close! No harvest this time — try again 💪");
+      // a loss costs the team nothing — it just doesn't add
+      SB.toast("So close! The wagon keeps everything it already has 💪",{top:true});
     }
+    st.save(); tick(true);
   });
 }
 btnN.addEventListener("click",function(){play(false);});
 btnH.addEventListener("click",function(){play(true);});
 
-// ---------- offers ----------
 function renderOffers(){
-  var box=document.getElementById("th-offers");box.innerHTML="";
-  var o1=document.createElement("div");o1.className="th-offer";
-  o1.innerHTML='<div class="em">⚡</div><h4>Team Booster</h4><p>YOUR contributions ×2 for the rest of the event. Badge on your avatar!</p>'+
-    (s.booster?'<div class="th-owned">✓ Active</div>':'<button class="sb-btn sb-btn-green sb-btn-block" id="th-buy1">$1.99</button>');
-  var o2=document.createElement("div");o2.className="th-offer";
-  o2.innerHTML='<div class="em">🚜</div><h4>Harvest Pass</h4><p>×2 YOUR share of team chests + exclusive tractor avatar frame.</p>'+
-    (s.pass?'<div class="th-owned">✓ Owned</div>':'<button class="sb-btn sb-btn-yellow sb-btn-block" id="th-buy2">$2.99</button>');
-  box.appendChild(o1);box.appendChild(o2);
-  var b1=document.getElementById("th-buy1");
-  if(b1)b1.addEventListener("click",function(){
-    SB.buyIAP({label:"Team Booster ⚡",price:"$1.99",sub:"Your level clears earn ×2 harvest points until the festival ends",grant:false,
-      onSuccess:function(){s.booster=true;st.save();
-        feed("🦊 Maya: WOW, You grabbed a Team Booster! ⚡ Carry us!");
-        SB.toast("⚡ Booster active — your clears now earn ×2!");refresh();}});
+  var box=$("th-offers"); box.innerHTML="";
+  var over=ended();
+  var o1=document.createElement("div"); o1.className="th-offer";
+  o1.innerHTML='<div class="em">⚡</div><h4>Team Booster</h4>'+
+    '<p>YOUR clears pay ×2 harvest points for the rest of this festival. One per festival. Teammates and rival teams are unaffected.</p>'+
+    (s.booster?'<div class="th-owned">✓ Active</div>'
+      :over?'<div class="th-owned" style="color:#8b97ad;">Festival over</div>'
+      :'<button class="sb-btn sb-btn-green sb-btn-block" id="th-buy1">$1.99</button>')+
+    '<div class="th-alt">Free: hard levels already pay ×2 ('+HARD+' pts)</div>';
+  var o2=document.createElement("div"); o2.className="th-offer";
+  o2.innerHTML='<div class="em">🚜</div><h4>Harvest Pass</h4>'+
+    '<p>Your personal chest + podium share is paid double (the team pool is unchanged). Adds a tractor avatar frame.</p>'+
+    (s.pass?'<div class="th-owned">✓ Owned</div>'
+      :over?'<div class="th-owned" style="color:#8b97ad;">Festival over</div>'
+      :'<button class="sb-btn sb-btn-yellow sb-btn-block" id="th-buy2">$2.99</button>')+
+    '<div class="th-alt">Free: all 3 chests are claimable without it</div>';
+  var o3=document.createElement("div"); o3.className="th-offer free";
+  o3.innerHTML='<div class="em">🌱</div><div><h4 style="margin:0 0 2px;">The free lane</h4>'+
+    '<p>No purchase needed: every level you clear feeds the wagon, all 3 team chests are free to claim, and a podium share only needs <b>1 cleared level</b>.</p></div>';
+  box.appendChild(o1); box.appendChild(o2); box.appendChild(o3);
+
+  var b1=$("th-buy1");
+  if(b1) b1.addEventListener("click",function(){
+    SB.buyIAP({label:"Team Booster ⚡",price:"$1.99",grant:false,
+      sub:"Your level clears pay ×2 harvest points until the festival ends",
+      contents:[{icon:"⚡",label:"Team Booster",amount:1}],
+      onSuccess:function(){
+        if(s.booster) return;            // never applies twice
+        s.booster=true; st.save();
+        feed("⚡ You activated a Team Booster — your clears now pay ×2");
+        SB.toast("⚡ Booster active — your clears now pay "+gainFor(false)+" / "+gainFor(true)+" pts",{top:true});
+        refresh();
+      }});
   });
-  var b2=document.getElementById("th-buy2");
-  if(b2)b2.addEventListener("click",function(){
-    SB.buyIAP({label:"Harvest Pass 🚜",price:"$2.99",sub:"Double YOUR share of every team chest + tractor avatar frame",grant:false,
-      onSuccess:function(){s.pass=true;st.save();
-        feed("🐺 Leo: nice tractor frame, You! 🚜 Chest shares doubled!");
-        SB.toast("🚜 Harvest Pass active — chest shares ×2!");refresh();}});
+  var b2=$("th-buy2");
+  if(b2) b2.addEventListener("click",function(){
+    SB.buyIAP({label:"Harvest Pass 🚜",price:"$2.99",grant:false,
+      sub:"Your share of every chest and the podium pool is paid double",
+      contents:[{icon:"🚜",label:"Harvest Pass",amount:1}],
+      onSuccess:function(){
+        if(s.pass) return;
+        s.pass=true; st.save();
+        feed("🚜 You unlocked the Harvest Pass — your chest shares are doubled");
+        SB.toast("🚜 Harvest Pass active — your shares pay double",{top:true});
+        refresh();
+      }});
   });
 }
+function renderFoot(rk){
+  $("th-foot").innerHTML=
+    "Your harvest: <b>"+SB.fmt(s.myPts)+"</b> pts · "+s.myLevels+" level"+(s.myLevels===1?"":"s")+" ("+s.hardClears+" hard) · "+
+    (s.myLevels>=1?"✅ chest + podium share unlocked":"🔒 clear 1 level to unlock your share")+
+    "<br>Team rank #"+rk+" of 10 · teammates and rivals never react to purchases";
+}
 
-// ---------- info modal ----------
-document.getElementById("th-info").addEventListener("click",function(){
-  SB.modal('<h3 style="margin:0 0 8px;">🌾 Team Harvest Rules</h3>'+
-    '<div style="text-align:left;font-size:13px;font-weight:600;color:#41527a;line-height:1.5;">'+
-    '<p>🃏 You + 4 teammates on <b>Wild Cards</b>. Every main level you clear adds <b>+10 pts</b> (hard <b>+25</b>) to the TEAM wagon.</p>'+
-    '<p>🎁 Team chests at <b>500 / 1200 / 2500</b> pts — every member claims, but you must clear <b>at least 1 level</b> to claim.</p>'+
-    '<p>🏆 Top-3 of 10 teams at festival end win podium prizes split among members.</p>'+
-    '<p>👏 Cheer a teammate — they respond with a point burst.</p>'+
-    '<p>🤖 Teammates play on their own schedule and <b>cap at 30 pts/hr</b> — no runaway scores.</p>'+
-    '<p class="sb-muted" style="font-size:11px;">Fri–Mon 72h event · compressed to 15 min for this demo.</p></div>'+
-    '<button class="sb-btn sb-btn-blue sb-btn-block" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>');
+/* ==========================================================
+   TICK / REFRESH
+   ========================================================== */
+function refresh(live){
+  var t=Date.now(), mem=members(t), tp=mem.reduce(function(a,m){return a+m.pts;},0);
+  var rows=standings(t), rk=myRank(rows);
+  renderWagon(mem,tp);
+  renderMiles(tp);
+  renderMembers(mem,tp);
+  renderBoard(rows,rk,live);
+  renderPlay();
+  renderFeed();
+  renderOffers();
+  renderFoot(rk);
+}
+var lastSig="";
+function tick(force){
+  if(ended()){ if(force) refresh(false); return; }
+  if(expired()){ settle(); return; }
+  var t=Date.now();
+  var got=announce(t);
+  var tp=teamPts(t);
+  checkChests(tp);
+  var sig=tp+"|"+standings(t).map(function(r){return r.pts;}).join(",")+"|"+s.myPts+"|"+(s.booster?1:0)+"|"+(s.pass?1:0)+"|"+s.claimed.join("");
+  if(force||got.n||sig!==lastSig){
+    lastSig=sig;
+    s.lastSeenAt=t; st.save();
+    refresh(true);
+  }
+}
+setInterval(function(){ tick(false); },1000);
+
+/* ==========================================================
+   RULES
+   ========================================================== */
+$("th-info").addEventListener("click",function(){
+  var paceRows=BOTS.map(function(b){
+    return "<tr><td class='nm'>"+b.av+" "+b.name+"</td><td>1 clear / "+Math.round(b.every/1000)+
+      "s · every "+ord(b.hardEvery)+" hard · ~"+botRate(b)+" pts/min</td></tr>";
+  }).join("");
+  var m=SB.modal(
+    '<h3 style="margin:0 0 8px;">🌾 Team Harvest — the rules</h3>'+
+    '<div class="th-rules">'+
+    '<p><b>The loop.</b> You + 4 teammates are Team <b>Wild Cards</b>. Every main level any member clears drops its points into one shared wagon. 10 teams, one 72h festival.</p>'+
+    '<table>'+
+      '<tr><td>Any cleared level</td><td>+'+NORMAL+' pts</td></tr>'+
+      '<tr><td>Hard level (exactly ×2)</td><td>+'+HARD+' pts</td></tr>'+
+      '<tr><td>Failed level</td><td>0 pts — never negative</td></tr>'+
+      '<tr><td>Team Booster ($1.99)</td><td>your clears ×2 ('+(NORMAL*2)+' / '+(HARD*2)+')</td></tr>'+
+    '</table>'+
+    '<p><b>🎁 Team chests</b> at '+MILES.join(' / ')+' pts. Every member who has cleared <b>at least 1 level</b> claims the full chest — chests are not divided, and they stay claimable even after the timer hits zero.</p>'+
+    '<p><b>🏆 Podium split.</b> Top 3 teams win a coin pool that is divided <b>evenly between the members who cleared at least 1 level</b>, plus a flat gem bonus each:</p>'+
+    '<table>'+
+      '<tr><td>🥇 1st</td><td>'+num(PODIUM[0].pool)+' 🪙 pool + '+PODIUM[0].gem+' 💎 each</td></tr>'+
+      '<tr><td>🥈 2nd</td><td>'+num(PODIUM[1].pool)+' 🪙 pool + '+PODIUM[1].gem+' 💎 each</td></tr>'+
+      '<tr><td>🥉 3rd</td><td>'+num(PODIUM[2].pool)+' 🪙 pool + '+PODIUM[2].gem+' 💎 each</td></tr>'+
+    '</table>'+
+    '<p>Pools divide exactly for 1–5 contributors (e.g. 1st with 4 contributors = '+num(PODIUM[0].pool/4)+' 🪙 each). A member with 0 clears gets nothing — including you. The Harvest Pass pays <b>your</b> share double; the pool and everyone else&rsquo;s share are untouched.</p>'+
+    '<p><b>🤖 Simulation honesty.</b> Teammates run a fixed schedule set when the festival opened:</p>'+
+    '<table>'+paceRows+'</table>'+
+    '<p>Rival teams post a fixed pace (shown on every row, '+RIVALS[RIVALS.length-1].rate+'–'+RIVALS[0].rate+' pts/min at demo speed). All of it is a pure function of elapsed time: <b>no offline banking, no catch-up bursts, no reaction to anything you buy</b>, and every team stops earning the moment the timer hits 00:00.</p>'+
+    '<p><b>👏 Cheers</b> — '+CHEER_MAX+' per teammate, 1 per minute. A cheer pulls a teammate&rsquo;s <i>next scheduled clear</i> forward: they play sooner, never more. Over the full festival their total is identical whether you cheer '+CHEER_MAX+' times or not at all.</p>'+
+    '<p>Ties are resolved in your team&rsquo;s favour. <span class="sb-muted">Fri–Mon 72h festival, compressed to 15 minutes for this demo.</span></p>'+
+    '</div>'+
+    '<button class="sb-btn sb-btn-blue sb-btn-block" id="th-rules-ok">Got it!</button>');
+  m.el.querySelector("#th-rules-ok").addEventListener("click",function(){ m.close(); });
 });
 
-// ---------- finale ----------
-function finale(){
-  if(s.ended)return;
-  s.ended=true;st.save();renderPlay();
-  var rows=standings(),rk=myRank(rows);
-  var all=[{name:"You",av:"😄",pts:s.myPts}].concat(s.bots);
-  all.sort(function(a,b){return b.pts-a.pts;});
-  var mvp=all[0],meMvp=mvp.name==="You";
-  var order=[1,0,2];
-  var pods=order.map(function(idx){
-    var t=rows[idx];
-    return '<div class="th-pod p'+(idx+1)+(t.mine?" mine":"")+'"><span class="pe">'+t.av+'</span><span class="pn">'+t.name+'</span><span class="pp">'+SB.fmt(t.pts)+'</span></div>';
-  }).join("");
-  var won=rk<=3,gateOk=s.myLevels>=1;
-  var prize=won?PODIUM[rk-1].map(function(r){return {type:r.type,amount:r.amount*(s.pass?2:1)};}):null;
-  var html='<h3 style="margin:0;">🎪 Harvest Festival Finale</h3>'+
-    '<div class="th-podium">'+pods+'</div>'+
-    '<p style="font-weight:900;font-size:16px;margin:4px 0;">Wild Cards finished <span style="color:'+(won?"#2E9E4F":"#D7263D")+';">#'+rk+'</span> of 10!</p>'+
-    '<p style="font-weight:800;font-size:13px;margin:4px 0;">👑 Team MVP: '+mvp.av+' '+mvp.name+' — '+SB.fmt(mvp.pts)+' pts'+(meMvp?" — THAT'S YOU!":"")+'</p>'+
-    '<p style="font-size:12px;font-weight:700;color:#5a6b8c;margin:4px 0 10px;">Chest recap: '+s.claimed.filter(Boolean).length+'/3 team chests claimed · your harvest '+SB.fmt(s.myPts)+' pts</p>'+
-    (won?(gateOk?'<div class="sb-sheet-contents" style="justify-content:center;">'+prize.map(SB.rewardChip).join("")+'</div>'+
-      (s.pass?'<p style="font-size:11px;font-weight:800;color:#2E9E4F;margin:2px 0 8px;">🚜 Harvest Pass doubled your share!</p>':"")+
-      '<button class="sb-btn sb-btn-yellow sb-btn-block" id="th-claim-pod">Collect podium prize! 🏆</button>'
-      :'<p style="font-size:12px;font-weight:800;color:#a8552a;">🔒 Podium share requires 1+ level cleared</p>')
-    :'<p style="font-size:12px;font-weight:700;color:#5a6b8c;">No podium this time — the next festival starts Friday! 🌱</p>')+
-    '<button class="sb-sheet-cancel" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Close</button>';
-  var m=SB.modal(html);
-  SB.confetti();SB.haptic(35);
-  if(meMvp)setTimeout(function(){SB.confetti(window.innerWidth/2,200,60);},600);
-  var cb=m.el.querySelector("#th-claim-pod");
-  if(cb)cb.addEventListener("click",function(){
-    SB.grantRewards(prize,cb);SB.confetti();
-    cb.disabled=true;cb.textContent="Collected ✓";
-  });
-  var fb=document.getElementById("th-finale");
-  fb.disabled=true;fb.textContent="🎪 Festival ended — final rank #"+rk;
+/* ==========================================================
+   FINALE — settles once, pays once, re-openable forever
+   ========================================================== */
+function settle(){
+  if(s.ended) return;
+  /* Freeze the whole simulation on the settling instant and move the window
+     end to match, so every clamped function agrees from here on. Rivals and
+     teammates can never earn another point after this line. */
+  var t=clampT(Date.now());
+  announce(t);
+  s.earlyMs=Math.max(0,s.end-t);                // >0 only via the demo fast-forward
+  s.end=t;
+  s.ended=true;
+  s.finalRank=myRank(standings(t));
+  s.finalTeam=teamPts(t);
+  s.finalContrib=contributors(t).length;
+  feed("🎪 The festival horn sounds — Wild Cards finish #"+s.finalRank+" of 10!");
+  st.save();
+  // an offer sheet left open across the horn would sell a booster that can
+  // no longer be used — dismiss it (core ignores this while a buy is in flight)
+  var oc=document.getElementById("sb-sheet-cancel"); if(oc) oc.click();
+  if(cdIv) clearInterval(cdIv);
+  var cd=$("th-cd"); cd.textContent="festival over";
+  if(cd.parentElement) cd.parentElement.classList.remove("urgent");
+  refresh(false);
+  showFinale();
 }
-document.getElementById("th-finale").addEventListener("click",finale);
-SB.countdown(document.getElementById("th-cd"),s.end,function(){if(!s.ended)finale();});
+function myShare(){
+  var rk=s.finalRank;
+  if(!rk||rk>3||s.myLevels<1) return null;
+  var n=Math.max(1,s.finalContrib||contributors(s.end).length);
+  var mult=s.pass?2:1;
+  return {pool:PODIUM[rk-1].pool,n:n,
+          rw:[{type:"coins",amount:Math.floor(PODIUM[rk-1].pool/n)*mult},
+              {type:"gem",amount:PODIUM[rk-1].gem*mult}]};
+}
+function showFinale(){
+  var t=s.end, rows=standings(t), rk=s.finalRank||myRank(rows);
+  var mem=members(t).slice().sort(function(a,b){ return b.pts-a.pts || a.i-b.i; });
+  var mvp=mem[0], meMvp=mvp.me;
+  // n comes from the same stored count myShare() pays from: the displayed
+  // arithmetic can never disagree with the payout
+  var contrib=contributors(t), n=s.finalContrib||contrib.length;
+  var pods=[1,0,2].map(function(idx){
+    var r=rows[idx];
+    return '<div class="th-pod p'+(idx+1)+(r.mine?" mine":"")+'"><span class="pe">'+(r.mine?"🌾":r.av)+'</span>'+
+      '<span class="pn">'+r.name+'</span><span class="pp">'+SB.fmt(r.pts)+'</span></div>';
+  }).join("");
+  var share=myShare(), onPodium=rk<=3, gateOk=s.myLevels>=1;
 
-// ---------- live sim tick ----------
-setInterval(function(){
-  if(s.ended)return;
-  var t=Date.now(),changed=false;
-  s.bots.forEach(function(b){
-    if(t>=b.nextAt){
-      var hard=Math.random()<b.big,g=hard?25:10;b.pts+=g;
-      feed(b.av+" "+b.name+" +"+g+(hard?" 🔥 hard clear!":" 🌽 level clear"));
-      b.nextAt=t+b.intMs*(0.7+Math.random()*0.6);changed=true;
-    }});
-  s.rivals.forEach(function(r){
-    if(t>=r.nextAt){r.pts+=Math.random()<0.3?25:10;r.nextAt=t+r.intMs*(0.7+Math.random()*0.6);changed=true;}
+  var body='<h3 style="margin:0;">🎪 Harvest Festival Finale</h3>'+
+    '<div class="th-podium">'+pods+'</div>'+
+    '<p style="font-weight:900;font-size:16px;margin:4px 0;">Wild Cards finished <span style="color:'+(onPodium?"#2E9E4F":"#D7263D")+';">#'+rk+'</span> of 10</p>'+
+    '<p style="font-weight:800;font-size:12.5px;margin:3px 0;">👑 Team MVP: '+mvp.av+' '+mvp.name+' — '+SB.fmt(mvp.pts)+' pts'+(meMvp?" — that's YOU!":"")+'</p>'+
+    '<p style="font-size:11.5px;font-weight:700;color:#5a6b8c;margin:3px 0 8px;">Wagon '+SB.fmt(teamPts(t))+' pts · your harvest '+SB.fmt(s.myPts)+' pts ('+s.myLevels+' levels) · '+s.claimed.filter(Boolean).length+'/3 chests claimed</p>';
+
+  if(onPodium){
+    body+='<div class="th-split">🏆 '+num(PODIUM[rk-1].pool)+' 🪙 pool ÷ <b>'+n+'</b> contributing member'+(n===1?"":"s")+
+      ' = <b>'+num(Math.floor(PODIUM[rk-1].pool/n))+' 🪙</b> each'+
+      '<br><span style="font-weight:700;">'+contrib.map(function(c){return c.av+" "+c.name;}).join(" · ")+
+      (n<TEAM_SIZE?' <span style="color:#c1642c;">('+(TEAM_SIZE-n)+' member'+(TEAM_SIZE-n===1?"":"s")+' cleared nothing — no share)</span>':"")+'</span></div>';
+    if(gateOk){
+      if(s.podiumClaimed){
+        body+='<div class="th-owned">✓ Your share is already in your wallet</div>';
+      }else{
+        body+='<div class="sb-sheet-contents" style="justify-content:center;">'+share.rw.map(SB.rewardChip).join("")+'</div>'+
+          (s.pass?'<p style="font-size:11px;font-weight:800;color:#2E9E4F;margin:2px 0 8px;">🚜 Harvest Pass doubled your share</p>':"")+
+          '<button class="sb-btn sb-btn-yellow sb-btn-block" id="th-claim-pod">Collect your share! 🏆</button>';
+      }
+    }else{
+      body+='<p style="font-size:12px;font-weight:800;color:#a8552a;">🔒 You cleared 0 levels, so you have no share of the pool — the rule was the same for everyone.</p>';
+    }
+  }else{
+    body+='<p style="font-size:12px;font-weight:700;color:#5a6b8c;">No podium this time — top 3 only. The next festival opens Friday! 🌱</p>';
+  }
+  if(s.earlyMs>1000){
+    body+='<p class="sb-muted" style="font-size:10.5px;font-weight:700;margin:8px 0 0;">Demo note: the festival was closed early with '+
+      Math.floor(s.earlyMs/60000)+"m "+Math.floor(s.earlyMs%60000/1000)+'s still on the clock — every team was frozen at the same instant.</p>';
+  }
+  body+='<button class="sb-sheet-cancel" id="th-fin-close">Close</button>';
+
+  var m=SB.modal(body);
+  if(!s.finaleSeen){ SB.confetti(); SB.haptic(35); s.finaleSeen=true; st.save(); }
+  if(meMvp) setTimeout(function(){ if(!m.closed) SB.confetti(window.innerWidth/2,190,60); },600);
+  m.el.querySelector("#th-fin-close").addEventListener("click",function(){ m.close(); });
+  var cb=m.el.querySelector("#th-claim-pod");
+  if(cb) cb.addEventListener("click",function(){
+    if(s.podiumClaimed) return;            // survives double-tap AND reload
+    s.podiumClaimed=true; st.save();
+    cb.disabled=true; cb.textContent="Collected ✓";
+    SB.grantRewards(share.rw,cb,{toast:false});
+    SB.toast("🏆 Podium share collected!",{top:true});
+    SB.confetti();
+    renderFinaleBtn();
   });
-  if(changed){checkBotClaims();refresh();st.save();}
-},1000);
+  renderFinaleBtn();
+}
+function renderFinaleBtn(){
+  var fb=$("th-finale");
+  if(!s.ended){ fb.textContent="⏩ See finale (demo)"; fb.disabled=false; return; }
+  var share=myShare();
+  var pending=share&&!s.podiumClaimed;
+  fb.textContent=pending?"🏆 Collect your podium share!":("🎪 Final standings — #"+s.finalRank+" of 10");
+  fb.className="sb-btn sb-btn-block "+(pending?"sb-btn-yellow":"sb-btn-blue");
+  fb.disabled=false;
+}
+$("th-finale").addEventListener("click",function(){
+  if(s.ended) showFinale(); else settle();
+});
+var cdIv=SB.countdown($("th-cd"),s.end,function(){ if(!s.ended) settle(); });
+if(s.ended){ var cd0=$("th-cd"); clearInterval(cdIv); cd0.textContent="festival over"; if(cd0.parentElement) cd0.parentElement.classList.remove("urgent"); }
 
-// ---------- render all ----------
-function refresh(){renderWagon();renderMiles();renderMembers();renderBoard();renderPlay();renderFeed();renderOffers();}
-refresh();
-if(s.ended){renderPlay();var fb=document.getElementById("th-finale");fb.disabled=true;fb.textContent="🎪 Festival ended";}
+/* ==========================================================
+   BOOT
+   ========================================================== */
+refresh(false);
+renderFinaleBtn();
+if(expired()&&!s.ended) settle();
+else if(!s.ended&&awayMs>20000&&caught.n>0){
+  SB.toast("⏰ While you were away, teammates added "+SB.fmt(caught.pts)+" pts",{top:true,ms:2600});
+}
 })();
 </script>
 </body>

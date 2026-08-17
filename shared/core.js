@@ -386,7 +386,8 @@
   window.SB = {
     init: init, store: store, toast: toast, haptic: haptic,
     grantRewards: grantRewards, spend: spend, bal: bal, fmt: fmt,
-    rewardChip: rewardChip, icon: icon, buyIAP: buyIAP, modal: modal,
+    rewardChip: rewardChip, icon: icon, buyIAP: buyIAP, closeSheet: closeSheet, modal: modal,
+    num: function (n) { return Math.floor(n).toLocaleString("en-US"); },
     confetti: confetti, countdown: countdown, wallet: wallet
   };
 })();

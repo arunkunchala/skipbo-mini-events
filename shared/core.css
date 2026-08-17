@@ -108,7 +108,7 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
 @keyframes sbPulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.07);} }
 
 /* ---------- Main content ---------- */
-.sb-main { flex: 1 1 auto; padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 58px); }
+.sb-main { flex: 1 1 auto; padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 20px); }
 
 /* ---------- Buttons ---------- */
 .sb-btn {
