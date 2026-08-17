@@ -239,20 +239,20 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
 
 /* ---------- Demo reset ---------- */
 .sb-demo-reset {
-  position: fixed; right: 10px; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
-  z-index: 260;
-  background: rgba(20,57,111,0.85);
+  flex: 0 0 auto;
+  background: rgba(0,0,0,0.3);
   color: var(--sb-sky-light);
   border: 1px solid rgba(255,255,255,0.25);
   border-radius: 999px;
+  font-family: var(--sb-font);
   font-size: 11px; font-weight: 700;
-  width: 44px; height: 44px; padding: 0; cursor: pointer;
+  width: 34px; height: 34px; padding: 0; cursor: pointer;
   overflow: hidden; white-space: nowrap;
-  opacity: 0.5;
+  opacity: 0.75;
   transition: width 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
 }
 .sb-demo-reset:hover, .sb-demo-reset:focus, .sb-demo-reset.open {
-  width: auto; padding: 0 14px; opacity: 1;
+  width: auto; padding: 0 12px; opacity: 1;
 }
 .sb-demo-reset .lbl { display: none; margin-left: 5px; }
 .sb-demo-reset:hover .lbl, .sb-demo-reset:focus .lbl, .sb-demo-reset.open .lbl { display: inline; }

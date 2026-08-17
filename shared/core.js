@@ -49,8 +49,19 @@
     var el = document.getElementById("sb-wallet-amt");
     if (el) el.textContent = fmt(wallet.coins);
   }
-  // single source of truth for reward-label pluralisation (chips + toasts agree)
+  // single source of truth for reward-label pluralisation (chips + toasts agree).
+  // Irregulars are explicit: mass nouns never take an "s", -ies words need a real
+  // singular, and symbol-suffixed labels must not be mangled.
+  var IRREGULAR = {
+    "Energy":    { one: "Energy",     many: "Energy" },      // mass noun
+    "Trophies":  { one: "Trophy",     many: "Trophies" },
+    "Draw+":     { one: "Draw+",      many: "Draw+" },       // symbol suffix
+    "Undo":      { one: "Undo",       many: "Undos" },
+    "Wild Card": { one: "Wild Card",  many: "Wild Cards" }
+  };
   function plural(label, amount) {
+    var irr = IRREGULAR[label];
+    if (irr) return amount === 1 ? irr.one : irr.many;
     if (amount === 1) return (/s$/.test(label) && !/ss$/.test(label)) ? label.replace(/s$/, "") : label;
     return /s$/.test(label) ? label : label + "s";
   }
@@ -97,14 +108,9 @@
         sDel(WKEY);
         location.reload();
       });
-      document.body.appendChild(r);
-      // fade the FAB while the page is scrolling so it never sits on top of content
-      var sT;
-      window.addEventListener("scroll", function () {
-        r.style.opacity = "0.12";
-        clearTimeout(sT);
-        sT = setTimeout(function () { r.style.opacity = ""; }, 450);
-      }, { passive: true });
+      // Docked in the top bar, not floating over content: as a fixed FAB it sat on
+      // top of event CTAs (claim columns, bottom action rows) in several events.
+      bar.appendChild(r);
     }
     if (!document.querySelector('link[rel="icon"]')) {
       var fav = document.createElement("link");
