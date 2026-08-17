@@ -242,8 +242,10 @@
   // rw: {type, amount} or {icon, label, amount} for event-local currencies
   function rewardChip(rw) {
     var ic = rw.icon || ICONS[rw.type] || "🎁";
+    // {exact:true} prints the full number so sheet chips match displayed arithmetic
+    var amt = rw.exact ? Math.floor(rw.amount).toLocaleString("en-US") : fmt(rw.amount);
     return '<span class="sb-reward"><span class="ico">' + ic + "</span>" +
-      fmt(rw.amount) + " " + plural(rw.label || LABELS[rw.type] || rw.type, rw.amount) + "</span>";
+      amt + " " + plural(rw.label || LABELS[rw.type] || rw.type, rw.amount) + "</span>";
   }
   function icon(type) { return ICONS[type] || "🎁"; }
 
