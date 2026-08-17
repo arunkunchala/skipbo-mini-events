@@ -227,7 +227,8 @@
     haptic(20);
     if (names.length && opts.toast !== false) toast(names.join("  ·  "), { top: !!opts.toastTop });
     var w = document.querySelector(".sb-wallet");
-    if (w) { w.classList.remove("sb-bounce"); void w.offsetWidth; w.classList.add("sb-bounce"); }
+    // wallet is right-docked: use the gentler bounce so it can't overflow the viewport
+    if (w) { w.classList.remove("sb-bounce-sm"); void w.offsetWidth; w.classList.add("sb-bounce-sm"); }
   }
 
   function spend(type, amount) {

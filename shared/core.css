@@ -289,7 +289,14 @@ body { touch-action: manipulation; user-select: none; -webkit-user-select: none;
   0%,100% { transform: translateX(0); }
   25% { transform: translateX(-6px); } 75% { transform: translateX(6px); }
 }
+/* NOTE: scales about the element centre — on a right-docked element a 1.25 scale
+   can push past the viewport edge and create horizontal scroll. Use .sb-bounce-sm
+   for anything anchored to an edge. */
 .sb-bounce { animation: sbBounce 0.5s; }
 @keyframes sbBounce {
   0%,100% { transform: scale(1); } 40% { transform: scale(1.25); } 70% { transform: scale(0.92); }
+}
+.sb-bounce-sm { animation: sbBounceSm 0.5s; }
+@keyframes sbBounceSm {
+  0%,100% { transform: scale(1); } 40% { transform: scale(1.1); } 70% { transform: scale(0.96); }
 }
