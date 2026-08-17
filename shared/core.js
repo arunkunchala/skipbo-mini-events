@@ -364,8 +364,10 @@
   var confettiParts = [];
 
   // ---------- countdown helper ----------
+  // urgentMs defaults to 3 minutes: every event here runs a compressed demo clock,
+  // so a 1-hour threshold would pulse the chip for the entire session.
   function countdown(el, endTs, onEnd, urgentMs) {
-    var UR = urgentMs == null ? 3600000 : urgentMs;
+    var UR = urgentMs == null ? 180000 : urgentMs;
     function tick() {
       var left = Math.max(0, endTs - Date.now());
       var h = Math.floor(left / 3600000);

@@ -6,6 +6,9 @@
 <title>Skip-Bo · Harvest Festival</title>
 <link rel="stylesheet" href="../shared/core.css">
 <style>
+/* toasts ride above the banner instead of over the bottom offer row (shared .sb-toast.top) */
+:root{--sb-toast-top:70px;}
+
 /* ================= banner ================= */
 .fb-banner{position:relative;border-radius:var(--sb-radius);padding:12px 12px 10px;color:#fff;overflow:hidden;background:linear-gradient(160deg,#8a4a12 0%,#c8791f 50%,#e0a531 100%);border:2px solid rgba(255,199,44,.55);box-shadow:var(--sb-shadow);}
 .fb-banner::before{content:"🍂";position:absolute;right:-6px;top:-16px;font-size:80px;opacity:.2;transform:rotate(16deg);}
@@ -62,13 +65,13 @@
 
 /* ---- 1. plowed field ---- */
 #fb-m1{left:0;bottom:0;width:150px;height:64px;z-index:6;clip-path:polygon(0 14%,58% 0,100% 44%,84% 100%,0 100%);background:repeating-linear-gradient(84deg,#8a5a2e 0 5px,#6d4522 5px 9px,#a06d38 9px 13px);box-shadow:inset 0 6px 10px rgba(0,0,0,.18);transform-origin:0 100%;}
-#fb-m1.on{animation:fbGrow .7s cubic-bezier(.34,1.56,.64,1);}
+#fb-m1.on.anim{animation:fbGrow .7s cubic-bezier(.34,1.56,.64,1);}
 .fb-crop{font-size:12px;z-index:7;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));}
 .fb-sprout{width:3px;height:7px;background:#5ea52f;border-radius:2px 2px 0 0;z-index:7;}
 
 /* ---- 2. barn + silo ---- */
 #fb-m2{left:10px;bottom:60px;width:120px;height:74px;z-index:9;transform-origin:50% 100%;}
-#fb-m2.on{animation:fbRaise .75s cubic-bezier(.34,1.56,.64,1);}
+#fb-m2.on.anim{animation:fbRaise .75s cubic-bezier(.34,1.56,.64,1);}
 .fb-barn-body{left:0;bottom:0;width:80px;height:36px;border-radius:2px;background:linear-gradient(180deg,#e05744 0%,#c33a2c 45%,#992418 100%);box-shadow:inset -8px 0 12px rgba(0,0,0,.2);}
 .fb-barn-roof{left:-5px;bottom:34px;width:90px;height:28px;background:linear-gradient(180deg,#a8291c,#7d1a11);clip-path:polygon(50% 0,86% 38%,100% 100%,0 100%,14% 38%);}
 .fb-barn-roof::after{content:"";position:absolute;left:50%;top:-2px;width:3px;height:6px;background:#fdf6e3;transform:translateX(-50%);}
@@ -87,7 +90,7 @@
 
 /* ---- 3. windmill ---- */
 #fb-m3{left:288px;bottom:56px;width:70px;height:104px;z-index:9;transform-origin:50% 100%;}
-#fb-m3.on{animation:fbRaise .75s cubic-bezier(.34,1.56,.64,1);}
+#fb-m3.on.anim{animation:fbRaise .75s cubic-bezier(.34,1.56,.64,1);}
 .fb-mill-tower{left:15px;bottom:0;width:40px;height:72px;clip-path:polygon(32% 0,68% 0,88% 100%,12% 100%);background:linear-gradient(90deg,#8d7a5c 0%,#e6dcc2 40%,#f3ecd8 55%,#a08c6a 100%);}
 .fb-mill-tower::after{content:"";position:absolute;inset:0;opacity:.45;background:repeating-linear-gradient(180deg,transparent 0 9px,rgba(0,0,0,.15) 9px 10px);}
 .fb-mill-cap{left:24px;bottom:68px;width:22px;height:11px;border-radius:50% 50% 0 0;background:linear-gradient(180deg,#c1382a,#8c2118);}
@@ -112,13 +115,13 @@
 .fb-tree.small .cn{width:22px;height:20px;margin-left:-11px;bottom:8px;}
 .fb-tree.small .cn::after{left:4px;top:5px;width:3px;height:3px;box-shadow:8px 3px 0 #d7263d,4px 9px 0 #d7263d,12px 8px 0 #c11f34;}
 .fb-tree.small .tr{height:10px;width:4px;margin-left:-2px;}
-#fb-m4.on .fb-tree{animation:fbPop .6s cubic-bezier(.34,1.56,.64,1) backwards;}
-#fb-m4.on .fb-tree.t2{animation-delay:.12s;}
-#fb-m4.on .fb-tree.t3{animation-delay:.24s;}
+#fb-m4.on.anim .fb-tree{animation:fbPop .6s cubic-bezier(.34,1.56,.64,1) backwards;}
+#fb-m4.on.anim .fb-tree.t2{animation-delay:.12s;}
+#fb-m4.on.anim .fb-tree.t3{animation-delay:.24s;}
 
 /* ---- 5. hay bales + fence ---- */
 #fb-m5{left:0;bottom:0;width:360px;height:70px;z-index:12;}
-#fb-m5.on{animation:fbFadeUp .6s ease backwards;}
+#fb-m5.on.anim{animation:fbFadeUp .6s ease backwards;}
 .fb-fence{left:0;bottom:6px;width:360px;height:26px;}
 .fb-fence .post{bottom:0;width:5px;height:26px;border-radius:1px;background:linear-gradient(90deg,#8a6a44,#c9a875 45%,#7a5a38);}
 .fb-fence .rail{left:0;width:360px;height:5px;border-radius:2px;background:linear-gradient(180deg,#d0b083,#9c7c50);box-shadow:0 1px 2px rgba(0,0,0,.25);}
@@ -130,21 +133,24 @@
 
 /* ---- 6. festival stage + bunting ---- */
 #fb-m6{left:0;bottom:0;width:360px;height:110px;z-index:13;transform-origin:60% 100%;}
-#fb-m6.on{animation:fbRaise .7s cubic-bezier(.34,1.56,.64,1);}
+#fb-m6.on.anim{animation:fbRaise .7s cubic-bezier(.34,1.56,.64,1);}
 .fb-stg-plat{left:200px;bottom:26px;width:96px;height:12px;border-radius:2px;background:linear-gradient(180deg,#c9a06a,#8b6535);box-shadow:0 2px 3px rgba(0,0,0,.3);}
 .fb-stg-plat::after{content:"";position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(0,0,0,.22) 11px 12px);}
 .fb-stg-post{bottom:36px;width:4px;height:24px;background:linear-gradient(90deg,#8b6535,#c9a06a);}
 .fb-stg-post.p1{left:206px;}
 .fb-stg-post.p2{left:288px;}
 .fb-stg-awn{left:196px;bottom:58px;width:104px;height:20px;clip-path:polygon(6% 0,94% 0,100% 78%,92% 100%,84% 78%,76% 100%,68% 78%,60% 100%,52% 78%,44% 100%,36% 78%,28% 100%,20% 78%,12% 100%,4% 78%,0 78%);background:repeating-linear-gradient(90deg,#d7263d 0 10px,#fdf6e3 10px 20px);box-shadow:0 2px 4px rgba(0,0,0,.25);}
-.fb-stg-sign{left:216px;bottom:50px;width:64px;height:12px;border-radius:3px;background:#fdf6e3;border:1.5px solid #b8541c;font-size:7px;font-weight:900;letter-spacing:.6px;color:#a8291c;text-align:center;line-height:10px;}
-.fb-stg-act{bottom:38px;font-size:11px;}
-.fb-flag{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:11px solid #d7263d;transform-origin:50% 0;animation:fbFlutter 2.6s ease-in-out infinite;}
-@keyframes fbFlutter{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
+/* sign sits ON the awning fascia (it used to float over the band's heads) */
+.fb-stg-sign{left:214px;bottom:62px;width:68px;height:13px;border-radius:3px;background:#fdf6e3;border:1.5px solid #b8541c;font-size:7.5px;font-weight:900;letter-spacing:.7px;color:#a8291c;text-align:center;line-height:11px;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+.fb-stg-act{bottom:39px;font-size:13px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));}
+/* pennants fly sideways off the bunting poles instead of dangling over the awning */
+.fb-flag{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:12px solid #d7263d;transform-origin:0 50%;animation:fbFlutter 2.6s ease-in-out infinite;}
+.fb-flag.rt{border-left:none;border-right:12px solid var(--sb-yellow);transform-origin:100% 50%;}
+@keyframes fbFlutter{0%,100%{transform:rotate(-5deg) scaleY(.92);}50%{transform:rotate(5deg) scaleY(1);}}
 
 /* ---- 7. string lights ---- */
 #fb-m7{left:0;top:0;width:360px;height:120px;z-index:20;}
-#fb-m7.on{animation:fbFade .8s ease backwards;}
+#fb-m7.on.anim{animation:fbFade .8s ease backwards;}
 .fb-wire{background:#4a3a2a;height:2px;border-radius:2px;opacity:.55;transform-origin:0 50%;}
 .fb-bulb{width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c8,#ffd75e 60%,#f0a92c);box-shadow:0 0 6px 2px rgba(255,215,94,.5);animation:fbGlow 2.4s ease-in-out infinite;}
 .dusk .fb-bulb{box-shadow:0 0 12px 5px rgba(255,214,110,.75);}
@@ -152,20 +158,35 @@
 
 /* ---- 8. ferris wheel ---- */
 #fb-m8{left:134px;bottom:52px;width:94px;height:128px;z-index:10;transform-origin:50% 100%;}
-#fb-m8.on{animation:fbRaise .9s cubic-bezier(.34,1.56,.64,1);}
-.fb-fw-leg{bottom:0;width:7px;height:56px;background:linear-gradient(90deg,#4d5a72,#98a7bf 45%,#5c6a82);border-radius:2px;}
-.fb-fw-leg.l1{left:38px;transform:rotate(12deg);transform-origin:50% 100%;}
-.fb-fw-leg.l2{left:50px;transform:rotate(-12deg);transform-origin:50% 100%;}
-.fb-fw-base{left:24px;bottom:-2px;width:46px;height:7px;border-radius:3px;background:linear-gradient(180deg,#7b8aa2,#414d63);}
+#fb-m8.on.anim{animation:fbRaise .9s cubic-bezier(.34,1.56,.64,1);}
+/* A-frame: both legs hang from the hub and splay out to planted feet */
+.fb-fw-leg{top:34px;left:44px;width:6px;height:98px;transform-origin:50% 0;border-radius:3px;
+  background:linear-gradient(90deg,#39445a,#8e9db6 42%,#aab7cc 55%,#414d63);box-shadow:0 1px 3px rgba(0,0,0,.35);}
+.fb-fw-leg.l1{transform:rotate(16deg);}
+.fb-fw-leg.l2{transform:rotate(-16deg);}
+.fb-fw-brace{left:24px;bottom:14px;width:46px;height:4px;border-radius:2px;background:linear-gradient(180deg,#8e9db6,#414d63);}
+.fb-fw-base{left:12px;bottom:-7px;width:70px;height:8px;border-radius:4px;background:linear-gradient(180deg,#8e9db6,#39445a);box-shadow:0 2px 4px rgba(0,0,0,.35);}
 .fb-fw-wheel{left:1px;bottom:48px;width:92px;height:92px;animation:fbSpin 16s linear infinite;}
 .fb-fw-rim{inset:0;border-radius:50%;border:4px solid #f4e6bd;box-shadow:0 0 0 2px rgba(0,0,0,.12),inset 0 0 12px rgba(0,0,0,.15);}
 .fb-fw-rim::after{content:"";position:absolute;inset:9px;border-radius:50%;border:2px solid rgba(244,230,189,.6);}
 .fb-fw-spoke{left:50%;top:50%;width:2px;height:92px;margin:-46px 0 0 -1px;background:linear-gradient(180deg,#fdf6e3,rgba(253,246,227,.45));transform-origin:50% 50%;}
 .fb-fw-hub{left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a8,#e0a531);border:2px solid #a8791c;}
-.fb-gond{width:14px;height:11px;margin:-5.5px 0 0 -7px;border-radius:3px 3px 6px 6px;border:1.5px solid rgba(0,0,0,.25);box-shadow:0 1px 2px rgba(0,0,0,.3);animation:fbSpinBack 16s linear infinite;}
-.fb-gond::before{content:"";position:absolute;left:50%;top:-5px;width:1.5px;height:5px;background:#8a7a60;transform:translateX(-50%);}
+/* each car hangs BELOW its rim mount: the mount counter-rotates so the car stays upright
+   (the car used to be centred on the rim, so the rim ran straight through it) */
+.fb-gmount{width:0;height:0;animation:fbSpinBack 16s linear infinite;}
+.fb-ghang{left:-1px;top:-1px;width:2px;height:7px;border-radius:1px;background:#e8dcbe;box-shadow:0 0 1px rgba(0,0,0,.4);}
+.fb-gond{left:-7px;top:6px;width:14px;height:11px;border-radius:3px 3px 6px 6px;border:1.5px solid rgba(0,0,0,.3);box-shadow:0 2px 3px rgba(0,0,0,.35);}
+.fb-gond::after{content:"";position:absolute;left:1px;right:1px;top:2px;height:3px;border-radius:2px;background:rgba(255,255,255,.35);}
 @keyframes fbSpinBack{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
 .dusk .fb-fw-rim{box-shadow:0 0 10px 2px rgba(255,214,110,.55),inset 0 0 12px rgba(0,0,0,.2);}
+
+/* ---- dusk wash: one translucent layer under the string lights so the whole foreground
+       (field, fence, bales, orchard, stage, wheel) reads as night, not daytime props ---- */
+.fb-nightwash{left:0;bottom:0;width:360px;height:240px;z-index:19;pointer-events:none;opacity:0;transition:opacity 1.3s ease;
+  background:linear-gradient(180deg,rgba(24,20,60,0) 0%,rgba(24,20,60,0) 32%,rgba(30,26,70,.30) 52%,rgba(26,22,58,.44) 100%);}
+.dusk .fb-nightwash{opacity:1;}
+.dusk .fb-barn-win{background:#ffe89a;box-shadow:0 0 14px 5px rgba(255,215,94,.95);}
+.dusk .fb-mill-cap{filter:brightness(.85);}
 
 /* ---- plaque + fireworks ---- */
 .fb-plaque{left:6px;bottom:4px;z-index:26;background:linear-gradient(180deg,#fff6d8,#ffd75e);border:1.5px solid #a8791c;border-radius:7px;padding:2px 7px;font-size:7.5px;font-weight:900;color:#7d4a10;white-space:nowrap;letter-spacing:.3px;box-shadow:0 2px 6px rgba(0,0,0,.4);animation:fbPop .6s cubic-bezier(.34,1.56,.64,1);}
@@ -199,6 +220,7 @@
 .fb-buildbtn.ready{animation:sbPulse 1.3s infinite;}
 .fb-b-sub{display:block;font-size:10.5px;font-weight:800;opacity:.9;}
 .fb-hardbtn{position:relative;background:linear-gradient(180deg,#ff8a5c 0%,#D7263D 55%,#8f1024 100%)!important;}
+.fb-hardbtn.nobadge::after{display:none;}
 .fb-hardbtn::after{content:"2× PLANKS";position:absolute;top:-8px;right:10px;background:var(--sb-yellow);color:var(--sb-ink);font-size:9px;font-weight:900;letter-spacing:.5px;padding:2px 8px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.3);}
 
 /* ================= offers ================= */
@@ -213,6 +235,10 @@
 .fb-offer .ds{font-size:10px;font-weight:700;color:#5a6b8c;line-height:1.25;}
 .fb-offer button{width:100%;min-height:44px;border:none;border-radius:10px;font-family:var(--sb-font);font-weight:900;font-size:12px;color:#fff;background:linear-gradient(180deg,#3fc167,var(--sb-green));box-shadow:0 2px 0 rgba(0,0,0,.2);cursor:pointer;margin-top:auto;}
 .fb-freenote{margin-top:8px;font-size:10.5px;font-weight:800;color:#c8f0cf;text-align:center;line-height:1.4;}
+
+/* ================= event-over bar (never a dead end) ================= */
+.fb-endbar{margin-top:10px;border-radius:14px;padding:10px 12px;background:linear-gradient(135deg,#5a3b8f,#2c2454);border:2px solid rgba(255,199,44,.55);color:#fff;font-size:11.5px;font-weight:800;line-height:1.45;box-shadow:var(--sb-shadow);}
+.fb-endbar .sb-btn{margin-top:8px;}
 
 /* ================= tabs ================= */
 .fb-tabs{display:flex;gap:6px;margin:12px 0 10px;background:rgba(0,0,0,.25);border-radius:14px;padding:4px;}
@@ -323,17 +349,20 @@
         <div class="fb-stg-post p1"></div>
         <div class="fb-stg-post p2"></div>
         <div class="fb-stg-plat"></div>
-        <div class="fb-stg-act" style="left:228px">🎻</div>
-        <div class="fb-stg-act" style="left:264px">🪗</div>
-        <div class="fb-flag" style="left:206px;bottom:60px"></div>
-        <div class="fb-flag" style="left:290px;bottom:60px"></div>
+        <div class="fb-stg-act" style="left:222px">🎻</div>
+        <div class="fb-stg-act" style="left:262px">🪗</div>
+        <div class="fb-flag" style="left:196px;bottom:97px"></div>
+        <div class="fb-flag rt" style="left:292px;bottom:97px"></div>
       </div>
+
+      <div class="fb-nightwash"></div>
 
       <div class="fb-el" id="fb-m7"></div>
 
       <div class="fb-el" id="fb-m8">
         <div class="fb-fw-leg l1"></div>
         <div class="fb-fw-leg l2"></div>
+        <div class="fb-fw-brace"></div>
         <div class="fb-fw-base"></div>
         <div class="fb-fw-wheel" id="fb-fw-wheel"><div class="fb-fw-rim"></div><div class="fb-fw-hub"></div></div>
       </div>
@@ -349,6 +378,11 @@
     <div class="fb-help" id="fb-help"></div>
   </div>
 
+  <div class="fb-endbar hidden" id="fb-endbar">
+    <span>🍂 <b>Festival week is over.</b> Offers are closed — your scene is safe.</span>
+    <button class="sb-btn sb-btn-green sb-btn-sm sb-btn-block" id="fb-extend-inline">⏱️ Keep building (demo extension)</button>
+  </div>
+
   <div class="fb-actions">
     <button class="sb-btn sb-btn-block fb-buildbtn" id="fb-build">🔨 Build</button>
     <button class="sb-btn sb-btn-green sb-btn-block" id="fb-play">▶ Play level <span class="fb-b-sub">+3 🪵 per clear · +1 first try · ~78% win</span></button>
@@ -361,7 +395,7 @@
     <div class="fb-offer">
       <span class="em">🪵</span>
       <span class="ti">Plank Bundle</span>
-      <span class="ds">+40 Planks<br>≈ 13 level clears</span>
+      <span class="ds" id="fb-bundle-ds">+40 Planks</span>
       <button id="fb-buy-bundle">$1.99</button>
     </div>
     <div class="fb-offer">
@@ -411,6 +445,13 @@
 var EVENT_MS = 18*60*1000;   // "18 days" compressed to 18 min for the demo
 var PLANK = {normal:3, hard:7, firstTry:1};
 var BUNDLE = 40;
+var PLANK_COIN = 25;         // leftover-plank trade-in rate at the finale (published in ⓘ)
+/* Monte-Carlo (200k runs, attempts-until-clear, first-try bonus counted):
+   all-normal 57.3 clears · all-hard 28.9 · alternating plays 41.1 clears.
+   => mean planks per clear on the alternating mix = 215/41.14 = 5.23 */
+var PLANKS_PER_CLEAR_MIX = 5.23;
+var PLANKS_PER_CLEAR_NORMAL = PLANK.normal + 0.78;   // 3.78 — a clear is first-try 78% of the time
+var BUNDLE_CLEARS = Math.round(BUNDLE / PLANKS_PER_CLEAR_NORMAL);   // 11
 
 var MILES = [
   {cost:7,  em:"🌾", name:"Plowed Field",  el:"fb-m1", blurb:"Turn the soil and sow the first rows.",
@@ -442,20 +483,24 @@ var TOTAL_COST = MILES.reduce(function(a,m){return a+m.cost;},0);   // 215
 
 /* ================= state ================= */
 var st = SB.store("farm-buildup", {start:0,end:0,planks:0,built:0,pass:false,claimedPrem:[],
-  plays:0,wins:0,hardWins:0,earned:0,attempts:0,level:214,shortShown:false,extended:false});
+  plays:0,wins:0,hardWins:0,earned:0,attempts:0,level:214,extended:false,ended:false,cashedOut:false});
 var d = st.data;
 if(!d.start){ d.start = Date.now(); d.end = d.start + EVENT_MS; }
+if(!d.ended && Date.now() >= d.end) d.ended = true;   // survives a reload while expired
 st.save();
 
 SB.init({title:"Harvest Festival", subtitle:"Farm Build-Up · Mini Event", resetKey:"farm-buildup"});
 
 function $(id){ return document.getElementById(id); }
-function wr(base){ if(window.__forceWin===true) return 1; if(window.__forceWin===false) return 0; return base; }
 function chips(list){ return list.map(SB.rewardChip).join(" "); }
 function done(){ return d.built >= MILES.length; }
 function cur(){ return done() ? null : MILES[d.built]; }
 function need(){ var m=cur(); return m ? Math.max(0, m.cost - d.planks) : 0; }
+/* a CLEAR is a win: N clears always yields N*3 planks, so ceil() is exact, never optimistic */
 function clearsToGo(){ return Math.ceil(need()/PLANK.normal); }
+var playing = false;                              // single source of truth: one level at a time
+function live(){ return !d.ended; }               // event still running (or extended)
+function modalOpen(){ return !!document.querySelector(".sb-modal-backdrop, .sb-sheet-backdrop, .sb-lvl-backdrop"); }
 
 /* ================= scene: generated pieces ================= */
 var stage = $("fb-stage");
@@ -517,11 +562,15 @@ var stage = $("fb-stage");
   var host=$("fb-m6");
   var x0=194, x1=302, y0=98, sag=-14, n=11;
   var cols=["#d7263d","#ffc72c","#2e9e4f","#3e8ede","#fdf6e3"];
-  [x0,x1].forEach(function(px){                       // poles the bunting hangs from
+  [x0,x1].forEach(function(px){        // poles run all the way down to the ground, not mid-air
     var pole=document.createElement("div");
-    pole.style.cssText="left:"+(px-1)+"px;bottom:60px;width:3px;height:42px;border-radius:2px;"+
-      "background:linear-gradient(90deg,#7a5a38,#c9a875 45%,#6d4f30);";
+    pole.style.cssText="left:"+(px-2)+"px;bottom:20px;width:4px;height:82px;border-radius:2px;"+
+      "background:linear-gradient(90deg,#6d4f30,#c9a875 45%,#6d4f30);box-shadow:0 1px 2px rgba(0,0,0,.3);";
     host.appendChild(pole);
+    var foot=document.createElement("div");   // a little base so the pole reads as planted
+    foot.style.cssText="left:"+(px-6)+"px;bottom:17px;width:12px;height:5px;border-radius:3px;"+
+      "background:linear-gradient(180deg,#b08a5c,#6d4f30);";
+    host.appendChild(foot);
   });
   for(var i=0;i<n;i++){
     var t=i/(n-1);
@@ -570,7 +619,7 @@ var stage = $("fb-stage");
 /* ferris wheel spokes + gondolas */
 (function(){
   var w=$("fb-fw-wheel");
-  var n=8, R=42;
+  var n=8, R=44;      // rim mid-line: 92px box, 4px border -> band 42..46
   for(var i=0;i<n/2;i++){
     var s=document.createElement("div");
     s.className="fb-fw-spoke";
@@ -580,29 +629,41 @@ var stage = $("fb-stage");
   var cols=["#d7263d","#ffc72c","#2e9e4f","#3e8ede","#f2a25c","#c05fd8","#fdf6e3","#ff8a5c"];
   for(var j=0;j<n;j++){
     var a=(j*2*Math.PI/n)-Math.PI/2;
-    var g=document.createElement("div");
-    g.className="fb-gond";
-    g.style.left=(46+R*Math.cos(a))+"px";
-    g.style.top=(46+R*Math.sin(a))+"px";
-    g.style.background="linear-gradient(180deg,"+cols[j]+",rgba(0,0,0,.25))";
-    w.appendChild(g);
+    var mt=document.createElement("div");            // mount point ON the rim mid-line
+    mt.className="fb-gmount";
+    mt.style.left=(46+R*Math.cos(a))+"px";
+    mt.style.top=(46+R*Math.sin(a))+"px";
+    var hg=document.createElement("div"); hg.className="fb-ghang";
+    var g=document.createElement("div"); g.className="fb-gond";
+    g.style.background="linear-gradient(180deg,"+cols[j]+",rgba(0,0,0,.3))";
+    mt.appendChild(hg); mt.appendChild(g);
+    w.appendChild(mt);
   }
 })();
 
 /* responsive scale: the scene is authored at 360x240 */
 function fitScene(){
   var wrap=$("fb-scene-wrap");
-  var s=wrap.clientWidth/360;
+  var w=wrap.clientWidth;
+  if(!w) return;
+  var s=w/360;
   stage.style.transform="scale("+s+")";
-  wrap.style.height=(240*s)+"px";
+  wrap.style.height=Math.round(240*s)+"px";
 }
 window.addEventListener("resize", fitScene);
+window.addEventListener("orientationchange", fitScene);
+if(window.ResizeObserver) new ResizeObserver(fitScene).observe($("fb-scene-wrap"));
+fitScene();                    // synchronous: no unscaled flash on first paint
 setTimeout(fitScene,0);
 
 /* ================= scene reveal ================= */
-function showBuilt(animate){
+/* animIdx: index of the piece just built (it alone plays its reveal animation).
+   Pass nothing on boot so a reload redraws the scene instantly at the right stage
+   instead of replaying every reveal. */
+function showBuilt(animIdx){
   for(var i=0;i<MILES.length;i++){
     var el=$(MILES[i].el);
+    el.classList.toggle("anim", i===animIdx);
     if(i < d.built) el.classList.add("on"); else el.classList.remove("on");
   }
   $("fb-m1x").classList.toggle("on", d.built>=1);
@@ -655,13 +716,16 @@ function fireworks(rounds){
             ";transform:translate("+(Math.cos(a)*dist)+"px,"+(Math.sin(a)*dist)+"px);opacity:0;"+
             "transition:transform .7s ease-out,opacity .7s ease-out;";
           stage.appendChild(p);
+          // NOTE: `p` is a var in this loop — the cleanup timer must close over the
+          // per-particle reference or only the last spark of each burst is ever removed
+          // (that leaked ~15 nodes per burst into #fb-stage, thousands over a session).
           (function(pp,ax,ay){
             requestAnimationFrame(function(){ requestAnimationFrame(function(){
               pp.style.opacity="1"; pp.style.transform="translate("+ax+"px,"+ay+"px)";
               setTimeout(function(){ pp.style.opacity="0"; pp.style.transform="translate("+(ax*1.5)+"px,"+(ay*1.5+14)+"px)"; },420);
             });});
+            setTimeout(function(){ pp.remove(); }, 1300);
           })(p, Math.cos(a)*dist, Math.sin(a)*dist);
-          setTimeout(function(){ p.remove(); }, 1300);
         }
       }, rr*380);
     })(r);
@@ -690,10 +754,16 @@ function renderHud(){
     $("fb-build").innerHTML = '🎉 Festival complete<span class="fb-b-sub">Keep clearing levels for souvenir coin bonuses</span>';
     $("fb-build").disabled = true;
     $("fb-build").classList.remove("ready");
-    $("fb-instant-ds").innerHTML = "Everything is built!";
-    $("fb-buy-instant").disabled = true;
-    $("fb-buy-instant").style.filter="grayscale(1)";
   }
+  // souvenir path pays coins, not planks — never leave the buttons advertising planks
+  $("fb-play").innerHTML = done()
+    ? '▶ Play level <span class="fb-b-sub">Souvenir bonus: +250 🪙 per clear</span>'
+    : '▶ Play level <span class="fb-b-sub">+'+PLANK.normal+' 🪵 per clear · +'+PLANK.firstTry+' first try · ~78% win</span>';
+  $("fb-hard").innerHTML = done()
+    ? '🔥 Hard level <span class="fb-b-sub">Souvenir bonus: +600 🪙 per clear</span>'
+    : '🔥 Hard level <span class="fb-b-sub">+'+PLANK.hard+' 🪵 per clear · +'+PLANK.firstTry+' first try · ~55% win</span>';
+  $("fb-hard").classList.toggle("nobadge", done());
+  renderOffers();
   $("fb-st-plays").textContent=d.plays;
   $("fb-st-wins").textContent=d.wins;
   $("fb-st-hard").textContent=d.hardWins;
@@ -701,23 +771,48 @@ function renderHud(){
   var remain = Math.max(0, TOTAL_COST - d.earned);
   $("fb-pace").innerHTML = done()
     ? "🎡 You built all 8 pieces in "+d.wins+" level clears. Total plank cost: "+TOTAL_COST+" 🪵."
-    : "Whole festival = "+TOTAL_COST+" 🪵 total · ~"+Math.ceil(remain/5.3)+" more clears at a normal mix. Free lane finishes on its own.";
+    : "Whole festival = "+TOTAL_COST+" 🪵 total · ~"+Math.max(1,Math.round(remain/PLANKS_PER_CLEAR_MIX))+
+      " more clears on a 50/50 normal-hard mix. The free lane finishes it on its own.";
   renderShort();
+}
+
+/* offers are only ever sellable when they can actually deliver */
+function renderOffers(){
+  var m = cur(), bundle = $("fb-buy-bundle"), inst = $("fb-buy-instant");
+  var bundleOK = live() && !!m;                      // planks are worthless once all 8 are built
+  var instOK   = live() && !!m && need()>0;          // and free when you already have the planks
+  bundle.disabled = !bundleOK;
+  bundle.textContent = bundleOK ? "$1.99" : (live() ? "Not needed" : "Ended");
+  inst.disabled = !instOK;
+  inst.textContent = instOK ? "$0.99" : (live() ? "Not needed" : "Ended");
+  $("fb-instant-ds").innerHTML = !live() ? "Festival week is over"
+    : !m ? "Everything is built!"
+    : need()===0 ? "You already have the planks — building is <b>free</b>"
+    : "Finish <b>"+m.name+"</b> now";
+  $("fb-bundle-ds").innerHTML = !live() ? "Festival week is over"
+    : !m ? "Everything is built!"
+    : "+"+BUNDLE+" Planks<br>≈ "+BUNDLE_CLEARS+" level clears";
+  [bundle, inst].forEach(function(b){ b.style.filter = b.disabled ? "grayscale(1)" : ""; });
+  $("fb-play").disabled = $("fb-hard").disabled = !live() || playing;
+  $("fb-endbar").classList.toggle("hidden", live());
 }
 
 /* contextual "just short" offer — always shows the free path too */
 function renderShort(){
   var host=$("fb-shortwrap");
   var m=cur(), n=need();
-  if(!m || n===0 || n>8){ host.innerHTML=""; return; }
+  // stated window: a build is started, you are 1-8 planks short, and the event is live
+  if(!m || n===0 || n>8 || !live()){ host.innerHTML=""; return; }
   host.innerHTML =
     '<div class="fb-short">'+'<h4>🔨 So close — '+n+' 🪵 short!</h4>'+'<p>'+m.em+' <b>'+m.name+'</b> is '+n+' plank'+(n>1?"s":"")+' away. Finish it now, or keep clearing levels.</p>'
     +'<button class="sb-btn sb-btn-yellow sb-btn-block sb-btn-sm" id="fb-short-buy">⚡ Finish this build · $0.99</button>'
-    +'<span class="fb-orfree">🆓 …or clear <b>'+clearsToGo()+' more level'+(clearsToGo()>1?"s":"")+'</b> — free, and it costs you nothing to try.</span>'
+    +'<span class="fb-orfree">🆓 …or clear <b>'+clearsToGo()+' more level'+(clearsToGo()>1?"s":"")+'</b> — free.<br>'
+      +clearsToGo()+' × 3 🪵 = '+(clearsToGo()*PLANK.normal)+' 🪵, covers the '+n+' you need · ~'
+      +Math.ceil(clearsToGo()/0.78)+' tries at 78% win · losses cost nothing</span>'
     +'<button class="sb-btn sb-btn-green sb-btn-block sb-btn-sm" style="margin-top:7px" id="fb-short-play">▶ Play a level instead</button>'+'</div>';
   $("fb-short-buy").addEventListener("click", instantBuild);
   $("fb-short-play").addEventListener("click", function(){ play(false); });
-  if(!d.shortShown){ d.shortShown=true; st.save(); SB.haptic(10); }
+  $("fb-short-play").disabled = playing;
 }
 
 /* ================= building ================= */
@@ -730,11 +825,13 @@ function doBuild(free){
   st.save();
   SB.haptic(28);
   dustPuff();
-  showBuilt(true);
+  showBuilt(i);
   var wrap=$("fb-scene-wrap"), r=wrap.getBoundingClientRect();
   SB.confetti(r.left+r.width/2, r.top+r.height/2, 46);
-  setTimeout(function(){ SB.grantRewards(m.free, wrap); }, 520);
-  if(i===6) SB.toast("💡 The lights are on — the farm turns to dusk!", 2400);
+  // granted in the SAME tick as the d.built++ save — a reload mid-animation can never
+  // drop the free-lane payout (it used to fire on a 520ms timer).
+  SB.grantRewards(m.free, wrap, {toast:false});
+  if(i===6) SB.toast("💡 The lights are on — the farm turns to dusk!", {ms:2400, top:true});
   if(d.built===MILES.length){ setTimeout(grandFinale, 900); }
   else {
     SB.modal(
@@ -749,26 +846,44 @@ function doBuild(free){
 
 function instantBuild(){
   var m=cur();
-  if(!m) return;
+  // never sell a speed-up that cannot deliver: nothing left to build, planks already
+  // sufficient (the build is free right now), or the event has ended.
+  if(!m || !live()) return;
+  if(need()===0){ SB.toast("You already have enough planks — tap BUILD, it's free!", {ms:2400, top:true}); return; }
+  var target = d.built;                      // lock the milestone this purchase promised
   SB.buyIAP({
     label:"⚡ Instant Build — "+m.name,
     price:"$0.99",
     sub:"Completes "+m.name+" right now, planks or not. You keep the planks you already earned.",
     grant:false,
     onSuccess:function(){
-      SB.toast("⚡ "+m.name+" built instantly!",2000);
+      if(d.built!==target) return;            // state moved on while the sheet was open
+      SB.toast("⚡ "+m.name+" built instantly!", {ms:2000, top:true});
       doBuild(false);
     }
   });
 }
 
+/* Leftover planks never go to waste. Zeroing the stack and paying the coins happen in ONE
+   tick so a reload in between cannot swallow them, and this also runs at BOOT — reloading
+   in the 900ms before grandFinale() used to strand the leftovers permanently.
+   Returns the number of planks traded in (0 if there was nothing to do). */
+function cashOutLeftovers(){
+  if(!done() || d.cashedOut) return 0;
+  var left = d.planks;
+  d.planks = 0; d.cashedOut = true; st.save();
+  if(left>0) SB.grantRewards([{type:"coins",amount:left*PLANK_COIN}], null, {toast:false});
+  return left;
+}
+
 function grandFinale(){
   fireworks(9);
-  if(d.planks>0){                       // leftover planks never go to waste
-    var swap = d.planks*25;
-    d.planks = 0; st.save();
-    setTimeout(function(){ SB.toast("Leftover planks traded in for "+SB.fmt(swap)+" coins!",2400);
-      SB.grantRewards([{type:"coins",amount:swap}]); }, 2600);
+  var left = cashOutLeftovers();
+  renderHud();                      // the trade-in zeroes d.planks — the HUD must follow
+  if(left>0){
+    setTimeout(function(){
+      SB.toast(left+" leftover 🪵 traded in at "+PLANK_COIN+" coins each = "+SB.fmt(left*PLANK_COIN)+" coins!", {ms:2800, top:true});
+    }, 2600);
   }
   SB.confetti(window.innerWidth/2, window.innerHeight/3, 150);
   setTimeout(function(){ SB.confetti(window.innerWidth*0.25, window.innerHeight/2.4, 90); }, 500);
@@ -786,7 +901,7 @@ function grandFinale(){
     fireworks(6);
     var cb=$("fb-celebrate");
     if(cb) cb.addEventListener("click", function(){
-      document.querySelector(".sb-modal-backdrop").remove();
+      cb.closest(".sb-modal-backdrop").remove();
       fireworks(7);
       SB.confetti(window.innerWidth/2, window.innerHeight/3, 110);
       SB.haptic(40);
@@ -796,13 +911,17 @@ function grandFinale(){
   }, 1900);
 }
 
-$("fb-build").addEventListener("click", function(){ if(need()===0) doBuild(true); });
+/* a build is refused while any modal/sheet/level is up, so a double-tap can never stack
+   two build modals (or slip a second build past the confirmation) */
+$("fb-build").addEventListener("click", function(){ if(need()===0 && !modalOpen()) doBuild(true); });
 
 /* ================= level play (the only free fuel) ================= */
 function play(hard){
-  var pb=$("fb-play"), hb=$("fb-hard");
-  pb.disabled = hb.disabled = true;
-  SB.playLevel({hard:hard, winRate:wr(hard?0.55:0.78), title:"Adventure Level "+d.level})
+  if(playing || !live()) return;         // guards BOTH entry points (buttons + "just short" card)
+  playing = true;
+  var pb=$("fb-play"), hb=$("fb-hard"), sp=$("fb-short-play");
+  pb.disabled = hb.disabled = true; if(sp) sp.disabled = true;
+  SB.playLevel({hard:hard, title:"Adventure Level "+d.level})
   .then(function(res){
     d.plays++; d.attempts++;
     if(res.won){
@@ -811,23 +930,24 @@ function play(hard){
       d.attempts=0; d.level++;
       if(done()){
         var c = hard?600:250;
-        SB.toast("🎉 Souvenir bonus +"+SB.fmt(c)+" coins!",2000);
-        SB.grantRewards([{type:"coins",amount:c}]);
+        SB.grantRewards([{type:"coins",amount:c}], null, {toast:false});
+        SB.toast("🎉 Souvenir bonus +"+SB.fmt(c)+" coins!", {ms:2000, top:true});
       } else {
         var gain = (hard?PLANK.hard:PLANK.normal) + (first?PLANK.firstTry:0);
         d.planks += gain; d.earned += gain;
-        SB.toast("+"+gain+" 🪵 Planks"+(first?" (first-try bonus!)":"")+" — "+d.planks+" total",2100);
+        SB.toast("+"+gain+" 🪵 Planks"+(first?" (first-try bonus!)":"")+" — "+d.planks+" total", {ms:2100, top:true});
         var el=$("fb-planks"); el.classList.remove("sb-bounce"); void el.offsetWidth; el.classList.add("sb-bounce");
         if(need()===0) setTimeout(function(){
-          if(cur() && need()===0) SB.toast("🔨 Enough planks — build "+cur().name+"!",2200);
+          if(cur() && need()===0) SB.toast("🔨 Enough planks — build "+cur().name+"!", {ms:2200, top:true});
         }, 1500);
       }
     } else {
-      SB.toast("No planks lost — your "+d.planks+" 🪵 are safe. Try again!",2200);
+      SB.toast("No planks lost — your "+d.planks+" 🪵 are safe. Try again!", {ms:2200, top:true});
     }
     st.save();
-    renderHud(); renderTrack();
-    pb.disabled = hb.disabled = false;
+    playing = false;
+    renderHud(); renderTrack();       // re-renders the "just short" card (and its play button)
+    pb.disabled = hb.disabled = !live();
   });
 }
 $("fb-play").addEventListener("click", function(){ play(false); });
@@ -835,14 +955,18 @@ $("fb-hard").addEventListener("click", function(){ play(true); });
 
 /* ================= offers ================= */
 $("fb-buy-bundle").addEventListener("click", function(){
+  if(!live() || done()) return;
   SB.buyIAP({
     label:"🪵 Plank Bundle",
     price:"$1.99",
-    sub:"+"+BUNDLE+" Planks, straight into your stack. Roughly 13 level clears' worth.",
+    sub:"Straight into your stack — about "+BUNDLE_CLEARS+" normal level clears' worth.",
+    // planks are event-local (d.planks), so grant:false and we add them ourselves;
+    // contents is here purely so the sheet shows the shared reward chip.
+    contents:[{type:"plank", amount:BUNDLE}],
     grant:false,
     onSuccess:function(){
       d.planks += BUNDLE; d.earned += BUNDLE; st.save();
-      SB.toast("+"+BUNDLE+" 🪵 Planks added!",2200);
+      SB.toast("+"+BUNDLE+" 🪵 Planks added!", {ms:2200, top:true});
       var el=$("fb-planks"); el.classList.remove("sb-bounce"); void el.offsetWidth; el.classList.add("sb-bounce");
       renderHud(); renderTrack();
     }
@@ -861,7 +985,8 @@ function renderTrack(){
     ? '<h3>🎫 Builder\'s Pass ACTIVE</h3><p>Pass lane unlocked on all 8 builds — claim each one on the track below.</p>'
       +'<div class="free-note">✓ Purchased. The free lane keeps paying too — nothing was replaced.</div>'
     : '<h3>🎫 Builder\'s Pass · $9.99</h3><p>Adds a second reward lane to all 8 builds — including 10,000 coins and 60 gems at the Ferris Wheel.</p>'
-      +'<button class="sb-btn sb-btn-yellow sb-btn-sm" id="fb-buy-pass">Unlock Pass lane · $9.99</button>'
+      +'<button class="sb-btn sb-btn-yellow sb-btn-sm" id="fb-buy-pass"'+(live()?"":" disabled")+'>'
+      +(live()?"Unlock Pass lane · $9.99":"🍂 Event ended — not for sale")+'</button>'
       +'<div class="free-note">🆓 <b>The full scene and every free reward is completable without the Pass.</b> Buy it late and it retro-pays every build you already finished.</div>';
   var bp=$("fb-buy-pass"); if(bp) bp.addEventListener("click", buyPass);
 
@@ -892,20 +1017,22 @@ function premCell(m,i,built){
   var claimed = d.claimedPrem.indexOf(i)!==-1;
   var action;
   if(claimed) action='<span class="done">✓ Claimed</span>';
-  else if(!d.pass) action='<button class="lock" data-gate>🔒 Pass lane</button>';
+  else if(!d.pass) action = live() ? '<button class="lock" data-gate>🔒 Pass lane</button>'
+                                   : '<span class="todo">🔒 Pass lane</span>';
   else if(!built) action='<span class="todo">build to claim</span>';
   else action='<button class="claim" data-claim="'+i+'">CLAIM</button>';
   return '<div class="fb-cell prem"><span class="rw">'+rwLine(m.prem)+'</span>'+action+'</div>';
 }
 function claimPrem(i, el){
-  if(d.claimedPrem.indexOf(i)!==-1) return;
+  if(d.claimedPrem.indexOf(i)!==-1) return;   // push-before-grant: a queued 2nd tap is a no-op
   d.claimedPrem.push(i); st.save();
-  SB.grantRewards(MILES[i].prem, el);
+  SB.grantRewards(MILES[i].prem, el, {toastTop:true});
   renderTrack();
 }
 
 function buyPass(){
   if(d.pass) return;
+  if(!live()){ SB.toast("The festival has ended — nothing more is for sale.", {ms:2400, top:true}); return; }
   SB.buyIAP({
     label:"🎫 Builder's Pass — Harvest Festival",
     price:"$9.99",
@@ -934,16 +1061,22 @@ function buyPass(){
         Array.prototype.forEach.call(items, function(it,k){
           setTimeout(function(){ it.classList.add("in"); SB.haptic(8); }, 160+k*180);
         });
+        var paid = false;                 // a queued second tap must not re-pay the retro batch
         mo.el.querySelector("#fb-retro-ok").addEventListener("click", function(){
-          idx.forEach(function(i){ if(d.claimedPrem.indexOf(i)===-1) d.claimedPrem.push(i); });
+          if(paid) return;
+          paid = true;
+          var batch = [];
+          idx.forEach(function(i){
+            if(d.claimedPrem.indexOf(i)===-1){ d.claimedPrem.push(i); MILES[i].prem.forEach(function(r){ batch.push(r); }); }
+          });
           st.save();
-          SB.grantRewards(retro);
+          if(batch.length) SB.grantRewards(batch, null, {toastTop:true});
           SB.confetti();
           mo.close(true);
           renderTrack();
         });
       } else {
-        SB.toast("🎫 Pass lane unlocked — claim it on every build!",2600);
+        SB.toast("🎫 Pass lane unlocked — claim it on every build!", {ms:2600, top:true});
       }
       $("fb-tabpass").click();
     }
@@ -967,47 +1100,58 @@ $("fb-info").addEventListener("click", function(){
   SB.modal('<h3 style="margin:0 0 8px">🍁 How Harvest Festival works</h3>'+'<div style="text-align:left;font-size:12.5px;line-height:1.55">'
     +'<b>Planks come from playing</b><br>▶ Clear a level: <b>+3 🪵</b> (~78% win)<br>🔥 Clear a HARD level: <b>+7 🪵</b> (~55% win)<br>'
     +'⭐ First-try clear: <b>+1 🪵</b> bonus<br>🛡️ <b>Losing never removes planks.</b><br><br>'
-    +'<b>8 builds, one growing scene</b><br>Costs: 7 · 11 · 16 · 22 · 28 · 35 · 43 · 53 = <b>'+TOTAL_COST+' 🪵</b> for the whole festival.<br>'
-    +'Simulated pacing: <b>~41 clears</b> at a 50/50 normal-hard mix (~57 all-normal, ~29 all-hard) across the 18-day event — about 2–3 clears a day.<br><br>'
+    +'<b>8 builds, one growing scene</b><br>Costs: '+MILES.map(function(m){return m.cost;}).join(" · ")+' = <b>'+TOTAL_COST+' 🪵</b> for the whole festival.<br>'
+    +'Simulated pacing (200,000-run Monte-Carlo re-run against these exact costs): <b>~41 clears</b> alternating '+'normal and hard levels — <b>~57</b> all-normal, <b>~29</b> all-hard. That is ~62 level attempts, about 2–3 clears '+'a day across the 18-day event.<br>'+'Any 🪵 still in your stack when the Ferris Wheel goes up is traded in at <b>'+PLANK_COIN+' coins per plank</b>.<br><br>'
     +'<b>🎫 Builder\'s Pass ($9.99, optional)</b><br>Adds a second reward lane at all 8 builds. Bought late, it retro-pays every build you already finished. '
     +'<b>The full scene and every free reward is completable without the Pass</b> — the Pass never gates a build.<br><br>'
-    +'<b>Speed-ups (optional)</b><br>🪵 Plank Bundle $1.99 = +40 planks · ⚡ Instant Build $0.99 = finish the current piece. Both only save time; nothing is exclusive to them.<br><br>'
+    +'<b>Speed-ups (optional)</b><br>🪵 Plank Bundle $1.99 = +'+BUNDLE+' planks (≈'+BUNDLE_CLEARS+' normal clears)'+' · ⚡ Instant Build $0.99 = finish the current piece. Both only save time; nothing is exclusive to them.<br><br>'
     +'<span class="sb-muted" style="font-size:11px">Demo note: the 18-day event is compressed to 18 minutes. Reset with the ⟲ button.</span></div>'
     +'<button class="sb-btn sb-btn-blue sb-btn-block" style="margin-top:12px" onclick="this.closest(\'.sb-modal-backdrop\').remove()">Got it!</button>');
 });
 
 /* ================= countdown (never dead-ends) ================= */
-function startTimer(){
-  SB.countdown($("fb-timer"), d.end, function(){
-    $("fb-timer").textContent="Ended";
-    SB.modal('<h3 style="margin:0 0 6px">🍂 Festival week is over</h3>'+'<p class="sb-muted" style="font-size:12.5px;margin:0 0 10px">You finished <b>'+d.built+' of 8</b> builds. '
-      +(done()?'Your festival stays on the farm forever.':'In the live game the scene carries into next season\'s event — nothing is lost.')+'</p>'
-      +'<button class="sb-btn sb-btn-green sb-btn-block" id="fb-extend">⏱️ Keep building (demo extension)</button>');
-    var e=$("fb-extend");
-    if(e) e.addEventListener("click", function(){
-      d.end = Date.now()+EVENT_MS; d.extended=true; st.save();
-      document.querySelector(".sb-modal-backdrop").remove();
-      startTimer();
-      SB.toast("Demo extended — keep building!",2000);
-    });
-  });
+var timerIv = null;
+function extend(){
+  d.end = Date.now()+EVENT_MS; d.extended=true; d.ended=false; st.save();
+  startTimer();
+  renderHud(); renderTrack();
+  SB.toast("Demo extended — keep building!", {ms:2000, top:true});
 }
-startTimer();
+function onEnded(){
+  $("fb-timer").textContent = "Ended";
+  d.ended = true; st.save();
+  renderHud(); renderTrack();      // closes every offer, shows the inline extend bar
+  SB.modal('<h3 style="margin:0 0 6px">🍂 Festival week is over</h3>'+'<p class="sb-muted" style="font-size:12.5px;margin:0 0 10px">You finished <b>'+d.built+' of 8</b> builds. '
+    +(done()?'Your festival stays on the farm forever.':'In the live game the scene carries into next season\'s event — nothing is lost.')
+    +'<br><br>Offers are closed now that the event has ended.</p>'
+    +'<button class="sb-btn sb-btn-green sb-btn-block" id="fb-extend">⏱️ Keep building (demo extension)</button>');
+  var e=$("fb-extend");
+  if(e) e.addEventListener("click", function(){ e.closest(".sb-modal-backdrop").remove(); extend(); });
+}
+function startTimer(){
+  if(timerIv) clearInterval(timerIv);
+  // urgent window scaled to the compressed demo: the shared 1h default would leave the
+  // chip pulsing for the whole 18-minute run.
+  timerIv = SB.countdown($("fb-timer"), d.end, onEnded, 3*60*1000);
+}
+$("fb-extend-inline").addEventListener("click", extend);
+if(d.ended) $("fb-timer").textContent="Ended"; else startTimer();
 
 /* ================= boot ================= */
-showBuilt(false);
+showBuilt(-1);
+cashOutLeftovers();     // settles a reload that landed between the 8th build and the finale
 renderHud();
 renderTrack();
 if(done()) fireworks(3);
 if(d.plays===0 && d.built===0) setTimeout(function(){
-  SB.toast("Clear levels to earn 🪵 Planks — then build the festival!",2800);
+  SB.toast("Clear levels to earn 🪵 Planks — then build the festival!", {ms:2800, top:true});
 }, 700);
 
 /* demo hook for automated screenshots */
 window.__fb = {
   state:d, MILES:MILES, TOTAL_COST:TOTAL_COST,
   addPlanks:function(n){ d.planks+=n; d.earned+=n; st.save(); renderHud(); renderTrack(); },
-  buildTo:function(n){ while(d.built<n && d.built<MILES.length){ d.built++; } st.save(); showBuilt(false); renderHud(); renderTrack(); },
+  buildTo:function(n){ while(d.built<n && d.built<MILES.length){ d.built++; } st.save(); showBuilt(-1); renderHud(); renderTrack(); },
   save:function(){ st.save(); }
 };
 })();
