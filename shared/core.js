@@ -144,17 +144,28 @@
   }
 
   // ---------- toast ----------
-  var toastEl, toastTimer;
-  // toast(msg, ms) or toast(msg, {ms, top:true})
+  // toast(msg, ms) or toast(msg, {ms, top:true}). Messages queue one-deep-plus so a
+  // reward toast is never erased by an incidental one arriving on its heels.
+  var toastEl, toastTimer, toastQ = [], toastBusy = false;
   function toast(msg, ms) {
     var top = false;
     if (ms && typeof ms === "object") { top = !!ms.top; ms = ms.ms; }
+    toastQ.push({ msg: msg, ms: ms || 1800, top: top });
+    if (!toastBusy) drainToast();
+  }
+  function drainToast() {
+    if (!toastQ.length) { toastBusy = false; return; }
+    toastBusy = true;
+    var t = toastQ.shift();
     if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "sb-toast"; document.body.appendChild(toastEl); }
-    toastEl.textContent = msg;
-    toastEl.classList.toggle("top", top);
+    toastEl.textContent = t.msg;
+    toastEl.classList.toggle("top", t.top);
     toastEl.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, ms || 1800);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove("show");
+      setTimeout(drainToast, toastQ.length ? 180 : 0);
+    }, t.ms);
   }
 
   // ---------- haptic ----------
